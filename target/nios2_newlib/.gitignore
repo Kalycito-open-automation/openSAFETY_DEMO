@@ -1,0 +1,11 @@
+# Gitignore for the root directory
+
+# Dirs
+obj/
+
+# Files
+*.elf
+*.map
+Makefile
+*.a
+*.mk
