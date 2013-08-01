@@ -126,7 +126,7 @@ static tAppIfStatus status_updateInStatusReg(UINT8* pBuffer_p, UINT16 bufSize_p,
 /**
 \brief    Initialize the status module
 
-\param  pInitParam_p     Initialization structure of the status module
+\param[in]  pInitParam_p     Initialization structure of the status module
 
 \return  tAppIfStatus
 \retval  kAppIfSuccessful          On success
@@ -222,7 +222,7 @@ void status_exit(void)
 /**
 \brief    Get Icc status register
 
-\param  pSeqNr_p        [OUT] The current status of the channel
+\param[out]  pSeqNr_p        The current status of the channel
 
 \ingroup module_status
 */
@@ -245,8 +245,8 @@ void status_getIccStatus(tSeqNrValue* pSeqNr_p)
 /**
 \brief    Set the asynchronous receive channel to next element
 
-\param chanNum_p     [IN] Id of the channel to mark as busy
-\param seqNr_p       [IN] The value of the sequence number
+\param[in] chanNum_p     Id of the channel to mark as busy
+\param[in] seqNr_p       The value of the sequence number
 
 \ingroup module_status
 */
@@ -268,8 +268,8 @@ void status_setAsyncRxChanFlag(UINT8 chanNum_p, tSeqNrValue seqNr_p)
 /**
 \brief    Get the asynchronous transmit channel status
 
-\param chanNum_p     [IN] Id of the channel to mark as busy
-\param seqNr_p       [OUT] The value of the sequence number
+\param[in]  chanNum_p     Id of the channel to mark as busy
+\param[out] pSeqNr_p      The value of the sequence number
 
 \ingroup module_status
 */
@@ -297,11 +297,13 @@ void status_getAsyncTxChanFlag(UINT8 chanNum_p, tSeqNrValue* pSeqNr_p)
 /**
 \brief    Initialize a status buffer
 
-\param pInitParam_p               Status buffer init parameters
+\param[in] buffId_p            Id of the buffer to initialize
+\param[in] buffBase_p          Base address of the buffer
+\param[in] buffSize_p          Size of the buffer
 
 \return tAppIfStatus
-\retval kAppIfSuccessful                  On success
-\retval other error
+\retval kAppIfSuccessful            On success
+\retval kAppIfStreamInvalidBuffer   Invalid buffer! Can't register
 
 \ingroup module_status
 */
@@ -331,14 +333,14 @@ Exit:
 /**
 \brief    Process time synchronization task
 
-\param pBuffer_p        Pointer to the base address of the buffer
-\param bufSize_p        Size of the buffer
-\param pUserArg_p       User defined argument
+\param[in] pBuffer_p        Pointer to the base address of the buffer
+\param[in] bufSize_p        Size of the buffer
+\param[in] pUserArg_p       User defined argument
 
 \return tAppIfStatus
 \retval kAppIfSuccessful                  On success
 \retval kAppIfStatusBufferSizeMismatch    Invalid buffer to process
-\retval other error
+\retval Other                             Other user error occurred
 
 \ingroup module_status
 */
@@ -378,9 +380,9 @@ Exit:
 /**
 \brief    Process outgoing status register fields
 
-\param pBuffer_p        Pointer to the base address of the buffer
-\param bufSize_p        Size of the buffer
-\param pUserArg_p       User defined argument
+\param[in] pBuffer_p        Pointer to the base address of the buffer
+\param[in] bufSize_p        Size of the buffer
+\param[in] pUserArg_p       User defined argument
 
 \return tAppIfStatus
 \retval kAppIfSuccessful          On success
@@ -425,9 +427,9 @@ Exit:
 /**
 \brief    Process incoming status register fields
 
-\param pBuffer_p        Pointer to the base address of the buffer
-\param bufSize_p        Size of the buffer
-\param pUserArg_p       User defined argument
+\param[in] pBuffer_p        Pointer to the base address of the buffer
+\param[in] bufSize_p        Size of the buffer
+\param[in] pUserArg_p       User defined argument
 
 \return tAppIfStatus
 \retval kAppIfSuccessful          On success

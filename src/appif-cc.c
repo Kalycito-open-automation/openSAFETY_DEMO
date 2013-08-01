@@ -149,7 +149,7 @@ static tAppIfStatus cc_handleOccRxObjects(UINT8* pBuffer_p, UINT16 bufSize_p,
 
 Initialize the input and output configuration channel
 
-\param  pCcInitParam_p       [IN] configuration channel initialization structure
+\param[in]  pCcInitParam_p         Configuration channel initialization structure
 
 \return tAppIfStatus
 \retval kAppIfSuccessful           On success
@@ -256,11 +256,12 @@ void cc_exit(void)
 /**
 \brief    Read a PCP object via the configuration channel
 
-\param  objIdx_p           [IN] Index of the to read object
-\param  objSubIdx_p        [IN] Subindex of the to read object
-\param  ppObject_p         [OUT] The read object data
+\param[in]  objIdx_p           Index of the to read object
+\param[in]  objSubIdx_p        Subindex of the to read object
+\param[out] ppObject_p         The read object data
 
-\return tAppIfStatus                       On success
+\return tAppIfStatus
+\retval kAppIfSuccessful                   On success
 \retval kAppIfConfChanObjectNotFound       Failed to read the object
 
 \ingroup module_cc
@@ -281,9 +282,10 @@ tAppIfStatus cc_readObject(UINT16 objIdx_p, UINT8 objSubIdx_p,
 /**
 \brief    Write a PCP object via the configuration channel
 
-\param pObject_p         [IN] The object to write
+\param[in] pObject_p         The object to write
 
-\return tAppIfStatus                      On success
+\return tAppIfStatus
+\retval kAppIfSuccessful                  On success
 \retval kAppIfConfChanInvalidSizeOfObj    Invalid object size
 \retval kAppIfConfChanChannelBusy         Channel is currently busy writing an old object
 
@@ -344,8 +346,8 @@ Exit:
 \brief    Process configuration channel module
 
 \return tAppIfStatus
-\retval kAppIfSuccessful            On success
-\retval Other error                 Error while processing the background task
+\retval kAppIfSuccessful        On success
+\retval Other                   Error while processing the background task
 
 \ingroup module_cc
 */
@@ -376,7 +378,7 @@ Exit:
 /**
 \brief    Process the transmit objects
 
-Forward the object to the icc buffer to update the object dictionary of the
+Forward the object to the ICC buffer to update the object dictionary of the
 PCP.
 
 \return tAppIfStatus
@@ -496,7 +498,7 @@ static tAppIfStatus appif_initCcObjects(void)
 /**
 \brief    Change local sequence number
 
-\param pSeqNr_p        [OUT] Changed sequence number
+\param[out] pSeqNr_p        Changed sequence number
 
 \ingroup module_cc
 */
@@ -546,9 +548,9 @@ static tAppIfStatus cc_checkIccStatus(void)
 /**
 \brief    Handle incoming objects from the occ buffer
 
-\param pBuffer_p        [IN] Pointer to the base address of the buffer
-\param bufSize_p        [IN] Size of the buffer
-\param pUserArg_p       [IN] The user argument
+\param[in] pBuffer_p        Pointer to the base address of the buffer
+\param[in] bufSize_p        Size of the buffer
+\param[in] pUserArg_p       The user argument
 
 \return tAppIfStatus
 \retval kAppIfSuccessful          On success

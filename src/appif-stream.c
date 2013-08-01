@@ -143,7 +143,7 @@ static void stream_genSegmDescList(tBuffDescriptor* pBuffDescList_p,
 /**
 \brief    Initialize the stream module
 
-\param  pInitParam_p  Stream module initialization parameters
+\param[in]  pInitParam_p  Stream module initialization parameters
 
 \return tAppIfStatus
 \retval kAppIfSuccessful          On success
@@ -237,7 +237,7 @@ void stream_exit(void)
 /**
 \brief   Register a new buffer to the stream module
 
-\param  pBuffParam_p        Parameters of the buffer to register
+\param[in]  pBuffParam_p        Parameters of the buffer to register
 
 \return tAppIfStatus
 \retval kAppIfSuccessful            On success
@@ -277,10 +277,10 @@ Exit:
 /**
 \brief   Register a new action to a buffer
 
-\param  actType_p        Type of action (Pre- or post filling)
-\param  buffId_p         Id of the buffer for the action
-\param  pfnBuffAct_p     Pointer to the action function
-\param  pUserArg_p       User argument to pass to function
+\param[in]  actType_p        Type of action (Pre- or post filling)
+\param[in]  buffId_p         Id of the buffer for the action
+\param[in]  pfnBuffAct_p     Pointer to the action function
+\param[in]  pUserArg_p       User argument to pass to function
 
 \return tAppIfStatus
 \retval kAppIfSuccessful            On success
@@ -355,8 +355,8 @@ void stream_registerSyncCb(tBuffSyncCb pfnSyncCb_p)
 /**
 \brief   Update a buffer address in the stream module
 
-\param  buffId_p            Id of the buffer to register
-\param  pBuffBase_p         New base address of the buffer to register
+\param[in]  buffId_p            Id of the buffer to register
+\param[in]  pBuffBase_p         New base address of the buffer to register
 
 \return tAppIfStatus
 \retval kAppIfSuccessful            On success
@@ -454,7 +454,7 @@ Exit:
 /**
 \brief   Function for buffer acknowledging
 
-\param  buffId_p    If of the buffer to acknowledge
+\param[in]  buffId_p    If of the buffer to acknowledge
 
 \ingroup module_stream
 */
@@ -474,11 +474,11 @@ void stream_ackBuffer(UINT8 buffId_p)
 /**
 \brief   Call all buffer filling post actions
 
-\param actType_p               Pre- or post filling actions
+\param[in] actType_p               Pre- or post filling actions
 
 \return tAppIfStatus
 \retval kAppIfSuccessful       On success
-\retval Other error            Module internal error on action
+\retval Other                  Module internal error on action
 
 \ingroup module_stream
 */
@@ -545,11 +545,11 @@ Exit:
 Splits the buffers into small segments which can be transfered via SPI
 in full duplex mode.
 
-\param pBuffDescList_p              [IN] List of unsegmented descriptors
-\param pBuffSegDescList_p           [OUT] List of segmented descriptors
-\param pCountDescSeg_p              [OUT] Count of segmented descriptors
-\param firstConsId_p                [IN] Id of the first consuming buffer
-\param firstProdId_p                [IN] Id of the first producing buffer
+\param[in] pBuffDescList_p              List of unsegmented descriptors
+\param[out] pBuffSegDescList_p          List of segmented descriptors
+\param[out] pCountDescSeg_p             Count of segmented descriptors
+\param[in] firstConsId_p                Id of the first consuming buffer
+\param[in] firstProdId_p                Id of the first producing buffer
 
 \ingroup module_stream
 */

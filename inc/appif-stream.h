@@ -2,9 +2,10 @@
 ********************************************************************************
 \file   appif-stream.h
 
-\brief  TODO
+\brief  Streaming module  header for streamed transfer of input/output data
 
-TODO
+This module handles the transfer of the input of output buffers via the steam
+handler. It enables to insert pre- and post actions before and after transfer.
 
 *******************************************************************************/
 

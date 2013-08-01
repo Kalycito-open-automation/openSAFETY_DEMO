@@ -118,12 +118,13 @@ static tAppIfStatus pdo_processRpdo(UINT8* pBuffer_p, UINT16 bufSize_p, void * p
 /**
 \brief    Initialize the PDO module
 
-\param  pPdoInitParam_p     Initialization structure of the PDO buffers
+\param[in]  pfnPdoCb_p          PDO process user callback function
+\param[in]  pPdoInitParam_p     Initialization structure of the PDO buffers
 
 \return  tAppIfStatus
 \retval  kAppIfSuccessful          On success
 \retval  kAppIfPdoInitError        Unable to initialize the PDO module
-\retval  other error               Other internal error occurred
+\retval  Other                     Other internal error occurred
 
 \ingroup module_pdo
 */
@@ -235,7 +236,9 @@ void pdo_exit(void)
 /**
 \brief    Initialize a PDO buffer image
 
-\param pInitParam_p               PDO buffer initialization parameters
+\param[in] buffId_p               Id of the pdo buffer
+\param[in] buffBase_p             Base address of the pdo buffer
+\param[in] buffSize_p             Size of the pdo buffer
 
 \return tAppIfStatus
 \retval kAppIfSuccessful               On success
@@ -271,7 +274,7 @@ Exit:
 
 \return tAppIfStatus
 \retval kAppIfSuccessful        On success
-\retval other error             User defined error occured
+\retval Other                   User defined error occurred
 
 \ingroup module_pdo
 */
@@ -292,9 +295,9 @@ static tAppIfStatus pdo_process(void)
 /**
 \brief    Process the RPDO buffer
 
-\param pBuffer_p        Pointer to the base address of the buffer
-\param bufSize_p        Size of the buffer
-\param pUserArg_p       User defined argument
+\param[in] pBuffer_p        Pointer to the base address of the buffer
+\param[in] bufSize_p        Size of the buffer
+\param[in] pUserArg_p       User defined argument
 
 \return kAppIfSuccessful
 
@@ -333,9 +336,9 @@ Exit:
 /**
 \brief    Acknowledge TPDO buffer
 
-\param pBuffer_p        Pointer to the base address of the buffer
-\param bufSize_p        Size of the buffer
-\param pUserArg_p       User defined argument
+\param[in] pBuffer_p        Pointer to the base address of the buffer
+\param[in] bufSize_p        Size of the buffer
+\param[in] pUserArg_p       User defined argument
 
 \return kAppIfSuccessful
 

@@ -1,0 +1,29 @@
+/**
+********************************************************************************
+\file       mainpage.txt
+
+\brief      Main doxygen documentation file of libAppIflite library
+
+Copyright © 2013 BERNECKER + RAINER, AUSTRIA, 5142 EGGELSBERG, B&R STRASSE 1
+All rights reserved. All use of this software and documentation is
+subject to the License Agreement located at the end of this file below.
+
+*******************************************************************************
+
+\mainpage
+The application interface lite library is an API designed to interface the PDO and SDO data provided by the POWERLINK
+communication Processor (PCP).
+
+\section reqs Requirements
+- C standard library functions: memset(), memcpy(), .....
+
+\section targets Targets
+The appif lite library is prepared to be compiled for miscellaneous processor targets. The following targets are supported
+- nios2_newlib: Altera NIOS II processor using new newlib C library
+
+\section porting Porting
+If the library should be ported to an other platform some parameters need to be adjusted by using the 
+target.h header in the folder libAppIfLite/inc. All platform specific parameters are given in this header.
+All other platform dependet parts are located in the application outside the library in folder apps/target.
+This files are called syscomp.c and syscomp.h.
+*******************************************************************************/

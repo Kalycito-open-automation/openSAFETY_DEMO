@@ -111,7 +111,7 @@ static tAppIfStatus async_checkChannelStatus(tAsyncInstance pInstance_p);
 
 //------------------------------------------------------------------------------
 /**
-\brief    Initialize the async module
+\brief    Initialize the asynchronous channel module
 
 \ingroup module_async
 */
@@ -133,8 +133,8 @@ tAppIfStatus async_init(void)
 Instantiate a new asynchronous channel which provides send and receive
 functionality for the upper and lower layers.
 
-\param  chanId_m             Id of the asynchronous channel
-\param  pInitParam_p         Asynchronous module initialization structure
+\param[in]  chanId_p         Id of the asynchronous channel
+\param[in]  pInitParam_p     Asynchronous module initialization structure
 
 \return tAsyncInstance
 \retval Address              Pointer to the instance of the channel
@@ -221,7 +221,7 @@ Exit:
 /**
 \brief    Destroy an asynchronous channel
 
-\param  pInstance_p       The instance to destroy
+\param[in]  pInstance_p       The instance to destroy
 
 \ingroup module_async
 */
@@ -240,9 +240,9 @@ void async_destroy(tAsyncInstance pInstance_p)
 /**
 \brief    Send a frame through the asynchronous channel
 
-\param  pInstance_p     [IN] Async module instance
-\param  pPayload_p      [IN] Pointer to the payload to send
-\param  paylSize_p      [IN] Size of the payload to send
+\param[in]  pInstance_p     Async module instance
+\param[in]  pPayload_p      Pointer to the payload to send
+\param[in]  paylSize_p      Size of the payload to send
 
 \ingroup module_async
 */
@@ -297,11 +297,11 @@ Exit:
 /**
 \brief    Process the asynchronous module
 
-\param  pInstance_p     [IN] Async module instance
+\param[in]  pInstance_p     Asynchronous module instance
 
 \return tAppIfStatus
 \retval kAppIfSuccessful        On success
-\retval Other error             Error while processing asynchronous frames
+\retval Other                   Error while processing asynchronous frames
 
 \ingroup module_async
 */
@@ -338,11 +338,11 @@ Exit:
 /**
 \brief    Process asynchronous receive frames
 
-\param  pInstance_p     [IN] Async module instance
+\param[in] pInstance_p     Async module instance
 
 \return tAppIfStatus
 \retval kAppIfSuccessful        On success
-\retval Other error             Other user error returned
+\retval Other                   Other user error returned
 
 \ingroup module_async
 */
@@ -376,7 +376,7 @@ static tAppIfStatus async_handleRxFrame(tAsyncInstance pInstance_p)
 /**
 \brief    Process asynchronous transmit frames
 
-\param  pInstance_p     [IN] Async module instance
+\param[in]  pInstance_p     Async module instance
 
 \return tAppIfStatus
 \retval kAppIfSuccessful              On success
@@ -453,9 +453,9 @@ Exit:
 /**
 \brief    Check for incoming frame from async channel
 
-\param pBuffer_p        [IN] Pointer to the base address of the buffer
-\param bufSize_p        [IN] Size of the buffer
-\param pUserArg_p       [IN] The user argument
+\param[in] pBuffer_p        Pointer to the base address of the buffer
+\param[in] bufSize_p        Size of the buffer
+\param[in] pUserArg_p       The user argument
 
 \return tAppIfStatus
 \retval kAppIfSuccessful          On success
@@ -532,7 +532,7 @@ Exit:
 /**
 \brief    Change local sequence number
 
-\param pSeqNr_p        [OUT] Changed sequence number
+\param[out] pSeqNr_p        Changed sequence number
 
 \ingroup module_async
 */
@@ -553,7 +553,7 @@ static void async_changeLocalSeqNr(tSeqNrValue* pSeqNr_p)
 /**
 \brief    Check if channel is ready for transmission
 
-\param  pInstance_p             [IN] Pointer to the local instance
+\param[in]  pInstance_p             Pointer to the local instance
 
 \return tAppIfStatus
 \retval kAppIfSuccessful        Channel is free for transmission

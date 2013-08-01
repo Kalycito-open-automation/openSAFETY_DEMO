@@ -2,7 +2,7 @@
 ********************************************************************************
 \file   appif-streamint.h
 
-\brief  Streaming module for receiving/transmitting the input and output buffers
+\brief  Streaming module internal header for streamed transfer of input/output data
 
 This module handles the transfer of the input of output buffers via the steam
 handler. It enables to insert pre- and post actions before and after transfer.

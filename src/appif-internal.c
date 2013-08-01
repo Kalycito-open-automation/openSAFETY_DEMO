@@ -116,7 +116,7 @@ static tInternalInstance          intInstance_l;
 /**
 \brief    Application interface initialization function
 
-\param  pInitParam_p       Initialization parameters
+\param[in]  pInitParam_p       Initialization parameters
 
 \return tAppIfStatus
 \retval kAppIfSuccessful         On success
@@ -248,11 +248,11 @@ tAppIfStatus appif_processSync(void)
 /**
 \brief    Process application interface asynchronous task
 
-\param  ppInstance_p         Pointer to the array of instances
+\param[in]  ppInstance_p         Pointer to the array of instances
 
 \return  tAppIfStatus
 \retval  kAppIfSuccessful           On success
-\retval  TODO
+\retval  Other                      User specified error code
 
 \ingroup module_internal
 */

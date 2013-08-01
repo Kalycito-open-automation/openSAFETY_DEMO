@@ -1,0 +1,80 @@
+//==============================================================================
+//==============================================================================
+/**
+\defgroup lib_appif_lite Application Interface - User library
+*/
+//==============================================================================
+//==============================================================================
+
+//==============================================================================
+/**
+\defgroup module_status Status module
+
+This module forwards the time information to the user application.
+It also provides the asynchronous channel status information.
+
+\ingroup lib_appif_lite
+*/
+
+
+//==============================================================================
+/**
+\defgroup module_cc Configuration channel module
+
+This modules forwards incoming object data from the occ to the local object list
+and forwards objects from the user application to the PCP.
+
+\see module_status
+
+\ingroup lib_appif_lite
+*/
+
+//==============================================================================
+/**
+\defgroup module_async Asynchronous module
+
+This module handles the asynchronous channels between the PCP and the application.
+For each channel a receive and a transmit buffer needs to be determined.
+It forwards the received data to the application.
+
+\see module_status
+
+\ingroup lib_appif_lite
+*/
+
+//==============================================================================
+/**
+\defgroup module_pdo Process data object (PDO) module
+
+This module forwards the mapped PDO's from the incoming buffers to the user
+application and back.
+
+\see module_status
+
+\ingroup lib_appif_lite
+*/
+
+//==============================================================================
+/**
+\defgroup module_internal Internal configuration module
+
+This module handlers library internals. It initializes internal modules and
+processes the synchronous and asynchronous task.
+
+\ingroup lib_appif_lite
+*/
+
+
+//==============================================================================
+/**
+\defgroup module_stream Stream access SPI module
+
+This module handles the transfer of the input of output buffers via the steam
+handler. It enables to insert pre- and post actions before and after transfer.
+
+\see module_internal
+
+\ingroup lib_appif_lite
+*/
+
+
