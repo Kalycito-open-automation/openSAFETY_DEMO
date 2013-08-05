@@ -103,7 +103,7 @@ typedef struct {
  * \brief Instance of the stream module
  */
 typedef struct {
-    UINT8            ountConsBuff_m;                        ///< Count of consuming buffers
+    UINT8            countConsBuff_m;                       ///< Count of consuming buffers
     UINT8            countProdBuff_m;                       ///< Count of producing buffers
 
     tBuffDescriptor  buffDescList_m[kTbufCount];            ///< List of buffer descriptors
@@ -177,7 +177,7 @@ tAppIfStatus stream_init(tStreamInitParam* pInitParam_p)
     streamInstance_l.pfnEnterCritSec_m = pInitParam_p->pfnEnterCritSec_m;
 
     // Save count of producing and consuming buffers
-    streamInstance_l.ountConsBuff_m = pInitParam_p->countConsBuff_m;
+    streamInstance_l.countConsBuff_m = pInitParam_p->countConsBuff_m;
     streamInstance_l.countProdBuff_m = pInitParam_p->countProdBuff_m;
 
 Exit:
@@ -197,10 +197,7 @@ tAppIfStatus stream_finishModuleInit(void)
 {
     tAppIfStatus ret = kAppIfSuccessful;
     // Count of consuming buffers with the ACK register
-    UINT8        countConsAck = streamInstance_l.ountConsBuff_m + 1;
-
-    // Add dummy descriptor
-
+    UINT8        countConsAck = streamInstance_l.countConsBuff_m + 1;
 
     // Initialize dummy descriptor for SPI slave initialization
     streamInstance_l.buffSegDescList_m[0].pBuffTxBase_m = (UINT8 *)&streamInstance_l.dummyBuffer_m;
@@ -368,7 +365,7 @@ void stream_registerSyncCb(tBuffSyncCb pfnSyncCb_p)
 tAppIfStatus stream_updateBufferBase(UINT8 buffId_p, UINT8* pBuffBase_p)
 {
     tAppIfStatus ret = kAppIfSuccessful;
-    UINT8        countConsAck = streamInstance_l.ountConsBuff_m + 1;
+    UINT8        countConsAck = streamInstance_l.countConsBuff_m + 1;
 
     if(buffId_p >= kTbufCount)
     {

@@ -63,8 +63,6 @@ It forwards the received data to the application.
 // const defines
 //------------------------------------------------------------------------------
 
-#define ASYNC_TX_TIMEOUT_CYCLE_COUNT        400    ///< Number of cycles after a transmit has a timeout
-
 //------------------------------------------------------------------------------
 // module global vars
 //------------------------------------------------------------------------------
