@@ -167,7 +167,7 @@ tAsyncInstance async_create(tAsyncChanNum chanId_p, tAsyncInitParam* pInitParam_
 
     // Register async tx buffer to stream module
     buffParam.buffId_m = pInitParam_p->buffIdTx_m;
-    buffParam.pBuffBase_m = (UINT8 *)&asyncInstance_l[chanId_p].txBuffParam_m.ccTxBuffer_m[idCurrTxBuffer].asyncTxPayl_m;
+    buffParam.pBuffBase_m = (UINT8 *)&asyncInstance_l[chanId_p].txBuffParam_m.asyncTxBuffer_m[idCurrTxBuffer].asyncTxPayl_m;
     buffParam.buffSize_m = sizeof(tTbufAsyncTxStructure);
 
     ret = stream_registerBuffer(&buffParam);
@@ -257,7 +257,7 @@ tAppIfStatus async_sendFrame(tAsyncInstance pInstance_p, UINT8* pPayload_p,
         goto Exit;
     }
 
-    if(paylSize_p > sizeof(pInstance_p->txBuffParam_m.ccTxBuffer_m[0].asyncTxPayl_m) ||
+    if(paylSize_p > sizeof(pInstance_p->txBuffParam_m.asyncTxBuffer_m[0].asyncTxPayl_m) ||
        paylSize_p == 0                             )
     {
         ret = kAppIfAsyncSendError;
@@ -268,21 +268,21 @@ tAppIfStatus async_sendFrame(tAsyncInstance pInstance_p, UINT8* pPayload_p,
     fillBuffId = pInstance_p->txBuffParam_m.currTxBuffer_m ^ 1;
 
     // Check if buffer is free for filling
-    if(pInstance_p->txBuffParam_m.ccTxBuffer_m[fillBuffId].isLocked_m != FALSE)
+    if(pInstance_p->txBuffParam_m.asyncTxBuffer_m[fillBuffId].isLocked_m != FALSE)
     {
         ret = kAppIfAsyncNoFreeBuffer;
         goto Exit;
     }
 
     // Fill buffer
-    APPIF_MEMCPY(pInstance_p->txBuffParam_m.ccTxBuffer_m[fillBuffId].asyncTxPayl_m.tssdoTransmitData_m,
+    APPIF_MEMCPY(pInstance_p->txBuffParam_m.asyncTxBuffer_m[fillBuffId].asyncTxPayl_m.tssdoTransmitData_m,
             pPayload_p, paylSize_p);
 
     // Set transmit size
-    AmiSetWordToLe((UINT8*)&pInstance_p->txBuffParam_m.ccTxBuffer_m[fillBuffId].asyncTxPayl_m.paylSize_m, paylSize_p);
+    AmiSetWordToLe((UINT8*)&pInstance_p->txBuffParam_m.asyncTxBuffer_m[fillBuffId].asyncTxPayl_m.paylSize_m, paylSize_p);
 
     // Lock buffer for transmission
-    pInstance_p->txBuffParam_m.ccTxBuffer_m[fillBuffId].isLocked_m = TRUE;
+    pInstance_p->txBuffParam_m.asyncTxBuffer_m[fillBuffId].isLocked_m = TRUE;
 
     // Enable transmit timer
     timeout_startTimer(pInstance_p->txBuffParam_m.pTimeoutInst_m);
@@ -416,21 +416,21 @@ static tAppIfStatus async_handleTxFrame(tAsyncInstance pInstance_p)
     nextTxBuff = currTxBuff ^ 1;
 
     // Switch to next buffer if there is something new to transmit
-    if(pInstance_p->txBuffParam_m.ccTxBuffer_m[nextTxBuff].isLocked_m != FALSE   )
+    if(pInstance_p->txBuffParam_m.asyncTxBuffer_m[nextTxBuff].isLocked_m != FALSE   )
     {
         // Unlock current buffer
-        pInstance_p->txBuffParam_m.ccTxBuffer_m[currTxBuff].isLocked_m = FALSE;
+        pInstance_p->txBuffParam_m.asyncTxBuffer_m[currTxBuff].isLocked_m = FALSE;
 
         // Increment local sequence number
         async_changeLocalSeqNr(&pInstance_p->txBuffParam_m.currTxSeqNr_m);
 
         // Set sequence number in next tx buffer
-        AmiSetByteToLe((UINT8*)&pInstance_p->txBuffParam_m.ccTxBuffer_m[nextTxBuff].asyncTxPayl_m.seqNr_m,
+        AmiSetByteToLe((UINT8*)&pInstance_p->txBuffParam_m.asyncTxBuffer_m[nextTxBuff].asyncTxPayl_m.seqNr_m,
                 pInstance_p->txBuffParam_m.currTxSeqNr_m);
 
         // Next buffer is filled and can be transmitted
         ret = stream_updateBufferBase(pInstance_p->txBuffParam_m.idTxBuff_m,
-                (UINT8 *)&pInstance_p->txBuffParam_m.ccTxBuffer_m[nextTxBuff].asyncTxPayl_m);
+                (UINT8 *)&pInstance_p->txBuffParam_m.asyncTxBuffer_m[nextTxBuff].asyncTxPayl_m);
         if(ret != kAppIfSuccessful)
         {
             goto Exit;

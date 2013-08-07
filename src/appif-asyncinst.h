@@ -68,7 +68,7 @@ typedef struct {
  */
 typedef struct {
     UINT8                 idTxBuff_m;                               ///< Id of the transmit buffer
-    tTbufAsyncTxBuffer    ccTxBuffer_m[ASYNC_TX_BUFFER_COUNT];   ///< Asynchronous transmit buffer copy
+    tTbufAsyncTxBuffer    asyncTxBuffer_m[ASYNC_TX_BUFFER_COUNT];   ///< Asynchronous transmit buffer copy
     tSeqNrValue           currTxSeqNr_m;                            ///< Current transmit sequence number
     UINT8                 currTxBuffer_m;                           ///< Current active transmit buffer
     tTimeoutInstance      pTimeoutInst_m;                           ///< Timer instance for asynchronous transmissions

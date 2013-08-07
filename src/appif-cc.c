@@ -111,7 +111,6 @@ typedef struct {
 typedef struct {
     UINT8              idOccRx_m;           ///< Output receive buffer id
     tTbufCcStructure   tbufOccLayout_m;     ///< Local copy of the Occ buffer
-    tSeqNrValue        currRxSeqNr_m;       ///< Current receive sequence number
 } tCcRxChannel;
 
 /**
