@@ -179,7 +179,6 @@ tAsyncInstance async_create(tAsyncChanNum chanId_p, tAsyncInitParam* pInitParam_
 
     // Initialize asynchronous transmit timeout instance
     asyncInstance_l[chanId_p].txBuffParam_m.pTimeoutInst_m = timeout_create(
-            kTimeoutNumApAsyncTransmit,
             ASYNC_TX_TIMEOUT_CYCLE_COUNT);
     if(asyncInstance_l[chanId_p].txBuffParam_m.pTimeoutInst_m == NULL)
     {

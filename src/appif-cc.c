@@ -202,7 +202,6 @@ tAppIfStatus cc_init(tCcInitParam* pCcInitParam_p)
 
     // Create timeout instance for transmit channel
     ccInstance_l.txChannel_m.pTimeoutInst_m = timeout_create(
-            kTimeoutNumApCcTransmit,
             CC_TX_TIMEOUT_CYCLE_COUNT);
     if(ccInstance_l.txChannel_m.pTimeoutInst_m == NULL)
     {

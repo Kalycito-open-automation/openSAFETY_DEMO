@@ -56,15 +56,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // typedef
 //------------------------------------------------------------------------------
 
-/**
- * \brief Ap timeout instance layout type
- */
-typedef enum {
-    kTimeoutNumApAsyncTransmit    =  0x00,      ///< Timeout instance is used for the async receive direction
-    kTimeoutNumApCcTransmit       =  0x01,      ///< Timeout instance for the cc objects transmit channel
-    kTimeoutNumCount              =  0x02       ///< Total number of timeout instances
-} tTimeoutLayout;
-
 //------------------------------------------------------------------------------
 // function prototypes
 //------------------------------------------------------------------------------
