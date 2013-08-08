@@ -357,7 +357,7 @@ static tAppIfStatus async_handleRxFrame(tAsyncInstance pInstance_p)
         rxBuffSize = AmiGetWordFromLe((UINT8 *)&pInstance_p->rxBuffParam_m.asyncRxBuffer_m.paylSize_m);
 
         // Call asynchronous user handler
-        ret = pInstance_p->rxBuffParam_m.pfnRxHandler_m(pInstance_p, pRxBuffer, rxBuffSize);
+        ret = pInstance_p->rxBuffParam_m.pfnRxHandler_m(pRxBuffer, rxBuffSize);
 
         // Access finished -> Unblock channel by writing current sequence number to status field!
         status_setAsyncRxChanFlag(pInstance_p->chanId_m,

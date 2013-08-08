@@ -57,7 +57,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 typedef struct eAsyncInstance *tAsyncInstance;
 
-typedef tAppIfStatus (*tAsyncRxHandler) (tAsyncInstance pInstance_p, UINT8* pPayload_p, UINT16 size_p);
+/**
+ * \brief Asynchronous module frame receive handler
+ */
+typedef tAppIfStatus (*tAsyncRxHandler) (UINT8* pPayload_p, UINT16 size_p);
 
 /**
  * \brief  Async module initialization structure
