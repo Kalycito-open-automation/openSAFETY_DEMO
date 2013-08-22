@@ -13,7 +13,7 @@ handler. It enables to insert pre- and post actions before and after transfer.
 /*------------------------------------------------------------------------------
 * License Agreement
 *
-* Copyright © 2013 BERNECKER + RAINER, AUSTRIA, 5142 EGGELSBERG, B&R STRASSE 1
+* Copyright 2013 BERNECKER + RAINER, AUSTRIA, 5142 EGGELSBERG, B&R STRASSE 1
 * All rights reserved.
 *
 * Redistribution and use in source and binary forms,
