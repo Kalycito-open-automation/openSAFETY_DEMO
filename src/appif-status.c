@@ -88,14 +88,14 @@ The status instance holds the status information of this module
 */
 typedef struct
 {
-    tTbufStatusOutStructure  tbufStatusOutLayout_m;  ///< Local copy of the status output triple buffer
-    UINT8                    buffOutId_m;            ///< Id of the output status register buffer
-    UINT8                    iccStatus_m;            ///< Icc status register
-    UINT16                   asyncTxStatus_m;        ///< Status of the asynchronous transmit channel
+    tTbufStatusOutStructure*  pStatusOutLayout_m;  ///< Local copy of the status output triple buffer
+    tTbufNumLayout            buffOutId_m;            ///< Id of the output status register buffer
+    UINT8                     iccStatus_m;            ///< Icc status register
+    UINT16                    asyncTxStatus_m;        ///< Status of the asynchronous transmit channel
 
-    tTbufStatusInStructure  tbufStatusInLayout_m;  ///< Local copy of the status incoming triple buffer
-    UINT8                   buffInId_m;            ///< Id of the incoming status register buffer
-    UINT16                  asyncRxStatus_m;       ///< Status of the asynchronous receive channel
+    tTbufStatusInStructure*   pStatusInLayout_m;  ///< Local copy of the status incoming triple buffer
+    tTbufNumLayout            buffInId_m;            ///< Id of the incoming status register buffer
+    UINT16                    asyncRxStatus_m;       ///< Status of the asynchronous receive channel
 
     tAppIfAppCbSync       pfnAppCbSync_m;       ///< Synchronous callback function
 } tStatusInstance;
@@ -109,8 +109,8 @@ static tStatusInstance          statusInstance_l;
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-static tAppIfStatus status_initBuffer( UINT8 buffId_p, UINT8* buffBase_p,
-        UINT16 buffSize_p);
+static tAppIfStatus status_initOutBuffer(tTbufNumLayout statOutId_p);
+static tAppIfStatus status_initInBuffer(tTbufNumLayout statInId_p);
 static tAppIfStatus status_processSync(UINT8* pBuffer_p, UINT16 bufSize_p,
         void * pUserArg_p);
 static tAppIfStatus status_updateOutStatusReg(UINT8* pBuffer_p, UINT16 bufSize_p,
@@ -141,68 +141,38 @@ tAppIfStatus status_init(tStatusInitParam* pInitParam_p)
 
     APPIF_MEMSET(&statusInstance_l, 0 , sizeof(tStatusInstance));
 
-    if(pInitParam_p == NULL)
+#ifdef _DEBUG
+    if(pInitParam_p != NULL)
+    {
+        if(pInitParam_p->pfnAppCbSync_m == NULL ||
+           pInitParam_p->buffOutId_m == 0        )
+        {
+            ret = kAppIfStatusInitError;
+        }
+    }
+    else
     {
         ret = kAppIfStatusInitError;
-        goto Exit;
     }
+#endif
 
-    if(pInitParam_p->pfnAppCbSync_m == NULL ||
-       pInitParam_p->buffOutId_m == 0           )
+    if(ret == kAppIfSuccessful)
     {
-        ret = kAppIfStatusInitError;
-        goto Exit;
+        // Remember id of the buffer
+        statusInstance_l.buffOutId_m = pInitParam_p->buffOutId_m;
+
+        // Remember synchronous callback function
+        statusInstance_l.pfnAppCbSync_m = pInitParam_p->pfnAppCbSync_m;
+
+        // Register status outgoing triple buffer
+        ret = status_initOutBuffer(pInitParam_p->buffOutId_m);
+        if(ret == kAppIfSuccessful)
+        {
+            // Register status incoming triple buffer
+            ret = status_initInBuffer(pInitParam_p->buffInId_m);
+        }
     }
 
-    // Remember id of the buffer
-    statusInstance_l.buffOutId_m = pInitParam_p->buffOutId_m;
-
-    // Remember synchronous callback function
-    statusInstance_l.pfnAppCbSync_m = pInitParam_p->pfnAppCbSync_m;
-
-    // Register status outgoing triple buffer
-    ret = status_initBuffer(pInitParam_p->buffOutId_m,
-            (UINT8 *)&statusInstance_l.tbufStatusOutLayout_m,
-            sizeof(tTbufStatusOutStructure));
-    if(ret != kAppIfSuccessful)
-    {
-        goto Exit;
-    }
-
-    // Register status incoming triple buffer
-    ret = status_initBuffer(pInitParam_p->buffInId_m,
-            (UINT8 *)&statusInstance_l.tbufStatusInLayout_m,
-            sizeof(tTbufStatusInStructure));
-    if(ret != kAppIfSuccessful)
-    {
-        goto Exit;
-    }
-
-    // Register status module pre action for sync processing
-    ret = stream_registerAction(kStreamActionPre, pInitParam_p->buffOutId_m,
-            status_processSync, NULL);
-    if(ret != kAppIfSuccessful)
-    {
-        goto Exit;
-    }
-
-    // Register outgoing status module post action for status register update
-    ret = stream_registerAction(kStreamActionPost, pInitParam_p->buffOutId_m,
-            status_updateOutStatusReg, NULL);
-    if(ret != kAppIfSuccessful)
-    {
-        goto Exit;
-    }
-
-    // Register incoming status module post action for status register update
-    ret = stream_registerAction(kStreamActionPost, pInitParam_p->buffInId_m,
-            status_updateInStatusReg, NULL);
-    if(ret != kAppIfSuccessful)
-    {
-        goto Exit;
-    }
-
-Exit:
     return ret;
 }
 
@@ -295,37 +265,88 @@ void status_getAsyncTxChanFlag(UINT8 chanNum_p, tSeqNrValue* pSeqNr_p)
 
 //------------------------------------------------------------------------------
 /**
-\brief    Initialize a status buffer
+\brief    Initialize the outgoing status buffer
 
-\param[in] buffId_p            Id of the buffer to initialize
-\param[in] buffBase_p          Base address of the buffer
-\param[in] buffSize_p          Size of the buffer
+\param[in] statOutId_p         Id of the buffer to initialize
 
 \return tAppIfStatus
-\retval kAppIfSuccessful            On success
-\retval kAppIfStreamInvalidBuffer   Invalid buffer! Can't register
+\retval kAppIfSuccessful             On success
+\retval kAppIfStreamInvalidBuffer    Invalid buffer! Can't register
+\retval kAppIfRpdoBufferSizeMismatch Invalid size of the buffer
 
 \ingroup module_status
 */
 //------------------------------------------------------------------------------
-static tAppIfStatus status_initBuffer( UINT8 buffId_p, UINT8* buffBase_p,
-        UINT16 buffSize_p)
+static tAppIfStatus status_initOutBuffer( tTbufNumLayout statOutId_p)
 {
     tAppIfStatus ret = kAppIfSuccessful;
-    tBuffParam buffParam;
+    tBuffDescriptor* pDescStatOut;
 
-    // Register rpdo buffer to stream module
-    buffParam.buffId_m = buffId_p;
-    buffParam.pBuffBase_m = buffBase_p;
-    buffParam.buffSize_m = buffSize_p;
-
-    ret = stream_registerBuffer(&buffParam);
-    if(ret != kAppIfSuccessful)
+    ret = stream_getBufferParam(statOutId_p, &pDescStatOut);
+    if(ret == kAppIfSuccessful)
     {
-        goto Exit;
+        if(pDescStatOut->buffSize_m == sizeof(tTbufStatusOutStructure))
+        {
+            // Remember buffer address for later usage
+            statusInstance_l.pStatusOutLayout_m = (tTbufStatusOutStructure *)pDescStatOut->pBuffBase_m;
+
+            // Register status module pre action for sync processing
+            ret = stream_registerAction(kStreamActionPre, statOutId_p,
+                    status_processSync, NULL);
+            if(ret == kAppIfSuccessful)
+            {
+                // Register outgoing status module post action for status register update
+                ret = stream_registerAction(kStreamActionPost, statOutId_p,
+                        status_updateOutStatusReg, NULL);
+            }
+        }
+        else
+        {
+            ret = kAppIfStatusBufferSizeMismatch;
+        }
     }
 
-Exit:
+    return ret;
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief    Initialize the incoming status buffer
+
+\param[in] statInId_p         Id of the buffer to initialize
+
+\return tAppIfStatus
+\retval kAppIfSuccessful             On success
+\retval kAppIfStreamInvalidBuffer    Invalid buffer! Can't register
+\retval kAppIfRpdoBufferSizeMismatch Invalid size of the buffer
+
+\ingroup module_status
+*/
+//------------------------------------------------------------------------------
+static tAppIfStatus status_initInBuffer(tTbufNumLayout statInId_p)
+{
+    tAppIfStatus ret = kAppIfSuccessful;
+    tBuffDescriptor* pDescStatIn;
+
+    ret = stream_getBufferParam(statInId_p, &pDescStatIn);
+    if(ret == kAppIfSuccessful)
+    {
+        if(pDescStatIn->buffSize_m == sizeof(tTbufStatusInStructure))
+        {
+            // Remember buffer address for later usage
+            statusInstance_l.pStatusInLayout_m = (tTbufStatusInStructure *)pDescStatIn->pBuffBase_m;
+
+            // Register incoming status module post action for status register update
+            ret = stream_registerAction(kStreamActionPost, statInId_p,
+                    status_updateInStatusReg, NULL);
+
+        }
+        else
+        {
+            ret = kAppIfStatusBufferSizeMismatch;
+        }
+    }
+
     return ret;
 }
 
@@ -356,23 +377,19 @@ static tAppIfStatus status_processSync(UINT8* pBuffer_p, UINT16 bufSize_p,
     pStatusBuff = (tTbufStatusOutStructure*) pBuffer_p;
 
     // Check size of buffer
-    if(bufSize_p != sizeof(tTbufStatusOutStructure))
+    if(bufSize_p == sizeof(tTbufStatusOutStructure))
+    {
+        // Call synchronous callback function
+        timeStamp.relTimeLow_m = AmiGetDwordFromLe((UINT8 *)&pStatusBuff->relTimeLow_m);
+        timeStamp.relTimeHigh_m = AmiGetDwordFromLe((UINT8 *)&pStatusBuff->relTimeHigh_m);
+
+        ret = statusInstance_l.pfnAppCbSync_m(&timeStamp);
+    }
+    else
     {
         ret = kAppIfStatusBufferSizeMismatch;
-        goto Exit;
     }
 
-    // Call synchronous callback function
-    timeStamp.relTimeLow_m = AmiGetDwordFromLe((UINT8 *)&pStatusBuff->relTimeLow_m);
-    timeStamp.relTimeHigh_m = AmiGetDwordFromLe((UINT8 *)&pStatusBuff->relTimeHigh_m);
-
-    ret = statusInstance_l.pfnAppCbSync_m(&timeStamp);
-    if(ret != kAppIfSuccessful)
-    {
-        goto Exit;
-    }
-
-Exit:
     return ret;
 }
 
@@ -399,27 +416,23 @@ static tAppIfStatus status_updateOutStatusReg(UINT8* pBuffer_p, UINT16 bufSize_p
     // Convert to status buffer structure
     pStatusBuff = (tTbufStatusOutStructure*) pBuffer_p;
 
-#ifdef _DEBUG
     // Check size of buffer
-    if(bufSize_p != sizeof(tTbufStatusOutStructure))
+    if(bufSize_p == sizeof(tTbufStatusOutStructure))
+    {
+        // Get CC status register
+        statusInstance_l.iccStatus_m = AmiGetByteFromLe((UINT8 *)&pStatusBuff->iccStatus_m);
+
+        // Update tx status register
+        statusInstance_l.asyncTxStatus_m = AmiGetWordFromLe((UINT8 *)&pStatusBuff->asyncConsStatus_m);
+
+        // Acknowledge buffer
+        stream_ackBuffer(statusInstance_l.buffOutId_m);
+    }
+    else
     {
         ret = kAppIfStatusBufferSizeMismatch;
-        goto Exit;
     }
-#endif
 
-    // Get CC status register
-    statusInstance_l.iccStatus_m = AmiGetByteFromLe((UINT8 *)&pStatusBuff->iccStatus_m);
-
-    // Update tx status register
-    statusInstance_l.asyncTxStatus_m = AmiGetWordFromLe((UINT8 *)&pStatusBuff->asyncConsStatus_m);
-
-    // Acknowledge buffer
-    stream_ackBuffer(statusInstance_l.buffOutId_m);
-
-#ifdef _DEBUG
-Exit:
-#endif
     return ret;
 }
 
@@ -446,28 +459,22 @@ static tAppIfStatus status_updateInStatusReg(UINT8* pBuffer_p, UINT16 bufSize_p,
     // Convert to status buffer structure
     pStatusBuff = (tTbufStatusInStructure*) pBuffer_p;
 
-#ifdef _DEBUG
     // Check size of buffer
-    if(bufSize_p != sizeof(tTbufStatusInStructure))
+    if(bufSize_p == sizeof(tTbufStatusInStructure))
+    {
+        // Acknowledge buffer
+        stream_ackBuffer(statusInstance_l.buffInId_m);
+
+        // Write rx status register
+        AmiSetWordToLe((UINT8 *)&pStatusBuff->asyncProdStatus_m, statusInstance_l.asyncRxStatus_m);
+    }
+    else
     {
         ret = kAppIfStatusBufferSizeMismatch;
-        goto Exit;
     }
-#endif
 
-    // Acknowledge buffer
-    stream_ackBuffer(statusInstance_l.buffInId_m);
-
-    // Write rx status register
-    AmiSetWordToLe((UINT8 *)&pStatusBuff->asyncProdStatus_m, statusInstance_l.asyncRxStatus_m);
-
-#ifdef _DEBUG
-Exit:
-#endif
     return ret;
 }
-
-
 
 /// \}
 

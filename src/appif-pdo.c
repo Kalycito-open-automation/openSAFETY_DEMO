@@ -87,10 +87,10 @@ application and back.
 typedef struct
 {
     UINT8           rpdoId_m;           ///< Id of the rpdo buffer
-    tTbufRpdoImage  tbufRpdoLayout_m;   ///< Local copy of the rpdo triple buffer
+    tTbufRpdoImage* pRpdoLayout_m;      ///< Pointer to the rpdo triple buffer
     UINT32          rpdoRelTimeLow_m;   ///< Low value of the relative time
     UINT8           tpdoId_m;           ///< Id of the tpdo buffer
-    tTbufTpdoImage  tbufTpdoLayout_m;   ///< Local copy of the tpdo triple buffer
+    tTbufTpdoImage* pTpdoLayout_m;      ///< Pointer to the tpdo triple buffer
     tAppIfPdoCb     pfnPdoCb_m;         ///< Process PDO user callback function
 } tPdoInstance;
 
@@ -105,8 +105,8 @@ static tPdoInstance          pdoInstance_l;
 //------------------------------------------------------------------------------
 
 static tAppIfStatus pdo_process(void);
-static tAppIfStatus pdo_initBuffer( UINT8 buffId_p, UINT8* buffBase_p,
-        UINT16 buffSize_p);
+static tAppIfStatus pdo_initRpdoBuffer(tTbufNumLayout rpdoId_p);
+static tAppIfStatus pdo_initTpdoBuffer(tTbufNumLayout tpdoId_p);
 static tAppIfStatus pdo_ackTpdo(UINT8* pBuffer_p, UINT16 bufSize_p, void * pUserArg_p);
 static tAppIfStatus pdo_processRpdo(UINT8* pBuffer_p, UINT16 bufSize_p, void * pUserArg_p);
 
@@ -132,85 +132,54 @@ static tAppIfStatus pdo_processRpdo(UINT8* pBuffer_p, UINT16 bufSize_p, void * p
 tAppIfStatus pdo_init(tAppIfPdoCb pfnPdoCb_p, tPdoInitParam* pPdoInitParam_p)
 {
     tAppIfStatus ret = kAppIfSuccessful;
-    UINT8 fInitRpdo = FALSE;
-    UINT8 fInitTpdo = FALSE;
 
     APPIF_MEMSET(&pdoInstance_l, 0 , sizeof(tPdoInstance));
 
-    if(pfnPdoCb_p == NULL)
+#ifdef _DEBUG
+    if(pfnPdoCb_p == NULL      ||
+       pPdoInitParam_p == NULL  )
     {
         ret = kAppIfPdoInitError;
-        goto Exit;
     }
+#endif
 
-    if(pPdoInitParam_p == NULL)
+    if(ret == kAppIfSuccessful)
     {
-        ret = kAppIfPdoInitError;
-        goto Exit;
+        if(pPdoInitParam_p->buffIdRpdo_m != 0 &&
+           pPdoInitParam_p->buffIdTpdo_m != 0   )
+        {
+            if(pPdoInitParam_p->buffIdTpdo_m != 0)
+            {
+                // Initialize the Rpdo buffer
+                ret = pdo_initRpdoBuffer(pPdoInitParam_p->buffIdRpdo_m);
+            }
+
+            if(pPdoInitParam_p->buffIdTpdo_m != 0 &&
+               ret == kAppIfSuccessful)
+            {
+                // Initialize the Tpdo buffer
+                ret = pdo_initTpdoBuffer(pPdoInitParam_p->buffIdTpdo_m);
+            }
+
+            if(ret == kAppIfSuccessful)
+            {
+                // Register PDO process function
+                stream_registerSyncCb(pdo_process);
+
+                // Copy buffer id to local instance
+                pdoInstance_l.rpdoId_m = pPdoInitParam_p->buffIdRpdo_m;
+                pdoInstance_l.tpdoId_m = pPdoInitParam_p->buffIdTpdo_m;
+
+                // Remember process PDO user callback
+                pdoInstance_l.pfnPdoCb_m = pfnPdoCb_p;
+            }
+        }
+        else
+        {
+            ret = kAppIfPdoInitError;
+        }
     }
 
-    if(pPdoInitParam_p->buffIdRpdo_m != 0)
-    {
-        // Initialize the Rpdo
-        ret = pdo_initBuffer(pPdoInitParam_p->buffIdRpdo_m,
-                (UINT8 *)&pdoInstance_l.tbufRpdoLayout_m,
-                sizeof(pdoInstance_l.tbufRpdoLayout_m));
-        if(ret != kAppIfSuccessful)
-        {
-            goto Exit;
-        }
-
-        // Register rpdo acknowledge action
-        ret = stream_registerAction(kStreamActionPre, pPdoInitParam_p->buffIdRpdo_m,
-                pdo_processRpdo, NULL);
-        if(ret != kAppIfSuccessful)
-        {
-            goto Exit;
-        }
-
-        fInitRpdo = TRUE;
-    }
-
-    if(pPdoInitParam_p->buffIdTpdo_m != 0)
-    {
-        // Initialize the Tpdo
-        ret = pdo_initBuffer(pPdoInitParam_p->buffIdTpdo_m,
-                (UINT8 *)&pdoInstance_l.tbufTpdoLayout_m,
-                sizeof(pdoInstance_l.tbufTpdoLayout_m));
-        if(ret != kAppIfSuccessful)
-        {
-            goto Exit;
-        }
-
-        // Register tpdo acknowledge action
-        ret = stream_registerAction(kStreamActionPost, pPdoInitParam_p->buffIdTpdo_m,
-                pdo_ackTpdo, NULL);
-        if(ret != kAppIfSuccessful)
-        {
-            goto Exit;
-        }
-
-        fInitTpdo = TRUE;
-    }
-
-    if(!fInitRpdo && !fInitTpdo)
-    {
-        // There needs to be either one R- or TPDO
-        ret = kAppIfPdoInitError;
-        goto Exit;
-    }
-
-    // Register PDO process function
-    stream_registerSyncCb(pdo_process);
-
-    // Copy buffer id to local instance
-    pdoInstance_l.rpdoId_m = pPdoInitParam_p->buffIdRpdo_m;
-    pdoInstance_l.tpdoId_m = pPdoInitParam_p->buffIdTpdo_m;
-
-    // Remember process PDO user callback
-    pdoInstance_l.pfnPdoCb_m = pfnPdoCb_p;
-
-Exit:
     return ret;
 }
 
@@ -234,37 +203,81 @@ void pdo_exit(void)
 
 //------------------------------------------------------------------------------
 /**
-\brief    Initialize a PDO buffer image
+\brief    Initialize the RPDO buffer image
 
-\param[in] buffId_p               Id of the pdo buffer
-\param[in] buffBase_p             Base address of the pdo buffer
-\param[in] buffSize_p             Size of the pdo buffer
+\param[in] rpdoId_p               Id of the RPDO buffer
 
 \return tAppIfStatus
 \retval kAppIfSuccessful               On success
 \retval kAppIfStreamInvalidBuffer      Invalid buffer! Can't register
+\retval kAppIfRpdoBufferSizeMismatch   Size of the buffer is invalid
 
 \ingroup module_pdo
 */
 //------------------------------------------------------------------------------
-static tAppIfStatus pdo_initBuffer( UINT8 buffId_p, UINT8* buffBase_p,
-        UINT16 buffSize_p)
+static tAppIfStatus pdo_initRpdoBuffer(tTbufNumLayout rpdoId_p)
 {
     tAppIfStatus ret = kAppIfSuccessful;
-    tBuffParam buffParam;
+    tBuffDescriptor* pDescRpdo;
 
-    // Register rpdo buffer to stream module
-    buffParam.buffId_m = buffId_p;
-    buffParam.pBuffBase_m = buffBase_p;
-    buffParam.buffSize_m = buffSize_p;
-
-    ret = stream_registerBuffer(&buffParam);
-    if(ret != kAppIfSuccessful)
+    ret = stream_getBufferParam(rpdoId_p, &pDescRpdo);
+    if(ret == kAppIfSuccessful)
     {
-        goto Exit;
+        if(pDescRpdo->buffSize_m == sizeof(tTbufRpdoImage))
+        {
+            // Remember buffer address for later usage
+            pdoInstance_l.pRpdoLayout_m = (tTbufRpdoImage *)pDescRpdo->pBuffBase_m;
+
+            // Register rpdo acknowledge action
+            ret = stream_registerAction(kStreamActionPre, rpdoId_p,
+                    pdo_processRpdo, NULL);
+        }
+        else
+        {
+            ret = kAppIfRpdoBufferSizeMismatch;
+        }
     }
 
-Exit:
+    return ret;
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief    Initialize the TPDO buffer image
+
+\param[in] tpdoId_p               Id of the TPDO buffer
+
+\return tAppIfStatus
+\retval kAppIfSuccessful               On success
+\retval kAppIfStreamInvalidBuffer      Invalid buffer! Can't register
+\retval kAppIfRpdoBufferSizeMismatch   Size of the buffer is invalid
+
+\ingroup module_pdo
+*/
+//------------------------------------------------------------------------------
+static tAppIfStatus pdo_initTpdoBuffer(tTbufNumLayout tpdoId_p)
+{
+    tAppIfStatus ret = kAppIfSuccessful;
+    tBuffDescriptor* pDescTpdo;
+
+    ret = stream_getBufferParam(tpdoId_p, &pDescTpdo);
+    if(ret == kAppIfSuccessful)
+    {
+        if(pDescTpdo->buffSize_m == sizeof(tTbufTpdoImage))
+        {
+            // Remember buffer address for later usage
+            pdoInstance_l.pTpdoLayout_m = (tTbufTpdoImage *)pDescTpdo->pBuffBase_m;
+
+            // Register rpdo acknowledge action
+            ret = stream_registerAction(kStreamActionPost, tpdoId_p,
+                    pdo_ackTpdo, NULL);
+        }
+        else
+        {
+            ret = kAppIfRpdoBufferSizeMismatch;
+        }
+    }
+
     return ret;
 }
 
@@ -284,9 +297,27 @@ static tAppIfStatus pdo_process(void)
     tAppIfStatus ret = kAppIfSuccessful;
 
     // Call the PDO user callback function
-    ret = pdoInstance_l.pfnPdoCb_m(pdoInstance_l.rpdoRelTimeLow_m,
-            &pdoInstance_l.tbufRpdoLayout_m.mappedObjList_m,
-            &pdoInstance_l.tbufTpdoLayout_m.mappedObjList_m);
+    if(pdoInstance_l.rpdoId_m == 0)
+    {
+        // The Rpdo buffer is not initialized
+        ret = pdoInstance_l.pfnPdoCb_m(pdoInstance_l.rpdoRelTimeLow_m,
+                    NULL,
+                    &pdoInstance_l.pTpdoLayout_m->mappedObjList_m);
+    }
+    else if(pdoInstance_l.tpdoId_m == 0)
+    {
+        // The Tpdo buffer is not initialized
+        ret = pdoInstance_l.pfnPdoCb_m(pdoInstance_l.rpdoRelTimeLow_m,
+                    &pdoInstance_l.pRpdoLayout_m->mappedObjList_m,
+                    NULL);
+    }
+    else
+    {
+        // Both PDO buffers are initialized
+        ret = pdoInstance_l.pfnPdoCb_m(pdoInstance_l.rpdoRelTimeLow_m,
+                    &pdoInstance_l.pRpdoLayout_m->mappedObjList_m,
+                    &pdoInstance_l.pTpdoLayout_m->mappedObjList_m);
+    }
 
     return ret;
 }
@@ -312,23 +343,19 @@ static tAppIfStatus pdo_processRpdo(UINT8* pBuffer_p, UINT16 bufSize_p, void * p
     // Convert to configuration channel buffer structure
     pRpdoImage = (tTbufRpdoImage*) pBuffer_p;
 
-#ifdef _DEBUG
     // Check size of buffer
-    if(bufSize_p != sizeof(tTbufRpdoImage))
+    if(bufSize_p == sizeof(tTbufRpdoImage))
+    {
+        // Write relative time to local structure
+        pdoInstance_l.rpdoRelTimeLow_m = AmiGetDwordFromLe((UINT8 *)&pRpdoImage->relativeTimeLow_m);
+
+        stream_ackBuffer(pdoInstance_l.rpdoId_m);
+    }
+    else
     {
         ret = kAppIfRpdoBufferSizeMismatch;
-        goto Exit;
     }
-#endif
 
-    // Write relative time to local structure
-    pdoInstance_l.rpdoRelTimeLow_m = AmiGetDwordFromLe((UINT8 *)&pRpdoImage->relativeTimeLow_m);
-
-    stream_ackBuffer(pdoInstance_l.rpdoId_m);
-
-#ifdef _DEBUG
-Exit:
-#endif
     return ret;
 }
 

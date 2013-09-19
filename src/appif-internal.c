@@ -80,21 +80,17 @@ processes the synchronous and asynchronous task.
 // const defines
 //------------------------------------------------------------------------------
 
-#define CONS_ACK_REGISTER_ID        0       ///< ID of the consumer ACK registers
-#define ACK_REGISTER_COUNT          2       ///< Number of acknowledge registers
-
 //------------------------------------------------------------------------------
 // local types
 //------------------------------------------------------------------------------
-/**
-\brief Rpdo user instance type
 
-The rpdo instance holds the pdo information of this module
+/**
+\brief Internal user instance type
 */
 typedef struct
 {
-    UINT32    consAckRegister;      ///< Data of the consumer ACK register
-    UINT32    prodAckRegister;      ///< Data of the producer ACK register
+    tTbufAckRegister*    pConsAckRegister_m;      ///< Pointer to the consumer ACK register
+    tTbufAckRegister*    pProdAckRegister_m;      ///< Pointer to the producer ACK register
 } tInternalInstance;
 
 //------------------------------------------------------------------------------
@@ -107,6 +103,9 @@ static tInternalInstance          intInstance_l;
 // local function prototypes
 //------------------------------------------------------------------------------
 
+static tAppIfStatus appif_initIntModules(tAppIfInitParam* pInitParam_p);
+static tAppIfStatus appif_initAckRegisters(tTbufNumLayout idConsAck_p,
+                                         tTbufNumLayout idProdAck_p);
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
@@ -128,68 +127,36 @@ static tInternalInstance          intInstance_l;
 tAppIfStatus appif_init(tAppIfInitParam* pInitParam_p)
 {
     tAppIfStatus ret = kAppIfSuccessful;
-    tBuffParam   ackBuffer;
-    tStreamInitParam streamInitParam;
 
     APPIF_MEMSET(&intInstance_l, 0 , sizeof(tInternalInstance));
 
 #if _DEBUG
-    if(pInitParam_p->countConsBuff_m + pInitParam_p->countProdBuff_m + ACK_REGISTER_COUNT !=
-            kTbufCount)
+    if(pInitParam_p != NULL)
+    {
+        if(pInitParam_p->idConsAck_m >= kTbufCount ||
+           pInitParam_p->idProdAck_m >= kTbufCount  )
+        {
+            ret = kAppIfInitError;
+        }
+    }
+    else
     {
         ret = kAppIfInitError;
-        goto Exit;
     }
 #endif
 
-    // Initialize stream module
-    streamInitParam.pBuffDescList_m = pInitParam_p->pBuffDescList_m;
-    streamInitParam.pfnStreamHandler_m = pInitParam_p->pfnStreamHandler_m;
-    streamInitParam.countConsBuff_m = pInitParam_p->countConsBuff_m;
-    streamInitParam.countProdBuff_m = pInitParam_p->countProdBuff_m;
-    streamInitParam.pfnEnterCritSec_m = pInitParam_p->pfnEnterCritSec_m;
-
-    ret = stream_init(&streamInitParam);
-    if(ret != kAppIfSuccessful)
+    if(ret == kAppIfSuccessful)
     {
-        goto Exit;
+        // Initialize internal library modules
+        ret = appif_initIntModules(pInitParam_p);
+        if(ret == kAppIfSuccessful)
+        {
+            // Initialize acknowledge registers
+            ret = appif_initAckRegisters(pInitParam_p->idConsAck_m,
+                                         pInitParam_p->idProdAck_m);
+        }
     }
 
-    // Initialize the asynchronous module
-    ret = async_init();
-    if(ret != kAppIfSuccessful)
-    {
-        goto Exit;
-    }
-
-    // Set consumer/producer ACK register to always ACK all!
-    intInstance_l.consAckRegister = 0xFFFFFFFF;
-    intInstance_l.prodAckRegister = 0xFFFFFFFF;
-
-    // Register consumer acknowledge triple buffer
-    ackBuffer.buffId_m = CONS_ACK_REGISTER_ID;
-    ackBuffer.pBuffBase_m = (UINT8 *)&intInstance_l.consAckRegister;
-    ackBuffer.buffSize_m = sizeof(intInstance_l.consAckRegister);
-
-    ret = stream_registerBuffer(&ackBuffer);
-    if(ret != kAppIfSuccessful)
-    {
-        goto Exit;
-    }
-
-    // Register producer acknowledge triple buffer
-    ackBuffer.buffId_m = pInitParam_p->countConsBuff_m +
-            pInitParam_p->countProdBuff_m + ACK_REGISTER_COUNT - 1;
-    ackBuffer.pBuffBase_m = (UINT8 *)&intInstance_l.prodAckRegister;
-    ackBuffer.buffSize_m = sizeof(intInstance_l.prodAckRegister);
-
-    ret = stream_registerBuffer(&ackBuffer);
-    if(ret != kAppIfSuccessful)
-    {
-        goto Exit;
-    }
-
-Exit:
     return ret;
 }
 
@@ -204,24 +171,6 @@ void appif_exit(void)
 {
     // Destroy initialized modules
     stream_exit();
-}
-
-//------------------------------------------------------------------------------
-/**
-\brief    Finish application interface module initialization
-
-\return  kAppIfSuccessful
-
-\ingroup module_internal
-*/
-//------------------------------------------------------------------------------
-tAppIfStatus appif_finishModuleInit(void)
-{
-    tAppIfStatus ret = kAppIfSuccessful;
-
-    ret = stream_finishModuleInit();
-
-    return ret;
 }
 
 //------------------------------------------------------------------------------
@@ -268,18 +217,16 @@ tAppIfStatus appif_processAsync(tAsyncInstance* ppInstance_p)
         ret = async_process(ppInstance_p[i]);
         if(ret != kAppIfSuccessful)
         {
-            goto Exit;
+            break;
         }
     }
 
-    // Process configuration channel objects
-    ret = cc_process();
-    if(ret != kAppIfSuccessful)
+    if(ret == kAppIfSuccessful)
     {
-        goto Exit;
+        // Process configuration channel objects
+        ret = cc_process();
     }
 
-Exit:
     return ret;
 }
 
@@ -289,6 +236,97 @@ Exit:
 /// \name Private Functions
 /// \{
 
+
+//------------------------------------------------------------------------------
+/**
+\brief    Initialize all internal modules
+
+\param[in]  pInitParam_p         Internal module initialization parameters
+
+\return  tAppIfStatus
+\retval  kAppIfSuccessful          On success
+\retval  kAppIfStreamInitError     Error while initializing the stream module
+
+\ingroup module_internal
+*/
+//------------------------------------------------------------------------------
+static tAppIfStatus appif_initIntModules(tAppIfInitParam* pInitParam_p)
+{
+    tAppIfStatus ret = kAppIfSuccessful;
+    tStreamInitParam streamInitParam;
+
+    // Initialize the asynchronous module
+    async_init();
+
+    // Initialize stream module
+    streamInitParam.pBuffDescList_m = pInitParam_p->pBuffDescList_m;
+    streamInitParam.pfnStreamHandler_m = pInitParam_p->pfnStreamHandler_m;
+    streamInitParam.idConsAck_m = pInitParam_p->idConsAck_m;
+    streamInitParam.idFirstProdBuffer_m = pInitParam_p->idFirstProdBuffer_m;
+
+    ret = stream_init(&streamInitParam);
+
+    return ret;
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief    Initialize the acknowledge registers
+
+\param[in]  idConsAck_p         Id of the consuming acknowledge register
+\param[in]  idProdAck_p         Id of the producing acknowledge register
+
+\return tAppIfStatus
+\retval kAppIfSuccessful            On success
+\retval kAppIfStreamInvalidBuffer   Unable to find the buffer in the list
+\retval kAppIfBufferSizeMismatch    Size of the buffer is invalid
+
+\ingroup module_internal
+*/
+//------------------------------------------------------------------------------
+static tAppIfStatus appif_initAckRegisters(tTbufNumLayout idConsAck_p,
+                                         tTbufNumLayout idProdAck_p)
+{
+    tAppIfStatus ret = kAppIfSuccessful;
+    tBuffDescriptor* pDescConsAck;
+    tBuffDescriptor* pDescProdAck;
+
+    ret = stream_getBufferParam(idConsAck_p, &pDescConsAck);
+    if(ret == kAppIfSuccessful)
+    {
+        if(pDescConsAck->buffSize_m == sizeof(tTbufAckRegister))
+        {
+            // Set consumer ACK register address
+            intInstance_l.pConsAckRegister_m = (tTbufAckRegister*)pDescConsAck->pBuffBase_m;
+
+            // Set register to always ack all buffers (Needed for streamed access)
+            *intInstance_l.pConsAckRegister_m = 0xFFFFFFFF;
+
+            ret = stream_getBufferParam(idProdAck_p, &pDescProdAck);
+            if(ret == kAppIfSuccessful)
+            {
+                if(pDescProdAck->buffSize_m == sizeof(tTbufAckRegister))
+                {
+                    // Set producer ACK register address
+                    intInstance_l.pProdAckRegister_m = (tTbufAckRegister*)pDescProdAck->pBuffBase_m;
+
+                    // Set register to always ack all buffers (Needed for streamed access)
+                    *intInstance_l.pProdAckRegister_m = 0xFFFFFFFF;
+                }
+                else
+                {
+                    ret = kAppIfBufferSizeMismatch;
+                }
+            }
+        }
+        else
+        {
+            ret = kAppIfBufferSizeMismatch;
+        }
+    }
+
+    return ret;
+}
 
 /// \}
 

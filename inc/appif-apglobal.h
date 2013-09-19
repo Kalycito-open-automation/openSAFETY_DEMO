@@ -47,6 +47,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <appif-debug.h>
 #include <ami.h>
 
+#include <appif-tbuflayout.h>
+
 
 //------------------------------------------------------------------------------
 // const defines

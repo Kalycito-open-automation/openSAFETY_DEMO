@@ -56,15 +56,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 
 /**
- * \brief Buffer register parameters
- */
-typedef struct {
-    UINT8 buffId_m;
-    UINT8* pBuffBase_m;
-    UINT16 buffSize_m;
-} tBuffParam;
-
-/**
  * \brief  Buffer action types -> Before or after filling!
  */
 typedef enum {
@@ -73,9 +64,15 @@ typedef enum {
     kStreamActionPost     = 0x02,
 } tActionType;
 
+/**
+ * \brief Callback for stream buffer action. Called to inform module about new data.
+ */
 typedef tAppIfStatus (*tBuffAction) (UINT8* pBuffer_p, UINT16 bufSize_p,
         void * pUserArg_p);
 
+/**
+ * \brief Synchronous user callback function. Informs user about new data.
+ */
 typedef tAppIfStatus (*tBuffSyncCb)(void);
 
 
@@ -83,11 +80,10 @@ typedef tAppIfStatus (*tBuffSyncCb)(void);
  * \brief  Stream module initialization structure
  */
 typedef struct {
-    tTbufDescriptor* pBuffDescList_m;      ///< Triple buffer descriptor list
-    UINT8            countConsBuff_m;      ///< Max number of consuming buffers
-    UINT8            countProdBuff_m;      ///< Max number of producing buffers
+    tBuffDescriptor* pBuffDescList_m;      ///< Triple buffer descriptor list
+    tTbufNumLayout   idConsAck_m;          ///< Id of the consumer ack register
+    tTbufNumLayout   idFirstProdBuffer_m;  ///< Id of the first producing buffer
     tStreamHandler   pfnStreamHandler_m;   ///< Stream receive and transmit handler
-    tAppIfCritSec    pfnEnterCritSec_m;    ///< Pointer to critical section entry function
 } tStreamInitParam;
 
 //------------------------------------------------------------------------------
@@ -95,10 +91,10 @@ typedef struct {
 //------------------------------------------------------------------------------
 tAppIfStatus stream_init(tStreamInitParam* pInitParam_p);
 void stream_exit(void);
-
 tAppIfStatus stream_finishModuleInit(void);
-tAppIfStatus stream_registerBuffer(tBuffParam* pBuffParam_p );
-tAppIfStatus stream_updateBufferBase(UINT8 buffId_p, UINT8* pBuffBase_p);
+
+tAppIfStatus stream_getBufferParam(tTbufNumLayout buffId_p,
+        tBuffDescriptor** ppBuffParam_p);
 tAppIfStatus stream_registerAction(tActionType actType_p, UINT8 buffId_p,
         tBuffAction pfnBuffAct_p, void * pUserArg_p);
 void stream_registerSyncCb(tBuffSyncCb pfnSyncCb_p);

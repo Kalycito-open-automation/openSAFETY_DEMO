@@ -53,22 +53,20 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // typedef
 //------------------------------------------------------------------------------
-
 /**
- * \brief Descriptor element of segmented descriptor list
+ * \brief Descriptor element of descriptor list
  */
 typedef struct {
-    UINT8*     pBuffRxBase_m;    ///< Base address of the receive buffer
-    UINT8*     pBuffTxBase_m;    ///< Base address of the transmit buffer
-    UINT16     transSize_m;     ///< Size to be transfered
-} tBuffSegDesc;
+    UINT8*     pBuffBase_m;    ///< Base address of the buffer
+    UINT16     buffSize_m;     ///< Size of the buffer
+} tBuffDescriptor;
 
 /**
  * \brief Parameters of the stream handler callback function
  */
 typedef struct {
-    tBuffSegDesc* pFirstSegDesc_m;      ///< First segmented descriptor
-    UINT8 segDescCount_m;               ///< Number of segmented descriptors
+    tBuffDescriptor consDesc_m;      ///< Descriptor of the incoming consuming payload
+    tBuffDescriptor prodDesc_m;      ///< Descriptor of the outgoing producing payload
 } tHandlerParam;
 
 /**

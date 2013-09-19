@@ -43,18 +43,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // includes
 //------------------------------------------------------------------------------
 
-#if defined( __GNUC__ )
-  #if defined(__MICROBLAZE__)
-    #include "xilinx_usleep.h"
-  #else
-    #include <unistd.h>    //for usleep()
-  #endif
-#elif defined(__CC_ARM)
-  #include <stddef.h>
-#endif
-
-#include <string.h>    // for memcpy() memset()
-
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------

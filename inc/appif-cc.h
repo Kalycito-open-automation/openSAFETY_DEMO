@@ -59,8 +59,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * \brief  Cc module initialization structure
  */
 typedef struct {
-    UINT8              iccId_m;          ///< Id of the icc buffer
-    UINT8              occId_m;          ///< Id of the occ buffer
+    tTbufNumLayout     iccId_m;          ///< Id of the icc buffer
+    tTbufNumLayout     occId_m;          ///< Id of the occ buffer
     tAppIfCritSec      pfnCritSec_p;     ///< Pointer to critical section entry function
 } tCcInitParam;
 

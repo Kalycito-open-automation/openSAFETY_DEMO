@@ -64,8 +64,8 @@ typedef tAppIfStatus (* tAppIfPdoCb) ( UINT32 rpdoRelTimeLow_p,
  * \brief  Pdo module initialization structure
  */
 typedef struct {
-    UINT8              buffIdRpdo_m;      ///< Id of the rpdo buffer
-    UINT8              buffIdTpdo_m;      ///< Id of the tpdo buffer
+    tTbufNumLayout     buffIdRpdo_m;      ///< Id of the rpdo buffer
+    tTbufNumLayout     buffIdTpdo_m;      ///< Id of the tpdo buffer
 } tPdoInitParam;
 
 //------------------------------------------------------------------------------

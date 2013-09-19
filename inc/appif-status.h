@@ -73,8 +73,8 @@ typedef tAppIfStatus (* tAppIfAppCbSync) ( tAppIfTimeStamp* pTimeStamp_p );
 typedef struct {
     tAppIfAppCbSync          pfnAppCbSync_m;    ///< Syncronous callback function
 
-    UINT8                    buffOutId_m;       ///< Id of the output status buffer
-    UINT8                    buffInId_m;       ///< Id of the input status buffer
+    tTbufNumLayout           buffOutId_m;       ///< Id of the output status buffer
+    tTbufNumLayout           buffInId_m;        ///< Id of the input status buffer
 } tStatusInitParam;
 
 //------------------------------------------------------------------------------

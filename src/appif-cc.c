@@ -82,7 +82,6 @@ and forwards objects from the user application to the PCP.
 // const defines
 //------------------------------------------------------------------------------
 
-#define CC_TX_BUFFER_COUNT                 2    ///< Number of cc transmit buffers
 #define CC_TX_TIMEOUT_CYCLE_COUNT        400    ///< Number of cycles after a transmit has a timeout
 
 //------------------------------------------------------------------------------
@@ -91,26 +90,25 @@ and forwards objects from the user application to the PCP.
 
 typedef struct {
     UINT8                   isLocked_m;        ///< Is buffer free for filling
-    tTbufCcStructure        ccTxPayl_m;        ///< Local transmit buffers copy
+    tTbufCcStructure*       pIccTxPayl_m;      ///< Pointer to the Icc transmit buffer
 } tCcTxBuffer;
 
 /**
  * \brief Parameter type of the transmit buffer
  */
 typedef struct {
-    UINT8              idIccTx_m;                            ///< Input transmit buffer id
-    tCcTxBuffer        ccTxBuffer_m[CC_TX_BUFFER_COUNT];     ///< Local copy of the Icc buffer
-    tSeqNrValue        currTxSeqNr_m;                        ///< Current transmit sequence number
-    UINT8              currTxBuffer_m;                       ///< Current active transmit buffer
-    tTimeoutInstance   pTimeoutInst_m;                       ///< Timer instance for asynchronous transmissions
+    tTbufNumLayout     idIccTx_m;          ///< Input transmit buffer id
+    tCcTxBuffer        iccTxBuffer_m;      ///< Parameters of the Icc buffer
+    tSeqNrValue        currTxSeqNr_m;      ///< Current transmit sequence number
+    tTimeoutInstance   pTimeoutInst_m;     ///< Timer instance for asynchronous transmissions
 } tCcTxChannel;
 
 /**
  * \brief Parameter type of the receive buffer
  */
 typedef struct {
-    UINT8              idOccRx_m;           ///< Output receive buffer id
-    tTbufCcStructure   tbufOccLayout_m;     ///< Local copy of the Occ buffer
+    tTbufNumLayout     idOccRx_m;           ///< Output receive buffer id
+    tTbufCcStructure*  pOccLayout_m;        ///< Pointer to the Occ transmit buffer
 } tCcRxChannel;
 
 /**
@@ -130,8 +128,9 @@ static tCcInstance          ccInstance_l;
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-
-static tAppIfStatus appif_initCcObjects(void);
+static tAppIfStatus cc_initIccTxBuffer(tTbufNumLayout iccId_p);
+static tAppIfStatus cc_initOccRxBuffer(tTbufNumLayout occId_p);
+static tAppIfStatus cc_initCcObjects(void);
 static tAppIfStatus cc_processTxObject(void);
 static void cc_changeLocalSeqNr(tSeqNrValue* pSeqNr_p);
 static tAppIfStatus cc_checkIccStatus(void);
@@ -160,77 +159,46 @@ Initialize the input and output configuration channel
 tAppIfStatus cc_init(tCcInitParam* pCcInitParam_p)
 {
     tAppIfStatus  ret = kAppIfSuccessful;
-    tBuffParam buffParam;
 
     APPIF_MEMSET(&ccInstance_l, 0 , sizeof(tCcInstance));
 
+#ifdef _DEBUG
     if(pCcInitParam_p == NULL)
     {
         ret = kAppIfConfChanInitError;
-        goto Exit;
     }
+#endif
 
-    // Register occ rx buffer to stream module
-    buffParam.buffId_m = pCcInitParam_p->iccId_m;
-    buffParam.pBuffBase_m = (UINT8 *)&ccInstance_l.txChannel_m.ccTxBuffer_m[0].ccTxPayl_m;
-    buffParam.buffSize_m = sizeof(tTbufCcStructure);
-
-    ret = stream_registerBuffer(&buffParam);
-    if(ret != kAppIfSuccessful)
+    if(ret == kAppIfSuccessful)
     {
-        goto Exit;
+        // Register icc tx buffer to stream module
+        ret = cc_initIccTxBuffer(pCcInitParam_p->iccId_m);
+        if(ret == kAppIfSuccessful)
+        {
+            // Register occ rx buffer to stream module
+            ret = cc_initOccRxBuffer(pCcInitParam_p->occId_m);
+            if(ret == kAppIfSuccessful)
+            {
+                // Initialize the configuration channel objects module
+                ret = ccobject_init(pCcInitParam_p->pfnCritSec_p);
+                if(ret == kAppIfSuccessful)
+                {
+                    // Initialize the cc object internal list
+                    ret = cc_initCcObjects();
+                    if(ret == kAppIfSuccessful)
+                    {
+                        // Fill local instance structure
+                        ccInstance_l.txChannel_m.idIccTx_m = pCcInitParam_p->iccId_m;
+                        ccInstance_l.rxChannel_m.idOccRx_m = pCcInitParam_p->occId_m;
+
+                        // Set sequence number init value
+                        ccInstance_l.txChannel_m.currTxSeqNr_m = kSeqNrValueFirst;
+                    }
+                }
+            }
+        }
     }
 
-    // Register icc tx buffer to stream module
-    buffParam.buffId_m = pCcInitParam_p->occId_m;
-    buffParam.pBuffBase_m = (UINT8 *)&ccInstance_l.rxChannel_m.tbufOccLayout_m;
-    buffParam.buffSize_m = sizeof(tTbufCcStructure);
-
-    ret = stream_registerBuffer(&buffParam);
-    if(ret != kAppIfSuccessful)
-    {
-        goto Exit;
-    }
-
-    // Register object receive post action
-    ret = stream_registerAction(kStreamActionPost, pCcInitParam_p->occId_m,
-            cc_handleOccRxObjects, NULL);
-    if(ret != kAppIfSuccessful)
-    {
-        goto Exit;
-    }
-
-    // Create timeout instance for transmit channel
-    ccInstance_l.txChannel_m.pTimeoutInst_m = timeout_create(
-            CC_TX_TIMEOUT_CYCLE_COUNT);
-    if(ccInstance_l.txChannel_m.pTimeoutInst_m == NULL)
-    {
-        ret = kAppIfConfChanInitError;
-        goto Exit;
-    }
-
-    // Initialize the configuration channel module
-    ret = ccobject_init(pCcInitParam_p->pfnCritSec_p);
-    if(ret != kAppIfSuccessful)
-    {
-        goto Exit;
-    }
-
-    // Initialize the cc object internal list
-    ret = appif_initCcObjects();
-    if(ret != kAppIfSuccessful)
-    {
-        goto Exit;
-    }
-
-    // Fill local instance structure
-    ccInstance_l.txChannel_m.idIccTx_m = pCcInitParam_p->iccId_m;
-    ccInstance_l.rxChannel_m.idOccRx_m = pCcInitParam_p->occId_m;
-
-    // Set sequence number init value
-    ccInstance_l.txChannel_m.currTxSeqNr_m = kSeqNrValueFirst;
-
-Exit:
     return ret;
 }
 
@@ -293,49 +261,59 @@ tAppIfStatus cc_readObject(UINT16 objIdx_p, UINT8 objSubIdx_p,
 tAppIfStatus cc_writeObject(tConfChanObject* pObject_p)
 {
     tAppIfStatus ret = kAppIfSuccessful;
-    UINT8        fillBuffId;
 
-    if(pObject_p->objSize_m > sizeof(UINT64) ||
-       pObject_p->objSize_m == 0              )
+    if(pObject_p != NULL)
     {
-        ret = kAppIfConfChanInvalidSizeOfObj;
-        goto Exit;
+        if(pObject_p->objSize_m > sizeof(UINT64) ||
+           pObject_p->objSize_m == 0              )
+        {
+            ret = kAppIfConfChanInvalidSizeOfObj;
+        }
+    }
+    else
+    {
+        ret = kAppIfConfChanInvalidParameter;
     }
 
-    // Get buffer id for filling buffer
-    fillBuffId = ccInstance_l.txChannel_m.currTxBuffer_m ^ 1;
-
-    // Check if buffer is free for filling
-    if(ccInstance_l.txChannel_m.ccTxBuffer_m[fillBuffId].isLocked_m != FALSE)
+    if(ret == kAppIfSuccessful)
     {
-        ret = kAppIfConfChanChannelBusy;
-        goto Exit;
+        // Check if buffer is free for filling
+        if(ccInstance_l.txChannel_m.iccTxBuffer_m.isLocked_m == FALSE)
+        {
+            // Write object data to local object list
+            ret = ccobject_writeObject(pObject_p);
+            if(ret == kAppIfSuccessful)
+            {
+                // Fill transmit buffer
+                APPIF_MEMCPY(&ccInstance_l.txChannel_m.iccTxBuffer_m.pIccTxPayl_m->objPayloadLow_m,
+                        &pObject_p->objPayloadLow_m, pObject_p->objSize_m);
+
+                // Set object index and subindex
+                AmiSetWordToLe((UINT8*)&ccInstance_l.txChannel_m.iccTxBuffer_m.pIccTxPayl_m->objIdx_m,
+                        pObject_p->objIdx_m);
+                AmiSetByteToLe((UINT8*)&ccInstance_l.txChannel_m.iccTxBuffer_m.pIccTxPayl_m->objSubIdx_m,
+                        pObject_p->objSubIdx_m);
+
+                // Set sequence number in tx buffer
+                AmiSetByteToLe((UINT8*)&ccInstance_l.txChannel_m.iccTxBuffer_m.pIccTxPayl_m->seqNr_m,
+                        ccInstance_l.txChannel_m.currTxSeqNr_m);
+
+                // Lock buffer for transmission
+                ccInstance_l.txChannel_m.iccTxBuffer_m.isLocked_m = TRUE;
+
+                // Enable transmit timer
+                timeout_startTimer(ccInstance_l.txChannel_m.pTimeoutInst_m);
+
+                // Acknowledge producing transmit buffer
+                stream_ackBuffer(ccInstance_l.txChannel_m.idIccTx_m);
+            }
+        }
+        else
+        {
+            ret = kAppIfConfChanChannelBusy;
+        }
     }
 
-    // Write object data to local object list
-    ret = ccobject_writeObject(pObject_p);
-    if(ret != kAppIfSuccessful)
-    {
-        goto Exit;
-    }
-
-    // Fill transmit buffer
-    APPIF_MEMCPY(&ccInstance_l.txChannel_m.ccTxBuffer_m[fillBuffId].ccTxPayl_m.objPayloadLow_m,
-            &pObject_p->objPayloadLow_m, pObject_p->objSize_m);
-
-    // Set object index and subindex
-    AmiSetWordToLe((UINT8*)&ccInstance_l.txChannel_m.ccTxBuffer_m[fillBuffId].ccTxPayl_m.objIdx_m,
-            pObject_p->objIdx_m);
-    AmiSetByteToLe((UINT8*)&ccInstance_l.txChannel_m.ccTxBuffer_m[fillBuffId].ccTxPayl_m.objSubIdx_m,
-            pObject_p->objSubIdx_m);
-
-    // Lock buffer for transmission
-    ccInstance_l.txChannel_m.ccTxBuffer_m[fillBuffId].isLocked_m = TRUE;
-
-    // Enable transmit timer
-    timeout_startTimer(ccInstance_l.txChannel_m.pTimeoutInst_m);
-
-Exit:
     return ret;
 }
 
@@ -356,12 +334,7 @@ tAppIfStatus cc_process(void)
 
     // Process transmit channel objects
     ret = cc_processTxObject();
-    if(ret != kAppIfSuccessful)
-    {
-        goto Exit;
-    }
 
-Exit:
     return ret;
 }
 
@@ -381,7 +354,6 @@ PCP.
 
 \return tAppIfStatus
 \retval kAppIfSuccessful                On success
-\retval kAppIfStreamInvalidBuffer       Update of the local buffer list failed
 
 \ingroup module_cc
 */
@@ -389,65 +361,129 @@ PCP.
 static tAppIfStatus cc_processTxObject(void)
 {
     tAppIfStatus ret = kAppIfSuccessful;
-    UINT8 currTxBuff;
-    UINT8 nextTxBuff;
 
-    // Check if timeout counter is expired
-    ret = timeout_checkExpire(ccInstance_l.txChannel_m.pTimeoutInst_m);
-    if(ret == kAppIfTimeoutOccured)
+    if(ccInstance_l.txChannel_m.iccTxBuffer_m.isLocked_m != FALSE)
     {
-        // Timeout occurred -> Increment local sequence number!
-        cc_changeLocalSeqNr(&ccInstance_l.txChannel_m.currTxSeqNr_m);
-    }
-
-    // Check if channel is ready for transmission
-    ret = cc_checkIccStatus();
-    if(ret == kAppIfConfChanChannelBusy)
-    {
-        ret = kAppIfSuccessful;
-        goto Exit;
-    }
-
-    // When timer is running and ACK occurred -> Stop timer instance!
-    if(timeout_isRunning(ccInstance_l.txChannel_m.pTimeoutInst_m))
-    {
-        timeout_stopTimer(ccInstance_l.txChannel_m.pTimeoutInst_m);
-    }
-
-    // Select next transmit buffer
-    currTxBuff = ccInstance_l.txChannel_m.currTxBuffer_m;
-    nextTxBuff = currTxBuff ^ 1;
-
-    // Switch to next buffer if there is something new to transmit
-    if(ccInstance_l.txChannel_m.ccTxBuffer_m[nextTxBuff].isLocked_m != FALSE   )
-    {
-        // Unlock current buffer
-        ccInstance_l.txChannel_m.ccTxBuffer_m[currTxBuff].isLocked_m = FALSE;
-
-        // Increment local sequence number
-        cc_changeLocalSeqNr(&ccInstance_l.txChannel_m.currTxSeqNr_m);
-
-        // Set sequence number in next tx buffer
-        AmiSetByteToLe((UINT8*)&ccInstance_l.txChannel_m.ccTxBuffer_m[nextTxBuff].ccTxPayl_m.seqNr_m,
-                ccInstance_l.txChannel_m.currTxSeqNr_m);
-
-        // Next buffer is filled and can be transmitted
-        ret = stream_updateBufferBase(ccInstance_l.txChannel_m.idIccTx_m,
-                (UINT8 *)&ccInstance_l.txChannel_m.ccTxBuffer_m[nextTxBuff].ccTxPayl_m);
-        if(ret != kAppIfSuccessful)
+        // Check if channel is ready for transmission
+        ret = cc_checkIccStatus();
+        if(ret == kAppIfSuccessful)
         {
-            goto Exit;
-        }
+            // Ongoing message is acknowledged
+            ccInstance_l.txChannel_m.iccTxBuffer_m.isLocked_m = FALSE;
 
-        // Set next buffer to current buffer
-        ccInstance_l.txChannel_m.currTxBuffer_m = nextTxBuff;
+            // Increment local sequence number
+            cc_changeLocalSeqNr(&ccInstance_l.txChannel_m.currTxSeqNr_m);
+
+            // When timer is running and ACK occurred -> Stop timer instance!
+            if(timeout_isRunning(ccInstance_l.txChannel_m.pTimeoutInst_m))
+            {
+                timeout_stopTimer(ccInstance_l.txChannel_m.pTimeoutInst_m);
+            }
+        }
+        else if(ret == kAppIfConfChanChannelBusy)
+        {
+            // Check if timeout counter is expired
+            ret = timeout_checkExpire(ccInstance_l.txChannel_m.pTimeoutInst_m);
+            if(ret == kAppIfTimeoutOccured)
+            {
+                // Timeout occurred -> Increment local sequence number!
+                cc_changeLocalSeqNr(&ccInstance_l.txChannel_m.currTxSeqNr_m);
+
+                // Unlock channel anyway!
+                ccInstance_l.txChannel_m.iccTxBuffer_m.isLocked_m = FALSE;
+            }
+
+            ret = kAppIfSuccessful;
+        }
     }
 
-    // Acknowledge producing transmit buffer
-    stream_ackBuffer(ccInstance_l.txChannel_m.idIccTx_m);
+    return ret;
+}
 
+//------------------------------------------------------------------------------
+/**
+\brief    Initialize the Icc transmit buffer
 
-Exit:
+\param[in] iccId_p               Id of the Icc transmit buffer
+
+\return tAppIfStatus
+\retval kAppIfSuccessful               On success
+\retval kAppIfConfChanInitError        Unable to initialize timeout module
+\retval kAppIfStreamInvalidBuffer      Invalid buffer! Can't register
+\retval kAppIfAsyncBufferSizeMismatch  Size of the buffer is invalid
+
+\ingroup module_cc
+*/
+//------------------------------------------------------------------------------
+static tAppIfStatus cc_initIccTxBuffer(tTbufNumLayout iccId_p)
+{
+    tAppIfStatus ret = kAppIfSuccessful;
+    tBuffDescriptor* pDescIccRcv;
+
+    ret = stream_getBufferParam(iccId_p, &pDescIccRcv);
+    if(ret == kAppIfSuccessful)
+    {
+        if(pDescIccRcv->buffSize_m == sizeof(tTbufCcStructure))
+        {
+            // Remember buffer address for later usage
+            ccInstance_l.txChannel_m.iccTxBuffer_m.pIccTxPayl_m =
+                    (tTbufCcStructure *)pDescIccRcv->pBuffBase_m;
+
+            // Create timeout instance for transmit channel
+            ccInstance_l.txChannel_m.pTimeoutInst_m = timeout_create(
+                    CC_TX_TIMEOUT_CYCLE_COUNT);
+            if(ccInstance_l.txChannel_m.pTimeoutInst_m == NULL)
+            {
+                ret = kAppIfConfChanInitError;
+            }
+        }
+        else
+        {
+            ret = kAppIfConfChanBufferSizeMismatch;
+        }
+    }
+
+    return ret;
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief    Initialize the Occ receive buffer
+
+\param[in] occId_p               Id of the Icc receive buffer
+
+\return tAppIfStatus
+\retval kAppIfSuccessful               On success
+\retval kAppIfStreamInvalidBuffer      Invalid buffer! Can't register
+\retval kAppIfAsyncBufferSizeMismatch  Size of the buffer is invalid
+
+\ingroup module_cc
+*/
+//------------------------------------------------------------------------------
+static tAppIfStatus cc_initOccRxBuffer(tTbufNumLayout occId_p)
+{
+    tAppIfStatus ret = kAppIfSuccessful;
+    tBuffDescriptor* pDescOccTrans;
+
+    ret = stream_getBufferParam(occId_p, &pDescOccTrans);
+    if(ret == kAppIfSuccessful)
+    {
+        if(pDescOccTrans->buffSize_m == sizeof(tTbufCcStructure))
+        {
+            // Remember buffer address for later usage
+            ccInstance_l.rxChannel_m.pOccLayout_m =
+                    (tTbufCcStructure *)pDescOccTrans->pBuffBase_m;
+
+            // Register object receive post action
+            ret = stream_registerAction(kStreamActionPost, occId_p,
+                    cc_handleOccRxObjects, NULL);
+        }
+        else
+        {
+            ret = kAppIfConfChanBufferSizeMismatch;
+        }
+    }
+
     return ret;
 }
 
@@ -462,7 +498,7 @@ Exit:
 \ingroup module_cc
 */
 //------------------------------------------------------------------------------
-static tAppIfStatus appif_initCcObjects(void)
+static tAppIfStatus cc_initCcObjects(void)
 {
     tAppIfStatus     ret = kAppIfSuccessful;
     tConfChanObject  object;
@@ -570,27 +606,29 @@ static tAppIfStatus cc_handleOccRxObjects(UINT8* pBuffer_p, UINT16 bufSize_p,
     if(bufSize_p != sizeof(tTbufCcStructure))
     {
         ret = kAppIfConfChanBufferSizeMismatch;
-        goto Exit;
     }
 #endif
 
-    // Increment transmit timer cycle count
-    timeout_incrementCounter(ccInstance_l.txChannel_m.pTimeoutInst_m);
-
-    // Forward receive objects to local list
-    ret = ccobject_writeCurrObject(pOccBuff->objIdx_m, pOccBuff->objSubIdx_m,
-            (UINT8*)&pOccBuff->objPayloadLow_m);
-    if(ret == kAppIfConfChanObjListOutOfSync)
+    if(ret == kAppIfSuccessful)
     {
-        // Don't update object and wait for sync again
-        ret = kAppIfSuccessful;
-        goto Exit;
+        // Increment transmit timer cycle count
+        timeout_incrementCounter(ccInstance_l.txChannel_m.pTimeoutInst_m);
+
+        // Forward receive objects to local list
+        ret = ccobject_writeCurrObject(pOccBuff->objIdx_m, pOccBuff->objSubIdx_m,
+                (UINT8*)&pOccBuff->objPayloadLow_m);
+        if(ret == kAppIfConfChanObjListOutOfSync)
+        {
+            // Don't update object and wait for sync again
+            ret = kAppIfSuccessful;
+        }
+        else if(ret == kAppIfSuccessful)
+        {
+            // Increment local object write pointer
+            ccobject_incObjWritePointer();
+        }
     }
 
-    // Increment local object write pointer
-    ccobject_incObjWritePointer();
-
-Exit:
     return ret;
 }
 

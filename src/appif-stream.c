@@ -49,8 +49,6 @@ handler. It enables to insert pre- and post actions before and after transfer.
 
 #include "appif-streamint.h"
 
-#include <appif-tbuflayout.h>
-
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
 //============================================================================//
@@ -83,37 +81,22 @@ handler. It enables to insert pre- and post actions before and after transfer.
 //------------------------------------------------------------------------------
 
 /**
- * \brief Descriptor element of descriptor list
- */
-typedef struct {
-    UINT8*     pBuffBase_m;    ///< Base address of the buffer
-    UINT16     buffSize_m;     ///< Size of the buffer
-} tBuffDescriptor;
-
-/**
  * \brief Element of buffer action list
  */
 typedef struct {
-    UINT8        buffId_m;          ///< Id of the buffer
-    tBuffAction  pfnBuffAction_m;   ///< Action to trigger
-    void *       pUserArg_m;        ///< User argument of the action
+    tTbufNumLayout  buffId_m;          ///< Id of the buffer
+    tBuffAction     pfnBuffAction_m;   ///< Action to trigger
+    void *          pUserArg_m;        ///< User argument of the action
 } tBuffActionElem;
 
 /**
  * \brief Instance of the stream module
  */
 typedef struct {
-    UINT8            countConsBuff_m;                       ///< Count of consuming buffers
-    UINT8            countProdBuff_m;                       ///< Count of producing buffers
-
     tBuffDescriptor  buffDescList_m[kTbufCount];            ///< List of buffer descriptors
-    tBuffSegDesc     buffSegDescList_m[kTbufCount + 1];     ///< List of segment buffer descriptors (with init descriptor)
-    UINT8            countSegDesc_m;                        ///< Count of segmented descriptors in list
-    UINT8            dummyBuffer_m[4];                      ///< Dummy buffer of descriptor list
 
     tHandlerParam    handlParam_m;                          ///< Parameters of the stream handler
     tStreamHandler   pfnStreamHandler_m;                    ///< Stream filling handler
-    tAppIfCritSec    pfnEnterCritSec_m;                     ///< Pointer to critical section entry function
 
     tBuffActionElem  buffPreActList_m[kTbufCount];          ///< List of buffer pre filling actions
     tBuffActionElem  buffPostActList_m[kTbufCount];         ///< List of buffer post filling actions
@@ -131,9 +114,7 @@ static tStreamInstance streamInstance_l;
 // local function prototypes
 //------------------------------------------------------------------------------
 static tAppIfStatus stream_callActions(tActionType actType_p);
-static void stream_genSegmDescList(tBuffDescriptor* pBuffDescList_p,
-        tBuffSegDesc* pBuffSegDescList_p, UINT8* countDescSeg_p,
-        UINT8 firstConsId_p, UINT8 firstProdId_p);
+static UINT16 stream_calcImageSize(tTbufNumLayout firstId_p, tTbufNumLayout lastId_p);
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
@@ -147,6 +128,7 @@ static void stream_genSegmDescList(tBuffDescriptor* pBuffDescList_p,
 
 \return tAppIfStatus
 \retval kAppIfSuccessful          On success
+\retval kAppIfStreamInitError     Error while initializing the stream module
 
 \ingroup module_stream
 */
@@ -154,66 +136,46 @@ static void stream_genSegmDescList(tBuffDescriptor* pBuffDescList_p,
 tAppIfStatus stream_init(tStreamInitParam* pInitParam_p)
 {
     tAppIfStatus ret = kAppIfSuccessful;
-
     APPIF_MEMSET(&streamInstance_l, 0, sizeof(tStreamInstance));
 
-    if(pInitParam_p->pBuffDescList_m != NULL )
+#if _DEBUG
+    if(pInitParam_p != NULL)
+    {
+        if(pInitParam_p->pBuffDescList_m == NULL    ||
+           pInitParam_p->pfnStreamHandler_m == NULL  )
+        {
+            ret = kAppIfStreamInitError;
+        }
+    }
+    else
     {
         ret = kAppIfStreamInitError;
-        goto Exit;
     }
 
-    if(pInitParam_p->pfnStreamHandler_m == NULL ||
-       pInitParam_p->pfnEnterCritSec_m == NULL   )
+#endif
+
+    if(ret == kAppIfSuccessful)
     {
-        ret = kAppIfStreamInitError;
-        goto Exit;
+        // Save the descriptor list internally
+        APPIF_MEMCPY(&streamInstance_l.buffDescList_m,
+                pInitParam_p->pBuffDescList_m,
+                sizeof(streamInstance_l.buffDescList_m));
+
+        // Remember handler of input output stream
+        streamInstance_l.pfnStreamHandler_m = pInitParam_p->pfnStreamHandler_m;
+
+        // Set consuming buffer handler parameter descriptor to first consuming buffer
+        streamInstance_l.handlParam_m.consDesc_m.pBuffBase_m =
+                streamInstance_l.buffDescList_m[pInitParam_p->idConsAck_m].pBuffBase_m;
+        streamInstance_l.handlParam_m.consDesc_m.buffSize_m =
+                stream_calcImageSize(pInitParam_p->idConsAck_m, pInitParam_p->idFirstProdBuffer_m);
+
+        // Set producing buffer handler parameter descriptor to first producing buffer
+        streamInstance_l.handlParam_m.prodDesc_m.pBuffBase_m =
+                streamInstance_l.buffDescList_m[pInitParam_p->idFirstProdBuffer_m].pBuffBase_m;
+        streamInstance_l.handlParam_m.prodDesc_m.buffSize_m =
+                stream_calcImageSize(pInitParam_p->idFirstProdBuffer_m, kTbufCount);
     }
-
-    // Remember handler of input output stream
-    streamInstance_l.pfnStreamHandler_m = pInitParam_p->pfnStreamHandler_m;
-
-    // Remember handler of critical section
-    streamInstance_l.pfnEnterCritSec_m = pInitParam_p->pfnEnterCritSec_m;
-
-    // Save count of producing and consuming buffers
-    streamInstance_l.countConsBuff_m = pInitParam_p->countConsBuff_m;
-    streamInstance_l.countProdBuff_m = pInitParam_p->countProdBuff_m;
-
-Exit:
-    return ret;
-}
-
-//------------------------------------------------------------------------------
-/**
-\brief    Finish the initialization of the modules
-
-\return kAppIfSuccessful
-
-\ingroup module_stream
-*/
-//------------------------------------------------------------------------------
-tAppIfStatus stream_finishModuleInit(void)
-{
-    tAppIfStatus ret = kAppIfSuccessful;
-    // Count of consuming buffers with the ACK register
-    UINT8        countConsAck = streamInstance_l.countConsBuff_m + 1;
-
-    // Initialize dummy descriptor for SPI slave initialization
-    streamInstance_l.buffSegDescList_m[0].pBuffTxBase_m = (UINT8 *)&streamInstance_l.dummyBuffer_m;
-    streamInstance_l.buffSegDescList_m[0].pBuffRxBase_m = NULL;
-    streamInstance_l.buffSegDescList_m[0].transSize_m = sizeof(streamInstance_l.dummyBuffer_m);
-
-    streamInstance_l.countSegDesc_m++;
-
-    // Generate segmented descriptor list
-    stream_genSegmDescList(&streamInstance_l.buffDescList_m[0],
-            &streamInstance_l.buffSegDescList_m[1], &streamInstance_l.countSegDesc_m,
-            0, countConsAck);
-
-    // Initialize stream handler parameter
-    streamInstance_l.handlParam_m.pFirstSegDesc_m = &streamInstance_l.buffSegDescList_m[0];
-    streamInstance_l.handlParam_m.segDescCount_m = streamInstance_l.countSegDesc_m;
 
     return ret;
 }
@@ -232,41 +194,32 @@ void stream_exit(void)
 
 //------------------------------------------------------------------------------
 /**
-\brief   Register a new buffer to the stream module
+\brief   Get buffer parameters for id of buffer
 
-\param[in]  pBuffParam_p        Parameters of the buffer to register
+\param[in]  buffId_p            Id of buffer
+\param[out] ppBuffParam_p       Requested buffer parameters
 
 \return tAppIfStatus
 \retval kAppIfSuccessful            On success
-\retval kAppIfStreamInvalidBuffer   Invalid buffer! Can't register
+\retval kAppIfStreamInvalidBuffer   Unable to find buffer in list
 
 \ingroup module_stream
 */
 //------------------------------------------------------------------------------
-tAppIfStatus stream_registerBuffer(tBuffParam* pBuffParam_p )
+tAppIfStatus stream_getBufferParam(tTbufNumLayout buffId_p,
+        tBuffDescriptor** ppBuffParam_p)
 {
     tAppIfStatus ret = kAppIfSuccessful;
-    tBuffDescriptor* buffer;
 
-    if(pBuffParam_p->buffId_m >= kTbufCount)
+    if(buffId_p >= kTbufCount)
     {
         ret = kAppIfStreamInvalidBuffer;
-        goto Exit;
     }
-
-    if(pBuffParam_p->pBuffBase_m == NULL ||
-       pBuffParam_p->buffSize_m == 0      )
+    else
     {
-        ret = kAppIfStreamInvalidBuffer;
-        goto Exit;
+        *ppBuffParam_p = &streamInstance_l.buffDescList_m[buffId_p];
     }
 
-    buffer = &streamInstance_l.buffDescList_m[pBuffParam_p->buffId_m];
-
-    buffer->pBuffBase_m = pBuffParam_p->pBuffBase_m;
-    buffer->buffSize_m = pBuffParam_p->buffSize_m;
-
-Exit:
     return ret;
 }
 
@@ -294,103 +247,68 @@ tAppIfStatus stream_registerAction(tActionType actType_p, UINT8 buffId_p,
     UINT8  i;
     tBuffActionElem* buffActElem;
 
-    if(pfnBuffAct_p == NULL)
+    if(pfnBuffAct_p != NULL)
+    {
+        switch(actType_p)
+        {
+            case kStreamActionPre:
+            {
+                buffActElem = &streamInstance_l.buffPreActList_m[0];
+                break;
+            }
+            case kStreamActionPost:
+            {
+                buffActElem = &streamInstance_l.buffPostActList_m[0];
+                break;
+            }
+            default:
+            {
+                ret = kAppIfStreamInvalidParameter;
+            }
+        }
+    }
+    else
     {
         ret = kAppIfStreamInvalidParameter;
-        goto Exit;
     }
 
-    switch(actType_p)
+    if(ret == kAppIfSuccessful)
     {
-        case kStreamActionPre:
+        for(i=0; i < kTbufCount; i++, buffActElem++)
         {
-            buffActElem = &streamInstance_l.buffPreActList_m[0];
-            break;
-        }
-        case kStreamActionPost:
-        {
-            buffActElem = &streamInstance_l.buffPostActList_m[0];
-            break;
-        }
-        default:
-        {
-            ret = kAppIfStreamInvalidParameter;
-            goto Exit;
-        }
-    }
+            if(buffActElem->pfnBuffAction_m == NULL)
+            {
+                // Free element found -> Insert action
+                buffActElem->buffId_m = buffId_p;
+                buffActElem->pfnBuffAction_m = pfnBuffAct_p;
+                buffActElem->pUserArg_m = pUserArg_p;
 
-    for(i=0; i < kTbufCount; i++, buffActElem++)
-    {
-        if(buffActElem->pfnBuffAction_m == NULL)
-        {
-            // Free element found -> Insert action
-            buffActElem->buffId_m = buffId_p;
-            buffActElem->pfnBuffAction_m = pfnBuffAct_p;
-            buffActElem->pUserArg_m = pUserArg_p;
+                fFreeFound = TRUE;
+                break;
+            }
+        }
 
-            fFreeFound = TRUE;
-            break;
+        if(fFreeFound == FALSE)
+        {
+            ret = kAppIfStreamNoFreeElementFound;
         }
     }
 
-    if(fFreeFound == FALSE)
-    {
-        ret = kAppIfStreamNoFreeElementFound;
-    }
-
-Exit:
     return ret;
-}
-
-
-void stream_registerSyncCb(tBuffSyncCb pfnSyncCb_p)
-{
-    streamInstance_l.pfnSyncCb_m = pfnSyncCb_p;
 }
 
 //------------------------------------------------------------------------------
 /**
-\brief   Update a buffer address in the stream module
+\brief   Register synchronous callback function
 
-\param[in]  buffId_p            Id of the buffer to register
-\param[in]  pBuffBase_p         New base address of the buffer to register
-
-\return tAppIfStatus
-\retval kAppIfSuccessful            On success
-\retval kAppIfStreamInvalidBuffer   Invalid buffer! Can't register
+\param[in]  pfnSyncCb_p     Pointer to synchronous callback function
 
 \ingroup module_stream
 */
 //------------------------------------------------------------------------------
-tAppIfStatus stream_updateBufferBase(UINT8 buffId_p, UINT8* pBuffBase_p)
+void stream_registerSyncCb(tBuffSyncCb pfnSyncCb_p)
 {
-    tAppIfStatus ret = kAppIfSuccessful;
-    UINT8        countConsAck = streamInstance_l.countConsBuff_m + 1;
-
-    if(buffId_p >= kTbufCount)
-    {
-        ret = kAppIfStreamInvalidBuffer;
-        goto Exit;
-    }
-
-    if(pBuffBase_p == NULL)
-    {
-        ret = kAppIfStreamInvalidBuffer;
-        goto Exit;
-    }
-
-    streamInstance_l.buffDescList_m[buffId_p].pBuffBase_m = pBuffBase_p;
-
-    // Reset segmented descriptor count
-    streamInstance_l.countSegDesc_m = 1;
-
-    // Update segmented descriptor list because of new buffer base
-    stream_genSegmDescList(&streamInstance_l.buffDescList_m[0],
-            &streamInstance_l.buffSegDescList_m[1], &streamInstance_l.countSegDesc_m,
-            0, countConsAck);
-
-Exit:
-    return ret;
+    streamInstance_l.pfnSyncCb_m = pfnSyncCb_p;
 }
 
 //------------------------------------------------------------------------------
@@ -413,37 +331,31 @@ tAppIfStatus stream_processSync(void)
 
     // Call all pre filling actions
     ret = stream_callActions(kStreamActionPre);
-    if(ret != kAppIfSuccessful)
+    if(ret == kAppIfSuccessful)
     {
-        goto Exit;
-    }
-
-    // Call sync callback function
-    if(streamInstance_l.pfnSyncCb_m != NULL)
-    {
-        ret = streamInstance_l.pfnSyncCb_m();
-        if(ret != kAppIfSuccessful)
+        // Call sync callback function
+        if(streamInstance_l.pfnSyncCb_m != NULL)
         {
-            goto Exit;
+            ret = streamInstance_l.pfnSyncCb_m();
         }
+
+        if(ret == kAppIfSuccessful)
+        {
+            // Transfer stream input/output data
+            ret = streamInstance_l.pfnStreamHandler_m(&streamInstance_l.handlParam_m);
+            if(ret == kAppIfSuccessful)
+            {
+                // Call all post filling actions
+                ret = stream_callActions(kStreamActionPost);
+            }
+            else
+            {
+                ret = kAppIfStreamTransferError;
+            }
+        }
+
     }
 
-    // Transfer stream input/output data
-    ret = streamInstance_l.pfnStreamHandler_m(&streamInstance_l.handlParam_m);
-    if(ret != kAppIfSuccessful)
-    {
-        ret = kAppIfStreamTransferError;
-        goto Exit;
-    }
-
-    // Call all post filling actions
-    ret = stream_callActions(kStreamActionPost);
-    if(ret != kAppIfSuccessful)
-    {
-        goto Exit;
-    }
-
-Exit:
     return ret;
 }
 
@@ -502,144 +414,64 @@ static tAppIfStatus stream_callActions(tActionType actType_p)
         default:
         {
             ret = kAppIfStreamInvalidParameter;
-            goto Exit;
         }
     }
 
-    // Call buffer action for each buffer
-    for(i=0; i < kTbufCount; i++, buffActElem++)
+    if(ret == kAppIfSuccessful)
     {
-        if(buffActElem->pfnBuffAction_m != NULL)
+        // Call buffer action for each buffer
+        for(i=0; i < kTbufCount; i++, buffActElem++)
         {
-            // Get buffer element by Id
-            bufferElem = &streamInstance_l.buffDescList_m[buffActElem->buffId_m];
-
-            ret = buffActElem->pfnBuffAction_m(bufferElem->pBuffBase_m,
-                                              bufferElem->buffSize_m,
-                                              buffActElem->pUserArg_m);
-            if(ret != kAppIfSuccessful)
+            if(buffActElem->pfnBuffAction_m != NULL)
             {
-                // Error happened.. return!
+                // Get buffer element by Id
+                bufferElem = &streamInstance_l.buffDescList_m[buffActElem->buffId_m];
+
+                ret = buffActElem->pfnBuffAction_m(bufferElem->pBuffBase_m,
+                                                  bufferElem->buffSize_m,
+                                                  buffActElem->pUserArg_m);
+                if(ret != kAppIfSuccessful)
+                {
+                    // Error happened.. return!
+                    break;
+                }
+            }
+            else
+            {
+                // All actions carried out! return!
                 break;
             }
-        }
-        else
-        {
-            // All actions carried out! return!
-            break;
-        }
 
+        }
     }
 
-Exit:
     return ret;
 }
 
 //------------------------------------------------------------------------------
 /**
-\brief   Generate segmented descriptor list
+\brief   Calculate size of transfer image
 
-Splits the buffers into small segments which can be transfered via SPI
-in full duplex mode.
+\param[in] firstId_p               First descriptor id of the image
+\param[in] lastId_p                Last descriptor id of the image
 
-\param[in] pBuffDescList_p              List of unsegmented descriptors
-\param[out] pBuffSegDescList_p          List of segmented descriptors
-\param[out] pCountDescSeg_p             Count of segmented descriptors
-\param[in] firstConsId_p                Id of the first consuming buffer
-\param[in] firstProdId_p                Id of the first producing buffer
+\return UINT16
+\retval Size            Size of the transfer image
 
 \ingroup module_stream
 */
 //------------------------------------------------------------------------------
-static void stream_genSegmDescList(tBuffDescriptor* pBuffDescList_p,
-        tBuffSegDesc* pBuffSegDescList_p, UINT8* pCountDescSeg_p,
-        UINT8 firstConsId_p, UINT8 firstProdId_p)
+static UINT16 stream_calcImageSize(tTbufNumLayout firstId_p, tTbufNumLayout lastId_p)
 {
-    tBuffDescriptor  emptyDesc;
-    tBuffDescriptor* pCurrConsDesc;
-    tBuffDescriptor* pCurrProdDesc;
-    UINT8   consCurrId = firstConsId_p;
-    UINT8   prodCurrId = firstProdId_p;
-    UINT8*  pCurrConsAddr;
-    UINT8*  pCurrProdAddr;
-    UINT16  prodTransfered = 0;
-    UINT16  consTransfered = 0;
-    UINT16  transfSize;
+    UINT8 i;
+    UINT16 imgSize = 0;
 
-    // Init empty descriptor
-    emptyDesc.pBuffBase_m = NULL;
-    emptyDesc.buffSize_m = 0xFFFF;
-
-    // Enter critical section
-    streamInstance_l.pfnEnterCritSec_m(FALSE);
-
-    // Loop over all buffer segments
-    while(consCurrId < firstProdId_p ||
-          prodCurrId < kTbufCount  )
+    for(i=firstId_p; i<lastId_p; i++)
     {
-        if(prodCurrId >= kTbufCount)
-            pCurrProdDesc = &emptyDesc;
-        else
-            pCurrProdDesc = pBuffDescList_p + prodCurrId;
+        imgSize += streamInstance_l.buffDescList_m[i].buffSize_m;
+    }
 
-        if(consCurrId >= firstProdId_p)
-            pCurrConsDesc = &emptyDesc;
-        else
-            pCurrConsDesc = pBuffDescList_p + consCurrId;
-
-        // Set address to read and write pointers
-        pCurrProdAddr = pCurrProdDesc->pBuffBase_m + prodTransfered;
-        pCurrConsAddr = pCurrConsDesc->pBuffBase_m + consTransfered;
-
-        // Get transfer size
-        if( (pCurrProdDesc->buffSize_m - prodTransfered) >
-            (pCurrConsDesc->buffSize_m - consTransfered) )
-        {
-            transfSize = pCurrConsDesc->buffSize_m - consTransfered;
-        }
-        else
-        {
-            transfSize = pCurrProdDesc->buffSize_m - prodTransfered;
-        }
-
-        // Set result to segment descriptor list
-        pBuffSegDescList_p->pBuffRxBase_m = pCurrConsAddr;
-        pBuffSegDescList_p->pBuffTxBase_m = pCurrProdAddr;
-        pBuffSegDescList_p->transSize_m = transfSize;
-
-        // Forward to next element
-        pBuffSegDescList_p++;
-        (*pCountDescSeg_p)++;
-
-        // Forward id and size to next segment
-        if( (pCurrProdDesc->buffSize_m - prodTransfered) >
-            (pCurrConsDesc->buffSize_m - consTransfered) )
-        {
-            // Producing buffer is bigger -> Jump to next consuming buffer!
-            prodTransfered += transfSize;
-            consTransfered = 0;
-            consCurrId++;
-        }
-        else if ((pCurrProdDesc->buffSize_m - prodTransfered) <
-                (pCurrConsDesc->buffSize_m - consTransfered) )
-        {
-            // Consuming buffer is bigger -> Jump to next producing buffer!
-            consTransfered += transfSize;
-            prodTransfered = 0;
-            prodCurrId++;
-        }
-        else
-        {
-            // Both buffers have same size -> jump to next segment
-            prodTransfered = 0;
-            prodCurrId++;
-            consTransfered = 0;
-            consCurrId++;
-        }
-    }   // end of while
-
-    // Leave critical section
-    streamInstance_l.pfnEnterCritSec_m(TRUE);
+    return imgSize;
 }
 
 /// \}

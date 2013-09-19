@@ -52,37 +52,35 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // const defines
 //------------------------------------------------------------------------------
 
-#define ASYNC_TX_BUFFER_COUNT       2       ///< Number of asynchronous transmit buffers
-
 //------------------------------------------------------------------------------
 // typedef
 //------------------------------------------------------------------------------
 
 typedef struct {
     UINT8                   isLocked_m;        ///< Is buffer free for filling
-    tTbufAsyncTxStructure   asyncTxPayl_m;     ///< Local transmit buffers copy
+    tTbufAsyncTxStructure*  pAsyncTxPayl_m;    ///< Pointer to transmit buffer
 } tTbufAsyncTxBuffer;
 
 /**
  * \brief Parameter type of the transmit buffer
  */
 typedef struct {
-    UINT8                 idTxBuff_m;                               ///< Id of the transmit buffer
-    tTbufAsyncTxBuffer    asyncTxBuffer_m[ASYNC_TX_BUFFER_COUNT];   ///< Asynchronous transmit buffer copy
-    tSeqNrValue           currTxSeqNr_m;                            ///< Current transmit sequence number
-    UINT8                 currTxBuffer_m;                           ///< Current active transmit buffer
-    tTimeoutInstance      pTimeoutInst_m;                           ///< Timer instance for asynchronous transmissions
+    tTbufNumLayout        idTxBuff_m;           ///< Id of the transmit buffer
+    tTbufAsyncTxBuffer    asyncTxBuffer_m;      ///< Asynchronous transmit buffer copy
+    tSeqNrValue           currTxSeqNr_m;        ///< Current transmit sequence number
+    UINT8                 currTxBuffer_m;       ///< Current active transmit buffer
+    tTimeoutInstance      pTimeoutInst_m;       ///< Timer instance for asynchronous transmissions
 } tAsyncTxChannel;
 
 /**
  * \brief Parameter type of the receive buffer
  */
 typedef struct {
-    UINT8                 idRxBuff_m;          ///< Id of the receive buffer
-    tAsyncRxHandler       pfnRxHandler_m;      ///< Async module receive handler
-    tTbufAsyncRxStructure asyncRxBuffer_m;     ///< Local receive buffer copy
-    tSeqNrValue           currRxSeqNr_m;       ///< Current receive sequence number
-    UINT8                 fRxFrameIncoming_m;  ///< Receive buffer incoming flag
+    tTbufNumLayout         idRxBuff_m;          ///< Id of the receive buffer
+    tAsyncRxHandler        pfnRxHandler_m;      ///< Async module receive handler
+    tTbufAsyncRxStructure* pAsyncRxBuffer_m;    ///< Pointer to receive buffer
+    tSeqNrValue            currRxSeqNr_m;       ///< Current receive sequence number
+    UINT8                  fRxFrameIncoming_m;  ///< Receive buffer incoming flag
 } tAsyncRxChannel;
 
 /**

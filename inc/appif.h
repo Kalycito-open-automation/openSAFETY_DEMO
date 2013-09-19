@@ -43,7 +43,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 
 #include <appif-apglobal.h>
-#include <appif-tbuflayout.h>
 
 #include <appif-stream.h>
 #include <appif-status.h>
@@ -66,11 +65,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * \brief Application interface initialization parameters
  */
 typedef struct {
-    tTbufDescriptor*    pBuffDescList_m;      ///< Triple buffer descriptor list
+    tBuffDescriptor*    pBuffDescList_m;      ///< Triple buffer descriptor list
     tStreamHandler      pfnStreamHandler_m;   ///< Stream handler callback function
-    tAppIfCritSec       pfnEnterCritSec_m;    ///< Pointer to critical section entry function
-    UINT8               countConsBuff_m;      ///< Number of consuming buffer
-    UINT8               countProdBuff_m;      ///< Number of producing buffer
+    tTbufNumLayout      idConsAck_m;          ///< Id of the consumer acknowledge register
+    tTbufNumLayout      idProdAck_m;          ///< Id of the producer acknowledge register
+    tTbufNumLayout      idFirstProdBuffer_m;  ///< Id of the first producing buffer
 } tAppIfInitParam;
 
 //------------------------------------------------------------------------------
@@ -79,7 +78,6 @@ typedef struct {
 tAppIfStatus appif_init(tAppIfInitParam* pInitParam_p);
 void appif_exit(void);
 
-tAppIfStatus appif_finishModuleInit(void);
 tAppIfStatus appif_processSync(void);
 tAppIfStatus appif_processAsync(tAsyncInstance* ppInstance_p);
 

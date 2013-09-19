@@ -58,7 +58,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // function prototypes
 //------------------------------------------------------------------------------
 
-tAppIfStatus async_init(void);
+void async_init(void);
 tAppIfStatus async_process(tAsyncInstance pInstance_p);
 
 #endif /* _INC_APPIF_ASYNCINT_H_ */

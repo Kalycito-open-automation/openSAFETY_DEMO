@@ -66,9 +66,9 @@ typedef tAppIfStatus (*tAsyncRxHandler) (UINT8* pPayload_p, UINT16 size_p);
  * \brief  Async module initialization structure
  */
 typedef struct {
-    UINT8                   buffIdTx_m;      ///< Id of the transmit buffer
+    tTbufNumLayout          buffIdTx_m;      ///< Id of the transmit buffer
 
-    UINT8                   buffIdRx_m;      ///< Id of the receive buffer
+    tTbufNumLayout          buffIdRx_m;      ///< Id of the receive buffer
     tAsyncRxHandler         pfnRxHandler_m;  ///< Async module receive handler
 } tAsyncInitParam;
 
@@ -78,7 +78,7 @@ typedef struct {
 //------------------------------------------------------------------------------
 tAsyncInstance async_create(tAsyncChanNum chanId_m, tAsyncInitParam* pInitParam_p);
 void async_destroy(tAsyncInstance  pInstance_p);
-tAppIfStatus async_sendFrame(tAsyncInstance pInstance_p, UINT8* pPayload_p,
+tAppIfStatus async_postPayload(tAsyncInstance pInstance_p, UINT8* pPayload_p,
         UINT16 paylSize_p);
 
 #endif /* _INC_APPIF_ASYNC_H_ */
