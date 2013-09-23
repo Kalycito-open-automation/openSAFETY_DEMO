@@ -209,6 +209,7 @@ tAppIfStatus appif_processSync(void)
 tAppIfStatus appif_processAsync(tAsyncInstance* ppInstance_p)
 {
     tAppIfStatus ret = kAppIfSuccessful;
+#if(((APPIF_MODULE_INTEGRATION) & (APPIF_MODULE_ASYNC)) != 0)
     UINT8 i;
 
     // Process all asynchronous channels
@@ -220,12 +221,15 @@ tAppIfStatus appif_processAsync(tAsyncInstance* ppInstance_p)
             break;
         }
     }
+#endif
 
+#if(((APPIF_MODULE_INTEGRATION) & (APPIF_MODULE_CC)) != 0)
     if(ret == kAppIfSuccessful)
     {
         // Process configuration channel objects
         ret = cc_process();
     }
+#endif
 
     return ret;
 }
@@ -255,8 +259,10 @@ static tAppIfStatus appif_initIntModules(tAppIfInitParam* pInitParam_p)
     tAppIfStatus ret = kAppIfSuccessful;
     tStreamInitParam streamInitParam;
 
+#if(((APPIF_MODULE_INTEGRATION) & (APPIF_MODULE_ASYNC)) != 0)
     // Initialize the asynchronous module
     async_init();
+#endif
 
     // Initialize stream module
     streamInitParam.pBuffDescList_m = pInitParam_p->pBuffDescList_m;
