@@ -109,13 +109,13 @@ static tStatusInstance          statusInstance_l;
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-static tAppIfStatus status_initOutBuffer(tTbufNumLayout statOutId_p);
-static tAppIfStatus status_initInBuffer(tTbufNumLayout statInId_p);
-static tAppIfStatus status_processSync(UINT8* pBuffer_p, UINT16 bufSize_p,
+static BOOL status_initOutBuffer(tTbufNumLayout statOutId_p);
+static BOOL status_initInBuffer(tTbufNumLayout statInId_p);
+static BOOL status_processSync(UINT8* pBuffer_p, UINT16 bufSize_p,
         void * pUserArg_p);
-static tAppIfStatus status_updateOutStatusReg(UINT8* pBuffer_p, UINT16 bufSize_p,
+static BOOL status_updateOutStatusReg(UINT8* pBuffer_p, UINT16 bufSize_p,
         void * pUserArg_p);
-static tAppIfStatus status_updateInStatusReg(UINT8* pBuffer_p, UINT16 bufSize_p,
+static BOOL status_updateInStatusReg(UINT8* pBuffer_p, UINT16 bufSize_p,
         void * pUserArg_p);
 
 //============================================================================//
@@ -128,52 +128,61 @@ static tAppIfStatus status_updateInStatusReg(UINT8* pBuffer_p, UINT16 bufSize_p,
 
 \param[in]  pInitParam_p     Initialization structure of the status module
 
-\return  tAppIfStatus
-\retval  kAppIfSuccessful          On success
-\retval  kAppIfStatusInitError     Unable to init the status module
+\return  BOOL
+\retval  TRUE      Successfully initialized the status module
+\retval  FALSE     Error during initialization
 
 \ingroup module_status
 */
 //------------------------------------------------------------------------------
-tAppIfStatus status_init(tStatusInitParam* pInitParam_p)
+BOOL status_init(tStatusInitParam* pInitParam_p)
 {
-    tAppIfStatus ret = kAppIfSuccessful;
+    BOOL fReturn = FALSE;
 
     APPIF_MEMSET(&statusInstance_l, 0 , sizeof(tStatusInstance));
 
-#ifdef _DEBUG
-    if(pInitParam_p != NULL)
+    if(pInitParam_p == NULL)
     {
-        if(pInitParam_p->pfnAppCbSync_m == NULL ||
-           pInitParam_p->buffOutId_m == 0        )
-        {
-            ret = kAppIfStatusInitError;
-        }
+        error_setError(kAppIfModuleStatus, kAppIfStatusInitError);
     }
     else
     {
-        ret = kAppIfStatusInitError;
-    }
-#endif
-
-    if(ret == kAppIfSuccessful)
-    {
-        // Remember id of the buffer
-        statusInstance_l.buffOutId_m = pInitParam_p->buffOutId_m;
-
-        // Remember synchronous callback function
-        statusInstance_l.pfnAppCbSync_m = pInitParam_p->pfnAppCbSync_m;
-
-        // Register status outgoing triple buffer
-        ret = status_initOutBuffer(pInitParam_p->buffOutId_m);
-        if(ret == kAppIfSuccessful)
+        if(pInitParam_p->pfnAppCbSync_m == NULL    ||
+           pInitParam_p->buffOutId_m >= kTbufCount ||
+           pInitParam_p->buffInId_m >= kTbufCount   )
         {
-            // Register status incoming triple buffer
-            ret = status_initInBuffer(pInitParam_p->buffInId_m);
+            error_setError(kAppIfModuleStatus, kAppIfStatusInitError);
+        }
+        else
+        {
+            // Register status outgoing triple buffer
+            if(status_initOutBuffer(pInitParam_p->buffOutId_m) != FALSE)
+            {
+                // Register status incoming triple buffer
+                if(status_initInBuffer(pInitParam_p->buffInId_m) != FALSE)
+                {
+                    // Remember id of the buffer
+                    statusInstance_l.buffOutId_m = pInitParam_p->buffOutId_m;
+
+                    // Remember synchronous callback function
+                    statusInstance_l.pfnAppCbSync_m = pInitParam_p->pfnAppCbSync_m;
+
+                    fReturn = TRUE;
+                }
+                else
+                {
+                    error_setError(kAppIfModuleStatus, kAppIfStatusInitError);
+                }
+            }
+            else
+            {
+                error_setError(kAppIfModuleStatus, kAppIfStatusInitError);
+            }
         }
     }
 
-    return ret;
+
+    return fReturn;
 }
 
 //------------------------------------------------------------------------------
@@ -269,21 +278,20 @@ void status_getAsyncTxChanFlag(UINT8 chanNum_p, tSeqNrValue* pSeqNr_p)
 
 \param[in] statOutId_p         Id of the buffer to initialize
 
-\return tAppIfStatus
-\retval kAppIfSuccessful             On success
-\retval kAppIfStreamInvalidBuffer    Invalid buffer! Can't register
-\retval kAppIfRpdoBufferSizeMismatch Invalid size of the buffer
+\return BOOL
+\retval TRUE        Successfully initialized the output buffer
+\retval FALSE       Unable to initialize the output buffer
 
 \ingroup module_status
 */
 //------------------------------------------------------------------------------
-static tAppIfStatus status_initOutBuffer( tTbufNumLayout statOutId_p)
+static BOOL status_initOutBuffer( tTbufNumLayout statOutId_p)
 {
-    tAppIfStatus ret = kAppIfSuccessful;
+    BOOL fReturn = FALSE;
     tBuffDescriptor* pDescStatOut;
 
-    ret = stream_getBufferParam(statOutId_p, &pDescStatOut);
-    if(ret == kAppIfSuccessful)
+    pDescStatOut = stream_getBufferParam(statOutId_p);
+    if(pDescStatOut != NULL)
     {
         if(pDescStatOut->buffSize_m == sizeof(tTbufStatusOutStructure))
         {
@@ -291,22 +299,28 @@ static tAppIfStatus status_initOutBuffer( tTbufNumLayout statOutId_p)
             statusInstance_l.pStatusOutLayout_m = (tTbufStatusOutStructure *)pDescStatOut->pBuffBase_m;
 
             // Register status module pre action for sync processing
-            ret = stream_registerAction(kStreamActionPre, statOutId_p,
-                    status_processSync, NULL);
-            if(ret == kAppIfSuccessful)
+            if(stream_registerAction(kStreamActionPre, statOutId_p,
+                    status_processSync, NULL) != FALSE)
             {
                 // Register outgoing status module post action for status register update
-                ret = stream_registerAction(kStreamActionPost, statOutId_p,
-                        status_updateOutStatusReg, NULL);
+                if(stream_registerAction(kStreamActionPost, statOutId_p,
+                        status_updateOutStatusReg, NULL) != FALSE)
+                {
+                    fReturn = TRUE;
+                }
             }
         }
         else
-        {
-            ret = kAppIfStatusBufferSizeMismatch;
+        {   // Invalid size of output buffer
+            error_setError(kAppIfModuleStatus, kAppIfStatusBufferSizeMismatch);
         }
     }
+    else
+    {   // Invalid base address of output buffer
+        error_setError(kAppIfModuleStatus, kAppIfStreamInvalidBuffer);
+    }
 
-    return ret;
+    return fReturn;
 }
 
 //------------------------------------------------------------------------------
@@ -315,21 +329,20 @@ static tAppIfStatus status_initOutBuffer( tTbufNumLayout statOutId_p)
 
 \param[in] statInId_p         Id of the buffer to initialize
 
-\return tAppIfStatus
-\retval kAppIfSuccessful             On success
-\retval kAppIfStreamInvalidBuffer    Invalid buffer! Can't register
-\retval kAppIfRpdoBufferSizeMismatch Invalid size of the buffer
+\return BOOL
+\retval TRUE        Successfully initialized the input buffer
+\retval FALSE       Unable to initialize the input buffer
 
 \ingroup module_status
 */
 //------------------------------------------------------------------------------
-static tAppIfStatus status_initInBuffer(tTbufNumLayout statInId_p)
+static BOOL status_initInBuffer(tTbufNumLayout statInId_p)
 {
-    tAppIfStatus ret = kAppIfSuccessful;
+    BOOL fReturn = FALSE;
     tBuffDescriptor* pDescStatIn;
 
-    ret = stream_getBufferParam(statInId_p, &pDescStatIn);
-    if(ret == kAppIfSuccessful)
+    pDescStatIn = stream_getBufferParam(statInId_p);
+    if(pDescStatIn != NULL)
     {
         if(pDescStatIn->buffSize_m == sizeof(tTbufStatusInStructure))
         {
@@ -337,17 +350,30 @@ static tAppIfStatus status_initInBuffer(tTbufNumLayout statInId_p)
             statusInstance_l.pStatusInLayout_m = (tTbufStatusInStructure *)pDescStatIn->pBuffBase_m;
 
             // Register incoming status module post action for status register update
-            ret = stream_registerAction(kStreamActionPost, statInId_p,
-                    status_updateInStatusReg, NULL);
+            if(stream_registerAction(kStreamActionPost, statInId_p,
+                    status_updateInStatusReg, NULL) != FALSE)
+            {
+                fReturn = TRUE;
+            }
+            else
+            {   // Unable to register in buffer user action
+                error_setError(kAppIfModuleStatus, kAppIfStreamInitError);
+            }
 
         }
         else
         {
-            ret = kAppIfStatusBufferSizeMismatch;
+            // Invalid size of input buffer
+            error_setError(kAppIfModuleStatus, kAppIfStatusBufferSizeMismatch);
         }
     }
+    else
+    {
+        // Invalid base address of input buffer
+        error_setError(kAppIfModuleStatus, kAppIfStreamInvalidBuffer);
+    }
 
-    return ret;
+    return fReturn;
 }
 
 //------------------------------------------------------------------------------
@@ -358,18 +384,17 @@ static tAppIfStatus status_initInBuffer(tTbufNumLayout statInId_p)
 \param[in] bufSize_p        Size of the buffer
 \param[in] pUserArg_p       User defined argument
 
-\return tAppIfStatus
-\retval kAppIfSuccessful                  On success
-\retval kAppIfStatusBufferSizeMismatch    Invalid buffer to process
-\retval Other                             Other user error occurred
+\return BOOL
+\retval TRUE        Successfully processed synchronous task
+\retval FALSE       Error while processing sync task
 
 \ingroup module_status
 */
 //------------------------------------------------------------------------------
-static tAppIfStatus status_processSync(UINT8* pBuffer_p, UINT16 bufSize_p,
+static BOOL status_processSync(UINT8* pBuffer_p, UINT16 bufSize_p,
         void * pUserArg_p)
 {
-    tAppIfStatus ret = kAppIfSuccessful;
+    BOOL fReturn = FALSE;
     tAppIfTimeStamp        timeStamp;
     tTbufStatusOutStructure*  pStatusBuff;
 
@@ -383,14 +408,21 @@ static tAppIfStatus status_processSync(UINT8* pBuffer_p, UINT16 bufSize_p,
         timeStamp.relTimeLow_m = AmiGetDwordFromLe((UINT8 *)&pStatusBuff->relTimeLow_m);
         timeStamp.relTimeHigh_m = AmiGetDwordFromLe((UINT8 *)&pStatusBuff->relTimeHigh_m);
 
-        ret = statusInstance_l.pfnAppCbSync_m(&timeStamp);
+        if(statusInstance_l.pfnAppCbSync_m(&timeStamp) != FALSE)
+        {
+            fReturn = TRUE;
+        }
+        else
+        {
+            error_setError(kAppIfModuleStatus, kAppIfStatusProcessSyncFailed);
+        }
     }
     else
     {
-        ret = kAppIfStatusBufferSizeMismatch;
+        error_setError(kAppIfModuleStatus, kAppIfStatusBufferSizeMismatch);
     }
 
-    return ret;
+    return fReturn;
 }
 
 //------------------------------------------------------------------------------
@@ -401,16 +433,17 @@ static tAppIfStatus status_processSync(UINT8* pBuffer_p, UINT16 bufSize_p,
 \param[in] bufSize_p        Size of the buffer
 \param[in] pUserArg_p       User defined argument
 
-\return tAppIfStatus
-\retval kAppIfSuccessful          On success
+\return BOOL
+\retval TRUE        Successfully updated the status register
+\retval FALSE       Error while updating the status register
 
 \ingroup module_status
 */
 //------------------------------------------------------------------------------
-static tAppIfStatus status_updateOutStatusReg(UINT8* pBuffer_p, UINT16 bufSize_p,
+static BOOL status_updateOutStatusReg(UINT8* pBuffer_p, UINT16 bufSize_p,
         void * pUserArg_p)
 {
-    tAppIfStatus ret = kAppIfSuccessful;
+    BOOL fReturn = FALSE;
     tTbufStatusOutStructure*  pStatusBuff;
 
     // Convert to status buffer structure
@@ -427,13 +460,15 @@ static tAppIfStatus status_updateOutStatusReg(UINT8* pBuffer_p, UINT16 bufSize_p
 
         // Acknowledge buffer
         stream_ackBuffer(statusInstance_l.buffOutId_m);
+
+        fReturn = TRUE;
     }
     else
     {
-        ret = kAppIfStatusBufferSizeMismatch;
+        error_setError(kAppIfModuleStatus, kAppIfStatusBufferSizeMismatch);
     }
 
-    return ret;
+    return fReturn;
 }
 
 //------------------------------------------------------------------------------
@@ -444,16 +479,17 @@ static tAppIfStatus status_updateOutStatusReg(UINT8* pBuffer_p, UINT16 bufSize_p
 \param[in] bufSize_p        Size of the buffer
 \param[in] pUserArg_p       User defined argument
 
-\return tAppIfStatus
-\retval kAppIfSuccessful          On success
+\return BOOL
+\retval TRUE        Successfully updated the status register
+\retval FALSE       Error while updating the status register
 
 \ingroup module_status
 */
 //------------------------------------------------------------------------------
-static tAppIfStatus status_updateInStatusReg(UINT8* pBuffer_p, UINT16 bufSize_p,
+static BOOL status_updateInStatusReg(UINT8* pBuffer_p, UINT16 bufSize_p,
         void * pUserArg_p)
 {
-    tAppIfStatus ret = kAppIfSuccessful;
+    BOOL fReturn = FALSE;
     tTbufStatusInStructure*  pStatusBuff;
 
     // Convert to status buffer structure
@@ -467,13 +503,15 @@ static tAppIfStatus status_updateInStatusReg(UINT8* pBuffer_p, UINT16 bufSize_p,
 
         // Write rx status register
         AmiSetWordToLe((UINT8 *)&pStatusBuff->asyncProdStatus_m, statusInstance_l.asyncRxStatus_m);
+
+        fReturn = TRUE;
     }
     else
     {
-        ret = kAppIfStatusBufferSizeMismatch;
+        error_setError(kAppIfModuleStatus, kAppIfStatusBufferSizeMismatch);
     }
 
-    return ret;
+    return fReturn;
 }
 
 /// \}

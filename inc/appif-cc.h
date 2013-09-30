@@ -56,6 +56,15 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 
 /**
+ * \brief Status of the configuration channel write object
+ */
+typedef enum {
+    kCcWriteStatusError       = 0x00,   ///< Error on writing an object
+    kCcWriteStatusSuccessful = 0x01,    ///< Writing the object successful
+    kCcWriteStatusBusy        = 0x02,   ///< Unable to write the object! Channel is busy
+} tCcWriteStatus;
+
+/**
  * \brief  Cc module initialization structure
  */
 typedef struct {
@@ -68,12 +77,11 @@ typedef struct {
 //------------------------------------------------------------------------------
 // function prototypes
 //------------------------------------------------------------------------------
-tAppIfStatus cc_init(tCcInitParam* pCcInitParam_p);
+BOOL cc_init(tCcInitParam* pCcInitParam_p);
 void cc_exit(void);
 
-tAppIfStatus cc_writeObject(tConfChanObject* object_p);
-tAppIfStatus cc_readObject(UINT16 objIdx_p, UINT8 objSubIdx_p,
-        tConfChanObject** ppObject_p);
+tCcWriteStatus cc_writeObject(tConfChanObject* pObject_p);
+tConfChanObject* cc_readObject(UINT16 objIdx_p, UINT8 objSubIdx_p);
 
 #endif /* _INC_APPIF_CC_H_ */
 

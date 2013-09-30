@@ -52,6 +52,8 @@ processes the synchronous and asynchronous task.
 #include "appif-streamint.h"
 #include "appif-asyncint.h"
 #include "appif-ccint.h"
+#include "appif-errorint.h"
+#include "appif-timeout.h"
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
@@ -80,6 +82,8 @@ processes the synchronous and asynchronous task.
 // const defines
 //------------------------------------------------------------------------------
 
+#define ACK_REG_INITIAL_VALUE    0xFFFFFFFF     ///< Initial value of the ACK register
+
 //------------------------------------------------------------------------------
 // local types
 //------------------------------------------------------------------------------
@@ -103,9 +107,8 @@ static tInternalInstance          intInstance_l;
 // local function prototypes
 //------------------------------------------------------------------------------
 
-static tAppIfStatus appif_initIntModules(tAppIfInitParam* pInitParam_p);
-static tAppIfStatus appif_initAckRegisters(tTbufNumLayout idConsAck_p,
-                                         tTbufNumLayout idProdAck_p);
+static BOOL appif_initIntModules(tAppIfInitParam* pInitParam_p);
+static tTbufAckRegister* appif_initAckRegister(tTbufNumLayout idAckReg_p);
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
@@ -117,47 +120,68 @@ static tAppIfStatus appif_initAckRegisters(tTbufNumLayout idConsAck_p,
 
 \param[in]  pInitParam_p       Initialization parameters
 
-\return tAppIfStatus
-\retval kAppIfSuccessful         On success
-\retval kAppIfStreamInitError    Initialization of the stream module failed
+\return BOOL
+\retval TRUE        Successfully initialized the internal module
+\retval FALSE       Error during initialization
 
 \ingroup module_internal
 */
 //------------------------------------------------------------------------------
-tAppIfStatus appif_init(tAppIfInitParam* pInitParam_p)
+BOOL appif_init(tAppIfInitParam* pInitParam_p)
 {
-    tAppIfStatus ret = kAppIfSuccessful;
+    BOOL fReturn = FALSE;
 
     APPIF_MEMSET(&intInstance_l, 0 , sizeof(tInternalInstance));
 
-#if _DEBUG
-    if(pInitParam_p != NULL)
+    if(pInitParam_p == NULL)
+    {
+        // Invalid input parameters provided
+        error_setError(kAppIfModuleInternal, kAppIfInitError);
+    }
+    else
     {
         if(pInitParam_p->idConsAck_m >= kTbufCount ||
            pInitParam_p->idProdAck_m >= kTbufCount  )
         {
-            ret = kAppIfInitError;
+            // Invalid input parameters provided
+            error_setError(kAppIfModuleInternal, kAppIfInitError);
         }
-    }
-    else
-    {
-        ret = kAppIfInitError;
-    }
-#endif
-
-    if(ret == kAppIfSuccessful)
-    {
-        // Initialize internal library modules
-        ret = appif_initIntModules(pInitParam_p);
-        if(ret == kAppIfSuccessful)
+        else
         {
-            // Initialize acknowledge registers
-            ret = appif_initAckRegisters(pInitParam_p->idConsAck_m,
-                                         pInitParam_p->idProdAck_m);
+            // Initialize internal library modules
+            if(appif_initIntModules(pInitParam_p))
+            {
+                // Initialize consumer acknowledge register
+                intInstance_l.pConsAckRegister_m = appif_initAckRegister(pInitParam_p->idConsAck_m);
+                if(intInstance_l.pConsAckRegister_m != NULL)
+                {
+                    // Initialize producer acknowledge register
+                    intInstance_l.pProdAckRegister_m = appif_initAckRegister(pInitParam_p->idProdAck_m);
+                    if(intInstance_l.pProdAckRegister_m != NULL)
+                    {
+                        fReturn = TRUE;
+                    }
+                    else
+                    {
+                        // Producer acknowledge register initialization failed
+                        error_setError(kAppIfModuleInternal, kAppIfInitError);
+                    }
+                }
+                else
+                {
+                    // Consumer acknowledge register initialization failed
+                    error_setError(kAppIfModuleInternal, kAppIfInitError);
+                }
+            }
+            else
+            {
+                // Initializing internal modules failed
+                error_setError(kAppIfModuleInternal, kAppIfInitError);
+            }
         }
     }
 
-    return ret;
+    return fReturn;
 }
 
 //------------------------------------------------------------------------------
@@ -171,26 +195,36 @@ void appif_exit(void)
 {
     // Destroy initialized modules
     stream_exit();
+
+    // Destroy error module
+    error_exit();
 }
 
 //------------------------------------------------------------------------------
 /**
 \brief    Process application interface synchronous task
 
-\return  tAppIfStatus
-\retval  kAppIfSuccessful           On success
-\retval  kAppIfStreamTransferError  Unable to transfer data to/from PCP
+\return  BOOL
+\retval  TRUE      Sync processing successful
+\retval  FALSE     Error while processing sync
 
 \ingroup module_internal
 */
 //------------------------------------------------------------------------------
-tAppIfStatus appif_processSync(void)
+BOOL appif_processSync(void)
 {
-    tAppIfStatus ret = kAppIfSuccessful;
+    BOOL fReturn = FALSE;
 
-    ret = stream_processSync();
+    if(stream_processSync() != FALSE)
+    {
+        fReturn = TRUE;
+    }
+    else
+    {
+        error_setError(kAppIfModuleInternal, kAppIfProcessSyncFailed);
+    }
 
-    return ret;
+    return fReturn;
 }
 
 //------------------------------------------------------------------------------
@@ -199,39 +233,44 @@ tAppIfStatus appif_processSync(void)
 
 \param[in]  ppInstance_p         Pointer to the array of instances
 
-\return  tAppIfStatus
-\retval  kAppIfSuccessful           On success
-\retval  Other                      User specified error code
+\return  BOOL
+\retval  TRUE         Async processing successful
+\retval  FALSE        Error while processing async
 
 \ingroup module_internal
 */
 //------------------------------------------------------------------------------
-tAppIfStatus appif_processAsync(tAsyncInstance* ppInstance_p)
+BOOL appif_processAsync(tAsyncInstance* ppInstance_p)
 {
-    tAppIfStatus ret = kAppIfSuccessful;
+    BOOL fReturn = FALSE, fError = FALSE;
 #if(((APPIF_MODULE_INTEGRATION) & (APPIF_MODULE_ASYNC)) != 0)
     UINT8 i;
 
     // Process all asynchronous channels
     for(i=0; i < kNumAsyncInstCount; i++)
     {
-        ret = async_process(ppInstance_p[i]);
-        if(ret != kAppIfSuccessful)
+        if(async_process(ppInstance_p[i]) == FALSE)
         {
+            fError = TRUE;
             break;
         }
     }
 #endif
 
-#if(((APPIF_MODULE_INTEGRATION) & (APPIF_MODULE_CC)) != 0)
-    if(ret == kAppIfSuccessful)
+    if(!fError)
     {
+#if(((APPIF_MODULE_INTEGRATION) & (APPIF_MODULE_CC)) != 0)
         // Process configuration channel objects
-        ret = cc_process();
-    }
+        if(cc_process() != FALSE)
+        {
+            fReturn = TRUE;
+        }
+#else
+        fReturn = TRUE;
 #endif
+    }
 
-    return ret;
+    return fReturn;
 }
 
 //============================================================================//
@@ -247,16 +286,16 @@ tAppIfStatus appif_processAsync(tAsyncInstance* ppInstance_p)
 
 \param[in]  pInitParam_p         Internal module initialization parameters
 
-\return  tAppIfStatus
-\retval  kAppIfSuccessful          On success
-\retval  kAppIfStreamInitError     Error while initializing the stream module
+\return  BOOL
+\retval  TRUE      Successfully initialized modules
+\retval  FALSE     Error while initializing internal modules
 
 \ingroup module_internal
 */
 //------------------------------------------------------------------------------
-static tAppIfStatus appif_initIntModules(tAppIfInitParam* pInitParam_p)
+static BOOL appif_initIntModules(tAppIfInitParam* pInitParam_p)
 {
-    tAppIfStatus ret = kAppIfSuccessful;
+    BOOL fReturn = FALSE;
     tStreamInitParam streamInitParam;
 
 #if(((APPIF_MODULE_INTEGRATION) & (APPIF_MODULE_ASYNC)) != 0)
@@ -264,74 +303,58 @@ static tAppIfStatus appif_initIntModules(tAppIfInitParam* pInitParam_p)
     async_init();
 #endif
 
+    // Initialize the timeout module
+    timeout_init();
+
+    // Initialize the error module
+    error_init(pInitParam_p->pfnErrorHandler_m);
+
     // Initialize stream module
     streamInitParam.pBuffDescList_m = pInitParam_p->pBuffDescList_m;
     streamInitParam.pfnStreamHandler_m = pInitParam_p->pfnStreamHandler_m;
     streamInitParam.idConsAck_m = pInitParam_p->idConsAck_m;
     streamInitParam.idFirstProdBuffer_m = pInitParam_p->idFirstProdBuffer_m;
 
-    ret = stream_init(&streamInitParam);
+    if(stream_init(&streamInitParam) != FALSE)
+    {
+        fReturn = TRUE;
+    }
 
-    return ret;
+    return fReturn;
 }
 
 //------------------------------------------------------------------------------
 /**
 \brief    Initialize the acknowledge registers
 
-\param[in]  idConsAck_p         Id of the consuming acknowledge register
-\param[in]  idProdAck_p         Id of the producing acknowledge register
+\param[in]  idAckReg_p         Id of the acknowledge register
 
-\return tAppIfStatus
-\retval kAppIfSuccessful            On success
-\retval kAppIfStreamInvalidBuffer   Unable to find the buffer in the list
-\retval kAppIfBufferSizeMismatch    Size of the buffer is invalid
+\return tTbufAckRegister
+\retval Address      Address of the initialized ACK register
+\retval NULL         Error while initializing the acknowledge register
 
 \ingroup module_internal
 */
 //------------------------------------------------------------------------------
-static tAppIfStatus appif_initAckRegisters(tTbufNumLayout idConsAck_p,
-                                         tTbufNumLayout idProdAck_p)
+static tTbufAckRegister* appif_initAckRegister(tTbufNumLayout idAckReg_p)
 {
-    tAppIfStatus ret = kAppIfSuccessful;
-    tBuffDescriptor* pDescConsAck;
-    tBuffDescriptor* pDescProdAck;
+    tBuffDescriptor* pDescAckReg;
+    tTbufAckRegister* pAckRegBase = NULL;
 
-    ret = stream_getBufferParam(idConsAck_p, &pDescConsAck);
-    if(ret == kAppIfSuccessful)
+    pDescAckReg = stream_getBufferParam(idAckReg_p);
+    if(pDescAckReg != NULL)
     {
-        if(pDescConsAck->buffSize_m == sizeof(tTbufAckRegister))
+        if(pDescAckReg->buffSize_m == sizeof(tTbufAckRegister))
         {
-            // Set consumer ACK register address
-            intInstance_l.pConsAckRegister_m = (tTbufAckRegister*)pDescConsAck->pBuffBase_m;
+            // Set ACK register address
+            pAckRegBase = (tTbufAckRegister*)pDescAckReg->pBuffBase_m;
 
             // Set register to always ack all buffers (Needed for streamed access)
-            *intInstance_l.pConsAckRegister_m = 0xFFFFFFFF;
-
-            ret = stream_getBufferParam(idProdAck_p, &pDescProdAck);
-            if(ret == kAppIfSuccessful)
-            {
-                if(pDescProdAck->buffSize_m == sizeof(tTbufAckRegister))
-                {
-                    // Set producer ACK register address
-                    intInstance_l.pProdAckRegister_m = (tTbufAckRegister*)pDescProdAck->pBuffBase_m;
-
-                    // Set register to always ack all buffers (Needed for streamed access)
-                    *intInstance_l.pProdAckRegister_m = 0xFFFFFFFF;
-                }
-                else
-                {
-                    ret = kAppIfBufferSizeMismatch;
-                }
-            }
-        }
-        else
-        {
-            ret = kAppIfBufferSizeMismatch;
+            *pAckRegBase = ACK_REG_INITIAL_VALUE;
         }
     }
 
-    return ret;
+    return pAckRegBase;
 }
 
 /// \}

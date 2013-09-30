@@ -113,8 +113,10 @@ static tStreamInstance streamInstance_l;
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-static tAppIfStatus stream_callActions(tActionType actType_p);
+static BOOL stream_callActions(tActionType actType_p);
 static UINT16 stream_calcImageSize(tTbufNumLayout firstId_p, tTbufNumLayout lastId_p);
+static tBuffActionElem* stream_getActionList(tActionType actType_p);
+static BOOL stream_callSyncCb(void);
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
@@ -126,58 +128,56 @@ static UINT16 stream_calcImageSize(tTbufNumLayout firstId_p, tTbufNumLayout last
 
 \param[in]  pInitParam_p  Stream module initialization parameters
 
-\return tAppIfStatus
-\retval kAppIfSuccessful          On success
-\retval kAppIfStreamInitError     Error while initializing the stream module
+\return BOOL
+\retval TRUE      On successful initialization
+\retval FALSE     Unable to initialize the stream module
 
 \ingroup module_stream
 */
 //------------------------------------------------------------------------------
-tAppIfStatus stream_init(tStreamInitParam* pInitParam_p)
+BOOL stream_init(tStreamInitParam* pInitParam_p)
 {
-    tAppIfStatus ret = kAppIfSuccessful;
+    BOOL fReturn = FALSE;
     APPIF_MEMSET(&streamInstance_l, 0, sizeof(tStreamInstance));
 
-#if _DEBUG
-    if(pInitParam_p != NULL)
+    if(pInitParam_p == NULL)
+    {
+        error_setError(kAppIfModuleStream, kAppIfStreamInitError);
+    }
+    else
     {
         if(pInitParam_p->pBuffDescList_m == NULL    ||
            pInitParam_p->pfnStreamHandler_m == NULL  )
         {
-            ret = kAppIfStreamInitError;
+            error_setError(kAppIfModuleStream, kAppIfStreamInitError);
+        }
+        else
+        {
+            // Save the descriptor list internally
+            APPIF_MEMCPY(&streamInstance_l.buffDescList_m,
+                    pInitParam_p->pBuffDescList_m,
+                    sizeof(streamInstance_l.buffDescList_m));
+
+            // Remember handler of input output stream
+            streamInstance_l.pfnStreamHandler_m = pInitParam_p->pfnStreamHandler_m;
+
+            // Set consuming buffer handler parameter descriptor to first consuming buffer
+            streamInstance_l.handlParam_m.consDesc_m.pBuffBase_m =
+                    streamInstance_l.buffDescList_m[pInitParam_p->idConsAck_m].pBuffBase_m;
+            streamInstance_l.handlParam_m.consDesc_m.buffSize_m =
+                    stream_calcImageSize(pInitParam_p->idConsAck_m, pInitParam_p->idFirstProdBuffer_m);
+
+            // Set producing buffer handler parameter descriptor to first producing buffer
+            streamInstance_l.handlParam_m.prodDesc_m.pBuffBase_m =
+                    streamInstance_l.buffDescList_m[pInitParam_p->idFirstProdBuffer_m].pBuffBase_m;
+            streamInstance_l.handlParam_m.prodDesc_m.buffSize_m =
+                    stream_calcImageSize(pInitParam_p->idFirstProdBuffer_m, kTbufCount);
+
+            fReturn = TRUE;
         }
     }
-    else
-    {
-        ret = kAppIfStreamInitError;
-    }
 
-#endif
-
-    if(ret == kAppIfSuccessful)
-    {
-        // Save the descriptor list internally
-        APPIF_MEMCPY(&streamInstance_l.buffDescList_m,
-                pInitParam_p->pBuffDescList_m,
-                sizeof(streamInstance_l.buffDescList_m));
-
-        // Remember handler of input output stream
-        streamInstance_l.pfnStreamHandler_m = pInitParam_p->pfnStreamHandler_m;
-
-        // Set consuming buffer handler parameter descriptor to first consuming buffer
-        streamInstance_l.handlParam_m.consDesc_m.pBuffBase_m =
-                streamInstance_l.buffDescList_m[pInitParam_p->idConsAck_m].pBuffBase_m;
-        streamInstance_l.handlParam_m.consDesc_m.buffSize_m =
-                stream_calcImageSize(pInitParam_p->idConsAck_m, pInitParam_p->idFirstProdBuffer_m);
-
-        // Set producing buffer handler parameter descriptor to first producing buffer
-        streamInstance_l.handlParam_m.prodDesc_m.pBuffBase_m =
-                streamInstance_l.buffDescList_m[pInitParam_p->idFirstProdBuffer_m].pBuffBase_m;
-        streamInstance_l.handlParam_m.prodDesc_m.buffSize_m =
-                stream_calcImageSize(pInitParam_p->idFirstProdBuffer_m, kTbufCount);
-    }
-
-    return ret;
+    return fReturn;
 }
 
 //------------------------------------------------------------------------------
@@ -197,30 +197,24 @@ void stream_exit(void)
 \brief   Get buffer parameters for id of buffer
 
 \param[in]  buffId_p            Id of buffer
-\param[out] ppBuffParam_p       Requested buffer parameters
 
-\return tAppIfStatus
-\retval kAppIfSuccessful            On success
-\retval kAppIfStreamInvalidBuffer   Unable to find buffer in list
+\return tBuffDescriptor*
+\retval Address                 Pointer to buffer descriptor parameters
+\retval NULL                    Unable to find buffer in list
 
 \ingroup module_stream
 */
 //------------------------------------------------------------------------------
-tAppIfStatus stream_getBufferParam(tTbufNumLayout buffId_p,
-        tBuffDescriptor** ppBuffParam_p)
+tBuffDescriptor* stream_getBufferParam(tTbufNumLayout buffId_p)
 {
-    tAppIfStatus ret = kAppIfSuccessful;
+    tBuffDescriptor* buffDesc = NULL;
 
-    if(buffId_p >= kTbufCount)
+    if(buffId_p < kTbufCount)
     {
-        ret = kAppIfStreamInvalidBuffer;
-    }
-    else
-    {
-        *ppBuffParam_p = &streamInstance_l.buffDescList_m[buffId_p];
+        buffDesc = &streamInstance_l.buffDescList_m[buffId_p];
     }
 
-    return ret;
+    return buffDesc;
 }
 
 //------------------------------------------------------------------------------
@@ -232,69 +226,56 @@ tAppIfStatus stream_getBufferParam(tTbufNumLayout buffId_p,
 \param[in]  pfnBuffAct_p     Pointer to the action function
 \param[in]  pUserArg_p       User argument to pass to function
 
-\return tAppIfStatus
-\retval kAppIfSuccessful            On success
-\retval kAppIfStreamInvalidBuffer   Invalid buffer! Can't register
+\return BOOL
+\retval TRUE         Successfully registered action to buffer
+\retval FALSE        Invalid buffer! Can't register
 
 \ingroup module_stream
 */
 //------------------------------------------------------------------------------
-tAppIfStatus stream_registerAction(tActionType actType_p, UINT8 buffId_p,
+BOOL stream_registerAction(tActionType actType_p, UINT8 buffId_p,
         tBuffAction pfnBuffAct_p, void * pUserArg_p)
 {
-    tAppIfStatus ret = kAppIfSuccessful;
-    UINT8  fFreeFound = FALSE;
+    BOOL fReturn = FALSE;
     UINT8  i;
-    tBuffActionElem* buffActElem;
+    tBuffActionElem* pBuffActElem;
 
-    if(pfnBuffAct_p != NULL)
+    if(pfnBuffAct_p == NULL)
     {
-        switch(actType_p)
-        {
-            case kStreamActionPre:
-            {
-                buffActElem = &streamInstance_l.buffPreActList_m[0];
-                break;
-            }
-            case kStreamActionPost:
-            {
-                buffActElem = &streamInstance_l.buffPostActList_m[0];
-                break;
-            }
-            default:
-            {
-                ret = kAppIfStreamInvalidParameter;
-            }
-        }
+        error_setError(kAppIfModuleStream, kAppIfStreamInvalidParameter);
     }
     else
     {
-        ret = kAppIfStreamInvalidParameter;
-    }
-
-    if(ret == kAppIfSuccessful)
-    {
-        for(i=0; i < kTbufCount; i++, buffActElem++)
+        pBuffActElem = stream_getActionList(actType_p);
+        if(pBuffActElem == NULL)
         {
-            if(buffActElem->pfnBuffAction_m == NULL)
+            error_setError(kAppIfModuleStream, kAppIfStreamInvalidParameter);
+        }
+        else
+        {
+            for(i=0; i < kTbufCount; i++, pBuffActElem++)
             {
-                // Free element found -> Insert action
-                buffActElem->buffId_m = buffId_p;
-                buffActElem->pfnBuffAction_m = pfnBuffAct_p;
-                buffActElem->pUserArg_m = pUserArg_p;
+                if(pBuffActElem->pfnBuffAction_m == NULL)
+                {
+                    // Free element found -> Insert action
+                    pBuffActElem->buffId_m = buffId_p;
+                    pBuffActElem->pfnBuffAction_m = pfnBuffAct_p;
+                    pBuffActElem->pUserArg_m = pUserArg_p;
 
-                fFreeFound = TRUE;
-                break;
+                    fReturn = TRUE;
+                    break;
+                }
+            }
+
+            if(fReturn == FALSE)
+            {
+                // Set error when list is full
+                error_setError(kAppIfModuleStream, kAppIfStreamNoFreeElementFound);
             }
         }
-
-        if(fFreeFound == FALSE)
-        {
-            ret = kAppIfStreamNoFreeElementFound;
-        }
     }
 
-    return ret;
+    return fReturn;
 }
 
 //------------------------------------------------------------------------------
@@ -318,45 +299,41 @@ void stream_registerSyncCb(tBuffSyncCb pfnSyncCb_p)
 This procedure starts the transfer of the local buffers and starts pre- or post
 actions for each type of buffer.
 
-\return tAppIfStatus
-\retval kAppIfSuccessful            On success
-\retval kAppIfStreamTransferError   Unable to transfer data
+\return BOOL
+\retval TRUE      Successfully processed the synchronous task
+\retval FALSE     Unable to transfer data or call user action
 
 \ingroup module_stream
 */
 //------------------------------------------------------------------------------
-tAppIfStatus stream_processSync(void)
+BOOL stream_processSync(void)
 {
-    tAppIfStatus ret = kAppIfSuccessful;
+    BOOL fReturn = FALSE;
 
     // Call all pre filling actions
-    ret = stream_callActions(kStreamActionPre);
-    if(ret == kAppIfSuccessful)
+    if(stream_callActions(kStreamActionPre) != FALSE)
     {
-        // Call sync callback function
-        if(streamInstance_l.pfnSyncCb_m != NULL)
-        {
-            ret = streamInstance_l.pfnSyncCb_m();
-        }
-
-        if(ret == kAppIfSuccessful)
+        // Call synchronization function handler
+        if(stream_callSyncCb() != FALSE)
         {
             // Transfer stream input/output data
-            ret = streamInstance_l.pfnStreamHandler_m(&streamInstance_l.handlParam_m);
-            if(ret == kAppIfSuccessful)
+            if(streamInstance_l.pfnStreamHandler_m(&streamInstance_l.handlParam_m) != FALSE)
             {
                 // Call all post filling actions
-                ret = stream_callActions(kStreamActionPost);
+                if(stream_callActions(kStreamActionPost) != FALSE)
+                {
+                    fReturn = TRUE;
+                }
             }
             else
             {
-                ret = kAppIfStreamTransferError;
+                // Stream handler error handler
+                error_setError(kAppIfModuleStream, kAppIfStreamTransferError);
             }
         }
-
     }
 
-    return ret;
+    return fReturn;
 }
 
 //------------------------------------------------------------------------------
@@ -385,67 +362,56 @@ void stream_ackBuffer(UINT8 buffId_p)
 
 \param[in] actType_p               Pre- or post filling actions
 
-\return tAppIfStatus
-\retval kAppIfSuccessful       On success
-\retval Other                  Module internal error on action
+\return BOOL
+\retval TRUE         Successfully called all buffer actions
+\retval FALSE        Error while processing a buffer action
 
 \ingroup module_stream
 */
 //------------------------------------------------------------------------------
-static tAppIfStatus stream_callActions(tActionType actType_p)
+static BOOL stream_callActions(tActionType actType_p)
 {
+    BOOL fReturn = FALSE, fRetAct;
     UINT8 i;
-    tAppIfStatus ret = kAppIfSuccessful;
-    tBuffDescriptor*   bufferElem;
-    tBuffActionElem* buffActElem;
+    tBuffDescriptor* pBuffElement;
+    tBuffActionElem* pBuffActList;
 
-    switch(actType_p)
+    pBuffActList = stream_getActionList(actType_p);
+    if(pBuffActList == NULL)
     {
-        case kStreamActionPre:
-        {
-            buffActElem = &streamInstance_l.buffPreActList_m[0];
-            break;
-        }
-        case kStreamActionPost:
-        {
-            buffActElem = &streamInstance_l.buffPostActList_m[0];
-            break;
-        }
-        default:
-        {
-            ret = kAppIfStreamInvalidParameter;
-        }
+        error_setError(kAppIfModuleStream, kAppIfStreamInvalidParameter);
     }
-
-    if(ret == kAppIfSuccessful)
+    else
     {
         // Call buffer action for each buffer
-        for(i=0; i < kTbufCount; i++, buffActElem++)
+        for(i=0; i < kTbufCount; i++, pBuffActList++)
         {
-            if(buffActElem->pfnBuffAction_m != NULL)
+            if(pBuffActList->pfnBuffAction_m != NULL)
             {
                 // Get buffer element by Id
-                bufferElem = &streamInstance_l.buffDescList_m[buffActElem->buffId_m];
+                pBuffElement = &streamInstance_l.buffDescList_m[pBuffActList->buffId_m];
 
-                ret = buffActElem->pfnBuffAction_m(bufferElem->pBuffBase_m,
-                                                  bufferElem->buffSize_m,
-                                                  buffActElem->pUserArg_m);
-                if(ret != kAppIfSuccessful)
+                fRetAct = pBuffActList->pfnBuffAction_m(pBuffElement->pBuffBase_m,
+                                                  pBuffElement->buffSize_m,
+                                                  pBuffActList->pUserArg_m);
+                if(fRetAct == FALSE)
                 {
                     // Error happened.. return!
+                    error_setError(kAppIfModuleStream, kAppIfStreamProcessActionFailed);
+
                     break;
                 }
             }
             else
             {
                 // All actions carried out! return!
+                fReturn = TRUE;
                 break;
             }
-
         }
     }
 
-    return ret;
+    return fReturn;
 }
 
 //------------------------------------------------------------------------------
@@ -472,6 +438,79 @@ static UINT16 stream_calcImageSize(tTbufNumLayout firstId_p, tTbufNumLayout last
     }
 
     return imgSize;
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief   Get action list for action type
+
+\param[in] actType_p               Type of the action
+
+\return tBuffActionElem
+\retval Address            Pointer to the action list
+\retval Null               Invalid action type for action list
+
+\ingroup module_stream
+*/
+//------------------------------------------------------------------------------
+static tBuffActionElem* stream_getActionList(tActionType actType_p)
+{
+    tBuffActionElem* pBuffActElem = NULL;
+
+    switch(actType_p)
+    {
+        case kStreamActionPre:
+        {
+            pBuffActElem = &streamInstance_l.buffPreActList_m[0];
+            break;
+        }
+        case kStreamActionPost:
+        {
+            pBuffActElem = &streamInstance_l.buffPostActList_m[0];
+            break;
+        }
+        default:
+        {
+            // error occurred
+        }
+    }
+
+    return pBuffActElem;
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief   Call the sync callback if initialized
+
+\return BOOL
+\retval TRUE           Success on calling the synchronization callback
+\retval FALSE          Error will calling the synchronization callback
+
+\ingroup module_stream
+*/
+//------------------------------------------------------------------------------
+static BOOL stream_callSyncCb(void)
+{
+    BOOL fReturn = FALSE;
+
+    if(streamInstance_l.pfnSyncCb_m != NULL)
+    {
+        // Call synchronization callback function
+        if(streamInstance_l.pfnSyncCb_m() != FALSE)
+        {
+            fReturn = TRUE;
+        }
+        else
+        {
+            error_setError(kAppIfModuleStream, kAppIfStreamSyncError);
+        }
+    }
+    else
+    {
+        fReturn = TRUE;
+    }
+
+    return fReturn;
 }
 
 /// \}

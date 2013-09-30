@@ -58,7 +58,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // function prototypes
 //------------------------------------------------------------------------------
 
-tAppIfStatus cc_process(void);
+BOOL cc_process(void);
 
 #endif /* _INC_APPIF_CCINT_H_ */
 

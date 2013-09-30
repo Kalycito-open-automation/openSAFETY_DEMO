@@ -55,12 +55,21 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // typedef
 //------------------------------------------------------------------------------
 
+/**
+ * \brief State of the transmit channel
+ */
+typedef enum {
+    kAsyncTxStatusError       = 0x00,   ///< Error while posting to the transmit channel
+    kAsyncTxStatusSuccessful = 0x01,    ///< Post to transmit channel successful
+    kAsyncTxStatusBusy        = 0x02,   ///< Transmit channel is currently busy
+} tAsyncTxStatus;
+
 typedef struct eAsyncInstance *tAsyncInstance;
 
 /**
  * \brief Asynchronous module frame receive handler
  */
-typedef tAppIfStatus (*tAsyncRxHandler) (UINT8* pPayload_p, UINT16 size_p);
+typedef BOOL (*tAsyncRxHandler) (UINT8* pPayload_p, UINT16 size_p);
 
 /**
  * \brief  Async module initialization structure
@@ -78,7 +87,7 @@ typedef struct {
 //------------------------------------------------------------------------------
 tAsyncInstance async_create(tAsyncChanNum chanId_m, tAsyncInitParam* pInitParam_p);
 void async_destroy(tAsyncInstance  pInstance_p);
-tAppIfStatus async_postPayload(tAsyncInstance pInstance_p, UINT8* pPayload_p,
+tAsyncTxStatus async_postPayload(tAsyncInstance pInstance_p, UINT8* pPayload_p,
         UINT16 paylSize_p);
 
 #endif /* _INC_APPIF_ASYNC_H_ */

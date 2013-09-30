@@ -61,6 +61,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     #define UINT8 unsigned char
 #endif
 
+#ifndef BOOL
+    #define BOOL UINT8
+#endif
+
 #ifndef INT16
     #define INT16 short int
 #endif
@@ -122,6 +126,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #ifndef UINT8
     #define UINT8 unsigned char
+#endif
+
+#ifndef BOOL
+    #define BOOL UINT8
 #endif
 
 #ifndef INT16

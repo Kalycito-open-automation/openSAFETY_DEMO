@@ -1,10 +1,11 @@
 /**
 ********************************************************************************
-\file   appif-apglobal.h
+\file   appif-error.h
 
-\brief  Global header file for the application interface project (AP processor)
+\brief  Library header for the error handler module
 
-Global header file for the application interface project on the AP processor.
+Application interface error handler module. Handles each occurred error and
+forwards a trace to the user layer.
 
 *******************************************************************************/
 
@@ -35,21 +36,14 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
 
-#ifndef _INC_APPIF_APGLOBAL_H_
-#define _INC_APPIF_APGLOBAL_H_
+#ifndef _INC_APPIF_ERROR_H_
+#define _INC_APPIF_ERROR_H_
 
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
 
-#include <appif-global.h>
-
-#include <appif-debug.h>
-#include <ami.h>
-
-#include <appif-tbuflayout.h>
-#include <appif-error.h>
-
+#include "appif-apglobal.h"
 
 //------------------------------------------------------------------------------
 // const defines
@@ -59,11 +53,27 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // typedef
 //------------------------------------------------------------------------------
 
+/**
+ * \brief Details of an error
+ */
+typedef struct
+{
+    tAppIfModules  srcModule_m;       ///< Source module of the error
+    tAppIfStatus   errCode_m;         ///< Code of the error
+} tErrorInfo;
+
+/**
+ * \brief Error handler user callback
+ */
+typedef void (*tErrorHandler) (tErrorInfo* pErrorInfo_p);
+
 //------------------------------------------------------------------------------
 // function prototypes
 //------------------------------------------------------------------------------
 
-#endif /* _INC_APPIF_PCPGLOBAL_H_ */
+void error_setError(tAppIfModules srcModule_p, tAppIfStatus errCode_p);
 
+
+#endif /* _INC_APPIF_ERRORINT_H_ */
 
 

@@ -87,6 +87,15 @@ It forwards the received data to the application.
 // local types
 //------------------------------------------------------------------------------
 
+/**
+ * \brief Status of the asynchronous channel
+ */
+typedef enum {
+    kChanStatusInvalid   = 0x00,    ///< Invalid channel status
+    kChanStatusBusy      = 0x01,    ///< Channel is currently busy
+    kChanStatusFree      = 0x02,    ///< Channel is free for transmission
+} tAsyncChanStatus;
+
 //------------------------------------------------------------------------------
 // local vars
 //------------------------------------------------------------------------------
@@ -96,16 +105,16 @@ static struct eAsyncInstance          asyncInstance_l[kNumAsyncInstCount];
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-static tAppIfStatus async_initRcvBuffer(tAsyncChanNum chanId_p,
+static BOOL async_initReceiveBuffer(tAsyncChanNum chanId_p,
         tTbufNumLayout rxBuffId_p);
-static tAppIfStatus async_initTransBuffer(tAsyncChanNum chanId_p,
+static BOOL async_initTransmitBuffer(tAsyncChanNum chanId_p,
         tTbufNumLayout txBuffId_p);
-static tAppIfStatus async_handleRxFrame(tAsyncInstance pInstance_p);
-static tAppIfStatus async_handleTxFrame(tAsyncInstance pInstance_p);
-static tAppIfStatus async_receiveFrame(UINT8* pBuffer_p, UINT16 bufSize_p,
+static BOOL async_handleRxFrame(tAsyncInstance pInstance_p);
+static BOOL async_handleTxFrame(tAsyncInstance pInstance_p);
+static BOOL async_receiveFrame(UINT8* pBuffer_p, UINT16 bufSize_p,
         void* pUserArg_p);
 static void async_changeLocalSeqNr(tSeqNrValue* pSeqNr_p);
-static tAppIfStatus async_checkChannelStatus(tAsyncInstance pInstance_p);
+static tAsyncChanStatus async_checkChannelStatus(tAsyncInstance pInstance_p);
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
@@ -143,25 +152,19 @@ functionality for the upper and lower layers.
 //------------------------------------------------------------------------------
 tAsyncInstance async_create(tAsyncChanNum chanId_p, tAsyncInitParam* pInitParam_p)
 {
-    tAppIfStatus  ret = kAppIfSuccessful;
     tAsyncInstance pInstance = NULL;
 
-#ifdef _DEBUG
     if(chanId_p >= kNumAsyncInstCount ||
        pInitParam_p == NULL            )
     {
-        ret = kAppIfAsyncInitError;
+        error_setError(kAppIfModuleAsync, kAppIfAsyncInitError);
     }
-#endif
-
-    if(ret == kAppIfSuccessful)
+    else
     {
         // Get asynchronous buffer parameters from stream module
-        ret = async_initRcvBuffer(chanId_p, pInitParam_p->buffIdRx_m);
-        if(ret == kAppIfSuccessful)
+        if(async_initReceiveBuffer(chanId_p, pInitParam_p->buffIdRx_m) != FALSE)
         {
-            ret = async_initTransBuffer(chanId_p, pInitParam_p->buffIdTx_m);
-            if(ret == kAppIfSuccessful)
+            if(async_initTransmitBuffer(chanId_p, pInitParam_p->buffIdTx_m) != FALSE)
             {
                 // Save channel Id
                 asyncInstance_l[chanId_p].chanId_m = chanId_p;
@@ -180,7 +183,6 @@ tAsyncInstance async_create(tAsyncChanNum chanId_p, tAsyncInitParam* pInitParam_
                 pInstance = &asyncInstance_l[chanId_p];
             }
         }
-
     }
 
     return pInstance;
@@ -213,67 +215,67 @@ void async_destroy(tAsyncInstance pInstance_p)
 \param[in]  pPayload_p      Pointer to the payload to send
 \param[in]  paylSize_p      Size of the payload to send
 
-\return tAppIfStatus
-\retval kAppIfSuccessful              On success
-\retval kAppIfAsyncTxConsSizeInvalid  Size of the payload to post is invalid
-\retval kAppIfAsyncSendError          Invalid input parameters
-\retval kAppIfAsyncNoFreeBuffer       Channel is currently busy
+\return tAsyncTxStatus
+\retval tAsyncTxStatusSuccessfull    Successfully posted payload to buffer
+\retval tAsyncTxStatusBusy           Unable to post payload to asynchronous channel
+\retval tAsyncTxStatusError          Error while posting payload to the transmit channel
 
 \ingroup module_async
 */
 //------------------------------------------------------------------------------
-tAppIfStatus async_postPayload(tAsyncInstance pInstance_p, UINT8* pPayload_p,
+tAsyncTxStatus async_postPayload(tAsyncInstance pInstance_p, UINT8* pPayload_p,
         UINT16 paylSize_p)
 {
-    tAppIfStatus ret = kAppIfSuccessful;
+    tAsyncTxStatus chanState = kAsyncTxStatusError;
 
-    if(pInstance_p != NULL &&
-       pPayload_p != NULL    )
+    if(pInstance_p == NULL  ||
+       pPayload_p == NULL    )
+    {
+        error_setError(kAppIfModuleAsync, kAppIfAsyncSendError);
+    }
+    else
     {
         // Check if payload fits inside the buffer
         if(paylSize_p > sizeof(pInstance_p->txBuffParam_m.asyncTxBuffer_m.pAsyncTxPayl_m->tssdoTransmitData_m) ||
            paylSize_p == 0                             )
         {
-            ret = kAppIfAsyncTxConsSizeInvalid;
-        }
-    }
-    else
-    {
-        ret = kAppIfAsyncSendError;
-    }
-
-    if(ret == kAppIfSuccessful)
-    {
-        // Check if buffer is free for filling
-        if(pInstance_p->txBuffParam_m.asyncTxBuffer_m.isLocked_m == FALSE)
-        {
-            // Fill buffer
-            APPIF_MEMCPY(pInstance_p->txBuffParam_m.asyncTxBuffer_m.pAsyncTxPayl_m->tssdoTransmitData_m,
-                    pPayload_p, paylSize_p);
-
-            // Set transmit size
-            AmiSetWordToLe((UINT8*)&pInstance_p->txBuffParam_m.asyncTxBuffer_m.pAsyncTxPayl_m->paylSize_m, paylSize_p);
-
-            // Set sequence number in next tx buffer
-            AmiSetByteToLe((UINT8*)&pInstance_p->txBuffParam_m.asyncTxBuffer_m.pAsyncTxPayl_m->seqNr_m,
-                    pInstance_p->txBuffParam_m.currTxSeqNr_m);
-
-            // Lock buffer for transmission
-            pInstance_p->txBuffParam_m.asyncTxBuffer_m.isLocked_m = TRUE;
-
-            // Enable transmit timer
-            timeout_startTimer(pInstance_p->txBuffParam_m.pTimeoutInst_m);
-
-            // Acknowledge producing transmit buffer
-            stream_ackBuffer(pInstance_p->txBuffParam_m.idTxBuff_m);
+            error_setError(kAppIfModuleAsync, kAppIfAsyncTxConsSizeInvalid);
         }
         else
         {
-            ret = kAppIfAsyncNoFreeBuffer;
+            // Check if buffer is free for filling
+            if(pInstance_p->txBuffParam_m.asyncTxBuffer_m.isLocked_m == FALSE)
+            {
+                // Fill buffer
+                APPIF_MEMCPY(pInstance_p->txBuffParam_m.asyncTxBuffer_m.pAsyncTxPayl_m->tssdoTransmitData_m,
+                        pPayload_p, paylSize_p);
+
+                // Set transmit size
+                AmiSetWordToLe((UINT8*)&pInstance_p->txBuffParam_m.asyncTxBuffer_m.pAsyncTxPayl_m->paylSize_m, paylSize_p);
+
+                // Set sequence number in next tx buffer
+                AmiSetByteToLe((UINT8*)&pInstance_p->txBuffParam_m.asyncTxBuffer_m.pAsyncTxPayl_m->seqNr_m,
+                        pInstance_p->txBuffParam_m.currTxSeqNr_m);
+
+                // Lock buffer for transmission
+                pInstance_p->txBuffParam_m.asyncTxBuffer_m.isLocked_m = TRUE;
+
+                // Enable transmit timer
+                timeout_startTimer(pInstance_p->txBuffParam_m.pTimeoutInst_m);
+
+                // Acknowledge producing transmit buffer
+                stream_ackBuffer(pInstance_p->txBuffParam_m.idTxBuff_m);
+
+                chanState = kAsyncTxStatusSuccessful;
+            }
+            else
+            {
+                chanState = kAsyncTxStatusBusy;
+            }
         }
     }
 
-    return ret;
+    return chanState;
 }
 
 //------------------------------------------------------------------------------
@@ -282,26 +284,28 @@ tAppIfStatus async_postPayload(tAsyncInstance pInstance_p, UINT8* pPayload_p,
 
 \param[in]  pInstance_p     Asynchronous module instance
 
-\return tAppIfStatus
-\retval kAppIfSuccessful        On success
-\retval Other                   Error while processing asynchronous frames
+\return BOOL
+\retval TRUE        Asynchronous frames processed successfully
+\retval FALSE       Error while processing asynchronous frames
 
 \ingroup module_async
 */
 //------------------------------------------------------------------------------
-tAppIfStatus async_process(tAsyncInstance pInstance_p)
+BOOL async_process(tAsyncInstance pInstance_p)
 {
-    tAppIfStatus ret = kAppIfSuccessful;
+    BOOL fReturn = FALSE;
 
     // Process incoming frames
-    ret = async_handleRxFrame(pInstance_p);
-    if(ret ==   kAppIfSuccessful)
+    if(async_handleRxFrame(pInstance_p) != FALSE)
     {
         // Process transmit frames
-        ret = async_handleTxFrame(pInstance_p);
+        if(async_handleTxFrame(pInstance_p) != FALSE)
+        {
+            fReturn = TRUE;
+        }
     }
 
-    return ret;
+    return fReturn;
 }
 
 //============================================================================//
@@ -317,22 +321,21 @@ tAppIfStatus async_process(tAsyncInstance pInstance_p)
 \param[in] chanId_p                 Id of the asynchronous channel
 \param[in] rxBuffId_p               Id of the asynchronous receive buffer
 
-\return tAppIfStatus
-\retval kAppIfSuccessful               On success
-\retval kAppIfStreamInvalidBuffer      Invalid buffer! Can't register
-\retval kAppIfAsyncBufferSizeMismatch  Size of the buffer is invalid
+\return BOOL
+\retval TRUE    Initialization successful
+\retval FALSE   Error while initializing
 
 \ingroup module_async
 */
 //------------------------------------------------------------------------------
-static tAppIfStatus async_initRcvBuffer(tAsyncChanNum chanId_p,
+static BOOL async_initReceiveBuffer(tAsyncChanNum chanId_p,
         tTbufNumLayout rxBuffId_p)
 {
-    tAppIfStatus ret = kAppIfSuccessful;
+    BOOL fReturn = FALSE;
     tBuffDescriptor* pDescAsyncRcv;
 
-    ret = stream_getBufferParam(rxBuffId_p, &pDescAsyncRcv);
-    if(ret == kAppIfSuccessful)
+    pDescAsyncRcv = stream_getBufferParam(rxBuffId_p);
+    if(pDescAsyncRcv != NULL)
     {
         if(pDescAsyncRcv->buffSize_m == sizeof(tTbufAsyncRxStructure))
         {
@@ -341,16 +344,23 @@ static tAppIfStatus async_initRcvBuffer(tAsyncChanNum chanId_p,
                     (tTbufAsyncRxStructure *)pDescAsyncRcv->pBuffBase_m;
 
             // Register frame receive post action
-            ret = stream_registerAction(kStreamActionPost, rxBuffId_p,
-                    async_receiveFrame, (void *)&asyncInstance_l[chanId_p]);
+            if(stream_registerAction(kStreamActionPost, rxBuffId_p,
+                    async_receiveFrame, (void *)&asyncInstance_l[chanId_p]) != FALSE)
+            {
+                fReturn = TRUE;
+            }
         }
         else
         {
-            ret = kAppIfAsyncBufferSizeMismatch;
+            error_setError(kAppIfModuleAsync, kAppIfAsyncBufferSizeMismatch);
         }
     }
+    else
+    {
+        error_setError(kAppIfModuleAsync, kAppIfAsyncInvalidBuffer);
+    }
 
-    return ret;
+    return fReturn;
 }
 
 //------------------------------------------------------------------------------
@@ -360,23 +370,21 @@ static tAppIfStatus async_initRcvBuffer(tAsyncChanNum chanId_p,
 \param[in] chanId_p                 Id of the asynchronous channel
 \param[in] txBuffId_p               Id of the asynchronous transmit buffer
 
-\return tAppIfStatus
-\retval kAppIfSuccessful               On success
-\retval kAppIfAsyncInitError           Unable to initialize the timeout module
-\retval kAppIfStreamInvalidBuffer      Invalid buffer! Can't register
-\retval kAppIfAsyncBufferSizeMismatch  Size of the buffer is invalid
+\return BOOL
+\retval TRUE    Initialization successful
+\retval FALSE   Error while initializing
 
 \ingroup module_async
 */
 //------------------------------------------------------------------------------
-static tAppIfStatus async_initTransBuffer(tAsyncChanNum chanId_p,
+static BOOL async_initTransmitBuffer(tAsyncChanNum chanId_p,
         tTbufNumLayout txBuffId_p)
 {
-    tAppIfStatus ret = kAppIfSuccessful;
+    BOOL fReturn = FALSE;
     tBuffDescriptor* pDescAsyncTrans;
 
-    ret = stream_getBufferParam(txBuffId_p, &pDescAsyncTrans);
-    if(ret == kAppIfSuccessful)
+    pDescAsyncTrans = stream_getBufferParam(txBuffId_p);
+    if(pDescAsyncTrans != NULL)
     {
         if(pDescAsyncTrans->buffSize_m == sizeof(tTbufAsyncTxStructure))
         {
@@ -387,18 +395,26 @@ static tAppIfStatus async_initTransBuffer(tAsyncChanNum chanId_p,
             // Initialize asynchronous transmit timeout instance
             asyncInstance_l[chanId_p].txBuffParam_m.pTimeoutInst_m = timeout_create(
                     ASYNC_TX_TIMEOUT_CYCLE_COUNT);
-            if(asyncInstance_l[chanId_p].txBuffParam_m.pTimeoutInst_m == NULL)
+            if(asyncInstance_l[chanId_p].txBuffParam_m.pTimeoutInst_m != NULL)
             {
-                ret = kAppIfAsyncInitError;
+                fReturn = TRUE;
+            }
+            else
+            {
+                error_setError(kAppIfModuleAsync, kAppIfAsyncInitError);
             }
         }
         else
         {
-            ret = kAppIfAsyncBufferSizeMismatch;
+            error_setError(kAppIfModuleAsync, kAppIfAsyncBufferSizeMismatch);
         }
     }
+    else
+    {
+        error_setError(kAppIfModuleAsync, kAppIfAsyncInvalidBuffer);
+    }
 
-    return ret;
+    return fReturn;
 }
 
 //------------------------------------------------------------------------------
@@ -407,16 +423,16 @@ static tAppIfStatus async_initTransBuffer(tAsyncChanNum chanId_p,
 
 \param[in] pInstance_p     Async module instance
 
-\return tAppIfStatus
-\retval kAppIfSuccessful        On success
-\retval Other                   Other user error returned
+\return BOOL
+\retval TRUE       Successfully processed asynchronous receive frame
+\retval FALSE      Error while processing
 
 \ingroup module_async
 */
 //------------------------------------------------------------------------------
-static tAppIfStatus async_handleRxFrame(tAsyncInstance pInstance_p)
+static BOOL async_handleRxFrame(tAsyncInstance pInstance_p)
 {
-    tAppIfStatus ret = kAppIfSuccessful;
+    BOOL fReturn = FALSE;
     UINT8*  pRxBuffer;
     UINT16  rxBuffSize;
 
@@ -427,7 +443,14 @@ static tAppIfStatus async_handleRxFrame(tAsyncInstance pInstance_p)
         rxBuffSize = AmiGetWordFromLe((UINT8 *)&pInstance_p->rxBuffParam_m.pAsyncRxBuffer_m->paylSize_m);
 
         // Call asynchronous user handler
-        ret = pInstance_p->rxBuffParam_m.pfnRxHandler_m(pRxBuffer, rxBuffSize);
+        if(pInstance_p->rxBuffParam_m.pfnRxHandler_m(pRxBuffer, rxBuffSize))
+        {
+            fReturn = TRUE;
+        }
+        else
+        {
+            error_setError(kAppIfModuleAsync, kAppIfAsyncProcessingFailed);
+        }
 
         // Access finished -> Unblock channel by writing current sequence number to status field!
         status_setAsyncRxChanFlag(pInstance_p->chanId_m,
@@ -435,8 +458,13 @@ static tAppIfStatus async_handleRxFrame(tAsyncInstance pInstance_p)
 
         pInstance_p->rxBuffParam_m.fRxFrameIncoming_m = FALSE;
     }
+    else
+    {
+        // Nothing to process -> Success anyway!
+        fReturn = TRUE;
+    }
 
-    return ret;
+    return fReturn;
 }
 
 //------------------------------------------------------------------------------
@@ -445,21 +473,24 @@ static tAppIfStatus async_handleRxFrame(tAsyncInstance pInstance_p)
 
 \param[in]  pInstance_p     Asynchronous module instance
 
-\return tAppIfStatus
-\retval kAppIfSuccessful              On success
+\return BOOL
+\retval TRUE        Successfully handled transmit frame
+\retval FALSE       Error while handling transmit frame
 
 \ingroup module_async
 */
 //------------------------------------------------------------------------------
-static tAppIfStatus async_handleTxFrame(tAsyncInstance pInstance_p)
+static BOOL async_handleTxFrame(tAsyncInstance pInstance_p)
 {
-    tAppIfStatus ret = kAppIfSuccessful;
+    BOOL fReturn = FALSE;
+    tAsyncChanStatus  txChanState;
+    tTimerStatus timerState;
 
     if(pInstance_p->txBuffParam_m.asyncTxBuffer_m.isLocked_m != FALSE)
     {
         // Check if channel is ready for transmission
-        ret = async_checkChannelStatus(pInstance_p);
-        if(ret == kAppIfSuccessful)
+        txChanState = async_checkChannelStatus(pInstance_p);
+        if(txChanState == kChanStatusFree)
         {
             // Ongoing message is acknowledged
             pInstance_p->txBuffParam_m.asyncTxBuffer_m.isLocked_m = FALSE;
@@ -468,16 +499,19 @@ static tAppIfStatus async_handleTxFrame(tAsyncInstance pInstance_p)
             async_changeLocalSeqNr(&pInstance_p->txBuffParam_m.currTxSeqNr_m);
 
             // When timer is running and ACK occurred -> Stop timer instance!
-            if(timeout_isRunning(pInstance_p->txBuffParam_m.pTimeoutInst_m))
+            timerState = timeout_isRunning(pInstance_p->txBuffParam_m.pTimeoutInst_m);
+            if(timerState == kTimerStateRunning);
             {
                 timeout_stopTimer(pInstance_p->txBuffParam_m.pTimeoutInst_m);
             }
+
+            fReturn = TRUE;
         }
-        else if(ret == kAppIfAsyncChannelBusy)
+        else if(txChanState == kChanStatusBusy)
         {
             // Check if timeout counter is expired
-            ret = timeout_checkExpire(pInstance_p->txBuffParam_m.pTimeoutInst_m);
-            if(ret == kAppIfTimeoutOccured)
+            timerState = timeout_checkExpire(pInstance_p->txBuffParam_m.pTimeoutInst_m);
+            if(timerState == kTimerStateExpired)
             {
                 // Timeout occurred -> Increment local sequence number!
                 async_changeLocalSeqNr(&pInstance_p->txBuffParam_m.currTxSeqNr_m);
@@ -486,11 +520,16 @@ static tAppIfStatus async_handleTxFrame(tAsyncInstance pInstance_p)
                 pInstance_p->txBuffParam_m.asyncTxBuffer_m.isLocked_m = FALSE;
             }
 
-            ret = kAppIfSuccessful;
+            fReturn = TRUE;
         }
     }
+    else
+    {
+        // Nothing to do! -> Success!
+        fReturn = TRUE;
+    }
 
-    return ret;
+    return fReturn;
 }
 
 //------------------------------------------------------------------------------
@@ -501,83 +540,83 @@ static tAppIfStatus async_handleTxFrame(tAsyncInstance pInstance_p)
 \param[in] bufSize_p        Size of the buffer
 \param[in] pUserArg_p       The user argument
 
-\return tAppIfStatus
-\retval kAppIfSuccessful          On success
+\return BOOL
+\retval TRUE          Successfully processed receive frame
+\retval FALSE         Error while processing receive frame
 
 \ingroup module_async
 */
 //------------------------------------------------------------------------------
-static tAppIfStatus async_receiveFrame(UINT8* pBuffer_p, UINT16 bufSize_p,
+static BOOL async_receiveFrame(UINT8* pBuffer_p, UINT16 bufSize_p,
         void* pUserArg_p)
 {
-    tAppIfStatus ret = kAppIfSuccessful;
+    BOOL fReturn = FALSE;
     tAsyncInstance pInstance;
     tTbufAsyncRxStructure*  pAsyncRxBuff;
     tSeqNrValue  currSeqNr = kSeqNrValueInvalid;
 
-#ifdef _DEBUG
-    if(pUserArg_p != NULL)
+    if(pUserArg_p == NULL)
+    {
+        error_setError(kAppIfModuleAsync, kAppIfAsyncInvalidParameter);
+    }
+    else
     {
         // Check size of buffer
         if(bufSize_p != sizeof(tTbufAsyncRxStructure))
         {
-            ret = kAppIfAsyncBufferSizeMismatch;
-        }
-    }
-    else
-    {
-        ret = kAppIfAsyncInvalidParameter;
-    }
-#endif
-
-    if(ret == kAppIfSuccessful)
-    {
-        // Get pointer to current instance
-        pInstance = (tAsyncInstance) pUserArg_p;
-
-        // Increment transmit timer cycle count
-        timeout_incrementCounter(pInstance->txBuffParam_m.pTimeoutInst_m);
-
-        // Convert to status buffer structure
-        pAsyncRxBuff = (tTbufAsyncRxStructure*) pBuffer_p;
-
-        // Check size of buffer
-        if(bufSize_p == sizeof(tTbufAsyncRxStructure))
-        {
-            // Acknowledge buffer before access
-            stream_ackBuffer(pInstance->rxBuffParam_m.idRxBuff_m);
-
-            currSeqNr = AmiGetByteFromLe((UINT8 *)&pAsyncRxBuff->seqNr_m);
-
-            // Check sequence number sanity
-            if(currSeqNr == kSeqNrValueFirst ||
-               currSeqNr == kSeqNrValueSecond  )
-            {
-                // Check sequence number against local copy
-                if(currSeqNr != pInstance->rxBuffParam_m.currRxSeqNr_m)
-                {
-                    // Sequence number changed -> Frame available
-                    pInstance->rxBuffParam_m.fRxFrameIncoming_m = TRUE;
-
-                    // Increment local receive sequence number
-                    pInstance->rxBuffParam_m.currRxSeqNr_m = currSeqNr;
-                }
-            }
+            error_setError(kAppIfModuleAsync, kAppIfAsyncBufferSizeMismatch);
         }
         else
         {
-            ret = kAppIfAsyncBufferSizeMismatch;
+            // Get pointer to current instance
+            pInstance = (tAsyncInstance) pUserArg_p;
+
+            // Increment transmit timer cycle count
+            timeout_incrementCounter(pInstance->txBuffParam_m.pTimeoutInst_m);
+
+            // Convert to status buffer structure
+            pAsyncRxBuff = (tTbufAsyncRxStructure*) pBuffer_p;
+
+            // Check size of buffer
+            if(bufSize_p == sizeof(tTbufAsyncRxStructure))
+            {
+                // Acknowledge buffer before access
+                stream_ackBuffer(pInstance->rxBuffParam_m.idRxBuff_m);
+
+                currSeqNr = AmiGetByteFromLe((UINT8 *)&pAsyncRxBuff->seqNr_m);
+
+                // Check sequence number sanity
+                if(currSeqNr == kSeqNrValueFirst ||
+                   currSeqNr == kSeqNrValueSecond  )
+                {
+                    // Check sequence number against local copy
+                    if(currSeqNr != pInstance->rxBuffParam_m.currRxSeqNr_m)
+                    {
+                        // Sequence number changed -> Frame available
+                        pInstance->rxBuffParam_m.fRxFrameIncoming_m = TRUE;
+
+                        // Increment local receive sequence number
+                        pInstance->rxBuffParam_m.currRxSeqNr_m = currSeqNr;
+                    }
+                }
+
+                fReturn = TRUE;
+            }
+            else
+            {
+                error_setError(kAppIfModuleAsync, kAppIfAsyncBufferSizeMismatch);
+            }
         }
     }
 
-    return ret;
+    return fReturn;
 }
 
 //------------------------------------------------------------------------------
 /**
 \brief    Change local sequence number
 
-\param[out] pSeqNr_p        Changed sequence number
+\param[inout] pSeqNr_p        Changed sequence number
 
 \ingroup module_async
 */
@@ -600,16 +639,16 @@ static void async_changeLocalSeqNr(tSeqNrValue* pSeqNr_p)
 
 \param[in]  pInstance_p             Pointer to the local instance
 
-\return tAppIfStatus
-\retval kAppIfSuccessful        Channel is free for transmission
-\retval kAppIfAsyncChannelBusy  Channel is currently transmitting
+\return tChanStatus
+\retval tChanStatusFree       Channel is free for transmission
+\retval tChanStatusBusy       Channel is currently transmitting
 
 \ingroup module_async
 */
 //------------------------------------------------------------------------------
-static tAppIfStatus async_checkChannelStatus(tAsyncInstance pInstance_p)
+static tAsyncChanStatus async_checkChannelStatus(tAsyncInstance pInstance_p)
 {
-    tAppIfStatus ret = kAppIfSuccessful;
+    tAsyncChanStatus chanStatus = kChanStatusInvalid;
     tSeqNrValue  seqNr = kSeqNrValueInvalid;
 
     // Get status of transmit channel
@@ -619,10 +658,14 @@ static tAppIfStatus async_checkChannelStatus(tAsyncInstance pInstance_p)
     if(seqNr != pInstance_p->txBuffParam_m.currTxSeqNr_m)
     {
         // Message in progress -> retry later!
-        ret = kAppIfAsyncChannelBusy;
+        chanStatus = kChanStatusBusy;
+    }
+    else
+    {
+        chanStatus = kChanStatusFree;
     }
 
-    return ret;
+    return chanStatus;
 }
 
 // \}

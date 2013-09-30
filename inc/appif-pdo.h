@@ -56,7 +56,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // typedef
 //------------------------------------------------------------------------------
 
-typedef tAppIfStatus (* tAppIfPdoCb) ( UINT32 rpdoRelTimeLow_p,
+typedef BOOL (* tAppIfPdoCb) ( UINT32 rpdoRelTimeLow_p,
         tRpdoMappedObj* pRpdoImage_p,
         tTpdoMappedObj* pTpdoImage_p );  ///< Pdo user callback function
 
@@ -71,7 +71,7 @@ typedef struct {
 //------------------------------------------------------------------------------
 // function prototypes
 //------------------------------------------------------------------------------
-tAppIfStatus pdo_init(tAppIfPdoCb pfnPdoCb_p, tPdoInitParam* pPdoInitParam_p);
+BOOL pdo_init(tAppIfPdoCb pfnPdoCb_p, tPdoInitParam* pPdoInitParam_p);
 void pdo_exit(void);
 
 #endif /* _INC_APPIF_PDO_H_ */

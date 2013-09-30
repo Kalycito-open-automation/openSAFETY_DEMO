@@ -67,13 +67,13 @@ typedef enum {
 /**
  * \brief Callback for stream buffer action. Called to inform module about new data.
  */
-typedef tAppIfStatus (*tBuffAction) (UINT8* pBuffer_p, UINT16 bufSize_p,
+typedef BOOL (*tBuffAction) (UINT8* pBuffer_p, UINT16 bufSize_p,
         void * pUserArg_p);
 
 /**
  * \brief Synchronous user callback function. Informs user about new data.
  */
-typedef tAppIfStatus (*tBuffSyncCb)(void);
+typedef BOOL (*tBuffSyncCb)(void);
 
 
 /**
@@ -89,16 +89,14 @@ typedef struct {
 //------------------------------------------------------------------------------
 // function prototypes
 //------------------------------------------------------------------------------
-tAppIfStatus stream_init(tStreamInitParam* pInitParam_p);
+BOOL stream_init(tStreamInitParam* pInitParam_p);
 void stream_exit(void);
-tAppIfStatus stream_finishModuleInit(void);
 
-tAppIfStatus stream_getBufferParam(tTbufNumLayout buffId_p,
-        tBuffDescriptor** ppBuffParam_p);
-tAppIfStatus stream_registerAction(tActionType actType_p, UINT8 buffId_p,
+tBuffDescriptor* stream_getBufferParam(tTbufNumLayout buffId_p);
+BOOL stream_registerAction(tActionType actType_p, UINT8 buffId_p,
         tBuffAction pfnBuffAct_p, void * pUserArg_p);
 void stream_registerSyncCb(tBuffSyncCb pfnSyncCb_p);
-tAppIfStatus stream_processSync(void);
+BOOL stream_processSync(void);
 
 void stream_ackBuffer(UINT8 buffId_p);
 

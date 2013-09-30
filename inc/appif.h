@@ -66,6 +66,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 typedef struct {
     tBuffDescriptor*    pBuffDescList_m;      ///< Triple buffer descriptor list
+    tErrorHandler       pfnErrorHandler_m;    ///< Error handler callback function
     tStreamHandler      pfnStreamHandler_m;   ///< Stream handler callback function
     tTbufNumLayout      idConsAck_m;          ///< Id of the consumer acknowledge register
     tTbufNumLayout      idProdAck_m;          ///< Id of the producer acknowledge register
@@ -75,11 +76,11 @@ typedef struct {
 //------------------------------------------------------------------------------
 // function prototypes
 //------------------------------------------------------------------------------
-tAppIfStatus appif_init(tAppIfInitParam* pInitParam_p);
+BOOL appif_init(tAppIfInitParam* pInitParam_p);
 void appif_exit(void);
 
-tAppIfStatus appif_processSync(void);
-tAppIfStatus appif_processAsync(tAsyncInstance* ppInstance_p);
+BOOL appif_processSync(void);
+BOOL appif_processAsync(tAsyncInstance* ppInstance_p);
 
 #endif /* _INC_APPIF_H_ */
 

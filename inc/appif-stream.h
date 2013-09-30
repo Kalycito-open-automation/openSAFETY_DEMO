@@ -72,7 +72,7 @@ typedef struct {
 /**
  * \brief Handler callback foe input/output stream filling
  */
-typedef tAppIfStatus (*tStreamHandler) (tHandlerParam* pHandlParam_p);
+typedef BOOL (*tStreamHandler) (tHandlerParam* pHandlParam_p);
 
 //------------------------------------------------------------------------------
 // function prototypes

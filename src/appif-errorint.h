@@ -1,10 +1,11 @@
 /**
 ********************************************************************************
-\file   appif-apglobal.h
+\file   appif-errorint.h
 
-\brief  Global header file for the application interface project (AP processor)
+\brief  Library internal header for the error handler module
 
-Global header file for the application interface project on the AP processor.
+Application interface error handler module. Handles each occurred error and
+forwards a trace to the user layer.
 
 *******************************************************************************/
 
@@ -35,21 +36,14 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
 
-#ifndef _INC_APPIF_APGLOBAL_H_
-#define _INC_APPIF_APGLOBAL_H_
+#ifndef _INC_APPIF_ERRORINT_H_
+#define _INC_APPIF_ERRORINT_H_
 
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
 
-#include <appif-global.h>
-
-#include <appif-debug.h>
-#include <ami.h>
-
-#include <appif-tbuflayout.h>
-#include <appif-error.h>
-
+#include "appif-error.h"
 
 //------------------------------------------------------------------------------
 // const defines
@@ -63,7 +57,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // function prototypes
 //------------------------------------------------------------------------------
 
-#endif /* _INC_APPIF_PCPGLOBAL_H_ */
+BOOL error_init(tErrorHandler pfnErrorHandler_p);
+void error_exit(void);
 
+
+#endif /* _INC_APPIF_ERRORINT_H_ */
 
 

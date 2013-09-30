@@ -65,7 +65,7 @@ typedef struct
 } tAppIfTimeStamp;
 
 
-typedef tAppIfStatus (* tAppIfAppCbSync) ( tAppIfTimeStamp* pTimeStamp_p );
+typedef BOOL (* tAppIfAppCbSync) ( tAppIfTimeStamp* pTimeStamp_p );
 
 /**
  * \brief  Status module initialization structure
@@ -81,7 +81,7 @@ typedef struct {
 // function prototypes
 //------------------------------------------------------------------------------
 
-tAppIfStatus status_init(tStatusInitParam* pInitParam_p);
+BOOL status_init(tStatusInitParam* pInitParam_p);
 void status_exit(void);
 
 #endif /* _INC_APPIF_STATUS_H_ */
