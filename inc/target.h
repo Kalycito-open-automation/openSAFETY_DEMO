@@ -181,6 +181,24 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #endif  //_TIME_OF_DAY_DEFINED_
 
+#elif defined(_WIN32_) || defined( _MSC_VER )
+  // types defined in WINDEF.H, included by <windows.h>
+  #include <windows.h>
+  
+  
+#ifndef _TIME_OF_DAY_DEFINED_
+
+    typedef struct
+    {
+        unsigned long  int  m_dwMs;
+        unsigned short int  m_wDays;
+
+    } tTimeOfDay;
+
+#define _TIME_OF_DAY_DEFINED_
+
+#endif  //_TIME_OF_DAY_DEFINED_
+
 #else
     #error "Please define the datatypes for your target and compiler here!"
 #endif
