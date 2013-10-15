@@ -144,10 +144,7 @@ IF ( DOXYGEN_FOUND )
 ENDIF ( DOXYGEN_FOUND  )
 
 
-#######################
-## Documentation
-#######################
-
+ADD_SUBDIRECTORY ("${PROJECT_SOURCE_DIR}/appifcommon" )
 ADD_SUBDIRECTORY ("${PROJECT_SOURCE_DIR}/appif" )
 
 IF ( UNITTEST_ENABLE )

@@ -38,15 +38,17 @@ SimpleTest ( "TST_AppIF" "tst_appif" "${TST_SOURCES}" )
 
 SET_TARGET_INCLUDE ( tst_appif "${PROJECT_SOURCE_DIR}" )
 SET_TARGET_INCLUDE ( tst_appif "${PROJECT_SOURCE_DIR}/Driver" )
+SET_TARGET_INCLUDE ( tst_appif "${CMAKE_SOURCE_DIR}/appifcommon/include/" )
 SET_TARGET_INCLUDE ( tst_appif "${CMAKE_SOURCE_DIR}/appif/include/" )
 
-TARGET_LINK_LIBRARIES(tst_appif "appif")
-ADD_DEPENDENCIES ( tst_appif "appif")
+TARGET_LINK_LIBRARIES(tst_appif "appif" "appifcommon" )
+ADD_DEPENDENCIES ( tst_appif "appif" "appifcommon" )
 
 IF ( ( WIN32 OR CYGWIN ) AND ( ${LIB_TYPE} STREQUAL "SHARED" ) )
-    EnsureLibraries(tst_appif "appif")
+    EnsureLibraries(tst_appif "appif" "appifcommon" )
 ENDIF ( ( WIN32 OR CYGWIN ) AND ( ${LIB_TYPE} STREQUAL "SHARED" ) )
 
 # Enable Coverage on target and test subject
 AddCoverage( "PIFA" "tst_appif" )
 AddCoverage( "PIFA" "appif" )
+AddCoverage( "PIFA" "appifcommon" )
