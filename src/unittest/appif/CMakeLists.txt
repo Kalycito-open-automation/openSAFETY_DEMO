@@ -48,5 +48,5 @@ IF ( ( WIN32 OR CYGWIN ) AND ( ${LIB_TYPE} STREQUAL "SHARED" ) )
 ENDIF ( ( WIN32 OR CYGWIN ) AND ( ${LIB_TYPE} STREQUAL "SHARED" ) )
 
 # Enable Coverage on target and test subject
-#AddCoverage( "PIFA" "appif" )
 AddCoverage( "PIFA" "tst_appif" )
+AddCoverage( "PIFA" "appif" )
