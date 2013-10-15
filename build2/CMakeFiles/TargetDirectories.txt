@@ -1,0 +1,6 @@
+/home/knallr/Development/PLK/openPOWERLINK_PIFA/build2/contrib/cunit/CMakeFiles/CUnit.dir
+/home/knallr/Development/PLK/openPOWERLINK_PIFA/build2/CMakeFiles/PIFA_coverage.dir
+/home/knallr/Development/PLK/openPOWERLINK_PIFA/build2/CMakeFiles/PIFA_coverage_html.dir
+/home/knallr/Development/PLK/openPOWERLINK_PIFA/build2/CMakeFiles/PIFA_coverage_xml.dir
+/home/knallr/Development/PLK/openPOWERLINK_PIFA/build2/appif/CMakeFiles/appif.dir
+/home/knallr/Development/PLK/openPOWERLINK_PIFA/build2/unittest/appif/CMakeFiles/tst_appif.dir

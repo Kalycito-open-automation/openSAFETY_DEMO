@@ -1,0 +1,16 @@
+
+Include(CMakeDependentOption)
+
+# The version number.
+# Allow the developer to select if Dynamic or Static libraries are built
+OPTION ( BUILD_SHARED_LIBS "Build Shared Libraries" ON)
+MARK_AS_ADVANCED ( BUILD_SHARED_LIBS )
+
+OPTION ( UNITTEST_ENABLE "Enables the unittest integration for the openSAFETY distribution" ON )
+
+CMAKE_DEPENDENT_OPTION ( UNITTEST_SMALL_TARGETS "Splits the unittest into smaller targets, to enable building for smaller memory footprint targets"  OFF "UNITTEST_ENABLE" OFF )
+CMAKE_DEPENDENT_OPTION ( UNITTEST_XML_REPORTS "Generates XML reports instead of stdout output" ON "UNITTEST_ENABLE" ON )
+
+OPTION ( UNITTEST_PIFA "Enables the unittest integration for the tools directory" ON )
+MARK_AS_ADVANCED ( UNITTEST_PIFA )
+
