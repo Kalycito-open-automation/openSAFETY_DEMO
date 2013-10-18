@@ -500,7 +500,7 @@ static BOOL async_handleTxFrame(tAsyncInstance pInstance_p)
 
             // When timer is running and ACK occurred -> Stop timer instance!
             timerState = timeout_isRunning(pInstance_p->txBuffParam_m.pTimeoutInst_m);
-            if(timerState == kTimerStateRunning);
+            if(timerState == kTimerStateRunning)
             {
                 timeout_stopTimer(pInstance_p->txBuffParam_m.pTimeoutInst_m);
             }
