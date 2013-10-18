@@ -284,6 +284,7 @@ tCcWriteState ccobject_writeCurrObject(UINT16 objIdx_p, UINT8 objSubIdx_p,
             default:
             {
                 // Error occurred! error signal already set!
+                break;
             }
         }
 

@@ -472,6 +472,7 @@ static tBuffActionElem* stream_getActionList(tActionType actType_p)
         default:
         {
             // error occurred
+            break;
         }
     }
 
