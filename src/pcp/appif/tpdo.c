@@ -212,15 +212,11 @@ tAppIfStatus tpdo_linkTpdos(void)
 /**
 \brief    Access to the tpdo is finished
 
-\param[in] chanId_p       Id of the TPDO channel
-
 \ingroup module_tpdo
 */
 //------------------------------------------------------------------------------
-void tpdo_procFinished(UINT8 chanId_p)
+void tpdo_procFinished(void)
 {
-    // TODO only ack if it is the last TPDO
-
     // Acknowledge triple buffer
     tbuf_setAck(tpdoInstance_l.pTbufInstance_m);
 }

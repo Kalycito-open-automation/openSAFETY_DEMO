@@ -500,24 +500,23 @@ Exit:
 \brief    Processing of a pdo is finished
 
 \param[in] pdoDir_p       The direction of the PDO
-\param[in] chanId_p       Id of the incoming channel
 
 \ingroup module_appif
 */
 //------------------------------------------------------------------------------
-void appif_pdoProcFinished(tAppIfPdoDir pdoDir_p, UINT8 chanId_p)
+void appif_pdoProcFinished(tAppIfPdoDir pdoDir_p)
 {
 #if(((APPIF_MODULE_INTEGRATION) & (APPIF_MODULE_PDO)) != 0)
     switch(pdoDir_p)
     {
         case tPdoDirRpdo:
         {
-            rpdo_procFinished(chanId_p);
+            rpdo_procFinished();
             break;
         }
         case tPdoDirTpdo:
         {
-            tpdo_procFinished(chanId_p);
+            tpdo_procFinished();
             break;
         }
         default:

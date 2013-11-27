@@ -72,7 +72,7 @@ typedef struct {
 tAppIfStatus rpdo_init(tRpdoInitStruct* pInitParam_p);
 void rpdo_exit(void);
 tAppIfStatus rpdo_linkRpdos(void);
-void rpdo_procFinished(UINT8 chanId_p);
+void rpdo_procFinished(void);
 tTbufRpdoImage* rpdo_getBaseAddr(void);
 
 #endif /* _INC_appif_rpdo_H_ */

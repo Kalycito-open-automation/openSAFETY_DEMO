@@ -138,8 +138,6 @@ static tAppIfStatus appif_initPlk(tMainInstance* pInstance_p);
 static tAppIfStatus appif_processPlk(tMainInstance* pInstance_p);
 static void appif_switchOffPlk(void);
 static void appif_enterCriticalSection(UINT8 fEnable_p);
-static void appif_rpdoCopyEndCb(UINT8 chanId_p);
-static void appif_tpdoCopyStartCb(UINT8 chanId_p);
 static tEplKernel appif_userEventCb(tEplApiEventType EventType_p,
                                    tEplApiEventArg* pEventArg_p,
                                    void* pUserArg_p);
@@ -320,8 +318,6 @@ static tAppIfStatus appif_initPlk(tMainInstance* pInstance_p)
     // set callback functions
     initParam.m_pfnCbEvent                = processEvents;
     initParam.m_pfnCbSync                 = appif_syncCb;
-    initParam.pfnCbRpdoPostCopy           = appif_rpdoCopyEndCb;
-    initParam.pfnCbTpdoPreCopy            = appif_tpdoCopyStartCb;
 
     // initialize POWERLINK stack
     eplret = oplk_init(&initParam);
@@ -435,34 +431,6 @@ static void appif_switchOffPlk(void)
 static void appif_enterCriticalSection(UINT8 fEnable_p)
 {
     EplTgtEnableGlobalInterrupt(fEnable_p);
-}
-
-//------------------------------------------------------------------------------
-/**
-\brief    Rpdo copy finished callback
-
-\param[in] chanId_p       Id of finished channel
-
-\ingroup module_main
-*/
-//------------------------------------------------------------------------------
-static void appif_rpdoCopyEndCb(UINT8 chanId_p)
-{
-    appif_pdoProcFinished(tPdoDirRpdo, chanId_p);
-}
-
-//------------------------------------------------------------------------------
-/**
-\brief    Tpdo copy finished callback
-
-\param[in] chanId_p       Id of finished channel
-
-\ingroup module_main
-*/
-//------------------------------------------------------------------------------
-static void appif_tpdoCopyStartCb(UINT8 chanId_p)
-{
-    appif_pdoProcFinished(tPdoDirTpdo, chanId_p);
 }
 
 
@@ -597,6 +565,8 @@ static tEplKernel PUBLIC appif_syncCb(tSocTimeStamp* socTimeStamp_p)
     if(eplret != kEplSuccessful)
         goto Exit;
 
+    appif_pdoProcFinished(tPdoDirRpdo);
+
     // CN is configured (cycle time is set)
     if (mainInstance_l.cycleTime != 0 &&
             mainInstance_l.plkState >= kNmtCsReadyToOperate)
@@ -623,6 +593,10 @@ static tEplKernel PUBLIC appif_syncCb(tSocTimeStamp* socTimeStamp_p)
     }
 
     eplret = pdou_copyTxPdoFromPi();
+    if(eplret != kEplSuccessful)
+        goto Exit;
+
+    appif_pdoProcFinished(tPdoDirTpdo);
 
 Exit:
     return eplret;

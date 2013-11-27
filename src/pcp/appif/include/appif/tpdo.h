@@ -72,7 +72,7 @@ typedef struct {
 tAppIfStatus tpdo_init(tTpdoInitStruct* pInitParam_p);
 void tpdo_exit(void);
 tAppIfStatus tpdo_linkTpdos(void);
-void tpdo_procFinished(UINT8 chanId_p);
+void tpdo_procFinished(void);
 tTbufTpdoImage* tpdo_getBaseAddr(void);
 
 #endif /* _INC_appif_tpdo_H_ */

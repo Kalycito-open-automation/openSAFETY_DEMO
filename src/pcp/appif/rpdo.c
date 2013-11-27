@@ -212,12 +212,10 @@ tAppIfStatus rpdo_linkRpdos(void)
 /**
 \brief    Access to the rpdo is finished
 
-\param[in] chanId_p     Id of the RPDO channel
-
 \ingroup module_rpdo
 */
 //------------------------------------------------------------------------------
-void rpdo_procFinished(UINT8 chanId_p)
+void rpdo_procFinished(void)
 {
     // Update the relative time
     rpdo_updateRelativeTime();

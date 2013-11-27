@@ -75,7 +75,7 @@ tAppIfStatus appif_configureModules(void);
 tAppIfStatus appif_handleAsync(void);
 tAppIfStatus appif_handleSync(void);
 
-void appif_pdoProcFinished(tAppIfPdoDir pdoDir_p, UINT8 chanId_p);
+void appif_pdoProcFinished(tAppIfPdoDir pdoDir_p);
 tAppIfStatus appif_sdoAccFinished(tEplSdoComFinished* pSdoComFinParam_p );
 
 
