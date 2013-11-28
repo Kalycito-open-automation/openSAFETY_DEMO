@@ -71,7 +71,7 @@ triple buffers.
 // global function prototypes
 //------------------------------------------------------------------------------
 
-extern tEplKernel PUBLIC appif_ccObdAccessCb(tObdCbParam MEM* pParam_p);
+extern tEplKernel PUBLIC cc_obdAccessCb(tObdCbParam MEM* pParam_p);
 
 //============================================================================//
 //            P R I V A T E   D E F I N I T I O N S                           //
@@ -241,7 +241,7 @@ channel objects the local object list needs to be forwarded.
 \ingroup module_main
 */
 //------------------------------------------------------------------------------
-tEplKernel PUBLIC appif_ccObdAccessCb(tObdCbParam MEM* pParam_p)
+tEplKernel PUBLIC cc_obdAccessCb(tObdCbParam MEM* pParam_p)
 {
     tEplKernel eplret = kEplSuccessful;
     tConfChanObject  object;

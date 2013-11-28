@@ -204,7 +204,7 @@ OBD_BEGIN ()
 
 #if(((APPIF_MODULE_INTEGRATION) & (APPIF_MODULE_CC)) != 0)
     // add manufacturer part objects (2000h .. 5fffh) here
-        OBD_BEGIN_INDEX_RAM(0x2000, 0x05, appif_ccObdAccessCb)
+        OBD_BEGIN_INDEX_RAM(0x2000, 0x05, cc_obdAccessCb)
             OBD_SUBINDEX_RAM_VAR(0x2000, 0x00, kObdTypeUInt8, kObdAccConst, tObdUnsigned8, NumberOfEntries, 0x04)
             OBD_SUBINDEX_RAM_VAR(0x2000, 0x01, kObdTypeUInt16, kObdAccRW, tObdUnsigned16, UserParameter_01, 0x00)
             OBD_SUBINDEX_RAM_VAR(0x2000, 0x02, kObdTypeUInt16, kObdAccRW, tObdUnsigned16, UserParameter_02, 0x00)
