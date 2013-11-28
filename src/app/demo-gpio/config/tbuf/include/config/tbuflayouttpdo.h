@@ -48,9 +48,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // const defines
 //------------------------------------------------------------------------------
 
-#define TPDO_NUM_OBJECTS    1       ///< Number of mapped TPDO objects
-
-#define T0SPDO_DOM_SIZE     36      ///< Size of the TPDO domain object
+#define TPDO_NUM_OBJECTS    4       ///< Number of mapped TPDO objects
 
 //------------------------------------------------------------------------------
 // typedef
@@ -59,7 +57,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * \brief List of all mappable objects
  */
 typedef struct {
-    UINT8  t0SpdoDom_m[T0SPDO_DOM_SIZE];
+    UINT8          digitalOutput0;   ///< Digital output TPDO object 0
+    UINT8          digitalOutput1;   ///< Digital output TPDO object 1
+    UINT8          digitalOutput2;   ///< Digital output TPDO object 2
+    UINT8          digitalOutput3;   ///< Digital output TPDO object 3
 } tTpdoMappedObj;
 
 /**
@@ -74,14 +75,20 @@ typedef struct {
 //------------------------------------------------------------------------------
 #define TBUF_TPDO_MAPPED_OBJ_OFF    offsetof(tTbufTpdoImage, mappedObjList_m)
 
-#define TBUF_TPDO0_SPDO_DOM_OFF     TBUF_TPDO_MAPPED_OBJ_OFF + offsetof(tTpdoMappedObj, t0SpdoDom_m)
+#define TBUF_DIGOUTPUT0_SPDO_DOM_OFF     TBUF_RPDO_MAPPED_OBJ_OFF + offsetof(tTpdoMappedObj, digitalOutput0)
+#define TBUF_DIGOUTPUT1_SPDO_DOM_OFF     TBUF_RPDO_MAPPED_OBJ_OFF + offsetof(tTpdoMappedObj, digitalOutput1)
+#define TBUF_DIGOUTPUT2_SPDO_DOM_OFF     TBUF_RPDO_MAPPED_OBJ_OFF + offsetof(tTpdoMappedObj, digitalOutput2)
+#define TBUF_DIGOUTPUT3_SPDO_DOM_OFF     TBUF_RPDO_MAPPED_OBJ_OFF + offsetof(tTpdoMappedObj, digitalOutput3)
 
 //------------------------------------------------------------------------------
 // object linking parameters
 //------------------------------------------------------------------------------
 
 // List of object index, subindex and destination address offset
-#define TPDO_LINKING_LIST_INIT_VECTOR   { {0x6000, 0x00, TBUF_TPDO0_SPDO_DOM_OFF, T0SPDO_DOM_SIZE} \
+#define TPDO_LINKING_LIST_INIT_VECTOR   { {0x6000, 0x01, TBUF_DIGOUTPUT0_SPDO_DOM_OFF, 1}, \
+                                          {0x6000, 0x02, TBUF_DIGOUTPUT1_SPDO_DOM_OFF, 1}, \
+                                          {0x6000, 0x03, TBUF_DIGOUTPUT2_SPDO_DOM_OFF, 1}, \
+                                          {0x6000, 0x04, TBUF_DIGOUTPUT3_SPDO_DOM_OFF, 1}  \
                                         }
 
 //------------------------------------------------------------------------------

@@ -47,9 +47,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
-#define RPDO_NUM_OBJECTS    1       ///< Number of mapped RPDO objects
-
-#define R0SPDO_DOM_SIZE     24      ///< Size of the RPDO domain object
+#define RPDO_NUM_OBJECTS    4       ///< Number of mapped RPDO objects
 
 //------------------------------------------------------------------------------
 // typedef
@@ -59,7 +57,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * \brief List of all mappable objects
  */
 typedef struct {
-    UINT8          r0SpdoDom_m[R0SPDO_DOM_SIZE];
+    UINT8          digitalInput0;   ///< Digital input RPDO object 0
+    UINT8          digitalInput1;   ///< Digital input RPDO object 1
+    UINT8          digitalInput2;   ///< Digital input RPDO object 2
+    UINT8          digitalInput3;   ///< Digital input RPDO object 3
 } tRpdoMappedObj;
 
 /**
@@ -76,14 +77,20 @@ typedef struct {
 #define TBUF_RPDO_RELTIME_OFF       offsetof(tTbufRpdoImage, relativeTimeLow_m)
 #define TBUF_RPDO_MAPPED_OBJ_OFF    offsetof(tTbufRpdoImage, mappedObjList_m)
 
-#define TBUF_RPDO0_SPDO_DOM_OFF     TBUF_RPDO_MAPPED_OBJ_OFF + offsetof(tRpdoMappedObj, r0SpdoDom_m)
+#define TBUF_DIGINPUT0_SPDO_DOM_OFF     TBUF_RPDO_MAPPED_OBJ_OFF + offsetof(tRpdoMappedObj, digitalInput0)
+#define TBUF_DIGINPUT1_SPDO_DOM_OFF     TBUF_RPDO_MAPPED_OBJ_OFF + offsetof(tRpdoMappedObj, digitalInput1)
+#define TBUF_DIGINPUT2_SPDO_DOM_OFF     TBUF_RPDO_MAPPED_OBJ_OFF + offsetof(tRpdoMappedObj, digitalInput2)
+#define TBUF_DIGINPUT3_SPDO_DOM_OFF     TBUF_RPDO_MAPPED_OBJ_OFF + offsetof(tRpdoMappedObj, digitalInput3)
 
 //------------------------------------------------------------------------------
 // object linking parameters
 //------------------------------------------------------------------------------
 
 // List of object index, subindex and destination address offset
-#define RPDO_LINKING_LIST_INIT_VECTOR   { {0x6200, 0x00, TBUF_RPDO0_SPDO_DOM_OFF, R0SPDO_DOM_SIZE} \
+#define RPDO_LINKING_LIST_INIT_VECTOR   { {0x6200, 0x01, TBUF_DIGINPUT0_SPDO_DOM_OFF, 1}, \
+                                          {0x6200, 0x02, TBUF_DIGINPUT1_SPDO_DOM_OFF, 1}, \
+                                          {0x6200, 0x03, TBUF_DIGINPUT2_SPDO_DOM_OFF, 1}, \
+                                          {0x6200, 0x04, TBUF_DIGINPUT3_SPDO_DOM_OFF, 1}  \
                                         }
 
 //------------------------------------------------------------------------------

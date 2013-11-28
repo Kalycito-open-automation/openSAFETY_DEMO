@@ -385,8 +385,6 @@ static BOOL appif_workInputOutput(UINT32 rpdoRelTimeLow_p,
         tRpdoMappedObj* pRpdoImage_p,
         tTpdoMappedObj* pTpdoImage_p )
 {
-    UINT8* pRSpdoObj = (UINT8 *)pRpdoImage_p->r0SpdoDom_m;
-    UINT8* pTSpdoObj = (UINT8 *)pTpdoImage_p->t0SpdoDom_m;
     UINT8 i;
     UINT32 outPort = 0;
     UINT8 inPort;
@@ -395,10 +393,10 @@ static BOOL appif_workInputOutput(UINT32 rpdoRelTimeLow_p,
     inPort = app_readInputPort();
 
 
-    pTSpdoObj[0] = inPort;
-    pTSpdoObj[1] = inPort;
-    pTSpdoObj[2] = inPort;
-    pTSpdoObj[3] = inPort;
+    pTpdoImage_p->digitalOutput0 = inPort;
+    pTpdoImage_p->digitalOutput1 = inPort;
+    pTpdoImage_p->digitalOutput2 = inPort;
+    pTpdoImage_p->digitalOutput3 = inPort;
 
     // Digital OUT: set Leds and hex digits
     for (i = 0; i < 3; i++)
@@ -406,16 +404,16 @@ static BOOL appif_workInputOutput(UINT32 rpdoRelTimeLow_p,
         if (i == 0) //first 8 bit of DigOut
         {
             // configured as output -> overwrite invalid input values with RPDO mapped variables
-            outPort = (outPort & ~(0xff << (i * 8))) | (pRSpdoObj[0] << (i * 8));
+            outPort = (outPort & ~(0xff << (i * 8))) | (pRpdoImage_p->digitalInput0 << (i * 8));
         }
         else if (i == 1) //second 8 bit of DigOut
         {
-            outPort = (outPort & ~(0xff << (i * 8))) | (pRSpdoObj[1] << (i * 8));
+            outPort = (outPort & ~(0xff << (i * 8))) | (pRpdoImage_p->digitalInput1 << (i * 8));
         }
         else if (i == 2)  //third 8 bit of DigOut
         {
             // configured as input -> store in TPDO mapped variable
-            outPort = (outPort & ~(0xff << (i * 8))) | (pRSpdoObj[3] << (i * 8));
+            outPort = (outPort & ~(0xff << (i * 8))) | (pRpdoImage_p->digitalInput3 << (i * 8));
         }
     }
 
