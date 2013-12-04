@@ -44,8 +44,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <libappif/apglobal.h>
 
-#include <config/tbuflayoutrpdo.h>
-#include <config/tbuflayouttpdo.h>
+#include <appifcommon/rpdo.h>
+#include <appifcommon/tpdo.h>
 
 //------------------------------------------------------------------------------
 // const defines

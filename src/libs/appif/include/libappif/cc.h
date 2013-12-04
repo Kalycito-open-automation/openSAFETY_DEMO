@@ -44,7 +44,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <libappif/apglobal.h>
 
-#include <config/tbuflayoutcc.h>
+#include <appifcommon/cc.h>
 
 //------------------------------------------------------------------------------
 // const defines

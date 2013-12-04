@@ -1,8 +1,8 @@
 /**
 ********************************************************************************
-\file   config/tbuflayoutssdo.h
+\file   config/ssdo.h
 
-\brief  Header defines the layout of the SSDO triple buffer
+\brief  This header provides the configuration parameters of the ssdo module
 
 This header gives the basic structure of the SSDO receive and
 transmit buffers.
@@ -36,8 +36,8 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
 
-#ifndef _INC_config_tbuflayoutssdo_H_
-#define _INC_config_tbuflayoutssdo_H_
+#ifndef _INC_config_ssdo_H_
+#define _INC_config_ssdo_H_
 
 //------------------------------------------------------------------------------
 // includes
@@ -67,41 +67,13 @@ typedef enum {
     kNumSsdoInstCount = 0x01,
 } tSsdoChanNum;
 
-/**
- * \brief Memory layout of the receive channel
- */
-typedef struct {
-    UINT8   seqNr_m;
-    UINT8   reserved;
-    UINT16  paylSize_m;
-    UINT8   ssdoStubDataDom_m[SSDO_STUB_DATA_DOM_SIZE];
-} tTbufSsdoRxStructure;
-
-/**
- * \brief Memory layout of the transmit channel
- */
-typedef struct {
-    UINT8   seqNr_m;
-    UINT8   reserved;
-    UINT16  paylSize_m;
-    UINT8   tssdoTransmitData_m[TSSDO_TRANSMIT_DATA_SIZE];
-} tTbufSsdoTxStructure;
-
 //------------------------------------------------------------------------------
 // offsetof defines
 //------------------------------------------------------------------------------
-
-#define TBUF_SSDORX_SEQNR_OFF                 offsetof(tTbufSsdoRxStructure, seqNr_m)
-#define TBUF_SSDORX_PAYLSIZE_OFF              offsetof(tTbufSsdoRxStructure, paylSize_m)
-#define TBUF_SSDORX_SSDO_STUB_DATA_DOM_OFF    offsetof(tTbufSsdoRxStructure, ssdoStubDataDom_m)
-
-#define TBUF_SSDOTX_SEQNR_OFF                 offsetof(tTbufSsdoTxStructure, seqNr_m)
-#define TBUF_SSDOTX_PAYLSIZE_OFF              offsetof(tTbufSsdoTxStructure, paylSize_m)
-#define TBUF_SSDOTX_TSSDO_TRANSMIT_DATA_OFF   offsetof(tTbufSsdoTxStructure, tssdoTransmitData_m)
 
 //------------------------------------------------------------------------------
 // function prototypes
 //------------------------------------------------------------------------------
 
-#endif /* _INC_config_tbuflayoutssdo_H_ */
+#endif /* _INC_config_ssdo_H_ */
 

@@ -1,11 +1,11 @@
 /**
 ********************************************************************************
-\file   config/tbuflayoutcc.h
+\file   appifcommon/ssdo.h
 
-\brief  Header defines the layout of the configuration channel triple buffer
+\brief  Header defines the layout of the SSDO triple buffer
 
-This header gives the basic structure of the configuration channel
-triple buffers.
+This header gives the basic structure of the SSDO receive and
+transmit buffers.
 
 *******************************************************************************/
 
@@ -36,40 +36,58 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
 
-#ifndef _INC_config_tbuflayoutcc_H_
-#define _INC_config_tbuflayoutcc_H_
+#ifndef _INC_appifcommon_ssdo_H_
+#define _INC_appifcommon_ssdo_H_
 
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
 
-#include <appifcommon/global.h>
-
-//------------------------------------------------------------------------------
-// typedef
-//------------------------------------------------------------------------------
-
-typedef struct {
-    UINT8 seqNr_m;
-    UINT8 objSubIdx_m;
-    UINT16 objIdx_m;
-    UINT32 objPayloadLow_m;
-    UINT32 objPayloadHigh_m;
-} tTbufCcStructure;
+#include <config/ssdo.h>
 
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
 
-#define TBUF_SEQNR_OFF          offsetof(tTbufCcStructure, seqNr_m)
-#define TBUF_OBJSUBIDX_OFF      offsetof(tTbufCcStructure, objSubIdx_m)
-#define TBUF_OBJIDX_OFF         offsetof(tTbufCcStructure, objIdx_m)
-#define TBUF_PAYLOADLOW_OFF     offsetof(tTbufCcStructure, objPayloadLow_m)
-#define TBUF_PAYLOADHIGH_OFF    offsetof(tTbufCcStructure, objPayloadHigh_m)
+//------------------------------------------------------------------------------
+// typedef
+//------------------------------------------------------------------------------
+
+/**
+ * \brief Memory layout of the receive channel
+ */
+typedef struct {
+    UINT8   seqNr_m;
+    UINT8   reserved;
+    UINT16  paylSize_m;
+    UINT8   ssdoStubDataDom_m[SSDO_STUB_DATA_DOM_SIZE];
+} tTbufSsdoRxStructure;
+
+/**
+ * \brief Memory layout of the transmit channel
+ */
+typedef struct {
+    UINT8   seqNr_m;
+    UINT8   reserved;
+    UINT16  paylSize_m;
+    UINT8   tssdoTransmitData_m[TSSDO_TRANSMIT_DATA_SIZE];
+} tTbufSsdoTxStructure;
+
+//------------------------------------------------------------------------------
+// offsetof defines
+//------------------------------------------------------------------------------
+
+#define TBUF_SSDORX_SEQNR_OFF                 offsetof(tTbufSsdoRxStructure, seqNr_m)
+#define TBUF_SSDORX_PAYLSIZE_OFF              offsetof(tTbufSsdoRxStructure, paylSize_m)
+#define TBUF_SSDORX_SSDO_STUB_DATA_DOM_OFF    offsetof(tTbufSsdoRxStructure, ssdoStubDataDom_m)
+
+#define TBUF_SSDOTX_SEQNR_OFF                 offsetof(tTbufSsdoTxStructure, seqNr_m)
+#define TBUF_SSDOTX_PAYLSIZE_OFF              offsetof(tTbufSsdoTxStructure, paylSize_m)
+#define TBUF_SSDOTX_TSSDO_TRANSMIT_DATA_OFF   offsetof(tTbufSsdoTxStructure, tssdoTransmitData_m)
 
 //------------------------------------------------------------------------------
 // function prototypes
 //------------------------------------------------------------------------------
 
-#endif /* _INC_config_tbuflayoutcc_H_ */
+#endif /* _INC_appifcommon_ssdo_H_ */
 

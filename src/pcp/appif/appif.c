@@ -63,7 +63,7 @@ the synchronous and asynchronous tasks.
 #include <appifcommon/ccobject.h>
 
 #include <config/ccobjectlist.h>
-#include <config/tbuflayout.h>
+#include <config/triplebuffer.h>
 
 
 //============================================================================//

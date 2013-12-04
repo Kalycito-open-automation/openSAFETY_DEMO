@@ -193,12 +193,16 @@ tAppIfStatus rpdo_linkRpdos(void)
     UINT8            i;
     tObjLinkingData  initObjList[RPDO_NUM_OBJECTS] = RPDO_LINKING_LIST_INIT_VECTOR;
     tTbufRpdoImage*  pTargBase = rpdo_getBaseAddr();
+    UINT32           destOffset;
 
     for(i=0; i < RPDO_NUM_OBJECTS; i++)
     {
+        // Add offset of relative time to mapping object offset
+        destOffset = initObjList[i].objDestOffset + TBUF_RPDO_MAPPED_OBJ_OFF;
+
         // Link object to address
         ret = appif_linkPdo(initObjList[i].objIdx, initObjList[i].objSubIdx,
-                (UINT8 *)pTargBase, initObjList[i].objDestOffset, initObjList[i].objSize );
+                (UINT8 *)pTargBase, destOffset, initObjList[i].objSize );
         if(ret != kAppIfSuccessful)
         {
             break;

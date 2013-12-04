@@ -44,7 +44,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <libappif/apglobal.h>
 
-#include <config/tbuflayoutssdo.h>
+#include <appifcommon/ssdo.h>
 
 //------------------------------------------------------------------------------
 // const defines

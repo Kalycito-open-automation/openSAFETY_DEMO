@@ -43,7 +43,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // includes
 //------------------------------------------------------------------------------
 
-#include <config/tbuflayoutssdo.h>
+#include <appifcommon/ssdo.h>
 #include <appifcommon/timeout.h>
 
 #include <libappif/ssdo.h>

@@ -1,10 +1,10 @@
 /**
 ********************************************************************************
-\file   config/tbuflayoutrpdo.h
+\file   config/tpdo.h
 
-\brief  Header defines the layout of the rpdo triple buffer
+\brief  This header defines the configurable parameters of the tpdo module
 
-This header gives the basic structure of the receive pdo triple buffers.
+This header gives the basic structure of the transmit pdo triple buffers.
 
 *******************************************************************************/
 
@@ -35,8 +35,8 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
 
-#ifndef _INC_config_tbuflayoutrpdo_H_
-#define _INC_config_tbuflayoutrpdo_H_
+#ifndef _INC_config_tpdo_H_
+#define _INC_config_tpdo_H_
 
 //------------------------------------------------------------------------------
 // includes
@@ -47,55 +47,44 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
-#define RPDO_NUM_OBJECTS    4       ///< Number of mapped RPDO objects
+
+#define TPDO_NUM_OBJECTS    4       ///< Number of mapped TPDO objects
 
 //------------------------------------------------------------------------------
 // typedef
 //------------------------------------------------------------------------------
-
 /**
  * \brief List of all mappable objects
  */
 typedef struct {
-    UINT8          digitalInput0;   ///< Digital input RPDO object 0
-    UINT8          digitalInput1;   ///< Digital input RPDO object 1
-    UINT8          digitalInput2;   ///< Digital input RPDO object 2
-    UINT8          digitalInput3;   ///< Digital input RPDO object 3
-} tRpdoMappedObj;
-
-/**
- * \brief The layout of the receive PDO image
- */
-typedef struct {
-    UINT32         relativeTimeLow_m;
-    tRpdoMappedObj mappedObjList_m;
-} tTbufRpdoImage;
+    UINT8          digitalOutput0;   ///< Digital output TPDO object 0
+    UINT8          digitalOutput1;   ///< Digital output TPDO object 1
+    UINT8          digitalOutput2;   ///< Digital output TPDO object 2
+    UINT8          digitalOutput3;   ///< Digital output TPDO object 3
+} tTpdoMappedObj;
 
 //------------------------------------------------------------------------------
 // offsetof defines
 //------------------------------------------------------------------------------
-#define TBUF_RPDO_RELTIME_OFF       offsetof(tTbufRpdoImage, relativeTimeLow_m)
-#define TBUF_RPDO_MAPPED_OBJ_OFF    offsetof(tTbufRpdoImage, mappedObjList_m)
-
-#define TBUF_DIGINPUT0_SPDO_DOM_OFF     TBUF_RPDO_MAPPED_OBJ_OFF + offsetof(tRpdoMappedObj, digitalInput0)
-#define TBUF_DIGINPUT1_SPDO_DOM_OFF     TBUF_RPDO_MAPPED_OBJ_OFF + offsetof(tRpdoMappedObj, digitalInput1)
-#define TBUF_DIGINPUT2_SPDO_DOM_OFF     TBUF_RPDO_MAPPED_OBJ_OFF + offsetof(tRpdoMappedObj, digitalInput2)
-#define TBUF_DIGINPUT3_SPDO_DOM_OFF     TBUF_RPDO_MAPPED_OBJ_OFF + offsetof(tRpdoMappedObj, digitalInput3)
+#define TBUF_TPDO_DIGOUTPUT0_OFF     offsetof(tTpdoMappedObj, digitalOutput0)
+#define TBUF_TPDO_DIGOUTPUT1_OFF     offsetof(tTpdoMappedObj, digitalOutput1)
+#define TBUF_TPDO_DIGOUTPUT2_OFF     offsetof(tTpdoMappedObj, digitalOutput2)
+#define TBUF_TPDO_DIGOUTPUT3_OFF     offsetof(tTpdoMappedObj, digitalOutput3)
 
 //------------------------------------------------------------------------------
 // object linking parameters
 //------------------------------------------------------------------------------
 
-// List of object index, subindex and destination address offset
-#define RPDO_LINKING_LIST_INIT_VECTOR   { {0x6200, 0x01, TBUF_DIGINPUT0_SPDO_DOM_OFF, 1}, \
-                                          {0x6200, 0x02, TBUF_DIGINPUT1_SPDO_DOM_OFF, 1}, \
-                                          {0x6200, 0x03, TBUF_DIGINPUT2_SPDO_DOM_OFF, 1}, \
-                                          {0x6200, 0x04, TBUF_DIGINPUT3_SPDO_DOM_OFF, 1}  \
+// Link between object and buffer address: objIdx | objSubIdx | addressOffset            | objSize
+#define TPDO_LINKING_LIST_INIT_VECTOR   { {0x6000 , 0x01      , TBUF_TPDO_DIGOUTPUT0_OFF , 1       }, \
+                                          {0x6000 , 0x02      , TBUF_TPDO_DIGOUTPUT1_OFF , 1       }, \
+                                          {0x6000 , 0x03      , TBUF_TPDO_DIGOUTPUT2_OFF , 1       }, \
+                                          {0x6000 , 0x04      , TBUF_TPDO_DIGOUTPUT3_OFF , 1       }  \
                                         }
 
 //------------------------------------------------------------------------------
 // function prototypes
 //------------------------------------------------------------------------------
 
-#endif /* _INC_config_tbuflayoutrpdo_H_ */
+#endif /* _INC_config_tpdo_H_ */
 

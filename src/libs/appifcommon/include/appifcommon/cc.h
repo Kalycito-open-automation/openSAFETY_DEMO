@@ -1,10 +1,11 @@
 /**
 ********************************************************************************
-\file   appif/obdict.h
+\file   appifcommon/cc.h
 
-\brief  Header file included in the POWERLINK stack obdict
+\brief  Header defines the layout of the configuration channel triple buffer
 
-This header consists of all
+This header gives the basic structure of the configuration channel
+triple buffers.
 
 *******************************************************************************/
 
@@ -35,38 +36,40 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
 
-#ifndef _INC_appif_obdict_H_
-#define _INC_appif_obdict_H_
+#ifndef _INC_appifcommon_cc_H_
+#define _INC_appifcommon_cc_H_
 
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
 
-#include <Epl.h>
-
-#include <config/triplebuffer.h>
-
-//------------------------------------------------------------------------------
-// const defines
-//------------------------------------------------------------------------------
-
+#include <appifcommon/global.h>
 
 //------------------------------------------------------------------------------
 // typedef
 //------------------------------------------------------------------------------
 
+typedef struct {
+    UINT8 seqNr_m;
+    UINT8 objSubIdx_m;
+    UINT16 objIdx_m;
+    UINT32 objPayloadLow_m;
+    UINT32 objPayloadHigh_m;
+} tTbufCcStructure;
+
+//------------------------------------------------------------------------------
+// const defines
+//------------------------------------------------------------------------------
+
+#define TBUF_SEQNR_OFF          offsetof(tTbufCcStructure, seqNr_m)
+#define TBUF_OBJSUBIDX_OFF      offsetof(tTbufCcStructure, objSubIdx_m)
+#define TBUF_OBJIDX_OFF         offsetof(tTbufCcStructure, objIdx_m)
+#define TBUF_PAYLOADLOW_OFF     offsetof(tTbufCcStructure, objPayloadLow_m)
+#define TBUF_PAYLOADHIGH_OFF    offsetof(tTbufCcStructure, objPayloadHigh_m)
 
 //------------------------------------------------------------------------------
 // function prototypes
 //------------------------------------------------------------------------------
-#if(((APPIF_MODULE_INTEGRATION) & (APPIF_MODULE_CC)) != 0)
-  extern tEplKernel PUBLIC cc_obdAccessCb(tObdCbParam MEM* pParam_p);
-#endif
 
-#if(((APPIF_MODULE_INTEGRATION) & (APPIF_MODULE_SSDO)) != 0)
-  extern tEplKernel PUBLIC ssdo_obdAccessCb(tObdCbParam MEM* pParam_p);
-#endif
-
-#endif /* _INC_appif_obdict_H_ */
-
+#endif /* _INC_appifcommon_cc_H_ */
 

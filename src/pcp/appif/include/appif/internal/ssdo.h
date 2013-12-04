@@ -48,7 +48,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <appif/fifo.h>
 
 #include <appifcommon/timeout.h>
-#include <config/tbuflayoutssdo.h>
+#include <config/ssdo.h>
 
 #include <Epl.h>
 

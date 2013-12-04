@@ -41,7 +41,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "EplInc.h"
 
-#include <config/tbuflayout.h>
+#include <config/triplebuffer.h>
 
 // =========================================================================
 // generic defines which for whole EPL Stack

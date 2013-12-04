@@ -1,10 +1,11 @@
 /**
 ********************************************************************************
-\file   config/tbuflayout.h
+\file   config/triplebuffer.h
 
 \brief  Global header file for the triple buffers layout
 
-This file contains of the layout of the triple buffers.
+This file configures the layout of the triple buffers. It assigns a meaning
+to each instantiated memory.
 
 *******************************************************************************/
 
@@ -35,17 +36,17 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
 
-#ifndef _INC_config_tbuflayout_H_
-#define _INC_config_tbuflayout_H_
+#ifndef _INC_config_triplebuffer_H_
+#define _INC_config_triplebuffer_H_
 
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <config/tbuflayoutstatus.h>
-#include <config/tbuflayoutcc.h>
-#include <config/tbuflayoutrpdo.h>
-#include <config/tbuflayouttpdo.h>
-#include <config/tbuflayoutssdo.h>
+#include <appifcommon/status.h>
+#include <appifcommon/cc.h>
+#include <appifcommon/ssdo.h>
+#include <appifcommon/rpdo.h>
+#include <appifcommon/tpdo.h>
 
 //------------------------------------------------------------------------------
 // typedef
@@ -108,5 +109,5 @@ typedef struct {
 // function prototypes
 //------------------------------------------------------------------------------
 
-#endif /* _INC_config_tbuflayout_H_ */
+#endif /* _INC_config_triplebuffer_H_ */
 

@@ -1,10 +1,10 @@
 /**
 ********************************************************************************
-\file   config/tbuflayoutstatus.h
+\file   config/rpdo.h
 
-\brief  Header defines the layout of the status triple buffer
+\brief  This header defines the configurable parameters of the rpdo module
 
-This header gives the basic structure of the status triple buffers.
+This header gives the basic structure of the receive pdo triple buffers.
 
 *******************************************************************************/
 
@@ -35,8 +35,8 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
 
-#ifndef _INC_config_tbuflayoutstatus_H_
-#define _INC_config_tbuflayoutstatus_H_
+#ifndef _INC_config_rpdo_H_
+#define _INC_config_rpdo_H_
 
 //------------------------------------------------------------------------------
 // includes
@@ -45,46 +45,47 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <appifcommon/global.h>
 
 //------------------------------------------------------------------------------
+// const defines
+//------------------------------------------------------------------------------
+#define RPDO_NUM_OBJECTS    4       ///< Number of mapped RPDO objects
+
+//------------------------------------------------------------------------------
 // typedef
 //------------------------------------------------------------------------------
 
 /**
- * \brief Status channel outgoing buffer layout
+ * \brief List of all mappable objects
  */
 typedef struct {
-    UINT32 relTimeLow_m;
-    UINT32 relTimeHigh_m;
-    UINT8  iccStatus_m;
-    UINT8  reserved_m;
-    UINT16 ssdoConsStatus_m;
-} tTbufStatusOutStructure;
-
-/**
- * \brief Status channel incoming buffer layout
- */
-typedef struct {
-    UINT16 reserved_m;
-    UINT16 ssdoProdStatus_m;
-} tTbufStatusInStructure;
+    UINT8          digitalInput0;   ///< Digital input RPDO object 0
+    UINT8          digitalInput1;   ///< Digital input RPDO object 1
+    UINT8          digitalInput2;   ///< Digital input RPDO object 2
+    UINT8          digitalInput3;   ///< Digital input RPDO object 3
+} tRpdoMappedObj;
 
 //------------------------------------------------------------------------------
-// const defines
+// offsetof defines
 //------------------------------------------------------------------------------
 
-#define TBUF_RELTIME_LOW_OFF            offsetof(tTbufStatusOutStructure, relTimeLow_m)
-#define TBUF_RELTIME_HIGH_OFF           offsetof(tTbufStatusOutStructure, relTimeHigh_m)
-#define TBUF_ICC_STATUS_OFF             offsetof(tTbufStatusOutStructure, iccStatus_m)
-#define TBUF_SSDO_CONS_STATUS_OFF       offsetof(tTbufStatusOutStructure, ssdoConsStatus_m)
+#define TBUF_RPDO_DIGINPUT0_OFF     offsetof(tRpdoMappedObj, digitalInput0)
+#define TBUF_RPDO_DIGINPUT1_OFF     offsetof(tRpdoMappedObj, digitalInput1)
+#define TBUF_RPDO_DIGINPUT2_OFF     offsetof(tRpdoMappedObj, digitalInput2)
+#define TBUF_RPDO_DIGINPUT3_OFF     offsetof(tRpdoMappedObj, digitalInput3)
 
-#define TBUF_SSDO_PROD_STATUS_OFF       offsetof(tTbufStatusInStructure, ssdoProdStatus_m)
+//------------------------------------------------------------------------------
+// object linking parameters
+//------------------------------------------------------------------------------
 
-
-#define STATUS_ICC_BUSY_FLAG_POS        0       ///< Position of the ICC busy flag
-#define STATUS_ICC_ERROR_FLAG_POS       1       ///< Position of the ICC error flag (TODO)
+// Link between object and buffer address: objIdx | objSubIdx | addressOffset           | objSize
+#define RPDO_LINKING_LIST_INIT_VECTOR   { {0x6200 , 0x01      , TBUF_RPDO_DIGINPUT0_OFF , 1       }, \
+                                          {0x6200 , 0x02      , TBUF_RPDO_DIGINPUT1_OFF , 1       }, \
+                                          {0x6200 , 0x03      , TBUF_RPDO_DIGINPUT2_OFF , 1       }, \
+                                          {0x6200 , 0x04      , TBUF_RPDO_DIGINPUT3_OFF , 1       }  \
+                                        }
 
 //------------------------------------------------------------------------------
 // function prototypes
 //------------------------------------------------------------------------------
 
-#endif /* _INC_config_tbuflayoutstatus_H_ */
+#endif /* _INC_config_rpdo_H_ */
 

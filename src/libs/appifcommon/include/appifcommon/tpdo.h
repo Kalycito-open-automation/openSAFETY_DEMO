@@ -1,10 +1,10 @@
 /**
 ********************************************************************************
-\file   appif/obdict.h
+\file   appifcommon/tpdo.h
 
-\brief  Header file included in the POWERLINK stack obdict
+\brief  This header defines the memory layout of the tpdo module
 
-This header consists of all
+This header gives the basic structure of the transmit pdo triple buffers.
 
 *******************************************************************************/
 
@@ -35,38 +35,42 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
 
-#ifndef _INC_appif_obdict_H_
-#define _INC_appif_obdict_H_
+#ifndef _INC_appifcommon_tpdo_H_
+#define _INC_appifcommon_tpdo_H_
 
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
 
-#include <Epl.h>
-
-#include <config/triplebuffer.h>
+#include <config/tpdo.h>
 
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
 
-
 //------------------------------------------------------------------------------
 // typedef
 //------------------------------------------------------------------------------
 
+/**
+ * \brief The layout of the transmit PDO image
+ */
+typedef struct {
+    tTpdoMappedObj mappedObjList_m;
+} tTbufTpdoImage;
+
+//------------------------------------------------------------------------------
+// offsetof defines
+//------------------------------------------------------------------------------
+#define TBUF_TPDO_MAPPED_OBJ_OFF    offsetof(tTbufTpdoImage, mappedObjList_m)
+
+//------------------------------------------------------------------------------
+// object linking parameters
+//------------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------
 // function prototypes
 //------------------------------------------------------------------------------
-#if(((APPIF_MODULE_INTEGRATION) & (APPIF_MODULE_CC)) != 0)
-  extern tEplKernel PUBLIC cc_obdAccessCb(tObdCbParam MEM* pParam_p);
-#endif
 
-#if(((APPIF_MODULE_INTEGRATION) & (APPIF_MODULE_SSDO)) != 0)
-  extern tEplKernel PUBLIC ssdo_obdAccessCb(tObdCbParam MEM* pParam_p);
-#endif
-
-#endif /* _INC_appif_obdict_H_ */
-
+#endif /* _INC_appifcommon_tpdo_H_ */
 

@@ -1,10 +1,10 @@
 /**
 ********************************************************************************
-\file   config/tbuflayouttpdo.h
+\file   appifcommon/status.h
 
-\brief  Header defines the layout of the tpdo triple buffer
+\brief  Header defines the layout of the status triple buffer
 
-This header gives the basic structure of the transmit pdo triple buffers.
+This header gives the basic structure of the status triple buffers.
 
 *******************************************************************************/
 
@@ -35,8 +35,8 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
 
-#ifndef _INC_config_tbuflayouttpdo_H_
-#define _INC_config_tbuflayouttpdo_H_
+#ifndef _INC_appifcommon_status_H_
+#define _INC_appifcommon_status_H_
 
 //------------------------------------------------------------------------------
 // includes
@@ -45,55 +45,46 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <appifcommon/global.h>
 
 //------------------------------------------------------------------------------
+// typedef
+//------------------------------------------------------------------------------
+
+/**
+ * \brief Status channel outgoing buffer layout
+ */
+typedef struct {
+    UINT32 relTimeLow_m;
+    UINT32 relTimeHigh_m;
+    UINT8  iccStatus_m;
+    UINT8  reserved_m;
+    UINT16 ssdoConsStatus_m;
+} tTbufStatusOutStructure;
+
+/**
+ * \brief Status channel incoming buffer layout
+ */
+typedef struct {
+    UINT16 reserved_m;
+    UINT16 ssdoProdStatus_m;
+} tTbufStatusInStructure;
+
+//------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
 
-#define TPDO_NUM_OBJECTS    4       ///< Number of mapped TPDO objects
+#define TBUF_RELTIME_LOW_OFF            offsetof(tTbufStatusOutStructure, relTimeLow_m)
+#define TBUF_RELTIME_HIGH_OFF           offsetof(tTbufStatusOutStructure, relTimeHigh_m)
+#define TBUF_ICC_STATUS_OFF             offsetof(tTbufStatusOutStructure, iccStatus_m)
+#define TBUF_SSDO_CONS_STATUS_OFF       offsetof(tTbufStatusOutStructure, ssdoConsStatus_m)
 
-//------------------------------------------------------------------------------
-// typedef
-//------------------------------------------------------------------------------
-/**
- * \brief List of all mappable objects
- */
-typedef struct {
-    UINT8          digitalOutput0;   ///< Digital output TPDO object 0
-    UINT8          digitalOutput1;   ///< Digital output TPDO object 1
-    UINT8          digitalOutput2;   ///< Digital output TPDO object 2
-    UINT8          digitalOutput3;   ///< Digital output TPDO object 3
-} tTpdoMappedObj;
+#define TBUF_SSDO_PROD_STATUS_OFF       offsetof(tTbufStatusInStructure, ssdoProdStatus_m)
 
-/**
- * \brief The layout of the transmit PDO image
- */
-typedef struct {
-    tTpdoMappedObj mappedObjList_m;
-} tTbufTpdoImage;
 
-//------------------------------------------------------------------------------
-// offsetof defines
-//------------------------------------------------------------------------------
-#define TBUF_TPDO_MAPPED_OBJ_OFF    offsetof(tTbufTpdoImage, mappedObjList_m)
-
-#define TBUF_DIGOUTPUT0_SPDO_DOM_OFF     TBUF_RPDO_MAPPED_OBJ_OFF + offsetof(tTpdoMappedObj, digitalOutput0)
-#define TBUF_DIGOUTPUT1_SPDO_DOM_OFF     TBUF_RPDO_MAPPED_OBJ_OFF + offsetof(tTpdoMappedObj, digitalOutput1)
-#define TBUF_DIGOUTPUT2_SPDO_DOM_OFF     TBUF_RPDO_MAPPED_OBJ_OFF + offsetof(tTpdoMappedObj, digitalOutput2)
-#define TBUF_DIGOUTPUT3_SPDO_DOM_OFF     TBUF_RPDO_MAPPED_OBJ_OFF + offsetof(tTpdoMappedObj, digitalOutput3)
-
-//------------------------------------------------------------------------------
-// object linking parameters
-//------------------------------------------------------------------------------
-
-// List of object index, subindex and destination address offset
-#define TPDO_LINKING_LIST_INIT_VECTOR   { {0x6000, 0x01, TBUF_DIGOUTPUT0_SPDO_DOM_OFF, 1}, \
-                                          {0x6000, 0x02, TBUF_DIGOUTPUT1_SPDO_DOM_OFF, 1}, \
-                                          {0x6000, 0x03, TBUF_DIGOUTPUT2_SPDO_DOM_OFF, 1}, \
-                                          {0x6000, 0x04, TBUF_DIGOUTPUT3_SPDO_DOM_OFF, 1}  \
-                                        }
+#define STATUS_ICC_BUSY_FLAG_POS        0       ///< Position of the ICC busy flag
+#define STATUS_ICC_ERROR_FLAG_POS       1       ///< Position of the ICC error flag (TODO)
 
 //------------------------------------------------------------------------------
 // function prototypes
 //------------------------------------------------------------------------------
 
-#endif /* _INC_config_tbuflayouttpdo_H_ */
+#endif /* _INC_appifcommon_status_H_ */
 
