@@ -90,6 +90,8 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifdef __NIOS2__
   #define LITTLE_ENDIAN			1
 #elif(__MICROBLAZE__)
+  #include "xparameters.h"
+
   #if XPAR_MICROBLAZE_ENDIANNESS == 1
     #define LITTLE_ENDIAN           1
   #else

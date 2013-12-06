@@ -57,7 +57,7 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
         unsigned long htonl(unsigned long x)
         {
-            unsigned long ret = 0;
+            volatile unsigned long ret = 0;
             //unsigned long *pbSrc = &x;
 
             ret |= (x & 0xFF000000) >> 24;
