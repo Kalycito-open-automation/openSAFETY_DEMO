@@ -58,7 +58,7 @@ the synchronous and asynchronous tasks.
 #include <appif/pdo.h>
 #include <appif/rpdo.h>
 #include <appif/tpdo.h>
-#include <appif/async.h>
+#include <appif/ssdo.h>
 #include <appif/fifo.h>
 #include <appifcommon/ccobject.h>
 
@@ -99,7 +99,9 @@ the synchronous and asynchronous tasks.
 //------------------------------------------------------------------------------
 
 typedef struct {
-    tAsyncInstance    instAsyncChan_m[kNumAsyncInstCount];    ///< Instance of the asynchronous channel 0
+#if(((APPIF_MODULE_INTEGRATION) & (APPIF_MODULE_SSDO)) != 0)
+    tSsdoInstance    instSsdoChan_m[kNumSsdoInstCount];    ///< Instance of the SSDO channels
+#endif
 } tAppIfInstance;
 
 //------------------------------------------------------------------------------
@@ -139,9 +141,9 @@ tAppIfStatus appif_init(UINT8 nodeId_p, tAppIfCritSec pfnCritSec_p)
     tOccInitStruct       occInitParam;
     tIccInitStruct       iccInitParam;
 #endif
-#if(((APPIF_MODULE_INTEGRATION) & (APPIF_MODULE_ASYNC)) != 0)
+#if(((APPIF_MODULE_INTEGRATION) & (APPIF_MODULE_SSDO)) != 0)
     UINT8                i;
-    tAsyncInitStruct     asyncInitParam;
+    tSsdoInitStruct      ssdoInitParam;
 #endif
 #if(((APPIF_MODULE_INTEGRATION) & (APPIF_MODULE_PDO)) != 0)
     tRpdoInitStruct      rpdoInitParam;
@@ -196,8 +198,8 @@ tAppIfStatus appif_init(UINT8 nodeId_p, tAppIfCritSec pfnCritSec_p)
         goto Exit;
     }
 
-#if(((APPIF_MODULE_INTEGRATION) & (APPIF_MODULE_ASYNC)) != 0)
-    async_init(nodeId_p, SSDO_STUB_OBJECT_INDEX, SSDO_STUB_DATA_OBJECT_INDEX);
+#if(((APPIF_MODULE_INTEGRATION) & (APPIF_MODULE_SSDO)) != 0)
+    ssdo_init(nodeId_p, SSDO_STUB_OBJECT_INDEX, SSDO_STUB_DATA_OBJECT_INDEX);
 #endif
 
     // Initialize the status module
@@ -288,29 +290,29 @@ tAppIfStatus appif_init(UINT8 nodeId_p, tAppIfCritSec pfnCritSec_p)
     }
 #endif
 
-#if(((APPIF_MODULE_INTEGRATION) & (APPIF_MODULE_ASYNC)) != 0)
+#if(((APPIF_MODULE_INTEGRATION) & (APPIF_MODULE_SSDO)) != 0)
     // Initialize all asynchronous channels
-    for(i=0; i < kNumAsyncInstCount; i++)
+    for(i=0; i < kNumSsdoInstCount; i++)
     {
-        asyncInitParam.chanId_m = i;
+        ssdoInitParam.chanId_m = i;
 
-        asyncInitParam.tbufRxId_m = kTbufNumAsyncReceive0 + i;
-        asyncInitParam.pTbufRxBase_m = (tTbufAsyncRxStructure *)(TBUF_BASE_ADDRESS +
-                tbufDescList[kTbufNumAsyncReceive0 + i].buffOffset_m);
-        asyncInitParam.pProdAckBase_m = prodAckBase;
-        asyncInitParam.tbufRxSize_m = tbufDescList[kTbufNumAsyncReceive0 + i].buffSize_m;
+        ssdoInitParam.tbufRxId_m = kTbufNumSsdoReceive0 + i;
+        ssdoInitParam.pTbufRxBase_m = (tTbufSsdoRxStructure *)(TBUF_BASE_ADDRESS +
+                tbufDescList[kTbufNumSsdoReceive0 + i].buffOffset_m);
+        ssdoInitParam.pProdAckBase_m = prodAckBase;
+        ssdoInitParam.tbufRxSize_m = tbufDescList[kTbufNumSsdoReceive0 + i].buffSize_m;
 
-        asyncInitParam.tbufTxId_m = kTbufNumAsyncTransmit0 + i;
-        asyncInitParam.pTbufTxBase_m = (tTbufAsyncTxStructure *)(TBUF_BASE_ADDRESS +
-                tbufDescList[kTbufNumAsyncTransmit0 + i].buffOffset_m);
-        asyncInitParam.pConsAckBase_m = consAckBase;
-        asyncInitParam.tbufTxSize_m = tbufDescList[kTbufNumAsyncTransmit0 + i].buffSize_m;
+        ssdoInitParam.tbufTxId_m = kTbufNumSsdoTransmit0 + i;
+        ssdoInitParam.pTbufTxBase_m = (tTbufSsdoTxStructure *)(TBUF_BASE_ADDRESS +
+                tbufDescList[kTbufNumSsdoTransmit0 + i].buffOffset_m);
+        ssdoInitParam.pConsAckBase_m = consAckBase;
+        ssdoInitParam.tbufTxSize_m = tbufDescList[kTbufNumSsdoTransmit0 + i].buffSize_m;
 
-        appifInstance_l.instAsyncChan_m[i] = async_create(&asyncInitParam);
-        if(appifInstance_l.instAsyncChan_m[i] == NULL)
+        appifInstance_l.instSsdoChan_m[i] = ssdo_create(&ssdoInitParam);
+        if(appifInstance_l.instSsdoChan_m[i] == NULL)
         {
-            ret = kAppIfAsyncInitError;
-            DEBUG_TRACE(DEBUG_LVL_ERROR,"ERROR: async_create() failed for instance "
+            ret = kAppIfSsdoInitError;
+            DEBUG_TRACE(DEBUG_LVL_ERROR,"ERROR: ssdo_create() failed for instance "
                     "number %d!\n", i );
             goto Exit;
         }
@@ -332,7 +334,7 @@ Close and destroy the application interface and all its submodules.
 //------------------------------------------------------------------------------
 void appif_exit(void)
 {
-#if(((APPIF_MODULE_INTEGRATION) & (APPIF_MODULE_ASYNC)) != 0)
+#if(((APPIF_MODULE_INTEGRATION) & (APPIF_MODULE_SSDO)) != 0)
     UINT8 i;
 #endif
 
@@ -350,11 +352,11 @@ void appif_exit(void)
     tpdo_exit();
 #endif
 
-#if(((APPIF_MODULE_INTEGRATION) & (APPIF_MODULE_ASYNC)) != 0)
-    // Destroy all asynchronous channels
-    for(i=0; i < kNumAsyncInstCount; i++)
+#if(((APPIF_MODULE_INTEGRATION) & (APPIF_MODULE_SSDO)) != 0)
+    // Destroy all SSDO channels
+    for(i=0; i < kNumSsdoInstCount; i++)
     {
-        async_destroy(appifInstance_l.instAsyncChan_m[i]);
+        ssdo_destroy(appifInstance_l.instSsdoChan_m[i]);
     }
 #endif
 }
@@ -415,7 +417,7 @@ Call modules where data needs to be forwarded in the background.
 tAppIfStatus appif_handleAsync(void)
 {
     tAppIfStatus ret = kAppIfSuccessful;
-#if(((APPIF_MODULE_INTEGRATION) & (APPIF_MODULE_ASYNC)) != 0)
+#if(((APPIF_MODULE_INTEGRATION) & (APPIF_MODULE_SSDO)) != 0)
     UINT8 i;
 #endif
 
@@ -428,14 +430,14 @@ tAppIfStatus appif_handleAsync(void)
     }
 #endif
 
-#if(((APPIF_MODULE_INTEGRATION) & (APPIF_MODULE_ASYNC)) != 0)
+#if(((APPIF_MODULE_INTEGRATION) & (APPIF_MODULE_SSDO)) != 0)
     // Process all instantiated asynchronous channels
-    for(i=0; i < kNumAsyncInstCount; i++)
+    for(i=0; i < kNumSsdoInstCount; i++)
     {
-        ret = async_process(appifInstance_l.instAsyncChan_m[i]);
+        ret = ssdo_process(appifInstance_l.instSsdoChan_m[i]);
         if(ret != kAppIfSuccessful)
         {
-            DEBUG_TRACE(DEBUG_LVL_ERROR, "ERROR: async_process() failed for "
+            DEBUG_TRACE(DEBUG_LVL_ERROR, "ERROR: ssdo_process() failed for "
                     "instance %d with: 0x%x!\n", i, ret);
             goto Exit;
         }
@@ -458,7 +460,7 @@ Call modules where data needs to be forwarded in the synchronous interrupt.
 tAppIfStatus appif_handleSync(void)
 {
     tAppIfStatus ret = kAppIfSuccessful;
-#if(((APPIF_MODULE_INTEGRATION) & (APPIF_MODULE_ASYNC)) != 0)
+#if(((APPIF_MODULE_INTEGRATION) & (APPIF_MODULE_SSDO)) != 0)
     UINT8 i;
 #endif
 
@@ -477,14 +479,14 @@ tAppIfStatus appif_handleSync(void)
     }
 #endif
 
-#if(((APPIF_MODULE_INTEGRATION) & (APPIF_MODULE_ASYNC)) != 0)
+#if(((APPIF_MODULE_INTEGRATION) & (APPIF_MODULE_SSDO)) != 0)
     // Process all instantiated asynchronous channels
-    for(i=0; i < kNumAsyncInstCount; i++)
+    for(i=0; i < kNumSsdoInstCount; i++)
     {
-        ret = async_handleIncoming(appifInstance_l.instAsyncChan_m[i]);
+        ret = ssdo_handleIncoming(appifInstance_l.instSsdoChan_m[i]);
         if(ret != kAppIfSuccessful)
         {
-            DEBUG_TRACE(DEBUG_LVL_ERROR, "ERROR: async_handleIncoming() failed for "
+            DEBUG_TRACE(DEBUG_LVL_ERROR, "ERROR: ssdo_handleIncoming() failed for "
                     "instance %d with: 0x%x!\n", i, ret);
             goto Exit;
         }
@@ -546,8 +548,8 @@ tAppIfStatus appif_sdoAccFinished(tEplSdoComFinished* pSdoComFinHdl_p )
 {
     tAppIfStatus ret = kAppIfSuccessful;
 
-#if(((APPIF_MODULE_INTEGRATION) & (APPIF_MODULE_ASYNC)) != 0)
-    ret = async_consTxTransferFinished((tAsyncInstance)pSdoComFinHdl_p->m_pUserArg);
+#if(((APPIF_MODULE_INTEGRATION) & (APPIF_MODULE_SSDO)) != 0)
+    ret = ssdo_consTxTransferFinished((tSsdoInstance)pSdoComFinHdl_p->m_pUserArg);
 #endif
 
     return ret;

@@ -63,7 +63,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
   extern tEplKernel PUBLIC cc_obdAccessCb(tObdCbParam MEM* pParam_p);
 #endif
 
-extern tEplKernel PUBLIC appif_asyncObdAccessCb(tObdCbParam MEM* pParam_p);
+#if(((APPIF_MODULE_INTEGRATION) & (APPIF_MODULE_SSDO)) != 0)
+  extern tEplKernel PUBLIC ssdo_obdAccessCb(tObdCbParam MEM* pParam_p);
+#endif
 
 #endif /* _INC_appif_obdict_H_ */
 

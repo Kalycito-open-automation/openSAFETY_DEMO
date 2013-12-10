@@ -1,15 +1,15 @@
 /**
 ********************************************************************************
-\file   async.c
+\file   ssdo.c
 
-\brief  Creates an asynchronous channel for receive and transmit
+\brief  Creates an ssdo channel for receiving and transmitting SSDO frames
 
-This module handles the asynchronous channels between the PCP and the application.
+This module handles the ssdo channels between the PCP and the application.
 For each channel a receive and a transmit buffer needs to be determined.
 It forwards the received data to the POWERLINK stack which transfers the data
 to the target.
 
-\ingroup module_async
+\ingroup module_ssdo
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
@@ -49,8 +49,8 @@ to the target.
 // includes
 //------------------------------------------------------------------------------
 
-#include <appif/internal/async.h>
-#include <appif/async.h>
+#include <appif/internal/ssdo.h>
+#include <appif/ssdo.h>
 
 #include <appif/status.h>
 
@@ -72,7 +72,7 @@ to the target.
 // global function prototypes
 //------------------------------------------------------------------------------
 
-extern tEplKernel PUBLIC appif_asyncObdAccessCb(tObdCbParam MEM* pParam_p);
+extern tEplKernel PUBLIC ssdo_obdAccessCb(tObdCbParam MEM* pParam_p);
 
 //============================================================================//
 //            P R I V A T E   D E F I N I T I O N S                           //
@@ -82,9 +82,9 @@ extern tEplKernel PUBLIC appif_asyncObdAccessCb(tObdCbParam MEM* pParam_p);
 // const defines
 //------------------------------------------------------------------------------
 
-#define ASYNC_RECEIVE_FIFO_ELEM_COUNT       5      ///< Number of elements in the receive FIFO
-#define ASYNC_RX_TIMEOUT_CYCLE_COUNT        400    ///< Number of cycles after a transmit has a timeout
-#define ASYNC_ARP_TIMEOUT_CYCLE_COUNT       50     ///< Number of cycles after an ARP request is retried
+#define SSDO_RECEIVE_FIFO_ELEM_COUNT       5      ///< Number of elements in the receive FIFO
+#define SSDO_RX_TIMEOUT_CYCLE_COUNT        400    ///< Number of cycles after a transmit has a timeout
+#define SSDO_ARP_TIMEOUT_CYCLE_COUNT       50     ///< Number of cycles after an ARP request is retried
 //------------------------------------------------------------------------------
 // local types
 //------------------------------------------------------------------------------
@@ -94,32 +94,32 @@ extern tEplKernel PUBLIC appif_asyncObdAccessCb(tObdCbParam MEM* pParam_p);
 // local vars
 //------------------------------------------------------------------------------
 
-static struct  eAsyncInstance       asyncInstance_l[kNumAsyncInstCount];
+static struct  eSsdoInstance       ssdoInstance_l[kNumSsdoInstCount];
 
-static UINT8   nodeId_l = 0;            ///< Node id of the Cn
-static UINT16  idxSsdoStub_l = 0;       ///< Index of the ssdo stub object
-static UINT16  idxSsdoStubData_l = 0;   ///< Index of the ssdo stub data object
+static UINT8   nodeId_l = 0;            ///< Node id of the CN
+static UINT16  idxSsdoStub_l = 0;       ///< Index of the SSDO stub object
+static UINT16  idxSsdoStubData_l = 0;   ///< Index of the SSDO stub data object
 
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-static tAppIfStatus async_processReceiveSm(tAsyncInstance pInstance_p);
-static tAppIfStatus async_processTransmitSm(tAsyncInstance pInstance_p);
-static tAsyncInstance async_getInstance(tAsyncChanNum  chanNum_p );
-static tAppIfStatus async_getTargetNode(tAsyncInstance pInstance_p,
+static tAppIfStatus ssdo_processReceiveSm(tSsdoInstance pInstance_p);
+static tAppIfStatus ssdo_processTransmitSm(tSsdoInstance pInstance_p);
+static tSsdoInstance ssdo_getInstance(tSsdoChanNum  chanNum_p );
+static tAppIfStatus ssdo_getTargetNode(tSsdoInstance pInstance_p,
         UINT8* pTargNode_p, UINT16* pTargIdx_p, UINT8* pTargSubIdx_p);
-static tAppIfStatus async_handleReceiveFrame(tAsyncInstance pInstance_p,
+static tAppIfStatus ssdo_handleReceiveFrame(tSsdoInstance pInstance_p,
         UINT8* pRxBuffer_p, UINT32 buffSize_p);
-static tAppIfStatus async_sendToDestTarget(tAsyncInstance pInstance_p,
+static tAppIfStatus ssdo_sendToDestTarget(tSsdoInstance pInstance_p,
         UINT8* pTargNode_p, UINT16* pTargIdx_p, UINT8* pTargSubIdx_p,
         UINT8* pMsgBuffer_p, UINT16* pBuffSize_p);
-static tAppIfStatus async_postToBuffer(tAsyncInstance pInstance_p,
+static tAppIfStatus ssdo_postToBuffer(tSsdoInstance pInstance_p,
         UINT8* pMsgBuffer_p, UINT16 buffSize_p);
-static tAppIfStatus async_grabFromBuffer(tAsyncInstance pInstance_p,
+static tAppIfStatus ssdo_grabFromBuffer(tSsdoInstance pInstance_p,
         UINT8** ppMsgBuffer_p, UINT16* pBuffSize_p);
-static void async_changeLocalSeqNr(tSeqNrValue* pSeqNr_p);
-static tAppIfStatus async_checkChannelStatus(tAsyncInstance pInstance_p);
-static tAppIfStatus async_verifyTargetInfo(UINT8 targNode_p, UINT16 targIdx_p,
+static void ssdo_changeLocalSeqNr(tSeqNrValue* pSeqNr_p);
+static tAppIfStatus ssdo_checkChannelStatus(tSsdoInstance pInstance_p);
+static tAppIfStatus ssdo_verifyTargetInfo(UINT8 targNode_p, UINT16 targIdx_p,
         UINT8 targSubIdx_p);
 
 //============================================================================//
@@ -128,58 +128,58 @@ static tAppIfStatus async_verifyTargetInfo(UINT8 targNode_p, UINT16 targIdx_p,
 
 //------------------------------------------------------------------------------
 /**
-\brief    Initialize the asynchronous channel module
+\brief    Initialize the SSDO channel module
 
 \param[in] nodeId_p             Node id of the Cn
-\param[in] idxSsdoStub_p        Object index of the ssdo stub
-\param[in] idxSsdoStubData_p    Object index of the sddo stub address
+\param[in] idxSsdoStub_p        Object index of the SSDO stub
+\param[in] idxSsdoStubData_p    Object index of the SSDO stub address
 
-\ingroup module_async
+\ingroup module_ssdo
 */
 //------------------------------------------------------------------------------
-void async_init(UINT8 nodeId_p, UINT16 idxSsdoStub_p, UINT16 idxSsdoStubData_p)
+void ssdo_init(UINT8 nodeId_p, UINT16 idxSsdoStub_p, UINT16 idxSsdoStubData_p)
 {
     // Remember stub object addresses
     nodeId_l = nodeId_p;
     idxSsdoStub_l = idxSsdoStub_p;
     idxSsdoStubData_l = idxSsdoStubData_p;
 
-    APPIF_MEMSET(&asyncInstance_l, 0 , sizeof(struct eAsyncInstance) * kNumAsyncInstCount);
+    APPIF_MEMSET(&ssdoInstance_l, 0 , sizeof(struct eSsdoInstance) * kNumSsdoInstCount);
 }
 
 //------------------------------------------------------------------------------
 /**
-\brief    Create a asynchronous channel instance
+\brief    Create a SSDO channel instance
 
-Instantiate a new asynchronous channel which provides send and receive
+Instantiate a new SSDO channel which provides send and receive
 functionality for the upper and lower layers.
 
-\param[in]  pInitParam_p          Asynchronous initialization structure
+\param[in]  pInitParam_p          SSDO initialization structure
 
-\return tAsyncInstance
+\return tSsdoInstance
 \retval address              Pointer to the instance of the channel
 \retval Null                 Unable to allocate instance
 
-\ingroup module_async
+\ingroup module_ssdo
 */
 //------------------------------------------------------------------------------
-tAsyncInstance async_create(tAsyncInitStruct* pInitParam_p)
+tSsdoInstance ssdo_create(tSsdoInitStruct* pInitParam_p)
 {
-    tAsyncInstance     pInstance = NULL;
+    tSsdoInstance     pInstance = NULL;
     tTbufInitStruct    tbufInitParam;
 
 #if _DEBUG
-    if(pInitParam_p->tbufRxSize_m != sizeof(tTbufAsyncRxStructure))
+    if(pInitParam_p->tbufRxSize_m != sizeof(tTbufSsdoRxStructure))
     {
         goto Exit;
     }
 
-    if(pInitParam_p->tbufTxSize_m != sizeof(tTbufAsyncTxStructure))
+    if(pInitParam_p->tbufTxSize_m != sizeof(tTbufSsdoTxStructure))
     {
         goto Exit;
     }
 
-    if(pInitParam_p->chanId_m > (kNumAsyncInstCount - 1))
+    if(pInitParam_p->chanId_m > (kNumSsdoInstCount - 1))
     {
         goto Exit;
     }
@@ -191,8 +191,8 @@ tAsyncInstance async_create(tAsyncInitStruct* pInitParam_p)
     tbufInitParam.pBase_m = (UINT8 *)pInitParam_p->pTbufRxBase_m;
     tbufInitParam.size_m = pInitParam_p->tbufRxSize_m;
 
-    asyncInstance_l[pInitParam_p->chanId_m].prodRxParam_m.pTbufProdRxInst_m = tbuf_create(&tbufInitParam);
-    if(asyncInstance_l[pInitParam_p->chanId_m].prodRxParam_m.pTbufProdRxInst_m == NULL)
+    ssdoInstance_l[pInitParam_p->chanId_m].prodRxParam_m.pTbufProdRxInst_m = tbuf_create(&tbufInitParam);
+    if(ssdoInstance_l[pInitParam_p->chanId_m].prodRxParam_m.pTbufProdRxInst_m == NULL)
     {
         goto Exit;
     }
@@ -203,51 +203,51 @@ tAsyncInstance async_create(tAsyncInitStruct* pInitParam_p)
     tbufInitParam.pBase_m = (UINT8 *)pInitParam_p->pTbufTxBase_m;
     tbufInitParam.size_m = pInitParam_p->tbufTxSize_m;
 
-    asyncInstance_l[pInitParam_p->chanId_m].consTxParam_m.pTbufConsTxInst_m = tbuf_create(&tbufInitParam);
-    if(asyncInstance_l[pInitParam_p->chanId_m].consTxParam_m.pTbufConsTxInst_m == NULL)
+    ssdoInstance_l[pInitParam_p->chanId_m].consTxParam_m.pTbufConsTxInst_m = tbuf_create(&tbufInitParam);
+    if(ssdoInstance_l[pInitParam_p->chanId_m].consTxParam_m.pTbufConsTxInst_m == NULL)
     {
         goto Exit;
     }
 
     // Initialize the frame receive FIFO
-    asyncInstance_l[pInitParam_p->chanId_m].prodRxParam_m.pRxFifoInst_m = fifo_create(
-            sizeof(asyncInstance_l[pInitParam_p->chanId_m].prodRxParam_m.prodRecvBuff_m.ssdoStubDataBuff_m),
-            ASYNC_RECEIVE_FIFO_ELEM_COUNT);
-    if(asyncInstance_l[pInitParam_p->chanId_m].prodRxParam_m.pRxFifoInst_m == NULL)
+    ssdoInstance_l[pInitParam_p->chanId_m].prodRxParam_m.pRxFifoInst_m = fifo_create(
+            sizeof(ssdoInstance_l[pInitParam_p->chanId_m].prodRxParam_m.prodRecvBuff_m.ssdoStubDataBuff_m),
+            SSDO_RECEIVE_FIFO_ELEM_COUNT);
+    if(ssdoInstance_l[pInitParam_p->chanId_m].prodRxParam_m.pRxFifoInst_m == NULL)
     {
         goto Exit;
     }
 
-    // Create timeout module for local async receive channel
-    asyncInstance_l[pInitParam_p->chanId_m].prodRxParam_m.pTimeoutInst_m = timeout_create(
-            ASYNC_RX_TIMEOUT_CYCLE_COUNT);
-    if(asyncInstance_l[pInitParam_p->chanId_m].prodRxParam_m.pTimeoutInst_m == NULL)
+    // Create timeout module for local ssdo receive channel
+    ssdoInstance_l[pInitParam_p->chanId_m].prodRxParam_m.pTimeoutInst_m = timeout_create(
+            SSDO_RX_TIMEOUT_CYCLE_COUNT);
+    if(ssdoInstance_l[pInitParam_p->chanId_m].prodRxParam_m.pTimeoutInst_m == NULL)
     {
         goto Exit;
     }
 
     // Create timeout module for ARP retry count
-    asyncInstance_l[pInitParam_p->chanId_m].consTxParam_m.pArpTimeoutInst_m = timeout_create(
-            ASYNC_ARP_TIMEOUT_CYCLE_COUNT);
-    if(asyncInstance_l[pInitParam_p->chanId_m].consTxParam_m.pArpTimeoutInst_m == NULL)
+    ssdoInstance_l[pInitParam_p->chanId_m].consTxParam_m.pArpTimeoutInst_m = timeout_create(
+            SSDO_ARP_TIMEOUT_CYCLE_COUNT);
+    if(ssdoInstance_l[pInitParam_p->chanId_m].consTxParam_m.pArpTimeoutInst_m == NULL)
     {
         goto Exit;
     }
 
     // Remember channel id
-    asyncInstance_l[pInitParam_p->chanId_m].instId_m = pInitParam_p->chanId_m;
+    ssdoInstance_l[pInitParam_p->chanId_m].instId_m = pInitParam_p->chanId_m;
 
     // Set initial transmit state
-    asyncInstance_l[pInitParam_p->chanId_m].consTxParam_m.consTxState_m = kConsTxStateWaitForFrame;
+    ssdoInstance_l[pInitParam_p->chanId_m].consTxParam_m.consTxState_m = kConsTxStateWaitForFrame;
 
     // Set initial receive state
-    asyncInstance_l[pInitParam_p->chanId_m].prodRxParam_m.prodRxState_m = kProdRxStateWaitForFrame;
+    ssdoInstance_l[pInitParam_p->chanId_m].prodRxParam_m.prodRxState_m = kProdRxStateWaitForFrame;
 
     // Set sequence number init value
-    asyncInstance_l[pInitParam_p->chanId_m].prodRxParam_m.currProdSeq_m = kSeqNrValueFirst;
+    ssdoInstance_l[pInitParam_p->chanId_m].prodRxParam_m.currProdSeq_m = kSeqNrValueFirst;
 
     // Set valid instance id
-    pInstance = &asyncInstance_l[pInitParam_p->chanId_m];
+    pInstance = &ssdoInstance_l[pInitParam_p->chanId_m];
 
 Exit:
     return pInstance;
@@ -255,17 +255,17 @@ Exit:
 
 //------------------------------------------------------------------------------
 /**
-\brief    Destroy a asynchronous channel
+\brief    Destroy a ssdo channel
 
-Destroy a asynchronous channel instance which provides basic send and receive
+Destroy a ssdo channel instance which provides basic send and receive
 functions for the channel.
 
 \param[in] pInstance_p           Pointer to the instance
 
-\ingroup module_async
+\ingroup module_ssdo
 */
 //------------------------------------------------------------------------------
-void async_destroy(tAsyncInstance pInstance_p)
+void ssdo_destroy(tSsdoInstance pInstance_p)
 {
     if(pInstance_p != NULL)
     {
@@ -276,7 +276,7 @@ void async_destroy(tAsyncInstance pInstance_p)
         // Destroy receive FIFO instance
         fifo_destroy(pInstance_p->prodRxParam_m.pRxFifoInst_m);
 
-        // Destroy the timeout module for the async rx channel
+        // Destroy the timeout module for the ssdo rx channel
         timeout_destroy(pInstance_p->prodRxParam_m.pTimeoutInst_m);
 
         // Destroy the timeout module for the arp retry counter
@@ -297,13 +297,13 @@ and forward it to the POWERLINK stack.
 
 \return tAppIfStatus
 \retval kAppIfSuccessful                    On success
-\retval kAppIfAsyncProcessingFailed         Unable to process SDO access
+\retval kAppIfSsdoProcessingFailed         Unable to process SDO access
 \retval kAppIfConfChanWriteToObDictFailed   Unable to forward object to stack
 
-\ingroup module_async
+\ingroup module_ssdo
 */
 //------------------------------------------------------------------------------
-tAppIfStatus async_process(tAsyncInstance pInstance_p)
+tAppIfStatus ssdo_process(tSsdoInstance pInstance_p)
 {
     tAppIfStatus ret = kAppIfSuccessful;
     tAppIfStatus chanRet = kAppIfSuccessful;
@@ -311,19 +311,19 @@ tAppIfStatus async_process(tAsyncInstance pInstance_p)
 
     if(pInstance_p == NULL)
     {
-        ret = kAppIfAsyncProcessingFailed;
+        ret = kAppIfSsdoProcessingFailed;
         goto Exit;
     }
 
     // Process outgoing frames
-    ret = async_processReceiveSm(pInstance_p);
+    ret = ssdo_processReceiveSm(pInstance_p);
     if(ret != kAppIfSuccessful)
     {
         goto Exit;
     }
 
     // Process incoming frames
-    ret = async_processTransmitSm(pInstance_p);
+    ret = ssdo_processTransmitSm(pInstance_p);
     if(ret != kAppIfSuccessful)
     {
         goto Exit;
@@ -334,7 +334,7 @@ tAppIfStatus async_process(tAsyncInstance pInstance_p)
     if(timerState == kTimerStateExpired)
     {
         // Timeout occurred -> Increment local sequence number!
-        async_changeLocalSeqNr(&pInstance_p->prodRxParam_m.currProdSeq_m);
+        ssdo_changeLocalSeqNr(&pInstance_p->prodRxParam_m.currProdSeq_m);
 
         ret = kAppIfSuccessful;
         goto Exit;
@@ -344,7 +344,7 @@ tAppIfStatus async_process(tAsyncInstance pInstance_p)
     timerState = timeout_isRunning(pInstance_p->prodRxParam_m.pTimeoutInst_m);
     if(timerState == kTimerStateRunning)
     {
-        chanRet = async_checkChannelStatus(pInstance_p);
+        chanRet = ssdo_checkChannelStatus(pInstance_p);
         if(chanRet == kAppIfSuccessful)
         {
             timeout_stopTimer(pInstance_p->prodRxParam_m.pTimeoutInst_m);
@@ -363,15 +363,15 @@ Exit:
 
 \return kAppIfSuccessful
 
-\ingroup module_async
+\ingroup module_ssdo
 */
 //------------------------------------------------------------------------------
-tAppIfStatus async_consTxTransferFinished(tAsyncInstance pInstance_p)
+tAppIfStatus ssdo_consTxTransferFinished(tSsdoInstance pInstance_p)
 {
     tAppIfStatus ret = kAppIfSuccessful;
 
-    // set async status register flag to current sequence flag
-    status_setAsyncConsChanFlag(pInstance_p->instId_m, pInstance_p->consTxParam_m.currConsSeq_m);
+    // set ssdo status register flag to current sequence flag
+    status_setSsdoConsChanFlag(pInstance_p->instId_m, pInstance_p->consTxParam_m.currConsSeq_m);
 
     // Set state machine to wait for next frame
     pInstance_p->consTxParam_m.consTxState_m = kConsTxStateWaitForFrame;
@@ -381,7 +381,7 @@ tAppIfStatus async_consTxTransferFinished(tAsyncInstance pInstance_p)
 
 //------------------------------------------------------------------------------
 /**
-\brief    Handle incoming asynchronous payload
+\brief    Handle incoming ssdo payload
 
 Handle incoming data from the triple buffers by checking the sequence number.
 If data has arrived forward set the channel blocking and forward it to the
@@ -391,21 +391,21 @@ background task.
 \param[in] pInstance_p           Pointer to the instance
 
 \return tAppIfStatus
-\retval kAppIfSuccessful                On success
-\retval kAppIfAsyncInvalidParameter     On an invalid instance
+\retval kAppIfSuccessful               On success
+\retval kAppIfSsdoInvalidParameter     On an invalid instance
 \retval other error
 
-\ingroup module_async
+\ingroup module_ssdo
 */
 //------------------------------------------------------------------------------
-tAppIfStatus async_handleIncoming(tAsyncInstance pInstance_p)
+tAppIfStatus ssdo_handleIncoming(tSsdoInstance pInstance_p)
 {
     tAppIfStatus ret = kAppIfSuccessful;
     tSeqNrValue  currSeqNr = kSeqNrValueInvalid;
 
     if(pInstance_p == NULL)
     {
-        ret = kAppIfAsyncInvalidParameter;
+        ret = kAppIfSsdoInvalidParameter;
         goto Exit;
     }
 
@@ -430,7 +430,7 @@ tAppIfStatus async_handleIncoming(tAsyncInstance pInstance_p)
 
     // Get current sequence number
     ret = tbuf_readByte(pInstance_p->consTxParam_m.pTbufConsTxInst_m,
-            TBUF_ASYNCTX_SEQNR_OFF, (UINT8 *)&currSeqNr);
+            TBUF_SSDOTX_SEQNR_OFF, (UINT8 *)&currSeqNr);
     if(ret != kAppIfSuccessful)
     {
         goto Exit;
@@ -457,9 +457,9 @@ Exit:
 
 //------------------------------------------------------------------------------
 /**
-\brief    Async module object access occurred
+\brief    Ssdo module object access occurred
 
-In case of an access to the local obdict.h of objects which are asynchronous
+In case of an access to the local obdict.h of objects which are ssdo
 channel objects the payload needs to be forwarded to the triple buffer
 
 \param[in] pParam_p               Object access parameter
@@ -467,14 +467,14 @@ channel objects the payload needs to be forwarded to the triple buffer
 \return  tEplKernel
 \retval  kEplSuccessful        On success
 
-\ingroup module_async
+\ingroup module_ssdo
 */
 //------------------------------------------------------------------------------
-tEplKernel PUBLIC appif_asyncObdAccessCb(tObdCbParam MEM* pParam_p)
+tEplKernel PUBLIC ssdo_obdAccessCb(tObdCbParam MEM* pParam_p)
 {
     tAppIfStatus ret = kAppIfSuccessful;
     tEplKernel eplret = kEplSuccessful;
-    tAsyncInstance  pInstance;
+    tSsdoInstance  pInstance;
 
     if(pParam_p == NULL)
     {
@@ -493,7 +493,7 @@ tEplKernel PUBLIC appif_asyncObdAccessCb(tObdCbParam MEM* pParam_p)
     if(pParam_p->obdEvent == kObdEvPostWrite)
     {
         // Find instance handle
-        pInstance = async_getInstance(pParam_p->subIndex - 1);
+        pInstance = ssdo_getInstance(pParam_p->subIndex - 1);
         if(pInstance == NULL)
         {
             eplret = kEplObdSubindexNotExist;
@@ -538,19 +538,19 @@ Exit:
 /**
 \brief    Process the frame receive state machine
 
-Implements the asynchronous receive state machine. Reads the frame from the
+Implements the ssdo receive state machine. Reads the frame from the
 FIFO and forwards it to the triple buffer.
 
 \param[in] pInstance_p               Pointer to the local instance
 
 \return  tAppIfStatus
 \retval  kAppIfSuccessful            On success
-\retval  kAppIfAsyncInvalidState     Invalid state machine state
+\retval  kAppIfSsdoInvalidState     Invalid state machine state
 
-\ingroup module_async
+\ingroup module_ssdo
 */
 //------------------------------------------------------------------------------
-static tAppIfStatus async_processReceiveSm(tAsyncInstance pInstance_p)
+static tAppIfStatus ssdo_processReceiveSm(tSsdoInstance pInstance_p)
 {
     tAppIfStatus ret = kAppIfSuccessful;
 
@@ -572,7 +572,7 @@ static tAppIfStatus async_processReceiveSm(tAsyncInstance pInstance_p)
                 }
                 case kAppIfSuccessful:
                 {
-                    ret = async_handleReceiveFrame(pInstance_p,
+                    ret = ssdo_handleReceiveFrame(pInstance_p,
                             pInstance_p->prodRxParam_m.prodRecvBuff_m.ssdoStubDataBuff_m,
                             pInstance_p->prodRxParam_m.prodRecvBuff_m.ssdoStubSize_m);
                     if(ret == kAppIfSuccessful)
@@ -580,7 +580,7 @@ static tAppIfStatus async_processReceiveSm(tAsyncInstance pInstance_p)
                         // Frame posted successfully -> Get next frame!
                         pInstance_p->prodRxParam_m.prodRxState_m = kProdRxStateWaitForFrame;
                     }
-                    else if(kAppIfAsyncNoFreeBuffer)
+                    else if(kAppIfSsdoNoFreeBuffer)
                     {
                         // No buffer is not a problem -> Retry until buffer gets ACK from AP!
                         ret = kAppIfSuccessful;
@@ -600,7 +600,7 @@ static tAppIfStatus async_processReceiveSm(tAsyncInstance pInstance_p)
         case kProdRxStateRepostFrame:
         {
             // Try to post frame to local triple buffer
-            ret = async_handleReceiveFrame(pInstance_p,
+            ret = ssdo_handleReceiveFrame(pInstance_p,
                     pInstance_p->prodRxParam_m.prodRecvBuff_m.ssdoStubDataBuff_m,
                     pInstance_p->prodRxParam_m.prodRecvBuff_m.ssdoStubSize_m);
             if(ret == kAppIfSuccessful)
@@ -608,7 +608,7 @@ static tAppIfStatus async_processReceiveSm(tAsyncInstance pInstance_p)
                 // Frame posted successfully -> Activate blocking mechanism
                 pInstance_p->prodRxParam_m.prodRxState_m = kProdRxStateWaitForFrame;
             }
-            else if(kAppIfAsyncNoFreeBuffer)
+            else if(kAppIfSsdoNoFreeBuffer)
             {
                 // No buffer is not a problem -> Retry until buffer gets ACK from AP!
                 ret = kAppIfSuccessful;
@@ -618,7 +618,7 @@ static tAppIfStatus async_processReceiveSm(tAsyncInstance pInstance_p)
         }
         default:
         {
-            ret = kAppIfAsyncInvalidState;
+            ret = kAppIfSsdoInvalidState;
             break;
         }
     }
@@ -631,19 +631,19 @@ Exit:
 /**
 \brief    Process the frame transmit state machine
 
-Implements the asynchronous transmit state machine. Reads the frame from the
+Implements the ssdo transmit state machine. Reads the frame from the
 triple buffer and forwards it to the target node.
 
 \param[in] pInstance_p               Pointer to the local instance
 
 \return  tAppIfStatus
 \retval  kAppIfSuccessful            On success
-\retval  kAppIfAsyncInvalidState     Invalid state machine state
+\retval  kAppIfSsdoInvalidState     Invalid state machine state
 
-\ingroup module_async
+\ingroup module_ssdo
 */
 //------------------------------------------------------------------------------
-static tAppIfStatus async_processTransmitSm(tAsyncInstance pInstance_p)
+static tAppIfStatus ssdo_processTransmitSm(tSsdoInstance pInstance_p)
 {
     tAppIfStatus ret = kAppIfSuccessful;
     tTimerStatus timerState;
@@ -652,7 +652,7 @@ static tAppIfStatus async_processTransmitSm(tAsyncInstance pInstance_p)
     UINT8        targSubIdx;
     UINT16       paylSize;
 
-    // Process asynchronous channel
+    // Process ssdo channel
     switch(pInstance_p->consTxParam_m.consTxState_m)
     {
         case kConsTxStateWaitForFrame:
@@ -663,7 +663,7 @@ static tAppIfStatus async_processTransmitSm(tAsyncInstance pInstance_p)
         case kConsTxStateProcessFrame:
         {
             // Incoming element -> Forward to other node!
-            ret = async_grabFromBuffer(pInstance_p, &pInstance_p->consTxParam_m.pConsTxPayl_m,
+            ret = ssdo_grabFromBuffer(pInstance_p, &pInstance_p->consTxParam_m.pConsTxPayl_m,
                     &paylSize);
             if(ret != kAppIfSuccessful)
             {
@@ -671,14 +671,14 @@ static tAppIfStatus async_processTransmitSm(tAsyncInstance pInstance_p)
             }
 
             // Get target node for incoming message!
-            ret = async_getTargetNode(pInstance_p, &targNode, &targIdx, &targSubIdx);
+            ret = ssdo_getTargetNode(pInstance_p, &targNode, &targIdx, &targSubIdx);
             if(ret != kAppIfSuccessful)
             {
                 goto Exit;
             }
 
             // Verify target node
-            ret = async_verifyTargetInfo(targNode, targIdx, targSubIdx);
+            ret = ssdo_verifyTargetInfo(targNode, targIdx, targSubIdx);
             if(ret != kAppIfSuccessful)
             {
                 // TODO Signal error back to application
@@ -687,7 +687,7 @@ static tAppIfStatus async_processTransmitSm(tAsyncInstance pInstance_p)
             }
 
             // Forward object access to target node
-            ret = async_sendToDestTarget(pInstance_p,
+            ret = ssdo_sendToDestTarget(pInstance_p,
                     &targNode, &targIdx, &targSubIdx,
                     pInstance_p->consTxParam_m.pConsTxPayl_m, &paylSize);
             if(ret != kAppIfSuccessful)
@@ -716,7 +716,7 @@ static tAppIfStatus async_processTransmitSm(tAsyncInstance pInstance_p)
         }
         default:
         {
-            ret = kAppIfAsyncInvalidState;
+            ret = kAppIfSsdoInvalidState;
             break;
         }
     }
@@ -732,24 +732,24 @@ Exit:
 
 \param[in] chanNum_p             Channel number of the instance
 
-\return  tAsyncInstance
+\return  tSsdoInstance
 \retval  Address        Pointer to the instance
 \retval  NULL           On invalid channel number
 
-\ingroup module_async
+\ingroup module_ssdo
 */
 //------------------------------------------------------------------------------
-static tAsyncInstance async_getInstance(tAsyncChanNum  chanNum_p )
+static tSsdoInstance ssdo_getInstance(tSsdoChanNum  chanNum_p )
 {
-    tAsyncInstance  pInstance = NULL;
+    tSsdoInstance  pInstance = NULL;
 
-    if(chanNum_p >= kNumAsyncInstCount )
+    if(chanNum_p >= kNumSsdoInstCount )
     {
         goto Exit;
     }
 
     // Set pointer to instance
-    pInstance = &asyncInstance_l[chanNum_p];
+    pInstance = &ssdoInstance_l[chanNum_p];
 
 Exit:
     return pInstance;
@@ -768,12 +768,12 @@ Read nodeId, index and subindex from the local object dictionary.
 
 \return  tAppIfStatus
 \retval  kAppIfSuccessful              On success
-\retval  kAppIfAsyncDestinationUnknown  Unable to find target in od
+\retval  kAppIfSsdoDestinationUnknown  Unable to find target in od
 
-\ingroup module_async
+\ingroup module_ssdo
 */
 //------------------------------------------------------------------------------
-static tAppIfStatus async_getTargetNode(tAsyncInstance pInstance_p,
+static tAppIfStatus ssdo_getTargetNode(tSsdoInstance pInstance_p,
         UINT8* pTargNode_p, UINT16* pTargIdx_p, UINT8* pTargSubIdx_p)
 {
     tEplKernel eplret = kEplSuccessful;
@@ -786,7 +786,7 @@ static tAppIfStatus async_getTargetNode(tAsyncInstance pInstance_p,
             &accTargNode, &accTargSize);
     if(eplret != kEplSuccessful)
     {
-        ret = kAppIfAsyncDestinationUnknown;
+        ret = kAppIfSsdoDestinationUnknown;
         goto Exit;
     }
 
@@ -811,41 +811,41 @@ Exit:
 \retval  kAppIfSuccessful              On success
 \retval  kAppIfTbuffWriteError         Unable to write data to buffer
 
-\ingroup module_async
+\ingroup module_ssdo
 */
 //------------------------------------------------------------------------------
-static tAppIfStatus async_handleReceiveFrame(tAsyncInstance pInstance_p,
+static tAppIfStatus ssdo_handleReceiveFrame(tSsdoInstance pInstance_p,
         UINT8* pRxBuffer_p, UINT32 buffSize_p)
 {
     tAppIfStatus ret = kAppIfSuccessful;
 
     // Check if channel is ready for transmission
-    ret = async_checkChannelStatus(pInstance_p);
-    if(ret == kAppIfAsyncChannelBusy)
+    ret = ssdo_checkChannelStatus(pInstance_p);
+    if(ret == kAppIfSsdoChannelBusy)
     {
         ret = kAppIfSuccessful;
         goto Exit;
     }
 
     // Forward payload to buffer
-    ret = async_postToBuffer(pInstance_p, pRxBuffer_p, (UINT16)buffSize_p);
+    ret = ssdo_postToBuffer(pInstance_p, pRxBuffer_p, (UINT16)buffSize_p);
     if(ret != kAppIfSuccessful)
     {
         goto Exit;
     }
 
     // Increment local sequence number
-    async_changeLocalSeqNr(&pInstance_p->prodRxParam_m.currProdSeq_m);
+    ssdo_changeLocalSeqNr(&pInstance_p->prodRxParam_m.currProdSeq_m);
 
     // Set sequence number
     ret = tbuf_writeByte(pInstance_p->prodRxParam_m.pTbufProdRxInst_m,
-            TBUF_ASYNCRX_SEQNR_OFF, pInstance_p->prodRxParam_m.currProdSeq_m);
+            TBUF_SSDORX_SEQNR_OFF, pInstance_p->prodRxParam_m.currProdSeq_m);
     if(ret != kAppIfSuccessful)
     {
         goto Exit;
     }
 
-    // Acknowledge asynchronous producing receive triple buffer
+    // Acknowledge ssdo producing receive triple buffer
     ret = tbuf_setAck(pInstance_p->prodRxParam_m.pTbufProdRxInst_m);
     if(ret != kAppIfSuccessful)
     {
@@ -874,10 +874,10 @@ the destination target.
 \retval  kAppIfSuccessful                   On success
 \retval  kAppIfConfChanWriteToObDictFailed  Unable to send data to target
 
-\ingroup module_async
+\ingroup module_ssdo
 */
 //------------------------------------------------------------------------------
-static tAppIfStatus async_sendToDestTarget(tAsyncInstance pInstance_p,
+static tAppIfStatus ssdo_sendToDestTarget(tSsdoInstance pInstance_p,
         UINT8* pTargNode_p, UINT16* pTargIdx_p, UINT8* pTargSubIdx_p,
         UINT8* pMsgBuffer_p, UINT16* pBuffSize_p)
 {
@@ -901,7 +901,7 @@ static tAppIfStatus async_sendToDestTarget(tAsyncInstance pInstance_p,
         case kEplSuccessful:
         {
             // Transfer is finished -> Free channel!
-            ret = async_consTxTransferFinished(pInstance_p);
+            ret = ssdo_consTxTransferFinished(pInstance_p);
             break;
         }
         case kEplSdoUdpArpInProgress:
@@ -916,7 +916,7 @@ static tAppIfStatus async_sendToDestTarget(tAsyncInstance pInstance_p,
         default:
         {
             // Other error happend
-            ret = kAppIfAsyncWriteToObDictFailed;
+            ret = kAppIfSsdoWriteToObDictFailed;
             break;
         }
     }
@@ -935,17 +935,17 @@ static tAppIfStatus async_sendToDestTarget(tAsyncInstance pInstance_p,
 \return  tAppIfStatus
 \retval  kAppIfSuccessful       On success
 
-\ingroup module_async
+\ingroup module_ssdo
 */
 //------------------------------------------------------------------------------
-static tAppIfStatus async_postToBuffer(tAsyncInstance pInstance_p,
+static tAppIfStatus ssdo_postToBuffer(tSsdoInstance pInstance_p,
         UINT8* pMsgBuffer_p, UINT16 buffSize_p)
 {
     tAppIfStatus ret = kAppIfSuccessful;
 
     // Write payload field
     ret = tbuf_writeWord(pInstance_p->prodRxParam_m.pTbufProdRxInst_m,
-            TBUF_ASYNCRX_PAYLSIZE_OFF, buffSize_p);
+            TBUF_SSDORX_PAYLSIZE_OFF, buffSize_p);
     if(ret != kAppIfSuccessful)
     {
         goto Exit;
@@ -953,7 +953,7 @@ static tAppIfStatus async_postToBuffer(tAsyncInstance pInstance_p,
 
     // Post frame to buffer
     ret = tbuf_writeStream(pInstance_p->prodRxParam_m.pTbufProdRxInst_m,
-            TBUF_ASYNCRX_SSDO_STUB_DATA_DOM_OFF, pMsgBuffer_p, buffSize_p);
+            TBUF_SSDORX_SSDO_STUB_DATA_DOM_OFF, pMsgBuffer_p, buffSize_p);
     if(ret != kAppIfSuccessful)
     {
         goto Exit;
@@ -974,19 +974,19 @@ Exit:
 
 \return  tEplKernel
 \retval  kEplSuccessful                 On success
-\retval  kAppIfAsyncTxConsSizeInvalid   Size of the payload too high
+\retval  kAppIfSsdoTxConsSizeInvalid   Size of the payload too high
 
-\ingroup module_async
+\ingroup module_ssdo
 */
 //------------------------------------------------------------------------------
-static tAppIfStatus async_grabFromBuffer(tAsyncInstance pInstance_p,
+static tAppIfStatus ssdo_grabFromBuffer(tSsdoInstance pInstance_p,
         UINT8** ppMsgBuffer_p, UINT16* pBuffSize_p)
 {
     tAppIfStatus ret = kAppIfSuccessful;
     UINT16      paylSize;
 
     ret = tbuf_readWord(pInstance_p->consTxParam_m.pTbufConsTxInst_m,
-            TBUF_ASYNCTX_PAYLSIZE_OFF, &paylSize);
+            TBUF_SSDOTX_PAYLSIZE_OFF, &paylSize);
     if(ret != kAppIfSuccessful)
     {
         goto Exit;
@@ -994,7 +994,7 @@ static tAppIfStatus async_grabFromBuffer(tAsyncInstance pInstance_p,
 
     // Get data pointer to local buffer
     ret = tbuf_getDataPtr(pInstance_p->consTxParam_m.pTbufConsTxInst_m,
-            TBUF_ASYNCTX_TSSDO_TRANSMIT_DATA_OFF, ppMsgBuffer_p);
+            TBUF_SSDOTX_TSSDO_TRANSMIT_DATA_OFF, ppMsgBuffer_p);
     if(ret != kAppIfSuccessful)
     {
         goto Exit;
@@ -1013,10 +1013,10 @@ Exit:
 
 \param[out] pSeqNr_p        Sequence number to change
 
-\ingroup module_async
+\ingroup module_ssdo
 */
 //------------------------------------------------------------------------------
-static void async_changeLocalSeqNr(tSeqNrValue* pSeqNr_p)
+static void ssdo_changeLocalSeqNr(tSeqNrValue* pSeqNr_p)
 {
     if(*pSeqNr_p == kSeqNrValueFirst)
     {
@@ -1036,24 +1036,24 @@ static void async_changeLocalSeqNr(tSeqNrValue* pSeqNr_p)
 
 \return tAppIfStatus
 \retval kAppIfSuccessful        Channel is free for transmission
-\retval kAppIfAsyncChannelBusy  Channel is currently transmitting
+\retval kAppIfSsdoChannelBusy  Channel is currently transmitting
 
-\ingroup module_async
+\ingroup module_ssdo
 */
 //------------------------------------------------------------------------------
-static tAppIfStatus async_checkChannelStatus(tAsyncInstance pInstance_p)
+static tAppIfStatus ssdo_checkChannelStatus(tSsdoInstance pInstance_p)
 {
     tAppIfStatus ret = kAppIfSuccessful;
     tSeqNrValue  seqNr = kSeqNrValueInvalid;
 
     // Get status of transmit channel
-    status_getAsyncProdChanFlag(pInstance_p->instId_m, &seqNr);
+    status_getSsdoProdChanFlag(pInstance_p->instId_m, &seqNr);
 
     // Check if old transmission is already finished!
     if(seqNr != pInstance_p->prodRxParam_m.currProdSeq_m)
     {
         // Message in progress -> retry later!
-        ret = kAppIfAsyncChannelBusy;
+        ret = kAppIfSsdoChannelBusy;
     }
 
     return ret;
@@ -1069,25 +1069,25 @@ static tAppIfStatus async_checkChannelStatus(tAsyncInstance pInstance_p)
 
 \return tAppIfStatus
 \retval kAppIfSuccessful              Target information valid
-\retval kAppIfAsyncInvalidTargetInfo  Invalid target information
+\retval kAppIfSsdoInvalidTargetInfo  Invalid target information
 
-\ingroup module_async
+\ingroup module_ssdo
 */
 //------------------------------------------------------------------------------
-static tAppIfStatus async_verifyTargetInfo(UINT8 targNode_p, UINT16 targIdx_p,
+static tAppIfStatus ssdo_verifyTargetInfo(UINT8 targNode_p, UINT16 targIdx_p,
         UINT8 targSubIdx_p)
 {
     tAppIfStatus ret = kAppIfSuccessful;
 
     if(targNode_p == 0 || targNode_p == nodeId_l)
     {
-        ret = kAppIfAsyncInvalidTargetInfo;
+        ret = kAppIfSsdoInvalidTargetInfo;
         goto Exit;
     }
 
     if(targIdx_p == 0 || targSubIdx_p == 0)
     {
-        ret = kAppIfAsyncInvalidTargetInfo;
+        ret = kAppIfSsdoInvalidTargetInfo;
         goto Exit;
     }
 

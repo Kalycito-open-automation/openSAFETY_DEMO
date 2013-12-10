@@ -1,11 +1,11 @@
 /**
 ********************************************************************************
-\file   config/tbuflayoutasync.h
+\file   libappif/internal/ssdoinst.h
 
-\brief  Header defines the layout of the async triple buffer
+\brief  Application interface SSDO module internal instance header
 
-This header gives the basic structure of the asynchronous receive and
-transmit buffers.
+Internal header for the SSDO channel which holds the instance
+declaration of one channel.
 
 *******************************************************************************/
 
@@ -36,72 +36,69 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
 
-#ifndef _INC_config_tbuflayoutasync_H_
-#define _INC_config_tbuflayoutasync_H_
+#ifndef _INC_libappif_internal_ssdoinst_H_
+#define _INC_libappif_internal_ssdoinst_H_
 
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
 
-#include <appifcommon/global.h>
+#include <config/tbuflayoutssdo.h>
+#include <appifcommon/timeout.h>
+
+#include <libappif/ssdo.h>
 
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
-#define SSDO_STUB_OBJECT_INDEX           0x3000     ///< Object index of the SSDO stub
-#define SSDO_STUB_DATA_OBJECT_INDEX      0x3100     ///< Object index of the SSDO stub data
-
-
-#define SSDO_STUB_DATA_DOM_SIZE     0x20      ///< Size of the SSDO stub data object
-#define TSSDO_TRANSMIT_DATA_SIZE    0x20      ///< Size of the SSDO channel transmit data
 
 //------------------------------------------------------------------------------
 // typedef
 //------------------------------------------------------------------------------
 
-/**
- * \brief Number of asynchronous channel instances
- */
-typedef enum {
-    kNumAsyncChan0     = 0x00,
-    kNumAsyncInstCount = 0x01,
-} tAsyncChanNum;
+typedef struct {
+    UINT8                   isLocked_m;        ///< Is buffer free for filling
+    tTbufSsdoTxStructure*   pSsdoTxPayl_m;    ///< Pointer to transmit buffer
+} tTbufSsdoTxBuffer;
 
 /**
- * \brief Memory layout of the receive channel
+ * \brief Parameter type of the transmit buffer
  */
 typedef struct {
-    UINT8   seqNr_m;
-    UINT8   reserved;
-    UINT16  paylSize_m;
-    UINT8   ssdoStubDataDom_m[SSDO_STUB_DATA_DOM_SIZE];
-} tTbufAsyncRxStructure;
+    tTbufNumLayout        idTxBuff_m;           ///< Id of the transmit buffer
+    tTbufSsdoTxBuffer     ssdoTxBuffer_m;       ///< SSDO transmit buffer copy
+    tSeqNrValue           currTxSeqNr_m;        ///< Current transmit sequence number
+    UINT8                 currTxBuffer_m;       ///< Current active transmit buffer
+    tTimeoutInstance      pTimeoutInst_m;       ///< Timer instance for SSDO transmissions
+} tSsdoTxChannel;
 
 /**
- * \brief Memory layout of the transmit channel
+ * \brief Parameter type of the receive buffer
  */
 typedef struct {
-    UINT8   seqNr_m;
-    UINT8   reserved;
-    UINT16  paylSize_m;
-    UINT8   tssdoTransmitData_m[TSSDO_TRANSMIT_DATA_SIZE];
-} tTbufAsyncTxStructure;
+    tTbufNumLayout         idRxBuff_m;          ///< Id of the receive buffer
+    tSsdoRxHandler         pfnRxHandler_m;      ///< SSDO module receive handler
+    tTbufSsdoRxStructure*  pSsdoRxBuffer_m;     ///< Pointer to receive buffer
+    tSeqNrValue            currRxSeqNr_m;       ///< Current receive sequence number
+    UINT8                  fRxFrameIncoming_m;  ///< Receive buffer incoming flag
+} tSsdoRxChannel;
 
-//------------------------------------------------------------------------------
-// offsetof defines
-//------------------------------------------------------------------------------
+/**
+\brief SSDO channel user instance
 
-#define TBUF_ASYNCRX_SEQNR_OFF                 offsetof(tTbufAsyncRxStructure, seqNr_m)
-#define TBUF_ASYNCRX_PAYLSIZE_OFF              offsetof(tTbufAsyncRxStructure, paylSize_m)
-#define TBUF_ASYNCRX_SSDO_STUB_DATA_DOM_OFF    offsetof(tTbufAsyncRxStructure, ssdoStubDataDom_m)
-
-#define TBUF_ASYNCTX_SEQNR_OFF                 offsetof(tTbufAsyncTxStructure, seqNr_m)
-#define TBUF_ASYNCTX_PAYLSIZE_OFF              offsetof(tTbufAsyncTxStructure, paylSize_m)
-#define TBUF_ASYNCTX_TSSDO_TRANSMIT_DATA_OFF   offsetof(tTbufAsyncTxStructure, tssdoTransmitData_m)
+The SSDO instance holds configuration information of each SSDO channel.
+*/
+struct eSsdoInstance
+{
+    tSsdoChanNum       chanId_m;           ///< Id of the SSDO channel
+    tSsdoTxChannel     txBuffParam_m;      ///< Parameters of the transmit channel
+    tSsdoRxChannel     rxBuffParam_m;      ///< Parameters of the receive channel
+};
 
 //------------------------------------------------------------------------------
 // function prototypes
 //------------------------------------------------------------------------------
 
-#endif /* _INC_config_tbuflayoutasync_H_ */
+#endif /* _INC_libappif_internal_ssdoinst_H_ */
+
 

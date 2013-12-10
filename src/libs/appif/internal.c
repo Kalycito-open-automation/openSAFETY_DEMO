@@ -50,7 +50,7 @@ processes the synchronous and asynchronous task.
 #include <libappif/appif.h>
 
 #include <libappif/internal/stream.h>
-#include <libappif/internal/async.h>
+#include <libappif/internal/ssdo.h>
 #include <libappif/internal/cc.h>
 #include <libappif/internal/error.h>
 
@@ -232,7 +232,7 @@ BOOL appif_processSync(void)
 /**
 \brief    Process application interface asynchronous task
 
-\param[in]  ppInstance_p         Pointer to the array of instances
+\param[in]  ppInstance_p         Pointer to the array of SSDO instances
 
 \return  BOOL
 \retval  TRUE         Async processing successful
@@ -241,24 +241,32 @@ BOOL appif_processSync(void)
 \ingroup module_internal
 */
 //------------------------------------------------------------------------------
-BOOL appif_processAsync(tAsyncInstance* ppInstance_p)
+BOOL appif_processAsync(tSsdoInstance* ppInstance_p)
 {
     BOOL fReturn = FALSE, fError = FALSE;
-#if(((APPIF_MODULE_INTEGRATION) & (APPIF_MODULE_ASYNC)) != 0)
+#if(((APPIF_MODULE_INTEGRATION) & (APPIF_MODULE_SSDO)) != 0)
     UINT8 i;
 
-    // Process all asynchronous channels
-    for(i=0; i < kNumAsyncInstCount; i++)
+    if(ppInstance_p == NULL)
     {
-        if(async_process(ppInstance_p[i]) == FALSE)
+        // SSDO module is active but no instance is passed -> ERROR!
+        fError = TRUE;
+    }
+    else
+    {
+        // Process all SSDO channels
+        for(i=0; i < kNumSsdoInstCount; i++)
         {
-            fError = TRUE;
-            break;
+            if(ssdo_process(ppInstance_p[i]) == FALSE)
+            {
+                fError = TRUE;
+                break;
+            }
         }
     }
 #endif
 
-    if(!fError)
+    if(fError == FALSE)
     {
 #if(((APPIF_MODULE_INTEGRATION) & (APPIF_MODULE_CC)) != 0)
         // Process configuration channel objects
@@ -299,9 +307,9 @@ static BOOL appif_initIntModules(tAppIfInitParam* pInitParam_p)
     BOOL fReturn = FALSE;
     tStreamInitParam streamInitParam;
 
-#if(((APPIF_MODULE_INTEGRATION) & (APPIF_MODULE_ASYNC)) != 0)
-    // Initialize the asynchronous module
-    async_init();
+#if(((APPIF_MODULE_INTEGRATION) & (APPIF_MODULE_SSDO)) != 0)
+    // Initialize the SSDO module
+    ssdo_init();
 #endif
 
     // Initialize the timeout module

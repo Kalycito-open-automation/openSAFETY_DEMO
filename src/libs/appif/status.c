@@ -5,7 +5,7 @@
 \brief  Status module for synchronization information forwarding
 
 This module forwards the time information to the user application.
-It also provides the asynchronous channel status information.
+It also provides the SSDO channel status information.
 
 \ingroup module_status
 *******************************************************************************/
@@ -91,11 +91,11 @@ typedef struct
     tTbufStatusOutStructure*  pStatusOutLayout_m;  ///< Local copy of the status output triple buffer
     tTbufNumLayout            buffOutId_m;            ///< Id of the output status register buffer
     UINT8                     iccStatus_m;            ///< Icc status register
-    UINT16                    asyncTxStatus_m;        ///< Status of the asynchronous transmit channel
+    UINT16                    ssdoTxStatus_m;         ///< Status of the SSDO transmit channel
 
     tTbufStatusInStructure*   pStatusInLayout_m;  ///< Local copy of the status incoming triple buffer
     tTbufNumLayout            buffInId_m;            ///< Id of the incoming status register buffer
-    UINT16                    asyncRxStatus_m;       ///< Status of the asynchronous receive channel
+    UINT16                    ssdoRxStatus_m;       ///< Status of the SSDO receive channel
 
     tAppIfAppCbSync       pfnAppCbSync_m;       ///< Synchronous callback function
 } tStatusInstance;
@@ -222,7 +222,7 @@ void status_getIccStatus(tSeqNrValue* pSeqNr_p)
 
 //------------------------------------------------------------------------------
 /**
-\brief    Set the asynchronous receive channel to next element
+\brief    Set the SSDO receive channel to next element
 
 \param[in] chanNum_p     Id of the channel to mark as busy
 \param[in] seqNr_p       The value of the sequence number
@@ -230,22 +230,22 @@ void status_getIccStatus(tSeqNrValue* pSeqNr_p)
 \ingroup module_status
 */
 //------------------------------------------------------------------------------
-void status_setAsyncRxChanFlag(UINT8 chanNum_p, tSeqNrValue seqNr_p)
+void status_setSsdoRxChanFlag(UINT8 chanNum_p, tSeqNrValue seqNr_p)
 {
     if(seqNr_p == kSeqNrValueFirst)
     {
-        statusInstance_l.asyncRxStatus_m &= ~(1<<chanNum_p);
+        statusInstance_l.ssdoRxStatus_m &= ~(1<<chanNum_p);
     }
     else
     {
-        statusInstance_l.asyncRxStatus_m |= (1<<chanNum_p);
+        statusInstance_l.ssdoRxStatus_m |= (1<<chanNum_p);
     }
 
 }
 
 //------------------------------------------------------------------------------
 /**
-\brief    Get the asynchronous transmit channel status
+\brief    Get the SSDO transmit channel status
 
 \param[in]  chanNum_p     Id of the channel to mark as busy
 \param[out] pSeqNr_p      The value of the sequence number
@@ -253,10 +253,10 @@ void status_setAsyncRxChanFlag(UINT8 chanNum_p, tSeqNrValue seqNr_p)
 \ingroup module_status
 */
 //------------------------------------------------------------------------------
-void status_getAsyncTxChanFlag(UINT8 chanNum_p, tSeqNrValue* pSeqNr_p)
+void status_getSsdoTxChanFlag(UINT8 chanNum_p, tSeqNrValue* pSeqNr_p)
 {
     // Reformat to sequence number type
-    if(CHECK_BIT(statusInstance_l.asyncTxStatus_m,chanNum_p))
+    if(CHECK_BIT(statusInstance_l.ssdoTxStatus_m,chanNum_p))
     {
         *pSeqNr_p = kSeqNrValueSecond;
     }
@@ -456,7 +456,7 @@ static BOOL status_updateOutStatusReg(UINT8* pBuffer_p, UINT16 bufSize_p,
         statusInstance_l.iccStatus_m = AmiGetByteFromLe((UINT8 *)&pStatusBuff->iccStatus_m);
 
         // Update tx status register
-        statusInstance_l.asyncTxStatus_m = AmiGetWordFromLe((UINT8 *)&pStatusBuff->asyncConsStatus_m);
+        statusInstance_l.ssdoTxStatus_m = AmiGetWordFromLe((UINT8 *)&pStatusBuff->ssdoConsStatus_m);
 
         // Acknowledge buffer
         stream_ackBuffer(statusInstance_l.buffOutId_m);
@@ -502,7 +502,7 @@ static BOOL status_updateInStatusReg(UINT8* pBuffer_p, UINT16 bufSize_p,
         stream_ackBuffer(statusInstance_l.buffInId_m);
 
         // Write rx status register
-        AmiSetWordToLe((UINT8 *)&pStatusBuff->asyncProdStatus_m, statusInstance_l.asyncRxStatus_m);
+        AmiSetWordToLe((UINT8 *)&pStatusBuff->ssdoProdStatus_m, statusInstance_l.ssdoRxStatus_m);
 
         fReturn = TRUE;
     }

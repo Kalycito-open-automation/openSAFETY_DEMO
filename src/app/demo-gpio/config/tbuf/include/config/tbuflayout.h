@@ -45,7 +45,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <config/tbuflayoutcc.h>
 #include <config/tbuflayoutrpdo.h>
 #include <config/tbuflayouttpdo.h>
-#include <config/tbuflayoutasync.h>
+#include <config/tbuflayoutssdo.h>
 
 //------------------------------------------------------------------------------
 // typedef
@@ -57,17 +57,17 @@ typedef UINT32 tTbufAckRegister;    ///< Acknowledge register size type
  * \brief This type assigns a number to each triple buffer
  */
 typedef enum {
-    kTbufAckRegisterCons     = 0x00,     ///< Number of the consumer acknowledge register
-    kTbufNumStatusOut        = 0x01,      ///< Number of the status output triple buffer
-    kTbufNumOutputConfChan   = 0x02,     ///< Number of the output configuration channel triple buffer
-    kTbufNumRpdoImage        = 0x03,     ///< Number of the RPDO triple buffer image
-    kTbufNumAsyncReceive0    = 0x04,     ///< Number of the asynchronous rx triple buffer 0
-    kTbufNumStatusIn         = 0x05,     ///< Number of the status input triple buffer
-    kTbufNumInputConfChan    = 0x06,     ///< Number of the input configuration channel triple buffer
-    kTbufNumTpdoImage        = 0x07,     ///< Number of the TPDO triple buffer image
-    kTbufNumAsyncTransmit0   = 0x08,     ///< Number of the asynchronous tx triple buffer 0
-    kTbufAckRegisterProd     = 0x09,     ///< Number of the producer acknowledge register
-    kTbufCount               = 0x0A,     ///< Total number of triple buffers
+    kTbufAckRegisterCons     = 0x00,     ///< ID of the consumer acknowledge register
+    kTbufNumStatusOut        = 0x01,     ///< ID of the status output triple buffer
+    kTbufNumOutputConfChan   = 0x02,     ///< ID of the output configuration channel triple buffer
+    kTbufNumRpdoImage        = 0x03,     ///< ID of the RPDO triple buffer image
+    kTbufNumSsdoReceive0     = 0x04,     ///< ID of the SSDO receive triple buffer 0
+    kTbufNumStatusIn         = 0x05,     ///< ID of the status input triple buffer
+    kTbufNumInputConfChan    = 0x06,     ///< ID of the input configuration channel triple buffer
+    kTbufNumTpdoImage        = 0x07,     ///< ID of the TPDO triple buffer image
+    kTbufNumSsdoTransmit0    = 0x08,     ///< ID of the SSDO transmit triple buffer 0
+    kTbufAckRegisterProd     = 0x09,     ///< ID of the producer acknowledge register
+    kTbufCount               = 0x0A,     ///< Total count of triple buffers
 } tTbufNumLayout;
 
 /**
@@ -79,13 +79,13 @@ typedef struct {
     tTbufStatusOutStructure   tbufStatusOut_m;      ///< Status outgoing triple buffer
     tTbufCcStructure          tbufOcc_m;            ///< Output configuration channel triple buffer
     tTbufRpdoImage            tbufRpdoImg_m;        ///< Structure of the rpdo image triple buffer
-    tTbufAsyncRxStructure     tbufAsyncRx0_m;       ///< Asynchronous receive channel 0 structure
+    tTbufSsdoRxStructure      tbufSsdoRx0_m;        ///< SSDO receive channel 0 structure
 
     // Consumer triple buffers
     tTbufStatusInStructure    tbufStatusIn_m;       ///< Status incoming triple buffer
     tTbufCcStructure          tbufIcc_m;            ///< Input configuration channel triple buffer
     tTbufTpdoImage            tbufTpdoImg_m;        ///< Structure of the tpdo image triple buffer
-    tTbufAsyncTxStructure     tbufAsyncTx0_m;       ///< Asynchronous transmit channel 0 structure
+    tTbufSsdoTxStructure      tbufSsdoTx0_m;        ///< SSDO transmit channel 0 structure
 
     tTbufAckRegister          prodAck_m;            ///< Producer ACK register
 } tTbufMemLayout;
@@ -101,7 +101,7 @@ typedef struct {
                                 | APPIF_MODULE_STATUS \
                                 | APPIF_MODULE_CC \
                                 | APPIF_MODULE_PDO \
-                                | APPIF_MODULE_ASYNC \
+                                | APPIF_MODULE_SSDO \
                                 )
 
 // Detect configuration errors

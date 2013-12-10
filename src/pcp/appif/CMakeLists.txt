@@ -49,7 +49,7 @@ SET ( APPIF_SRCS
     ${PROJECT_SOURCE_DIR}/pdo.c
     ${PROJECT_SOURCE_DIR}/rpdo.c
     ${PROJECT_SOURCE_DIR}/tpdo.c
-    ${PROJECT_SOURCE_DIR}/async.c
+    ${PROJECT_SOURCE_DIR}/ssdo.c
     ${PROJECT_SOURCE_DIR}/fifo.c
     ${appifcommon_SOURCE_DIR}/timeout.c
     ${appifcommon_SOURCE_DIR}/ccobject.c

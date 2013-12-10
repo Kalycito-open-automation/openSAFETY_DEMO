@@ -97,9 +97,9 @@ void status_disableSyncInt(void);
 // Configuration channel status flag
 void status_setIccStatus(tSeqNrValue seqNr_p);
 
-// Asynchronous channel status flag
-void status_setAsyncConsChanFlag(UINT8 chanNum_p, tSeqNrValue seqNr_p);
-void status_getAsyncProdChanFlag(UINT8 chanNum_p, tSeqNrValue* pSeqNr_p);
+// SSDO channel status flag
+void status_setSsdoConsChanFlag(UINT8 chanNum_p, tSeqNrValue seqNr_p);
+void status_getSsdoProdChanFlag(UINT8 chanNum_p, tSeqNrValue* pSeqNr_p);
 
 #endif /* _INC_appif_status_H_ */
 

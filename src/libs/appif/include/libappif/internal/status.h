@@ -62,8 +62,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // function prototypes
 //------------------------------------------------------------------------------
 void status_getIccStatus(tSeqNrValue* pSeqNr_p);
-void status_setAsyncRxChanFlag(UINT8 chanNum_p, tSeqNrValue seqNr_p);
-void status_getAsyncTxChanFlag(UINT8 chanNum_p, tSeqNrValue* pSeqNr_p);
+void status_setSsdoRxChanFlag(UINT8 chanNum_p, tSeqNrValue seqNr_p);
+void status_getSsdoTxChanFlag(UINT8 chanNum_p, tSeqNrValue* pSeqNr_p);
 
 #endif /* _INC_libappif_internal_status_H_ */
 

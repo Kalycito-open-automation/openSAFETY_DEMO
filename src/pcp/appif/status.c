@@ -5,8 +5,7 @@
 \brief  Status module for synchronization information forwarding
 
 This module configures the synchronous interrupt and forwards the time information
-to the status triple buffer. It also updates the asynchronous channel status
-information.
+to the status triple buffer. It also updates the SSDO channel status information.
 
 \ingroup module_status
 *******************************************************************************/
@@ -110,9 +109,9 @@ typedef struct
     UINT32 cycleTime_m;                    ///< local copy of the cycle status
 
     UINT8  iccStatus_m;                    ///< Icc status register
-    UINT16 asyncConsStatus_m;              ///< Async consumer buffer status register
+    UINT16 ssdoConsStatus_m;               ///< SSDO consumer buffer status register
 
-    UINT16 asyncProdStatus_m;              ///< Async producer buffer status register
+    UINT16 ssdoProdStatus_m;              ///< SSDO producer buffer status register
 } tStatusInstance;
 
 //------------------------------------------------------------------------------
@@ -355,7 +354,7 @@ void status_setIccStatus(tSeqNrValue seqNr_p)
 
 //------------------------------------------------------------------------------
 /**
-\brief    Set the asynchronous transmit consuming channel to next element
+\brief    Set the SSDO transmit consuming channel to next element
 
 \param[in] chanNum_p     Id of the channel to acknowledge
 \param[in] seqNr_p       The value of the sequence number
@@ -363,15 +362,15 @@ void status_setIccStatus(tSeqNrValue seqNr_p)
 \ingroup module_status
 */
 //------------------------------------------------------------------------------
-void status_setAsyncConsChanFlag(UINT8 chanNum_p, tSeqNrValue seqNr_p)
+void status_setSsdoConsChanFlag(UINT8 chanNum_p, tSeqNrValue seqNr_p)
 {
     if(seqNr_p == kSeqNrValueFirst)
     {
-        statusInstance_l.asyncConsStatus_m &= ~(1<<chanNum_p);
+        statusInstance_l.ssdoConsStatus_m &= ~(1<<chanNum_p);
     }
     else
     {
-        statusInstance_l.asyncConsStatus_m |= (1<<chanNum_p);
+        statusInstance_l.ssdoConsStatus_m |= (1<<chanNum_p);
     }
 
 }
@@ -379,7 +378,7 @@ void status_setAsyncConsChanFlag(UINT8 chanNum_p, tSeqNrValue seqNr_p)
 
 //------------------------------------------------------------------------------
 /**
-\brief    Get the asynchronous receive producing channel status
+\brief    Get the SSDO receive producing channel status
 
 \param[in]  chanNum_p     Id of the channel to mark as busy
 \param[out] seqNr_p       The value of the sequence number
@@ -391,10 +390,10 @@ void status_setAsyncConsChanFlag(UINT8 chanNum_p, tSeqNrValue seqNr_p)
 \ingroup module_status
 */
 //------------------------------------------------------------------------------
-void status_getAsyncProdChanFlag(UINT8 chanNum_p, tSeqNrValue* pSeqNr_p)
+void status_getSsdoProdChanFlag(UINT8 chanNum_p, tSeqNrValue* pSeqNr_p)
 {
     // Reformat to sequence number type
-    if(CHECK_BIT(statusInstance_l.asyncProdStatus_m ,chanNum_p))
+    if(CHECK_BIT(statusInstance_l.ssdoProdStatus_m ,chanNum_p))
     {
         *pSeqNr_p = kSeqNrValueSecond;
     }
@@ -442,8 +441,8 @@ static tAppIfStatus status_processOut(tTimeInfo* pTime_p)
     }
 
     // Write aynchronous channels status field to buffer
-    ret = tbuf_writeWord(statusInstance_l.pTbufOutInstance_m, TBUF_ASYNC_CONS_STATUS_OFF,
-            statusInstance_l.asyncConsStatus_m);
+    ret = tbuf_writeWord(statusInstance_l.pTbufOutInstance_m, TBUF_SSDO_CONS_STATUS_OFF,
+            statusInstance_l.ssdoConsStatus_m);
     if(ret != kAppIfSuccessful)
     {
         goto Exit;
@@ -474,9 +473,9 @@ static tAppIfStatus status_processIn(void)
     // Set acknowledge byte
     tbuf_setAck(statusInstance_l.pTbufInInstance_m);
 
-    // Read asynchronous channels status field from buffer
-    ret = tbuf_readWord(statusInstance_l.pTbufInInstance_m, TBUF_ASYNC_PROD_STATUS_OFF,
-            &statusInstance_l.asyncProdStatus_m);
+    // Read SSDO channels status field from buffer
+    ret = tbuf_readWord(statusInstance_l.pTbufInInstance_m, TBUF_SSDO_PROD_STATUS_OFF,
+            &statusInstance_l.ssdoProdStatus_m);
     if(ret != kAppIfSuccessful)
     {
         goto Exit;

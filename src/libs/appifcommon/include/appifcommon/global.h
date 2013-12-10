@@ -59,7 +59,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define APPIF_MODULE_STATUS      0x00000001L    ///< Status module
 #define APPIF_MODULE_CC          0x00000002L    ///< Configuration channel module
 #define APPIF_MODULE_PDO         0x00000004L    ///< PDO module
-#define APPIF_MODULE_ASYNC       0x00000008L    ///< Asynchronous module
+#define APPIF_MODULE_SSDO        0x00000008L    ///< SSDO module
 
 // Alignment macros
 #define ALIGN16(ptr)        (((UINT16)(ptr) + 1U) & 0xFFFFFFFEU)   ///< aligns the pointer to UINT16 (2 byte)
@@ -160,7 +160,7 @@ typedef enum {
     kAppIfModuleCc        = 0x02,
     kAppIfModuleCcObject  = 0x03,
     kAppIfModulePdo       = 0x04,
-    kAppIfModuleAsync     = 0x05,
+    kAppIfModuleSsdo      = 0x05,
     kAppIfModuleTimeout   = 0x06,
     kAppIfModuleStream    = 0x07,
     kAppIfModuleInternal  = 0x08,
@@ -224,19 +224,19 @@ typedef enum {
     kAppIfStreamProcessActionFailed   = 0x85,
     kAppIfStreamSyncError             = 0x86,
 
-    kAppIfAsyncInitError              = 0x90,
-    kAppIfAsyncInvalidParameter       = 0x91,
-    kAppIfAsyncProcessingFailed       = 0x92,
-    kAppIfAsyncWriteToObDictFailed    = 0x93,
-    kAppIfAsyncDestinationUnknown     = 0x94,
-    kAppIfAsyncTxConsSizeInvalid      = 0x95,
-    kAppIfAsyncSendError              = 0x96,
-    kAppIfAsyncNoFreeBuffer           = 0x97,
-    kAppIfAsyncBufferSizeMismatch     = 0x98,
-    kAppIfAsyncInvalidBuffer          = 0x99,
-    kAppIfAsyncInvalidState           = 0x9A,
-    kAppIfAsyncChannelBusy            = 0x9B,
-    kAppIfAsyncInvalidTargetInfo      = 0x9C,
+    kAppIfSsdoInitError               = 0x90,
+    kAppIfSsdoInvalidParameter        = 0x91,
+    kAppIfSsdoProcessingFailed        = 0x92,
+    kAppIfSsdoWriteToObDictFailed     = 0x93,
+    kAppIfSsdoDestinationUnknown      = 0x94,
+    kAppIfSsdoTxConsSizeInvalid       = 0x95,
+    kAppIfSsdoSendError               = 0x96,
+    kAppIfSsdoNoFreeBuffer            = 0x97,
+    kAppIfSsdoBufferSizeMismatch      = 0x98,
+    kAppIfSsdoInvalidBuffer           = 0x99,
+    kAppIfSsdoInvalidState            = 0x9A,
+    kAppIfSsdoChannelBusy             = 0x9B,
+    kAppIfSsdoInvalidTargetInfo       = 0x9C,
 
     kAppIfFifoInitFailed              = 0x100,
     kAppIfFifoInvalidParam            = 0x101,

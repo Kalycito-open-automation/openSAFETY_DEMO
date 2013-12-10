@@ -36,7 +36,7 @@ PROJECT (appif)
 # Set all source files
 ########################################################################
 SET ( LIB_SRCS
-    ${PROJECT_SOURCE_DIR}/async.c
+    ${PROJECT_SOURCE_DIR}/ssdo.c
     ${PROJECT_SOURCE_DIR}/cc.c
     ${PROJECT_SOURCE_DIR}/error.c
     ${PROJECT_SOURCE_DIR}/internal.c

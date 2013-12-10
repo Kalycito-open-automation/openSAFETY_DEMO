@@ -56,7 +56,7 @@ typedef struct {
     UINT32 relTimeHigh_m;
     UINT8  iccStatus_m;
     UINT8  reserved_m;
-    UINT16 asyncConsStatus_m;
+    UINT16 ssdoConsStatus_m;
 } tTbufStatusOutStructure;
 
 /**
@@ -64,7 +64,7 @@ typedef struct {
  */
 typedef struct {
     UINT16 reserved_m;
-    UINT16 asyncProdStatus_m;
+    UINT16 ssdoProdStatus_m;
 } tTbufStatusInStructure;
 
 //------------------------------------------------------------------------------
@@ -74,9 +74,9 @@ typedef struct {
 #define TBUF_RELTIME_LOW_OFF            offsetof(tTbufStatusOutStructure, relTimeLow_m)
 #define TBUF_RELTIME_HIGH_OFF           offsetof(tTbufStatusOutStructure, relTimeHigh_m)
 #define TBUF_ICC_STATUS_OFF             offsetof(tTbufStatusOutStructure, iccStatus_m)
-#define TBUF_ASYNC_CONS_STATUS_OFF      offsetof(tTbufStatusOutStructure, asyncConsStatus_m)
+#define TBUF_SSDO_CONS_STATUS_OFF       offsetof(tTbufStatusOutStructure, ssdoConsStatus_m)
 
-#define TBUF_ASYNC_PROD_STATUS_OFF      offsetof(tTbufStatusInStructure, asyncProdStatus_m)
+#define TBUF_SSDO_PROD_STATUS_OFF       offsetof(tTbufStatusInStructure, ssdoProdStatus_m)
 
 
 #define STATUS_ICC_BUSY_FLAG_POS        0       ///< Position of the ICC busy flag

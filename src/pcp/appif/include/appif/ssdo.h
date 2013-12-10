@@ -1,10 +1,10 @@
 /**
 ********************************************************************************
-\file   appif/async.h
+\file   appif/ssdo.h
 
-\brief  Header file for async module
+\brief  Header file of the SSDO module
 
-This file contains definitions for the async module.
+This file contains definitions for the SSDO module.
 
 *******************************************************************************/
 
@@ -35,8 +35,8 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
 
-#ifndef _INC_appif_async_H_
-#define _INC_appif_async_H_
+#ifndef _INC_appif_ssdo_H_
+#define _INC_appif_ssdo_H_
 
 //------------------------------------------------------------------------------
 // includes
@@ -44,7 +44,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <appif/pcpglobal.h>
 
-#include <config/tbuflayoutasync.h>
+#include <config/tbuflayoutssdo.h>
 
 //------------------------------------------------------------------------------
 // const defines
@@ -55,34 +55,34 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 
 /**
- * \brief Asynchronous channel initialization parameters
+ * \brief SSDO channel initialization parameters
  */
 typedef struct {
-    tAsyncChanNum            chanId_m;          ///< Id of the asynchronous channel
+    tSsdoChanNum             chanId_m;          ///< Id of the SSDO channel
 
     UINT8                    tbufRxId_m;        ///< Id of the receive triple buffer
-    tTbufAsyncRxStructure*   pTbufRxBase_m;     ///< Base address of the receive triple buffer
+    tTbufSsdoRxStructure*    pTbufRxBase_m;     ///< Base address of the receive triple buffer
     UINT32                   tbufRxSize_m;      ///< Size of the receive triple buffer
     UINT8*                   pProdAckBase_m;    ///< Producer acknowledge register base
 
     UINT8                    tbufTxId_m;        ///< Id of the transmit triple buffer
-    tTbufAsyncTxStructure*   pTbufTxBase_m;     ///< Base address of the transmit triple buffer
+    tTbufSsdoTxStructure*    pTbufTxBase_m;     ///< Base address of the transmit triple buffer
     UINT32                   tbufTxSize_m;      ///< Size of the transmit triple buffer
     UINT8*                   pConsAckBase_m;    ///< Consumer acknowledge register base
-} tAsyncInitStruct;
+} tSsdoInitStruct;
 
-typedef struct eAsyncInstance *tAsyncInstance;
+typedef struct eSsdoInstance *tSsdoInstance;
 
 //------------------------------------------------------------------------------
 // function prototypes
 //------------------------------------------------------------------------------
-void async_init(UINT8 nodeId_p, UINT16 idxSsdoStub_p, UINT16 idxSsdoStubData_p);
-tAsyncInstance async_create(tAsyncInitStruct* pInitParam_p);
-void async_destroy(tAsyncInstance pInstance_p);
-tAppIfStatus async_process(tAsyncInstance pInstance_p);
-tAppIfStatus async_consTxTransferFinished(tAsyncInstance pInstance_p);
-tAppIfStatus async_handleIncoming(tAsyncInstance pInstance_p);
+void ssdo_init(UINT8 nodeId_p, UINT16 idxSsdoStub_p, UINT16 idxSsdoStubData_p);
+tSsdoInstance ssdo_create(tSsdoInitStruct* pInitParam_p);
+void ssdo_destroy(tSsdoInstance pInstance_p);
+tAppIfStatus ssdo_process(tSsdoInstance pInstance_p);
+tAppIfStatus ssdo_consTxTransferFinished(tSsdoInstance pInstance_p);
+tAppIfStatus ssdo_handleIncoming(tSsdoInstance pInstance_p);
 
-#endif /* _INC_appif_async_H_ */
+#endif /* _INC_appif_ssdo_H_ */
 
 

@@ -7,7 +7,7 @@ PROJECT (tst_appif)
 #################################################################
 SET ( TST_DRIVER
     ${PROJECT_SOURCE_DIR}/Driver/ExampleAddTest.c
-    ${PROJECT_SOURCE_DIR}/Driver/TST_module_async.c
+    ${PROJECT_SOURCE_DIR}/Driver/TST_module_ssdo.c
     ${PROJECT_SOURCE_DIR}/Driver/TST_module_status.c
 )
 

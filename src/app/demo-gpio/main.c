@@ -87,9 +87,7 @@ data from and to the PCP.
 
 typedef struct {
     tTbufMemLayout     tbufMemLayout_m;                        ///< Local copy of the triple buffer memory
-    tAsyncInstance     instAsyncChan_m[kNumAsyncInstCount];    ///< Instance of the asynchronous channel 0
     UINT8              fShutdown_m;                            ///< Indicates CN shutdown
-    UINT8              fAsyncTxTestEnable_m;                   ///< Enable periodic transmission of asynchronous frame
     UINT8              fCcWriteObjTestEnable_m;                ///< Enable periodic writing of a cc object
 } tMainInstance;
 
@@ -117,12 +115,6 @@ static BOOL appif_workInputOutput(UINT32 rpdoRelTimeLow_p,
 #endif
 
 static void appif_errorHandler(tErrorInfo* pErrorInfo_p);
-
-#if(((APPIF_MODULE_INTEGRATION) & (APPIF_MODULE_ASYNC)) != 0)
-static void appif_asyncSendPayload(void);
-static BOOL appif_asyncCbRcvPaylChan0(UINT8* pPayload_p, UINT16 size_p);
-static BOOL appif_asyncCbRcvPaylChan1(UINT8* pPayload_p, UINT16 size_p);
-#endif
 
 #if(((APPIF_MODULE_INTEGRATION) & (APPIF_MODULE_CC)) != 0)
 static void appif_ccWriteObject(void);
@@ -160,8 +152,7 @@ int main (void)
     // Generate buffer descriptor list
     appif_genDescList(&buffDescList[0], kTbufCount);
 
-    // Enable async Tx test
-    mainInstance_l.fAsyncTxTestEnable_m = TRUE;
+    // Enable test of configuration channel
     mainInstance_l.fCcWriteObjTestEnable_m = TRUE;
 
     // initialize and start the application interface internals
@@ -205,19 +196,11 @@ int main (void)
     /* main program loop */
     while (TRUE)
     {
-        if(appif_processAsync(&mainInstance_l.instAsyncChan_m[kNumAsyncChan0]) == FALSE)
+        if(appif_processAsync(NULL) == FALSE)
         {
             DEBUG_TRACE(DEBUG_LVL_ERROR,"ERROR: Unable to process background task!\n");
             break;
         }
-
-#if(((APPIF_MODULE_INTEGRATION) & (APPIF_MODULE_ASYNC)) != 0)
-        // Transmit async dummy frame for testing
-        if(mainInstance_l.fAsyncTxTestEnable_m != FALSE)
-        {
-            appif_asyncSendPayload();
-        }
-#endif
 
 #if(((APPIF_MODULE_INTEGRATION) & (APPIF_MODULE_CC)) != 0)
         // Transmit async dummy frame for testing
@@ -273,11 +256,6 @@ static BOOL appif_initModules(void)
 #if(((APPIF_MODULE_INTEGRATION) & (APPIF_MODULE_CC)) != 0)
     tCcInitParam       ccInitParam;
 #endif
-#if(((APPIF_MODULE_INTEGRATION) & (APPIF_MODULE_ASYNC)) != 0)
-    UINT8              i;
-    tAsyncInitParam    asyncInitParam;
-    tAsyncRxHandler    asyncRxHandler[kNumAsyncInstCount] = { appif_asyncCbRcvPaylChan0 };
-#endif
 
     // Initialize the status module
     statusInitParam.pfnAppCbSync_m = appif_appCbSync;
@@ -315,24 +293,6 @@ static BOOL appif_initModules(void)
     }
 #endif
 
-#if(((APPIF_MODULE_INTEGRATION) & (APPIF_MODULE_ASYNC)) != 0)
-    // Initialize asynchronous channels
-    for(i=0; i < kNumAsyncInstCount; i++)
-    {
-        asyncInitParam.buffIdRx_m = kTbufNumAsyncReceive0 + i;
-        asyncInitParam.buffIdTx_m = kTbufNumAsyncTransmit0 + i;
-        asyncInitParam.pfnRxHandler_m = asyncRxHandler[i];
-
-        mainInstance_l.instAsyncChan_m[i] = async_create(i, &asyncInitParam);
-        if(mainInstance_l.instAsyncChan_m[i] == NULL)
-        {
-            DEBUG_TRACE(DEBUG_LVL_ERROR,"ERROR: async_create() failed for instance "
-                    "number %d!\n", i);
-            goto Exit;
-        }
-    }
-#endif
-
     // All module successfully initialized! -> Set return to success!
     fReturn = TRUE;
 
@@ -359,19 +319,6 @@ static void appif_exitModules(void)
 #if(((APPIF_MODULE_INTEGRATION) & (APPIF_MODULE_CC)) != 0)
     cc_exit();
 #endif
-
-#if(((APPIF_MODULE_INTEGRATION) & (APPIF_MODULE_ASYNC)) != 0)
-    {
-        UINT8 i;
-
-        // Destroy asynchronous channels
-        for(i=0; i < kNumAsyncInstCount; i++)
-        {
-            async_destroy(mainInstance_l.instAsyncChan_m[i]);
-        }
-    }
-#endif
-
 
 }
 
@@ -526,74 +473,6 @@ static void appif_errorHandler(tErrorInfo* pErrorInfo_p)
                         pErrorInfo_p->srcModule_m,
                         pErrorInfo_p->errCode_m);
 }
-
-#if(((APPIF_MODULE_INTEGRATION) & (APPIF_MODULE_ASYNC)) != 0)
-//------------------------------------------------------------------------------
-/**
-\brief    Post a frame to async channel 0
-
-
-\ingroup module_main
-*/
-//------------------------------------------------------------------------------
-static void appif_asyncSendPayload(void)
-{
-    tAsyncTxStatus txState = kAsyncTxStatusError;
-    static UINT8 asyncPayload[20] = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20 };
-
-    txState = async_postPayload(mainInstance_l.instAsyncChan_m[kNumAsyncChan0], &asyncPayload[0],
-            sizeof(asyncPayload));
-    if(txState != kAsyncTxStatusSuccessful && txState != kAsyncTxStatusBusy)
-    {
-        DEBUG_TRACE(DEBUG_LVL_ERROR,"ERROR: Unable to post frame to async buffer!\n");
-    }
-    else if( txState == kAsyncTxStatusSuccessful)
-    {
-        asyncPayload[0]++;
-    }
-}
-
-//------------------------------------------------------------------------------
-/**
-\brief    Asynchronous receive callback function from channel0
-
-\param[in] pPayload_p       Pointer to the received payload
-\param[in] size_p           Size of the payload
-
-\return TRUE
-
-\ingroup module_main
-*/
-//------------------------------------------------------------------------------
-static BOOL appif_asyncCbRcvPaylChan0(UINT8* pPayload_p, UINT16 size_p)
-{
-
-    DEBUG_TRACE(DEBUG_LVL_ALWAYS,"INFO: Asynchronous channel 0 received with "
-            "size 0x%x! First byte %d!\n", size_p, *pPayload_p);
-
-    return TRUE;
-}
-
-//------------------------------------------------------------------------------
-/**
-\brief    Asynchronous receive callback function from channel1
-
-\param[in] pPayload_p       Pointer to the received payload
-\param[in] size_p           Size of the payload
-
-\return TRUE
-
-\ingroup module_main
-*/
-//------------------------------------------------------------------------------
-static BOOL appif_asyncCbRcvPaylChan1(UINT8* pPayload_p, UINT16 size_p)
-{
-    DEBUG_TRACE(DEBUG_LVL_ALWAYS,"INFO: Asynchronous channel 1 received with "
-            "size 0x%x! First byte %d!\n", size_p, *pPayload_p);
-
-    return TRUE;
-}
-#endif
 
 #if(((APPIF_MODULE_INTEGRATION) & (APPIF_MODULE_CC)) != 0)
 //------------------------------------------------------------------------------

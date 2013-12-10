@@ -1,10 +1,10 @@
 /**
 ********************************************************************************
-\file   appif/internal/async.h
+\file   appif/internal/ssdo.h
 
-\brief  Internal header file for async module
+\brief  Internal header file of the SSDO module
 
-This file contains internal definitions for the asynchronous module.
+This file contains internal definitions for the SSDO module.
 
 *******************************************************************************/
 
@@ -35,8 +35,8 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
 
-#ifndef _INC_appif_int_async_H_
-#define _INC_appif_int_async_H_
+#ifndef _INC_appif_int_ssdo_H_
+#define _INC_appif_int_ssdo_H_
 
 //------------------------------------------------------------------------------
 // includes
@@ -48,7 +48,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <appif/fifo.h>
 
 #include <appifcommon/timeout.h>
-#include <config/tbuflayoutasync.h>
+#include <config/tbuflayoutssdo.h>
 
 #include <Epl.h>
 
@@ -99,7 +99,7 @@ typedef struct {
     tEplSdoComConHdl  sdoComConHdl_m;       ///< SDO connection handler
     UINT8*            pConsTxPayl_m;        ///< Pointer to transmit buffer
     tTimeoutInstance  pArpTimeoutInst_m;    ///< Timer for ARP request retry
-} tAsyncConsTx;
+} tSsdoConsTx;
 
 /**
  * \brief Parameter type of the producing receive buffer
@@ -110,26 +110,25 @@ typedef struct {
     tProdRxState      prodRxState_m;        ///< State of the producing receive buffer
     tSeqNrValue       currProdSeq_m;        ///< Current producing buffer sequence number
     tProdRxBuffer     prodRecvBuff_m;       ///< Producing receive buffer for packet retransmission
-    tTimeoutInstance  pTimeoutInst_m;       ///< Timer for asynchronous transmissions over the tbuf
-} tAsyncProdRx;
+    tTimeoutInstance  pTimeoutInst_m;       ///< Timer for SSDO transmissions over the tbuf
+} tSsdoProdRx;
 
 /**
-\brief Asynchronous channel user instance
+\brief SSDO channel user instance
 
-The asynchronous instance holds configuration information of each asynchronous
-channel.
+The SSDO instance holds configuration information of each SSDO channel.
 */
-struct eAsyncInstance
+struct eSsdoInstance
 {
-    tAsyncChanNum   instId_m;             ///< Id of the async instance
-    tAsyncConsTx    consTxParam_m;        ///< Consuming receive buffer parameters
-    tAsyncProdRx    prodRxParam_m;        ///< Producing transmit buffer parameters
+    tSsdoChanNum   instId_m;             ///< Id of the SSDO instance
+    tSsdoConsTx    consTxParam_m;        ///< Consuming receive buffer parameters
+    tSsdoProdRx    prodRxParam_m;        ///< Producing transmit buffer parameters
 };
 
 //------------------------------------------------------------------------------
 // function prototypes
 //------------------------------------------------------------------------------
 
-#endif /* _INC_appif_int_async_H_ */
+#endif /* _INC_appif_int_ssdo_H_ */
 
 

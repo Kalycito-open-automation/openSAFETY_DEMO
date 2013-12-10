@@ -213,7 +213,7 @@ OBD_BEGIN ()
         OBD_END_INDEX(0x2000)
 #endif
 
-#if(((APPIF_MODULE_INTEGRATION) & (APPIF_MODULE_ASYNC)) != 0)
+#if(((APPIF_MODULE_INTEGRATION) & (APPIF_MODULE_SSDO)) != 0)
         // SSDO-Stub
         OBD_BEGIN_INDEX_RAM(0x3000, 0x03, NULL)
             OBD_SUBINDEX_RAM_VAR(0x3000, 0x00, kObdTypeUInt8, kObdAccConst, tObdUnsigned8, NumberOfEntries, 0x02)
@@ -222,7 +222,7 @@ OBD_BEGIN ()
         OBD_END_INDEX(0x3000)
 
         // SSDO-StubData
-        OBD_BEGIN_INDEX_RAM(0x3100, 0x03, appif_asyncObdAccessCb)
+        OBD_BEGIN_INDEX_RAM(0x3100, 0x03, ssdo_obdAccessCb)
             OBD_SUBINDEX_RAM_VAR(0x3100, 0x00, kObdTypeUInt8, kObdAccConst, tObdUnsigned8, NumberOfEntries, 0x02)
             OBD_SUBINDEX_RAM_OSTRING(0x3100, 0x01, kObdAccRW, SSDOStubData_DOM, 0x20)
             OBD_SUBINDEX_RAM_OSTRING(0x3100, 0x02, kObdAccRW, SSDOStubData_DOM, 0x20)

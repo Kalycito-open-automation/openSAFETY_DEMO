@@ -18,9 +18,9 @@ static int TST_status_init(void) { return 0; }
 static int TST_status_clean(void) { return 0; }
 
 /* Tests for the asynchronous module */
-static CU_TestInfo asyncTests[] = {
-	{ "Test postPayload twice to signal busy", TST_asyncPostPayloadBusy }, 
-	{ "This is an unimplemented async module testcase", TST_asyncWirTestenWasAnderes },
+static CU_TestInfo ssdoTests[] = {
+	{ "Test postPayload twice to signal busy", TST_ssdoPostPayloadBusy },
+	{ "This is an unimplemented SSDO module testcase", TST_ssdoAnOtherTest },
 	CU_TEST_INFO_NULL,
 };
 
@@ -32,8 +32,8 @@ static CU_TestInfo statusTests[] = {
 };
 
 static CU_SuiteInfo suites[] = {
-	{ "Asynchronous module Test Suite", TST_async_init, TST_async_clean, asyncTests }, 
     { "Status module Test Suite", TST_status_init, TST_status_clean, statusTests }, 
+	{ "Ssdo module Test Suite", TST_ssdo_init, TST_ssdo_clean, ssdoTests },
 	CU_SUITE_INFO_NULL,
 };
 

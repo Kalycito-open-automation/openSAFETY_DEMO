@@ -1,10 +1,10 @@
 /**
 ********************************************************************************
-\file   libappif/internal/async.h
+\file   libappif/ssdo.h
 
-\brief  Application interface async module internal header
+\brief  Application interface SSDO module header
 
-Internal header for the asynchronous channel which is used library internally.
+TODO
 
 *******************************************************************************/
 
@@ -35,14 +35,16 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
 
-#ifndef _INC_libappif_internal_async_H_
-#define _INC_libappif_internal_async_H_
+#ifndef _INC_libappif_ssdo_H_
+#define _INC_libappif_ssdo_H_
 
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
 
-#include <libappif/async.h>
+#include <libappif/apglobal.h>
+
+#include <config/tbuflayoutssdo.h>
 
 //------------------------------------------------------------------------------
 // const defines
@@ -53,14 +55,40 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // typedef
 //------------------------------------------------------------------------------
 
+/**
+ * \brief State of the transmit channel
+ */
+typedef enum {
+    kSsdoTxStatusError       = 0x00,   ///< Error while posting to the transmit channel
+    kSsdoTxStatusSuccessful  = 0x01,   ///< Post to transmit channel successful
+    kSsdoTxStatusBusy        = 0x02,   ///< Transmit channel is currently busy
+} tSsdoTxStatus;
+
+typedef struct eSsdoInstance *tSsdoInstance;
+
+/**
+ * \brief SSDO module frame receive handler
+ */
+typedef BOOL (*tSsdoRxHandler) (UINT8* pPayload_p, UINT16 size_p);
+
+/**
+ * \brief  SSDO module initialization structure
+ */
+typedef struct {
+    tTbufNumLayout         buffIdTx_m;      ///< Id of the transmit buffer
+
+    tTbufNumLayout         buffIdRx_m;      ///< Id of the receive buffer
+    tSsdoRxHandler         pfnRxHandler_m;  ///< SSDO module receive handler
+} tSsdoInitParam;
+
 
 //------------------------------------------------------------------------------
 // function prototypes
 //------------------------------------------------------------------------------
+DLLEXPORT tSsdoInstance ssdo_create(tSsdoChanNum chanId_m, tSsdoInitParam* pInitParam_p);
+DLLEXPORT void ssdo_destroy(tSsdoInstance  pInstance_p);
+DLLEXPORT tSsdoTxStatus ssdo_postPayload(tSsdoInstance pInstance_p, UINT8* pPayload_p,
+                                           UINT16 paylSize_p);
 
-void async_init(void);
-BOOL async_process(tAsyncInstance pInstance_p);
-
-#endif /* _INC_libappif_internal_async_H_ */
-
+#endif /* _INC_libappif_ssdo_H_ */
 
