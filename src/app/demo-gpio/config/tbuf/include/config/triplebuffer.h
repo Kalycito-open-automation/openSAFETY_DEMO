@@ -69,24 +69,6 @@ typedef enum {
     kTbufCount               = 0x08,     ///< Total count of triple buffers
 } tTbufNumLayout;
 
-/**
- * \brief This type provides the memory layout of the triple buffer core
- */
-typedef struct {
-    tTbufAckRegister          consAck_m;            ///< Consumer ACK register
-    // Producer triple buffers
-    tTbufStatusOutStructure   tbufStatusOut_m;      ///< Status outgoing triple buffer
-    tTbufCcStructure          tbufOcc_m;            ///< Output configuration channel triple buffer
-    tTbufRpdoImage            tbufRpdoImg_m;        ///< Structure of the rpdo image triple buffer
-
-    // Consumer triple buffers
-    tTbufStatusInStructure    tbufStatusIn_m;       ///< Status incoming triple buffer
-    tTbufCcStructure          tbufIcc_m;            ///< Input configuration channel triple buffer
-    tTbufTpdoImage            tbufTpdoImg_m;        ///< Structure of the tpdo image triple buffer
-
-    tTbufAckRegister          prodAck_m;            ///< Producer ACK register
-} tTbufMemLayout;
-
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------

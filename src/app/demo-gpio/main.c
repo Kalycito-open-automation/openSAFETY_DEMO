@@ -61,7 +61,7 @@ data from and to the PCP.
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
-
+#define TBUF_IMAGE_SIZE     ( TBUF_OFFSET_PROACK + TBUF_SIZE_PROACK )   ///< Size of the triple buffer image
 
 //------------------------------------------------------------------------------
 // module global vars
@@ -86,9 +86,9 @@ data from and to the PCP.
 //------------------------------------------------------------------------------
 
 typedef struct {
-    tTbufMemLayout     tbufMemLayout_m;                        ///< Local copy of the triple buffer memory
-    UINT8              fShutdown_m;                            ///< Indicates CN shutdown
-    UINT8              fCcWriteObjTestEnable_m;                ///< Enable periodic writing of a cc object
+    UINT8 tbufMemLayout_m[TBUF_IMAGE_SIZE];    ///< Local copy of the triple buffer memory
+    UINT8 fShutdown_m;                         ///< Indicates CN shutdown
+    UINT8 fCcWriteObjTestEnable_m;             ///< Enable periodic writing of a cc object
 } tMainInstance;
 
 //------------------------------------------------------------------------------
