@@ -47,7 +47,6 @@ the synchronous interrupts. If a limit is reached the timeout is generated.
 // includes
 //------------------------------------------------------------------------------
 #include <appifcommon/internal/timeout.h>
-#include <appifcommon/timeout.h>
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
@@ -75,8 +74,6 @@ the synchronous interrupts. If a limit is reached the timeout is generated.
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
-
-#define TIMEOUT_MAX_INSTANCES       5       ///< Maximum number of timeout module instances
 
 //------------------------------------------------------------------------------
 // local types
@@ -164,8 +161,11 @@ tTimeoutInstance timeout_create(UINT16 cycleLimit_p)
 //------------------------------------------------------------------------------
 void timeout_destroy(tTimeoutInstance pInstance_p)
 {
-    // Destroy timeout instance!
-    APPIF_MEMSET(pInstance_p, 0 , sizeof(struct eTimeoutInstance));
+    if(pInstance_p != NULL)
+    {
+        // Destroy timeout instance!
+        APPIF_MEMSET(pInstance_p, 0 , sizeof(struct eTimeoutInstance));
+    }
 }
 
 

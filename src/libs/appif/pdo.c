@@ -50,6 +50,8 @@ application and back.
 #include <libappif/internal/pdo.h>
 #include <libappif/internal/stream.h>
 
+#if(((APPIF_MODULE_INTEGRATION) & (APPIF_MODULE_PDO)) != 0)
+
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
 //============================================================================//
@@ -141,41 +143,50 @@ BOOL pdo_init(tAppIfPdoCb pfnPdoCb_p, tPdoInitParam* pPdoInitParam_p)
     }
     else
     {
-        if(pPdoInitParam_p->buffIdRpdo_m == 0 &&
-           pPdoInitParam_p->buffIdTpdo_m == 0   )
+        if((pPdoInitParam_p->buffIdRpdo_m >= kTbufCount &&
+            pPdoInitParam_p->buffIdTpdo_m >= kTbufCount   )               ||
+            pPdoInitParam_p->buffIdRpdo_m == pPdoInitParam_p->buffIdTpdo_m )
         {
             // At least one PDO needs to be initialized
             error_setError(kAppIfModulePdo, kAppIfPdoInitError);
         }
         else
         {
-            if(pPdoInitParam_p->buffIdTpdo_m != 0)
+            if(pPdoInitParam_p->buffIdRpdo_m < kTbufCount)
             {
                 // Initialize the Rpdo buffer
                 if(pdo_initRpdoBuffer(pPdoInitParam_p->buffIdRpdo_m) == FALSE)
                 {
                     fError = TRUE;
                 }
+
+                pdoInstance_l.rpdoId_m = pPdoInitParam_p->buffIdRpdo_m;
+            }
+            else
+            {
+                pdoInstance_l.rpdoId_m = PDO_CHANNEL_DEACTIVATED;
             }
 
-            if(pPdoInitParam_p->buffIdTpdo_m != 0 &&
-               !fError                              )
+            if(pPdoInitParam_p->buffIdTpdo_m < kTbufCount &&
+               !fError                                     )
             {
                 // Initialize the Tpdo buffer
                 if(pdo_initTpdoBuffer(pPdoInitParam_p->buffIdTpdo_m) == FALSE)
                 {
                     fError = TRUE;
                 }
+
+                pdoInstance_l.tpdoId_m = pPdoInitParam_p->buffIdTpdo_m;
+            }
+            else
+            {
+                pdoInstance_l.tpdoId_m = PDO_CHANNEL_DEACTIVATED;
             }
 
             if(fError == FALSE)
             {
                 // Register PDO process function
                 stream_registerSyncCb(pdo_process);
-
-                // Copy buffer id to local instance
-                pdoInstance_l.rpdoId_m = pPdoInitParam_p->buffIdRpdo_m;
-                pdoInstance_l.tpdoId_m = pPdoInitParam_p->buffIdTpdo_m;
 
                 // Remember process PDO user callback
                 pdoInstance_l.pfnPdoCb_m = pfnPdoCb_p;
@@ -226,7 +237,7 @@ static BOOL pdo_initRpdoBuffer(tTbufNumLayout rpdoId_p)
     tBuffDescriptor* pDescRpdo;
 
     pDescRpdo = stream_getBufferParam(rpdoId_p);
-    if(pDescRpdo != NULL)
+    if(pDescRpdo->pBuffBase_m != NULL)
     {
         if(pDescRpdo->buffSize_m == sizeof(tTbufRpdoImage))
         {
@@ -272,7 +283,7 @@ static BOOL pdo_initTpdoBuffer(tTbufNumLayout tpdoId_p)
     tBuffDescriptor* pDescTpdo;
 
     pDescTpdo = stream_getBufferParam(tpdoId_p);
-    if(pDescTpdo != NULL)
+    if(pDescTpdo->pBuffBase_m != NULL)
     {
         if(pDescTpdo->buffSize_m == sizeof(tTbufTpdoImage))
         {
@@ -315,7 +326,7 @@ static BOOL pdo_process(void)
     BOOL fReturn = FALSE;
 
     // Call the PDO user callback function
-    if(pdoInstance_l.rpdoId_m == 0)
+    if(pdoInstance_l.rpdoId_m == PDO_CHANNEL_DEACTIVATED)
     {
         // The Rpdo buffer is not initialized
         if(pdoInstance_l.pfnPdoCb_m(pdoInstance_l.rpdoRelTimeLow_m,
@@ -329,7 +340,7 @@ static BOOL pdo_process(void)
             error_setError(kAppIfModulePdo, kAppIfPdoProcessSyncFailed);
         }
     }
-    else if(pdoInstance_l.tpdoId_m == 0)
+    else if(pdoInstance_l.tpdoId_m == PDO_CHANNEL_DEACTIVATED)
     {
         // The Tpdo buffer is not initialized
         if(pdoInstance_l.pfnPdoCb_m(pdoInstance_l.rpdoRelTimeLow_m,
@@ -371,35 +382,23 @@ static BOOL pdo_process(void)
 
 \return BOOL
 \retval TRUE     Processing of RPDO buffer successful
-\retval FALSE    Unable to process RPDO buffer
 
 \ingroup module_pdo
 */
 //------------------------------------------------------------------------------
 static BOOL pdo_processRpdo(UINT8* pBuffer_p, UINT16 bufSize_p, void * pUserArg_p)
 {
-    BOOL fReturn = FALSE;
     tTbufRpdoImage*  pRpdoImage;
 
     // Convert to configuration channel buffer structure
     pRpdoImage = (tTbufRpdoImage*) pBuffer_p;
 
-    // Check size of buffer
-    if(bufSize_p == sizeof(tTbufRpdoImage))
-    {
-        // Write relative time to local structure
-        pdoInstance_l.rpdoRelTimeLow_m = AmiGetDwordFromLe((UINT8 *)&pRpdoImage->relativeTimeLow_m);
+    // Write relative time to local structure
+    pdoInstance_l.rpdoRelTimeLow_m = AmiGetDwordFromLe((UINT8 *)&pRpdoImage->relativeTimeLow_m);
 
-        stream_ackBuffer(pdoInstance_l.rpdoId_m);
+    stream_ackBuffer(pdoInstance_l.rpdoId_m);
 
-        fReturn = TRUE;
-    }
-    else
-    {
-        error_setError(kAppIfModulePdo, kAppIfRpdoBufferSizeMismatch);
-    }
-
-    return fReturn;
+    return TRUE;
 }
 
 //------------------------------------------------------------------------------
@@ -425,4 +424,4 @@ static BOOL pdo_ackTpdo(UINT8* pBuffer_p, UINT16 bufSize_p, void * pUserArg_p)
 
 /// \}
 
-
+#endif // #if(((APPIF_MODULE_INTEGRATION) & (APPIF_MODULE_PDO)) != 0)

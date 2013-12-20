@@ -54,6 +54,8 @@ It forwards the received data to the application.
 #include <libappif/internal/status.h>
 #include <libappif/internal/stream.h>
 
+#if(((APPIF_MODULE_INTEGRATION) & (APPIF_MODULE_SSDO)) != 0)
+
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
 //============================================================================//
@@ -79,8 +81,6 @@ It forwards the received data to the application.
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
-
-#define SSDO_TX_TIMEOUT_CYCLE_COUNT        400     ///< Number of cycles after a transmit has a timeout
 
 //------------------------------------------------------------------------------
 // local types
@@ -109,7 +109,7 @@ static BOOL ssdo_initReceiveBuffer(tSsdoChanNum chanId_p,
 static BOOL ssdo_initTransmitBuffer(tSsdoChanNum chanId_p,
         tTbufNumLayout txBuffId_p);
 static BOOL ssdo_handleRxFrame(tSsdoInstance pInstance_p);
-static BOOL ssdo_handleTxFrame(tSsdoInstance pInstance_p);
+static void ssdo_handleTxFrame(tSsdoInstance pInstance_p);
 static BOOL ssdo_receiveFrame(UINT8* pBuffer_p, UINT16 bufSize_p,
         void* pUserArg_p);
 static void ssdo_changeLocalSeqNr(tSeqNrValue* pSeqNr_p);
@@ -160,26 +160,35 @@ tSsdoInstance ssdo_create(tSsdoChanNum chanId_p, tSsdoInitParam* pInitParam_p)
     }
     else
     {
-        // Get SSDO buffer parameters from stream module
-        if(ssdo_initReceiveBuffer(chanId_p, pInitParam_p->buffIdRx_m) != FALSE)
+        if(pInitParam_p->buffIdRx_m >= kTbufCount              ||
+           pInitParam_p->buffIdTx_m >= kTbufCount              ||
+           pInitParam_p->buffIdRx_m == pInitParam_p->buffIdTx_m )
         {
-            if(ssdo_initTransmitBuffer(chanId_p, pInitParam_p->buffIdTx_m) != FALSE)
+            error_setError(kAppIfModuleSsdo, kAppIfSsdoInitError);
+        }
+        else
+        {
+            // Get SSDO buffer parameters from stream module
+            if(ssdo_initReceiveBuffer(chanId_p, pInitParam_p->buffIdRx_m) != FALSE)
             {
-                // Save channel Id
-                ssdoInstance_l[chanId_p].chanId_m = chanId_p;
+                if(ssdo_initTransmitBuffer(chanId_p, pInitParam_p->buffIdTx_m) != FALSE)
+                {
+                    // Save channel Id
+                    ssdoInstance_l[chanId_p].chanId_m = chanId_p;
 
-                // Save id of producing and consuming buffers
-                ssdoInstance_l[chanId_p].txBuffParam_m.idTxBuff_m = pInitParam_p->buffIdTx_m;
-                ssdoInstance_l[chanId_p].rxBuffParam_m.idRxBuff_m = pInitParam_p->buffIdRx_m;
+                    // Save id of producing and consuming buffers
+                    ssdoInstance_l[chanId_p].txBuffParam_m.idTxBuff_m = pInitParam_p->buffIdTx_m;
+                    ssdoInstance_l[chanId_p].rxBuffParam_m.idRxBuff_m = pInitParam_p->buffIdRx_m;
 
-                // Set sequence number init value
-                ssdoInstance_l[chanId_p].txBuffParam_m.currTxSeqNr_m = kSeqNrValueFirst;
+                    // Set sequence number init value
+                    ssdoInstance_l[chanId_p].txBuffParam_m.currTxSeqNr_m = kSeqNrValueSecond;
 
-                // Register receive handler
-                ssdoInstance_l[chanId_p].rxBuffParam_m.pfnRxHandler_m = pInitParam_p->pfnRxHandler_m;
+                    // Register receive handler
+                    ssdoInstance_l[chanId_p].rxBuffParam_m.pfnRxHandler_m = pInitParam_p->pfnRxHandler_m;
 
-                // Set valid instance id
-                pInstance = &ssdoInstance_l[chanId_p];
+                    // Set valid instance id
+                    pInstance = &ssdoInstance_l[chanId_p];
+                }
             }
         }
     }
@@ -298,10 +307,9 @@ BOOL ssdo_process(tSsdoInstance pInstance_p)
     if(ssdo_handleRxFrame(pInstance_p) != FALSE)
     {
         // Process transmit frames
-        if(ssdo_handleTxFrame(pInstance_p) != FALSE)
-        {
-            fReturn = TRUE;
-        }
+        ssdo_handleTxFrame(pInstance_p);
+
+        fReturn = TRUE;
     }
 
     return fReturn;
@@ -334,7 +342,7 @@ static BOOL ssdo_initReceiveBuffer(tSsdoChanNum chanId_p,
     tBuffDescriptor* pDescSsdoRcv;
 
     pDescSsdoRcv = stream_getBufferParam(rxBuffId_p);
-    if(pDescSsdoRcv != NULL)
+    if(pDescSsdoRcv->pBuffBase_m != NULL)
     {
         if(pDescSsdoRcv->buffSize_m == sizeof(tTbufSsdoRxStructure))
         {
@@ -383,7 +391,7 @@ static BOOL ssdo_initTransmitBuffer(tSsdoChanNum chanId_p,
     tBuffDescriptor* pDescSsdoTrans;
 
     pDescSsdoTrans = stream_getBufferParam(txBuffId_p);
-    if(pDescSsdoTrans != NULL)
+    if(pDescSsdoTrans->pBuffBase_m != NULL)
     {
         if(pDescSsdoTrans->buffSize_m == sizeof(tTbufSsdoTxStructure))
         {
@@ -472,16 +480,11 @@ static BOOL ssdo_handleRxFrame(tSsdoInstance pInstance_p)
 
 \param[in]  pInstance_p     SSDO module instance
 
-\return BOOL
-\retval TRUE        Successfully handled transmit frame
-\retval FALSE       Error while handling transmit frame
-
 \ingroup module_ssdo
 */
 //------------------------------------------------------------------------------
-static BOOL ssdo_handleTxFrame(tSsdoInstance pInstance_p)
+static void ssdo_handleTxFrame(tSsdoInstance pInstance_p)
 {
-    BOOL fReturn = FALSE;
     tSsdoChanStatus  txChanState;
     tTimerStatus timerState;
 
@@ -497,16 +500,10 @@ static BOOL ssdo_handleTxFrame(tSsdoInstance pInstance_p)
             // Increment local sequence number
             ssdo_changeLocalSeqNr(&pInstance_p->txBuffParam_m.currTxSeqNr_m);
 
-            // When timer is running and ACK occurred -> Stop timer instance!
-            timerState = timeout_isRunning(pInstance_p->txBuffParam_m.pTimeoutInst_m);
-            if(timerState == kTimerStateRunning)
-            {
-                timeout_stopTimer(pInstance_p->txBuffParam_m.pTimeoutInst_m);
-            }
-
-            fReturn = TRUE;
+            // Message was acknowledged -> Stop timer if running!
+            timeout_stopTimer(pInstance_p->txBuffParam_m.pTimeoutInst_m);
         }
-        else if(txChanState == kChanStatusBusy)
+        else
         {
             // Check if timeout counter is expired
             timerState = timeout_checkExpire(pInstance_p->txBuffParam_m.pTimeoutInst_m);
@@ -518,17 +515,8 @@ static BOOL ssdo_handleTxFrame(tSsdoInstance pInstance_p)
                 // Unlock channel anyway!
                 pInstance_p->txBuffParam_m.ssdoTxBuffer_m.isLocked_m = FALSE;
             }
-
-            fReturn = TRUE;
         }
     }
-    else
-    {
-        // Nothing to do! -> Success!
-        fReturn = TRUE;
-    }
-
-    return fReturn;
 }
 
 //------------------------------------------------------------------------------
@@ -541,7 +529,6 @@ static BOOL ssdo_handleTxFrame(tSsdoInstance pInstance_p)
 
 \return BOOL
 \retval TRUE          Successfully processed receive frame
-\retval FALSE         Error while processing receive frame
 
 \ingroup module_ssdo
 */
@@ -549,66 +536,40 @@ static BOOL ssdo_handleTxFrame(tSsdoInstance pInstance_p)
 static BOOL ssdo_receiveFrame(UINT8* pBuffer_p, UINT16 bufSize_p,
         void* pUserArg_p)
 {
-    BOOL fReturn = FALSE;
     tSsdoInstance pInstance;
     tTbufSsdoRxStructure*  pSsdoRxBuff;
     tSeqNrValue  currSeqNr = kSeqNrValueInvalid;
 
-    if(pUserArg_p == NULL)
+    // Get pointer to current instance
+    pInstance = (tSsdoInstance) pUserArg_p;
+
+    // Increment transmit timer cycle count
+    timeout_incrementCounter(pInstance->txBuffParam_m.pTimeoutInst_m);
+
+    // Convert to status buffer structure
+    pSsdoRxBuff = (tTbufSsdoRxStructure*) pBuffer_p;
+
+    // Acknowledge buffer before access
+    stream_ackBuffer(pInstance->rxBuffParam_m.idRxBuff_m);
+
+    currSeqNr = (tSeqNrValue)AmiGetByteFromLe((UINT8 *)&pSsdoRxBuff->seqNr_m);
+
+    // Check sequence number sanity
+    if(currSeqNr == kSeqNrValueFirst ||
+       currSeqNr == kSeqNrValueSecond  )
     {
-        error_setError(kAppIfModuleSsdo, kAppIfSsdoInvalidParameter);
-    }
-    else
-    {
-        // Check size of buffer
-        if(bufSize_p != sizeof(tTbufSsdoRxStructure))
+        // Check sequence number against local copy
+        if(currSeqNr != pInstance->rxBuffParam_m.currRxSeqNr_m)
         {
-            error_setError(kAppIfModuleSsdo, kAppIfSsdoBufferSizeMismatch);
-        }
-        else
-        {
-            // Get pointer to current instance
-            pInstance = (tSsdoInstance) pUserArg_p;
+            // Sequence number changed -> Frame available
+            pInstance->rxBuffParam_m.fRxFrameIncoming_m = TRUE;
 
-            // Increment transmit timer cycle count
-            timeout_incrementCounter(pInstance->txBuffParam_m.pTimeoutInst_m);
-
-            // Convert to status buffer structure
-            pSsdoRxBuff = (tTbufSsdoRxStructure*) pBuffer_p;
-
-            // Check size of buffer
-            if(bufSize_p == sizeof(tTbufSsdoRxStructure))
-            {
-                // Acknowledge buffer before access
-                stream_ackBuffer(pInstance->rxBuffParam_m.idRxBuff_m);
-
-                currSeqNr = AmiGetByteFromLe((UINT8 *)&pSsdoRxBuff->seqNr_m);
-
-                // Check sequence number sanity
-                if(currSeqNr == kSeqNrValueFirst ||
-                   currSeqNr == kSeqNrValueSecond  )
-                {
-                    // Check sequence number against local copy
-                    if(currSeqNr != pInstance->rxBuffParam_m.currRxSeqNr_m)
-                    {
-                        // Sequence number changed -> Frame available
-                        pInstance->rxBuffParam_m.fRxFrameIncoming_m = TRUE;
-
-                        // Increment local receive sequence number
-                        pInstance->rxBuffParam_m.currRxSeqNr_m = currSeqNr;
-                    }
-                }
-
-                fReturn = TRUE;
-            }
-            else
-            {
-                error_setError(kAppIfModuleSsdo, kAppIfSsdoBufferSizeMismatch);
-            }
+            // Increment local receive sequence number
+            pInstance->rxBuffParam_m.currRxSeqNr_m = currSeqNr;
         }
     }
 
-    return fReturn;
+    return TRUE;
 }
 
 //------------------------------------------------------------------------------
@@ -669,4 +630,4 @@ static tSsdoChanStatus ssdo_checkChannelStatus(tSsdoInstance pInstance_p)
 
 // \}
 
-
+#endif // #if (((APPIF_MODULE_INTEGRATION) & (APPIF_MODULE_SSDO)) != 0)

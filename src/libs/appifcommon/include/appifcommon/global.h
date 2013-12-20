@@ -71,6 +71,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // Check if a bit is set
 #define CHECK_BIT(var,pos) ((var) & (1<<(pos)))
 
+#ifndef UNUSED_PARAMETER
+  #define UNUSED_PARAMETER(par)   (void)par
+#endif
+
 //------------------------------------------------------------------------------
 // Simple return values
 //------------------------------------------------------------------------------
@@ -176,6 +180,7 @@ typedef enum {
     kAppIfBufferSizeMismatch          = 0x03,
     kAppIfInvalidBuffer               = 0x04,
     kAppIfProcessSyncFailed           = 0x05,
+    kAppIfProcessAsyncFailed          = 0x06,
 
     kAppIfMainPlkStackInitError       = 0x12,
     kAppIfMainPlkStackStartError      = 0x13,

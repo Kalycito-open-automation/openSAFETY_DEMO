@@ -107,7 +107,9 @@ static tInternalInstance          intInstance_l;
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-
+#if (((APPIF_MODULE_INTEGRATION) & (APPIF_MODULE_SSDO)) != 0)
+  static BOOL appif_processSsdo(tSsdoInstance* ppInstance_p);
+#endif
 static BOOL appif_initIntModules(tAppIfInitParam* pInitParam_p);
 static tTbufAckRegister* appif_initAckRegister(tTbufNumLayout idAckReg_p);
 
@@ -142,7 +144,8 @@ BOOL appif_init(tAppIfInitParam* pInitParam_p)
     else
     {
         if(pInitParam_p->idConsAck_m >= kTbufCount ||
-           pInitParam_p->idProdAck_m >= kTbufCount  )
+           pInitParam_p->idProdAck_m >= kTbufCount ||
+           pInitParam_p->idConsAck_m == pInitParam_p->idProdAck_m )
         {
             // Invalid input parameters provided
             error_setError(kAppIfModuleInternal, kAppIfInitError);
@@ -243,14 +246,51 @@ BOOL appif_processSync(void)
 //------------------------------------------------------------------------------
 BOOL appif_processAsync(tSsdoInstance* ppInstance_p)
 {
-    BOOL fReturn = FALSE, fError = FALSE;
+    BOOL fReturn = FALSE;
+
+#if(((APPIF_MODULE_INTEGRATION) & (APPIF_MODULE_CC)) != 0)
+    // Process configuration channel objects
+    cc_process();
+#endif
+
 #if(((APPIF_MODULE_INTEGRATION) & (APPIF_MODULE_SSDO)) != 0)
+    fReturn = appif_processSsdo(ppInstance_p);
+#else
+    fReturn = TRUE;
+#endif
+
+    return fReturn;
+}
+
+//============================================================================//
+//            P R I V A T E   F U N C T I O N S                               //
+//============================================================================//
+/// \name Private Functions
+/// \{
+
+#if (((APPIF_MODULE_INTEGRATION) & (APPIF_MODULE_SSDO)) != 0)
+//------------------------------------------------------------------------------
+/**
+\brief    Process Ssdo asynchronous task
+
+\param[in]  ppInstance_p         Pointer to the array of SSDO instances
+
+\return  BOOL
+\retval  TRUE      Successfully processed Ssdo task
+\retval  FALSE     Error while processing
+
+\ingroup module_internal
+*/
+//------------------------------------------------------------------------------
+static BOOL appif_processSsdo(tSsdoInstance* ppInstance_p)
+{
+    BOOL fReturn = FALSE, fError = FALSE;
     UINT8 i;
 
     if(ppInstance_p == NULL)
     {
         // SSDO module is active but no instance is passed -> ERROR!
-        fError = TRUE;
+        error_setError(kAppIfModuleInternal, kAppIfProcessSyncFailed);
     }
     else
     {
@@ -263,31 +303,17 @@ BOOL appif_processAsync(tSsdoInstance* ppInstance_p)
                 break;
             }
         }
-    }
-#endif
 
-    if(fError == FALSE)
-    {
-#if(((APPIF_MODULE_INTEGRATION) & (APPIF_MODULE_CC)) != 0)
-        // Process configuration channel objects
-        if(cc_process() != FALSE)
+        if(fError == FALSE)
         {
+
             fReturn = TRUE;
         }
-#else
-        fReturn = TRUE;
-#endif
     }
 
     return fReturn;
 }
-
-//============================================================================//
-//            P R I V A T E   F U N C T I O N S                               //
-//============================================================================//
-/// \name Private Functions
-/// \{
-
+#endif //#if (((APPIF_MODULE_INTEGRATION) & (APPIF_MODULE_SSDO)) != 0)
 
 //------------------------------------------------------------------------------
 /**
@@ -351,7 +377,7 @@ static tTbufAckRegister* appif_initAckRegister(tTbufNumLayout idAckReg_p)
     tTbufAckRegister* pAckRegBase = NULL;
 
     pDescAckReg = stream_getBufferParam(idAckReg_p);
-    if(pDescAckReg != NULL)
+    if(pDescAckReg->pBuffBase_m != NULL)
     {
         if(pDescAckReg->buffSize_m == sizeof(tTbufAckRegister))
         {

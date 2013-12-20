@@ -291,7 +291,7 @@ static BOOL status_initOutBuffer( tTbufNumLayout statOutId_p)
     tBuffDescriptor* pDescStatOut;
 
     pDescStatOut = stream_getBufferParam(statOutId_p);
-    if(pDescStatOut != NULL)
+    if(pDescStatOut->pBuffBase_m != NULL)
     {
         if(pDescStatOut->buffSize_m == sizeof(tTbufStatusOutStructure))
         {
@@ -342,7 +342,7 @@ static BOOL status_initInBuffer(tTbufNumLayout statInId_p)
     tBuffDescriptor* pDescStatIn;
 
     pDescStatIn = stream_getBufferParam(statInId_p);
-    if(pDescStatIn != NULL)
+    if(pDescStatIn->pBuffBase_m != NULL)
     {
         if(pDescStatIn->buffSize_m == sizeof(tTbufStatusInStructure))
         {
@@ -401,25 +401,17 @@ static BOOL status_processSync(UINT8* pBuffer_p, UINT16 bufSize_p,
     // Convert to status buffer structure
     pStatusBuff = (tTbufStatusOutStructure*) pBuffer_p;
 
-    // Check size of buffer
-    if(bufSize_p == sizeof(tTbufStatusOutStructure))
-    {
-        // Call synchronous callback function
-        timeStamp.relTimeLow_m = AmiGetDwordFromLe((UINT8 *)&pStatusBuff->relTimeLow_m);
-        timeStamp.relTimeHigh_m = AmiGetDwordFromLe((UINT8 *)&pStatusBuff->relTimeHigh_m);
+    // Call synchronous callback function
+    timeStamp.relTimeLow_m = AmiGetDwordFromLe((UINT8 *)&pStatusBuff->relTimeLow_m);
+    timeStamp.relTimeHigh_m = AmiGetDwordFromLe((UINT8 *)&pStatusBuff->relTimeHigh_m);
 
-        if(statusInstance_l.pfnAppCbSync_m(&timeStamp) != FALSE)
-        {
-            fReturn = TRUE;
-        }
-        else
-        {
-            error_setError(kAppIfModuleStatus, kAppIfStatusProcessSyncFailed);
-        }
+    if(statusInstance_l.pfnAppCbSync_m(&timeStamp) != FALSE)
+    {
+        fReturn = TRUE;
     }
     else
     {
-        error_setError(kAppIfModuleStatus, kAppIfStatusBufferSizeMismatch);
+        error_setError(kAppIfModuleStatus, kAppIfStatusProcessSyncFailed);
     }
 
     return fReturn;
@@ -443,32 +435,21 @@ static BOOL status_processSync(UINT8* pBuffer_p, UINT16 bufSize_p,
 static BOOL status_updateOutStatusReg(UINT8* pBuffer_p, UINT16 bufSize_p,
         void * pUserArg_p)
 {
-    BOOL fReturn = FALSE;
     tTbufStatusOutStructure*  pStatusBuff;
 
     // Convert to status buffer structure
     pStatusBuff = (tTbufStatusOutStructure*) pBuffer_p;
 
-    // Check size of buffer
-    if(bufSize_p == sizeof(tTbufStatusOutStructure))
-    {
-        // Get CC status register
-        statusInstance_l.iccStatus_m = AmiGetByteFromLe((UINT8 *)&pStatusBuff->iccStatus_m);
+    // Get CC status register
+    statusInstance_l.iccStatus_m = AmiGetByteFromLe((UINT8 *)&pStatusBuff->iccStatus_m);
 
-        // Update tx status register
-        statusInstance_l.ssdoTxStatus_m = AmiGetWordFromLe((UINT8 *)&pStatusBuff->ssdoConsStatus_m);
+    // Update tx status register
+    statusInstance_l.ssdoTxStatus_m = AmiGetWordFromLe((UINT8 *)&pStatusBuff->ssdoConsStatus_m);
 
-        // Acknowledge buffer
-        stream_ackBuffer(statusInstance_l.buffOutId_m);
+    // Acknowledge buffer
+    stream_ackBuffer(statusInstance_l.buffOutId_m);
 
-        fReturn = TRUE;
-    }
-    else
-    {
-        error_setError(kAppIfModuleStatus, kAppIfStatusBufferSizeMismatch);
-    }
-
-    return fReturn;
+    return TRUE;
 }
 
 //------------------------------------------------------------------------------
@@ -489,29 +470,18 @@ static BOOL status_updateOutStatusReg(UINT8* pBuffer_p, UINT16 bufSize_p,
 static BOOL status_updateInStatusReg(UINT8* pBuffer_p, UINT16 bufSize_p,
         void * pUserArg_p)
 {
-    BOOL fReturn = FALSE;
     tTbufStatusInStructure*  pStatusBuff;
 
     // Convert to status buffer structure
     pStatusBuff = (tTbufStatusInStructure*) pBuffer_p;
 
-    // Check size of buffer
-    if(bufSize_p == sizeof(tTbufStatusInStructure))
-    {
-        // Acknowledge buffer
-        stream_ackBuffer(statusInstance_l.buffInId_m);
+    // Acknowledge buffer
+    stream_ackBuffer(statusInstance_l.buffInId_m);
 
-        // Write rx status register
-        AmiSetWordToLe((UINT8 *)&pStatusBuff->ssdoProdStatus_m, statusInstance_l.ssdoRxStatus_m);
+    // Write rx status register
+    AmiSetWordToLe((UINT8 *)&pStatusBuff->ssdoProdStatus_m, statusInstance_l.ssdoRxStatus_m);
 
-        fReturn = TRUE;
-    }
-    else
-    {
-        error_setError(kAppIfModuleStatus, kAppIfStatusBufferSizeMismatch);
-    }
-
-    return fReturn;
+    return TRUE;
 }
 
 /// \}

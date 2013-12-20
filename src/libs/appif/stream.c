@@ -377,38 +377,38 @@ static BOOL stream_callActions(tActionType actType_p)
     tBuffActionElem* pBuffActList;
 
     pBuffActList = stream_getActionList(actType_p);
-    if(pBuffActList == NULL)
+
+    // Call buffer action for each buffer
+    for(i=0; i < kTbufCount; i++, pBuffActList++)
     {
-        error_setError(kAppIfModuleStream, kAppIfStreamInvalidParameter);
-    }
-    else
-    {
-        // Call buffer action for each buffer
-        for(i=0; i < kTbufCount; i++, pBuffActList++)
+        if(pBuffActList->pfnBuffAction_m != NULL)
         {
-            if(pBuffActList->pfnBuffAction_m != NULL)
-            {
-                // Get buffer element by Id
-                pBuffElement = &streamInstance_l.buffDescList_m[pBuffActList->buffId_m];
+            // Get buffer element by Id
+            pBuffElement = &streamInstance_l.buffDescList_m[pBuffActList->buffId_m];
 
-                fRetAct = pBuffActList->pfnBuffAction_m(pBuffElement->pBuffBase_m,
-                                                  pBuffElement->buffSize_m,
-                                                  pBuffActList->pUserArg_m);
-                if(fRetAct == FALSE)
-                {
-                    // Error happened.. return!
-                    error_setError(kAppIfModuleStream, kAppIfStreamProcessActionFailed);
-
-                    break;
-                }
-            }
-            else
+            fRetAct = pBuffActList->pfnBuffAction_m(pBuffElement->pBuffBase_m,
+                                               pBuffElement->buffSize_m,
+                                               pBuffActList->pUserArg_m);
+            if(fRetAct == FALSE)
             {
-                // All actions carried out! return!
-                fReturn = TRUE;
+                // Error happened.. return!
+                error_setError(kAppIfModuleStream, kAppIfStreamProcessActionFailed);
+
                 break;
             }
         }
+        else
+        {
+            // All set actions carried out! return!
+            fReturn = TRUE;
+            break;
+        }
+    }
+
+    if(i == kTbufCount)
+    {
+        // All actions set and carried out
+        fReturn = TRUE;
     }
 
     return fReturn;

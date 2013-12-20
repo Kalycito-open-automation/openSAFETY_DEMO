@@ -43,11 +43,13 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // includes
 //------------------------------------------------------------------------------
 
-#include <appifcommon/global.h>
+#include <appifcommon/timeout.h>
 
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
+
+#define TIMEOUT_MAX_INSTANCES       5       ///< Maximum number of timeout module instances
 
 //------------------------------------------------------------------------------
 // typedef

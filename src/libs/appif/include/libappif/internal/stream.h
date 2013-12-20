@@ -49,7 +49,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
-
+#define PDO_CHANNEL_DEACTIVATED     0xFF    ///< Id of an deactivated PDO channel
 
 //------------------------------------------------------------------------------
 // typedef

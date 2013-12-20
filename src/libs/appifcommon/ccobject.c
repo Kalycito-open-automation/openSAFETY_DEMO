@@ -167,13 +167,16 @@ BOOL ccobject_initObject(UINT8 objId_p, tConfChanObject* pObjDef_p)
 {
     BOOL fReturn = FALSE;
 
-    if(objId_p < CONF_CHAN_NUM_OBJECTS)
+    if(pObjDef_p != NULL)
     {
-        // Copy object to list
-        APPIF_MEMCPY(&ccobjInstance_l.objectList_m[objId_p], pObjDef_p,
-                sizeof(tConfChanObject));
+        if(objId_p < CONF_CHAN_NUM_OBJECTS)
+        {
+            // Copy object to list
+            APPIF_MEMCPY(&ccobjInstance_l.objectList_m[objId_p], pObjDef_p,
+                    sizeof(tConfChanObject));
 
-        fReturn = TRUE;
+            fReturn = TRUE;
+        }
     }
 
     return fReturn;
@@ -272,16 +275,12 @@ tCcWriteState ccobject_writeCurrObject(UINT16 objIdx_p, UINT8 objSubIdx_p,
                 writeState = kCcWriteStateSuccessful;
                 break;
             }
-            case sizeof(UINT64):
+            default:
             {
+                // Default use UINT64
                 pObjDest->objPayloadLow_m = AmiGetDwordFromLe((UINT8 *)pData_p);
                 pObjDest->objPayloadHigh_m = AmiGetDwordFromLe((UINT8 *)pData_p + 4);
                 writeState = kCcWriteStateSuccessful;
-                break;
-            }
-            default:
-            {
-                // Error occurred! error signal already set!
                 break;
             }
         }
@@ -343,12 +342,7 @@ tConfChanObject* ccobject_readObject(UINT16 objIdx_p, UINT8 objSubIdx_p)
 //------------------------------------------------------------------------------
 tConfChanObject* ccobject_readCurrObject(void)
 {
-    tConfChanObject* pObject = NULL;
-
-    if( ccobjInstance_l.currReadObj_m < CONF_CHAN_NUM_OBJECTS)
-    {
-        pObject = &ccobjInstance_l.objectList_m[ccobjInstance_l.currReadObj_m];
-    }
+    tConfChanObject* pObject = &ccobjInstance_l.objectList_m[ccobjInstance_l.currReadObj_m];
 
     return pObject;
 }

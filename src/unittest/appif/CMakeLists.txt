@@ -1,63 +1,54 @@
+################################################################################
+#
+# CMake appif library tests main file
+#
+# Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+# All rights reserved.
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions are met:
+#     * Redistributions of source code must retain the above copyright
+#       notice, this list of conditions and the following disclaimer.
+#     * Redistributions in binary form must reproduce the above copyright
+#       notice, this list of conditions and the following disclaimer in the
+#       documentation and/or other materials provided with the distribution.
+#     * Neither the name of the copyright holders nor the
+#       names of its contributors may be used to endorse or promote products
+#       derived from this software without specific prior written permission.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+# ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+# WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+# DISCLAIMED. IN NO EVENT SHALL COPYRIGHT HOLDERS BE LIABLE FOR ANY
+# DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+# (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+# LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+# ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+# (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+# SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+################################################################################
+
 CMAKE_MINIMUM_REQUIRED (VERSION 2.8)
 
-PROJECT (tst_appif)
+PROJECT (appifUnitTests)
 
-#################################################################
-# Drivers implement the tests and provide the test methods
-#################################################################
-SET ( TST_DRIVER
-    ${PROJECT_SOURCE_DIR}/Driver/ExampleAddTest.c
-    ${PROJECT_SOURCE_DIR}/Driver/TST_module_status.c
+INCLUDE(AddTest)
+
+FILE(GLOB TSTDIRECTORIES
+    RELATIVE "${PROJECT_SOURCE_DIR}/"
+    "${PROJECT_SOURCE_DIR}/TST*"
 )
 
-# Provide all stubs needed for running the tests
-SET ( TST_STUBS
-)
+INCLUDE_DIRECTORIES ( "${PROJECT_SOURCE_DIR}/common/general" )
+INCLUDE_DIRECTORIES ( "${appif_SOURCE_DIR}/include" )
+INCLUDE_DIRECTORIES ( "${appifcommon_SOURCE_DIR}/include" )
+INCLUDE_DIRECTORIES ( "${endian_SOURCE_DIR}/include" )
+INCLUDE_DIRECTORIES ( "${TARGET_DIR}/include" )
 
+# Path to the configuration headers for the application interface
+INCLUDE_DIRECTORIES ( "${DEMO_CONFIG_DIR}/config/tbuf/include" )
 
-#################################################################
-# additional compiler flags
-#################################################################
-ADD_DEFINITIONS(-D_CONSOLE -DHAVE_REMOTE)
-ADD_DEFINITIONS( -DNDEBUG -DDEF_DEBUG_LVL=0x00000000L )
-
-#################################################################
-# assemble source file list
-#################################################################
-SET (TST_SOURCES 
-    ${CMAKE_SOURCE_DIR}/unittest/common/cunit_main.c
-    ${TST_DRIVER}
-    ${TST_STUBS}
-)
-SOURCE_GROUP("Test Application" FILES ${TST_SOURCES})
-
-SimpleTest ( "TST_AppIF" "tst_appif" "${TST_SOURCES}" )
-
-SET_TARGET_INCLUDE ( tst_appif "${PROJECT_SOURCE_DIR}" )
-SET_TARGET_INCLUDE ( tst_appif "${PROJECT_SOURCE_DIR}/Driver" )
-SET_TARGET_INCLUDE ( tst_appif "${CMAKE_SOURCE_DIR}/libs/appifcommon/include" )
-SET_TARGET_INCLUDE ( tst_appif "${CMAKE_SOURCE_DIR}/libs/appif/include" )
-SET_TARGET_INCLUDE ( tst_appif "${DEMO_CONFIG_DIR}/config/tbuf/include" )
-SET_TARGET_INCLUDE ( tst_appif "${TARGET_DIR}/include" )
-SET_TARGET_INCLUDE ( tst_appif "${CMAKE_SOURCE_DIR}/libs/endian/include" )
-IF (WIN32)
-    SET_TARGET_INCLUDE ( tst_appif "${CMAKE_SOURCE_DIR}/contrib/win32" )
-    
-    TARGET_LINK_LIBRARIES( tst_appif "win32" )
-    ADD_DEPENDENCIES ( tst_appif "win32")
-endif (WIN32)
-
-TARGET_LINK_LIBRARIES(tst_appif "appif" "appifcommon" "endian")
-ADD_DEPENDENCIES ( tst_appif "appif" "appifcommon" "endian")
-
-IF ( ( WIN32 OR CYGWIN ) AND ( ${LIB_TYPE} STREQUAL "SHARED" ) )
-    EnsureLibraries(tst_appif "appif" )
-    EnsureLibraries(tst_appif "appifcommon" )
-    EnsureLibraries(tst_appif "endian" )
-ENDIF ( ( WIN32 OR CYGWIN ) AND ( ${LIB_TYPE} STREQUAL "SHARED" ) )
-
-# Enable Coverage on target and test subject
-AddCoverage( "PIFA" "tst_appif" )
-AddCoverage( "PIFA" "appif" )
-AddCoverage( "PIFA" "appifcommon" )
-AddCoverage( "PIFA" "endian" )
+# Add all test projects
+FOREACH ( TSTDIR IN ITEMS ${TSTDIRECTORIES} )
+    ADD_SUBDIRECTORY ( "${PROJECT_SOURCE_DIR}/${TSTDIR}" )
+ENDFOREACH ( TSTDIR IN ITEMS ${TSTDIRECTORIES} )
