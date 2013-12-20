@@ -103,19 +103,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     #define NULL ((void *) 0)
 #endif
 
-#ifndef _TIME_OF_DAY_DEFINED_
-
-    typedef struct
-    {
-        unsigned long  int  m_dwMs;
-        unsigned short int  m_wDays;
-
-    } tTimeOfDay;
-
-#define _TIME_OF_DAY_DEFINED_
-
-#endif  //_TIME_OF_DAY_DEFINED_
-
 #else
     #error "Please define the datatypes for your compiler here!"
 #endif

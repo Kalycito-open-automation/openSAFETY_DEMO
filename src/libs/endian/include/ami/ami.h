@@ -53,59 +53,28 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // const defines
 //------------------------------------------------------------------------------
 
-#define AmiSetByteToBe(pAddr_p, bByteVal_p)  {*(UINT8  *)(pAddr_p) = (bByteVal_p);}
-#define AmiSetByteToLe(pAddr_p, bByteVal_p)  {*(UINT8  *)(pAddr_p) = (bByteVal_p);}
+#define AmiSetByteToBe(pAddr_p, bByteVal_p) {*(UINT8  *)(pAddr_p) = (bByteVal_p);}
+#define AmiSetByteToLe(pAddr_p, bByteVal_p) {*(UINT8  *)(pAddr_p) = (bByteVal_p);}
 
-#define AmiGetByteFromBe(pAddr_p)  (*(UINT8  *)(pAddr_p))
-#define AmiGetByteFromLe(pAddr_p)  (*(UINT8  *)(pAddr_p))
+#define AmiGetByteFromBe(pAddr_p)    (*(UINT8 *)(pAddr_p))
+#define AmiGetByteFromLe(pAddr_p)    (*(UINT8 *)(pAddr_p))
 
 //------------------------------------------------------------------------------
 // function prototypes
 //------------------------------------------------------------------------------
+DLLEXPORT void AmiSetWordToBe(void* pAddr_p, UINT16 wordVal_p);
+DLLEXPORT void AmiSetWordToLe(void* pAddr_p, UINT16 wordVal_p);
+DLLEXPORT UINT16 AmiGetWordFromBe(void* pAddr_p);
+DLLEXPORT UINT16 AmiGetWordFromLe(void* pAddr_p);
 
-DLLEXPORT void AmiSetWordToBe  (void* pAddr_p, UINT16 wWordVal_p);
-DLLEXPORT void AmiSetDwordToBe (void* pAddr_p, UINT32 dwDwordVal_p);
-DLLEXPORT void AmiSetWordToLe  (void* pAddr_p, UINT16 wWordVal_p);
-DLLEXPORT void AmiSetDwordToLe (void* pAddr_p, UINT32 dwDwordVal_p);
+DLLEXPORT void AmiSetDwordToBe(void* pAddr_p, UINT32 dwordVal_p);
+DLLEXPORT void AmiSetDwordToLe(void* pAddr_p, UINT32 dwordVal_p);
+DLLEXPORT UINT32 AmiGetDwordFromBe(void* pAddr_p);
+DLLEXPORT UINT32 AmiGetDwordFromLe(void* pAddr_p);
 
-DLLEXPORT UINT16 AmiGetWordFromBe  (void * pAddr_p);
-DLLEXPORT UINT32 AmiGetDwordFromBe (void * pAddr_p);
-DLLEXPORT UINT16 AmiGetWordFromLe  (void * pAddr_p);
-DLLEXPORT UINT32 AmiGetDwordFromLe (void * pAddr_p);
-
-DLLEXPORT void AmiSetDword24ToBe (void * pAddr_p, UINT32 dwDwordVal_p);
-DLLEXPORT void AmiSetDword24ToLe (void * pAddr_p, UINT32 dwDwordVal_p);
-
-DLLEXPORT UINT32 AmiGetDword24FromBe (void * pAddr_p);
-DLLEXPORT UINT32 AmiGetDword24FromLe (void * pAddr_p);
-
-DLLEXPORT void AmiSetQword40ToBe (void * pAddr_p, UINT64 qwQwordVal_p);
-DLLEXPORT void AmiSetQword40ToLe (void * pAddr_p, UINT64 qwQwordVal_p);
-
-DLLEXPORT UINT64 AmiGetQword40FromBe (void * pAddr_p);
-DLLEXPORT UINT64 AmiGetQword40FromLe (void * pAddr_p);
-
-DLLEXPORT void AmiSetQword48ToBe (void * pAddr_p, UINT64 qwQwordVal_p);
-DLLEXPORT void AmiSetQword48ToLe (void * pAddr_p, UINT64 qwQwordVal_p);
-
-DLLEXPORT UINT64 AmiGetQword48FromBe (void * pAddr_p);
-DLLEXPORT UINT64 AmiGetQword48FromLe (void * pAddr_p);
-
-DLLEXPORT void AmiSetQword56ToBe (void * pAddr_p, UINT64 qwQwordVal_p);
-DLLEXPORT void AmiSetQword56ToLe (void * pAddr_p, UINT64 qwQwordVal_p);
-
-DLLEXPORT UINT64 AmiGetQword56FromBe (void * pAddr_p);
-DLLEXPORT UINT64 AmiGetQword56FromLe (void * pAddr_p);
-
-DLLEXPORT void AmiSetQword64ToBe (void * pAddr_p, UINT64 qwQwordVal_p);
-DLLEXPORT void AmiSetQword64ToLe (void * pAddr_p, UINT64 qwQwordVal_p);
-
-DLLEXPORT UINT64 AmiGetQword64FromBe (void * pAddr_p);
-DLLEXPORT UINT64 AmiGetQword64FromLe (void * pAddr_p);
-
-DLLEXPORT void AmiSetTimeOfDay (void * pAddr_p, tTimeOfDay * pTimeOfDay_p);
-
-DLLEXPORT void AmiGetTimeOfDay (void * pAddr_p, tTimeOfDay * pTimeOfDay_p);
+DLLEXPORT void AmiSetQword64ToBe(void* pAddr_p, UINT64 qwordVal_p);
+DLLEXPORT void AmiSetQword64ToLe(void* pAddr_p, UINT64 qwordVal_p);
+DLLEXPORT UINT64 AmiGetQword64FromBe(void* pAddr_p);
+DLLEXPORT UINT64 AmiGetQword64FromLe(void* pAddr_p);
 
 #endif  /* _INC_ami_H_ */
-

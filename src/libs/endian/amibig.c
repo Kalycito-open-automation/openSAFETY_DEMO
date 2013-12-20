@@ -4,7 +4,7 @@
 
 \brief  Abstract Memory Interface for big endian processors
 
-\ingroup module-ami
+\ingroup module_ami
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
@@ -53,6 +53,7 @@
 // const defines
 //------------------------------------------------------------------------------
 
+
 //------------------------------------------------------------------------------
 // module global vars
 //------------------------------------------------------------------------------
@@ -77,370 +78,306 @@
 
 typedef struct
 {
-   UINT16  m_wWord;
-
+   UINT16  word_m;
 } twStruct;
 
+
 typedef struct
 {
-   UINT32  m_dwDword;
-
+   UINT32  dword_m;
 } tdwStruct;
 
+
 typedef struct
 {
-   UINT64  m_qwQword;
-
+   UINT64  qword_m;
 } tqwStruct;
 
+//============================================================================//
+//            P U B L I C   F U N C T I O N S                                 //
+//============================================================================//
 
+//------------------------------------------------------------------------------
+/**
+\brief    AmiSetWordToBe
 
-//=========================================================================//
-//                                                                         //
-//          P U B L I C   F U N C T I O N S                                //
-//                                                                         //
-//=========================================================================//
+Sets a 16 bit value to a buffer in big endian
 
-//------------< write UINT16 in little endian >--------------------------
+\param[out] pAddr_p         Pointer to the destination buffer
+\param[in]  wordVal_p       The source value to convert
 
-void AmiSetWordToLe (void* pAddr_p, UINT16 wWordVal_p)
+\ingroup module_ami
+*/
+//------------------------------------------------------------------------------
+void AmiSetWordToBe(void* pAddr_p, UINT16 wordVal_p)
 {
 #if defined (__MICROBLAZE__)
-UINT8 *dst=(UINT8*)pAddr_p, *src=(UINT8*)&wWordVal_p;
+    UINT8 *pDst = (UINT8 *) pAddr_p;
+    UINT8 *pSrc = (UINT8 *)&wordVal_p;
 
-   *(dst+0) = *(src+1);
-   *(dst+1) = *(src+0);
+    *pDst = *pSrc;
+    *(pDst+1) = *(pSrc+1);
 #else
-twStruct *  pwStruct;
-twStruct wValue;
+    twStruct*  pwStruct;
 
-   wValue.m_wWord   = (UINT16)((wWordVal_p & 0x00FF) << 8); //LSB to MSB
-   wValue.m_wWord  |= (UINT16)((wWordVal_p & 0xFF00) >> 8); //MSB to LSB
-
-   pwStruct = (twStruct *)pAddr_p;
-   pwStruct->m_wWord = wValue.m_wWord;
+    pwStruct = (twStruct *)pAddr_p;
+    pwStruct->word_m = wordVal_p;
 #endif
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief    AmiSetWordToLe
 
+Sets a 16 bit value to a buffer in little endian
 
-//------------< write UINT32 in little endian >-------------------------
+\param[out] pAddr_p         Pointer to the destination buffer
+\param[in]  wordVal_p       The source value to convert
 
-void AmiSetDwordToLe (void * pAddr_p, UINT32 dwDwordVal_p)
+\ingroup module_ami
+*/
+//------------------------------------------------------------------------------
+void AmiSetWordToLe(void* pAddr_p, UINT16 wordVal_p)
 {
 #if defined (__MICROBLAZE__)
-UINT8 *dst=(UINT8*)pAddr_p, *src=(UINT8*)&dwDwordVal_p;
-    
+    UINT8* dst = (UINT8*)pAddr_p;
+    UINT8* src = (UINT8*)&wordVal_p;
+
+    *(dst+0) = *(src+1);
+    *(dst+1) = *(src+0);
+#else
+    twStruct *  pwStruct;
+    twStruct wValue;
+
+    wValue.word_m   = (UINT16)((wordVal_p & 0x00FF) << 8); //LSB to MSB
+    wValue.word_m  |= (UINT16)((wordVal_p & 0xFF00) >> 8); //MSB to LSB
+
+    pwStruct = (twStruct *)pAddr_p;
+    pwStruct->word_m = wValue.word_m;
+#endif
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief    AmiGetWordFromBe
+
+Reads a 16 bit value from a buffer in big endian
+
+\param[in]  pAddr_p         Pointer to the source buffer
+
+\return UINT16
+\retval Value       The data in platform endian
+
+\ingroup module_ami
+*/
+//------------------------------------------------------------------------------
+UINT16 AmiGetWordFromBe(void* pAddr_p)
+{
+#if defined (__MICROBLAZE__)
+    UINT8 *pbSrc = pAddr_p;
+
+    return ((UINT16)(pbSrc[0]) << 8) |
+          ((UINT16)(pbSrc[1]) << 0);
+#else
+    twStruct*  pwStruct;
+
+    pwStruct = (twStruct *)pAddr_p;
+
+    return ( pwStruct->word_m );
+#endif
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief    AmiGetWordFromLe
+
+Reads a 16 bit value from a buffer in little endian
+
+\param[in]  pAddr_p         Pointer to the source buffer
+
+\return UINT16
+\retval Value       The data in platform endian
+
+\ingroup module_ami
+*/
+//------------------------------------------------------------------------------
+UINT16 AmiGetWordFromLe(void* pAddr_p)
+{
+#if defined (__MICROBLAZE__)
+    UINT8 *pSrc = pAddr_p;
+    UINT16 wDst;
+
+    wDst = (*(pSrc+1) << 8) | (*(pSrc+0));
+
+    return wDst;
+#else
+    twStruct *  pwStruct;
+    twStruct wValue;
+
+    pwStruct = (twStruct *)pAddr_p;
+
+    wValue.word_m   = (UINT16)((pwStruct->word_m & 0x00FF) << 8); //LSB to MSB
+    wValue.word_m  |= (UINT16)((pwStruct->word_m & 0xFF00) >> 8); //MSB to LSB
+
+    return wValue.word_m;
+#endif
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief    AmiSetDwordToBe
+
+Sets a 32 bit value to a buffer in big endian
+
+\param[out] pAddr_p         Pointer to the destination buffer
+\param[in]  dwordVal_p      The source value to convert
+
+\ingroup module_ami
+*/
+//------------------------------------------------------------------------------
+void AmiSetDwordToBe(void* pAddr_p, UINT32 dwordVal_p)
+{
+#if defined (__MICROBLAZE__)
+    UINT8* dst = (UINT8*)pAddr_p;
+    UINT8* src = (UINT8*)&dwordVal_p;
+
+    *(dst+0) = *(src+0);
+    *(dst+1) = *(src+1);
+    *(dst+2) = *(src+2);
+    *(dst+3) = *(src+3);
+#else
+    tdwStruct *  pdwStruct;
+
+    pdwStruct = (tdwStruct *)pAddr_p;
+    pdwStruct->dword_m = dwordVal_p;
+#endif
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief    AmiSetDwordToLe
+
+Sets a 32 bit value to a buffer in little endian
+
+\param[out] pAddr_p         Pointer to the destination buffer
+\param[in]  dwordVal_p      The source value to convert
+
+\ingroup module_ami
+*/
+//------------------------------------------------------------------------------
+void AmiSetDwordToLe(void* pAddr_p, UINT32 dwordVal_p)
+{
+#if defined (__MICROBLAZE__)
+    UINT8* dst = (UINT8*)pAddr_p;
+    UINT8* src = (UINT8*)&dwordVal_p;
+
    *(dst+0) = *(src+3);
    *(dst+1) = *(src+2);
    *(dst+2) = *(src+1);
    *(dst+3) = *(src+0);
 #else
-tdwStruct *  pdwStruct;
-tdwStruct dwValue;
+    tdwStruct *  pdwStruct;
+    tdwStruct dwValue;
 
 
-   dwValue.m_dwDword = ((dwDwordVal_p & 0x000000FF)<<24); //LSB to MSB
-   dwValue.m_dwDword|= ((dwDwordVal_p & 0x0000FF00)<<8);
-   dwValue.m_dwDword|= ((dwDwordVal_p & 0x00FF0000)>>8 );
-   dwValue.m_dwDword|= ((dwDwordVal_p & 0xFF000000)>>24); //MSB to LSB
-
-   pdwStruct = (tdwStruct *)pAddr_p;
-   pdwStruct->m_dwDword = dwValue.m_dwDword;
-#endif
-
-}
-
-
-//------------< write UINT16 in big endian >--------------------------
-
-void AmiSetWordToBe (void * pAddr_p, UINT16 wWordVal_p)
-{
-#if defined (__MICROBLAZE__)
-UINT8 *pDst = (UINT8 *) pAddr_p, *pSrc = (UINT8 *)&wWordVal_p;
-    
-   *pDst = *pSrc;
-   *(pDst+1) = *(pSrc+1);
-#else
-twStruct *  pwStruct;
-
-   pwStruct = (twStruct *)pAddr_p;
-   pwStruct->m_wWord = wWordVal_p;
-#endif
-
-}
-
-
-
-//------------< write UINT32 in big endian >-------------------------
-
-void AmiSetDwordToBe (void * pAddr_p, UINT32 dwDwordVal_p)
-{
-#if defined (__MICROBLAZE__)
-UINT8 *dst=(UINT8*)pAddr_p, *src=(UINT8*)&dwDwordVal_p;
-    
-   *(dst+0) = *(src+0);
-   *(dst+1) = *(src+1);
-   *(dst+2) = *(src+2);
-   *(dst+3) = *(src+3);
-#else
-tdwStruct *  pdwStruct;
+   dwValue.dword_m = ((dwordVal_p & 0x000000FF)<<24); //LSB to MSB
+   dwValue.dword_m |= ((dwordVal_p & 0x0000FF00)<<8);
+   dwValue.dword_m |= ((dwordVal_p & 0x00FF0000)>>8 );
+   dwValue.dword_m |= ((dwordVal_p & 0xFF000000)>>24); //MSB to LSB
 
    pdwStruct = (tdwStruct *)pAddr_p;
-   pdwStruct->m_dwDword = dwDwordVal_p;
-#endif
-
-}
-
-//------------< read UINT16 in little endian >---------------------------
-
-UINT16 AmiGetWordFromLe (void * pAddr_p)
-{
-#if defined (__MICROBLAZE__)
-UINT8 *pSrc = pAddr_p;
-UINT16 wDst;
-    
-   wDst = (*(pSrc+1) << 8) | (*(pSrc+0));
-    
-   return wDst;
-#else
-twStruct *  pwStruct;
-twStruct wValue;
-
-   pwStruct = (twStruct *)pAddr_p;
-
-   wValue.m_wWord   = (UINT16)((pwStruct->m_wWord & 0x00FF) << 8); //LSB to MSB
-   wValue.m_wWord  |= (UINT16)((pwStruct->m_wWord & 0xFF00) >> 8); //MSB to LSB
-
-   return ( wValue.m_wWord );
+   pdwStruct->dword_m = dwValue.dword_m;
 #endif
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief    AmiGetDwordFromBe
 
+Reads a 32 bit value from a buffer in big endian
 
+\param[in]  pAddr_p         Pointer to the source buffer
 
-//------------< read UINT32 in little endian >--------------------------
+\return UINT32
+\retval Value       The data in platform endian
 
-UINT32  AmiGetDwordFromLe (void * pAddr_p)
+\ingroup module_ami
+*/
+//------------------------------------------------------------------------------
+UINT32 AmiGetDwordFromBe(void* pAddr_p)
 {
 #if defined (__MICROBLAZE__)
-UINT8 *pbSrc = pAddr_p;
-    
-   return (((UINT32)pbSrc[0]) <<  0) | 
-           (((UINT32)pbSrc[1]) <<  8) |
-           (((UINT32)pbSrc[2]) << 16) |
-           (((UINT32)pbSrc[3]) << 24);
-#else
-tdwStruct *  pdwStruct;
-tdwStruct dwValue;
+    UINT8 *pbSrc = pAddr_p;
 
-   pdwStruct = (tdwStruct *)pAddr_p;
-
-   dwValue.m_dwDword = ((pdwStruct->m_dwDword & 0x000000FF)<<24); //LSB to MSB
-   dwValue.m_dwDword|= ((pdwStruct->m_dwDword & 0x0000FF00)<<8);
-   dwValue.m_dwDword|= ((pdwStruct->m_dwDword & 0x00FF0000)>>8 );
-   dwValue.m_dwDword|= ((pdwStruct->m_dwDword & 0xFF000000)>>24); //MSB to LSB
-
-   return ( dwValue.m_dwDword );
-#endif
-
-}
-
-//------------< read UINT16 in big endian >---------------------------
-
-UINT16 AmiGetWordFromBe (void * pAddr_p)
-{
-#if defined (__MICROBLAZE__)
-UINT8 *pbSrc = pAddr_p;
-    
-   return ((UINT32)(pbSrc[0]) << 8) | 
-          ((UINT32)(pbSrc[1]) << 0);
-#else
-twStruct *  pwStruct;
-
-   pwStruct = (twStruct *)pAddr_p;
-   return ( pwStruct->m_wWord );
-#endif
-
-}
-
-
-
-
-//------------< read UINT32 in big endian >--------------------------
-
-UINT32 AmiGetDwordFromBe (void * pAddr_p)
-{
-#if defined (__MICROBLAZE__)
-UINT8 *pbSrc = pAddr_p;
-    
-   return (((UINT32)pbSrc[0]) << 24) | 
+    return (((UINT32)pbSrc[0]) << 24) |
            (((UINT32)pbSrc[1]) << 16) |
            (((UINT32)pbSrc[2]) <<  8) |
            (((UINT32)pbSrc[3]) <<  0);
 #else
-tdwStruct *  pdwStruct;
+    tdwStruct *  pdwStruct;
 
-   pdwStruct = (tdwStruct *)pAddr_p;
-   return ( pdwStruct->m_dwDword );
+    pdwStruct = (tdwStruct *)pAddr_p;
+
+    return ( pdwStruct->dword_m );
 #endif
-
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief    AmiGetDwordFromLe
 
-//---------------------------------------------------------------------------
-//
-// Function:    AmiSetDword24ToLe()
-//
-// Description: sets a 24 bit value to a buffer in little endian
-//
-// Parameters:  pAddr_p         = pointer to destination buffer
-//              dwDwordVal_p    = value to set
-//
-// Return:      void
-//
-// State:       not tested
-//
-//---------------------------------------------------------------------------
+Reads a 32 bit value from a buffer in little endian
 
-void AmiSetDword24ToLe (void * pAddr_p, UINT32 dwDwordVal_p)
-{
+\param[in]  pAddr_p         Pointer to the source buffer
 
-    ((UINT8 *) pAddr_p)[0] = ((UINT8 *) &dwDwordVal_p)[2];
-    ((UINT8 *) pAddr_p)[1] = ((UINT8 *) &dwDwordVal_p)[1];
-    ((UINT8 *) pAddr_p)[2] = ((UINT8 *) &dwDwordVal_p)[0];
+\return UINT32
+\retval Value       The data in platform endian
 
-}
-
-
-//---------------------------------------------------------------------------
-//
-// Function:    AmiSetDword24ToBe()
-//
-// Description: sets a 24 bit value to a buffer in big endian
-//
-// Parameters:  pAddr_p         = pointer to destination buffer
-//              dwDwordVal_p    = value to set
-//
-// Return:      void
-//
-// State:       not tested
-//
-//---------------------------------------------------------------------------
-
-void AmiSetDword24ToBe (void * pAddr_p, UINT32 dwDwordVal_p)
-{
-
-    ((UINT8 *) pAddr_p)[0] = ((UINT8 *) &dwDwordVal_p)[0];
-    ((UINT8 *) pAddr_p)[1] = ((UINT8 *) &dwDwordVal_p)[1];
-    ((UINT8 *) pAddr_p)[2] = ((UINT8 *) &dwDwordVal_p)[2];
-
-}
-
-
-//---------------------------------------------------------------------------
-//
-// Function:    AmiGetDword24FromLe()
-//
-// Description: reads a 24 bit value from a buffer in little endian
-//
-// Parameters:  pAddr_p         = pointer to source buffer
-//
-// Return:      UINT32           = read value
-//
-// State:       not tested
-//
-//---------------------------------------------------------------------------
-
-UINT32 AmiGetDword24FromLe (void * pAddr_p)
-{
-
-tdwStruct      dwStruct;
-
-    dwStruct.m_dwDword  = AmiGetDwordFromLe (pAddr_p) & 0x00FFFFFF;
-
-    return ( dwStruct.m_dwDword );
-
-}
-
-
-//---------------------------------------------------------------------------
-//
-// Function:    AmiGetDword24FromBe()
-//
-// Description: reads a 24 bit value from a buffer in big endian
-//
-// Parameters:  pAddr_p         = pointer to source buffer
-//
-// Return:      UINT32           = read value
-//
-// State:       not tested
-//
-//---------------------------------------------------------------------------
-
-UINT32 AmiGetDword24FromBe (void * pAddr_p)
-{
-
-tdwStruct      dwStruct;
-
-    dwStruct.m_dwDword  = AmiGetDwordFromBe (pAddr_p);
-    dwStruct.m_dwDword >>= 8;
-
-    return ( dwStruct.m_dwDword );
-
-}
-
-
-//---------------------------------------------------------------------------
-//
-// Function:    AmiSetQword64ToLe()
-//
-// Description: sets a 64 bit value to a buffer in little endian
-//
-// Parameters:  pAddr_p         = pointer to destination buffer
-//              qwQwordVal_p    = quadruple word value
-//
-// Return:      void
-//
-// State:       not tested
-//
-//---------------------------------------------------------------------------
-
-void AmiSetQword64ToLe (void * pAddr_p, UINT64 qwQwordVal_p)
-{
-
-    ((UINT8 *) pAddr_p)[0] = ((UINT8 *) &qwQwordVal_p)[7];
-    ((UINT8 *) pAddr_p)[1] = ((UINT8 *) &qwQwordVal_p)[6];
-    ((UINT8 *) pAddr_p)[2] = ((UINT8 *) &qwQwordVal_p)[5];
-    ((UINT8 *) pAddr_p)[3] = ((UINT8 *) &qwQwordVal_p)[4];
-    ((UINT8 *) pAddr_p)[4] = ((UINT8 *) &qwQwordVal_p)[3];
-    ((UINT8 *) pAddr_p)[5] = ((UINT8 *) &qwQwordVal_p)[2];
-    ((UINT8 *) pAddr_p)[6] = ((UINT8 *) &qwQwordVal_p)[1];
-    ((UINT8 *) pAddr_p)[7] = ((UINT8 *) &qwQwordVal_p)[0];
-
-}
-
-
-//---------------------------------------------------------------------------
-//
-// Function:    AmiSetQword64ToBe()
-//
-// Description: sets a 64 bit value to a buffer in big endian
-//
-// Parameters:  pAddr_p         = pointer to destination buffer
-//              qwQwordVal_p    = quadruple word value
-//
-// Return:      void
-//
-// State:       not tested
-//
-//---------------------------------------------------------------------------
-
-void AmiSetQword64ToBe (void * pAddr_p, UINT64 qwQwordVal_p)
+\ingroup module_ami
+*/
+//------------------------------------------------------------------------------
+UINT32  AmiGetDwordFromLe(void* pAddr_p)
 {
 #if defined (__MICROBLAZE__)
-UINT8 *dst=(UINT8*)pAddr_p, *src=(UINT8*)&qwQwordVal_p;
-    
+    UINT8 *pbSrc = pAddr_p;
+
+    return (((UINT32)pbSrc[0]) <<  0) |
+           (((UINT32)pbSrc[1]) <<  8) |
+           (((UINT32)pbSrc[2]) << 16) |
+           (((UINT32)pbSrc[3]) << 24);
+#else
+    tdwStruct *  pdwStruct;
+    tdwStruct dwValue;
+
+    pdwStruct = (tdwStruct *)pAddr_p;
+
+    dwValue.dword_m = ((pdwStruct->dword_m & 0x000000FF)<<24); //LSB to MSB
+    dwValue.dword_m|= ((pdwStruct->dword_m & 0x0000FF00)<<8);
+    dwValue.dword_m|= ((pdwStruct->dword_m & 0x00FF0000)>>8 );
+    dwValue.dword_m|= ((pdwStruct->dword_m & 0xFF000000)>>24); //MSB to LSB
+
+    return dwValue.dword_m;
+#endif
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief    AmiSetQword64ToBe
+
+Sets a 64 bit value to a buffer in big endian
+
+\param[out] pAddr_p         Pointer to the destination buffer
+\param[in]  qwordVal_p      The source value to convert
+
+\ingroup module_ami
+*/
+//------------------------------------------------------------------------------
+void AmiSetQword64ToBe(void* pAddr_p, UINT64 qwordVal_p)
+{
+#if defined (__MICROBLAZE__)
+    UINT8* dst = (UINT8*)pAddr_p;
+    UINT8* src = (UINT8*)&qwordVal_p;
+
     *(dst+0) = *(src+0);
     *(dst+1) = *(src+1);
     *(dst+2) = *(src+2);
@@ -450,443 +387,105 @@ UINT8 *dst=(UINT8*)pAddr_p, *src=(UINT8*)&qwQwordVal_p;
     *(dst+6) = *(src+6);
     *(dst+7) = *(src+7);
 #else
-UINT64 * pqwDst;
+    UINT64* pqwDst;
 
-    pqwDst  = (UINT64 *) pAddr_p;
-    *pqwDst = qwQwordVal_p;
+    pqwDst = (UINT64 *) pAddr_p;
+    *pqwDst = qwordVal_p;
 #endif
-
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief    AmiSetQword64ToLe
 
-//---------------------------------------------------------------------------
-//
-// Function:    AmiGetQword64FromLe()
-//
-// Description: reads a 64 bit value from a buffer in little endian
-//
-// Parameters:  pAddr_p         = pointer to source buffer
-//
-// Return:      void
-//
-// State:       not tested
-//
-//---------------------------------------------------------------------------
+Sets a 64 bit value to a buffer in little endian
 
-UINT64 AmiGetQword64FromLe (void * pAddr_p)
+\param[out] pAddr_p         Pointer to the destination buffer
+\param[in]  qwordVal_p      The source value to convert
+
+\ingroup module_ami
+*/
+//------------------------------------------------------------------------------
+void AmiSetQword64ToLe(void* pAddr_p, UINT64 qwordVal_p)
 {
-
-tqwStruct      qwStruct = { 0 };
-
-    ((UINT8 *) &qwStruct.m_qwQword)[0] = ((UINT8 *) pAddr_p)[7];
-    ((UINT8 *) &qwStruct.m_qwQword)[1] = ((UINT8 *) pAddr_p)[6];
-    ((UINT8 *) &qwStruct.m_qwQword)[2] = ((UINT8 *) pAddr_p)[5];
-    ((UINT8 *) &qwStruct.m_qwQword)[3] = ((UINT8 *) pAddr_p)[4];
-    ((UINT8 *) &qwStruct.m_qwQword)[4] = ((UINT8 *) pAddr_p)[3];
-    ((UINT8 *) &qwStruct.m_qwQword)[5] = ((UINT8 *) pAddr_p)[2];
-    ((UINT8 *) &qwStruct.m_qwQword)[6] = ((UINT8 *) pAddr_p)[1];
-    ((UINT8 *) &qwStruct.m_qwQword)[7] = ((UINT8 *) pAddr_p)[0];
-
-    return ( qwStruct.m_qwQword );
-
+    ((UINT8 *) pAddr_p)[0] = ((UINT8 *) &qwordVal_p)[7];
+    ((UINT8 *) pAddr_p)[1] = ((UINT8 *) &qwordVal_p)[6];
+    ((UINT8 *) pAddr_p)[2] = ((UINT8 *) &qwordVal_p)[5];
+    ((UINT8 *) pAddr_p)[3] = ((UINT8 *) &qwordVal_p)[4];
+    ((UINT8 *) pAddr_p)[4] = ((UINT8 *) &qwordVal_p)[3];
+    ((UINT8 *) pAddr_p)[5] = ((UINT8 *) &qwordVal_p)[2];
+    ((UINT8 *) pAddr_p)[6] = ((UINT8 *) &qwordVal_p)[1];
+    ((UINT8 *) pAddr_p)[7] = ((UINT8 *) &qwordVal_p)[0];
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief    AmiGetQword64FromBe
 
-//---------------------------------------------------------------------------
-//
-// Function:    AmiGetQword64FromBe()
-//
-// Description: reads a 64 bit value from a buffer in big endian
-//
-// Parameters:  pAddr_p         = pointer to source buffer
-//
-// Return:      void
-//
-// State:       not tested
-//
-//---------------------------------------------------------------------------
+Reads a 64 bit value from a buffer in big endian
 
-UINT64 AmiGetQword64FromBe (void * pAddr_p)
+\param[in]  pAddr_p         Pointer to the source buffer
+
+\return UINT64
+\retval Value       The data in platform endian
+
+\ingroup module_ami
+*/
+//------------------------------------------------------------------------------
+UINT64 AmiGetQword64FromBe(void * pAddr_p)
 {
 #if defined (__MICROBLAZE__)
-tqwStruct      qwStruct = { 0 };
+    tqwStruct qwStruct = { 0 };
 
-    ((UINT8 *) &qwStruct.m_qwQword)[0] = ((UINT8 *) pAddr_p)[0];
-    ((UINT8 *) &qwStruct.m_qwQword)[1] = ((UINT8 *) pAddr_p)[1];
-    ((UINT8 *) &qwStruct.m_qwQword)[2] = ((UINT8 *) pAddr_p)[2];
-    ((UINT8 *) &qwStruct.m_qwQword)[3] = ((UINT8 *) pAddr_p)[3];
-    ((UINT8 *) &qwStruct.m_qwQword)[4] = ((UINT8 *) pAddr_p)[4];
-    ((UINT8 *) &qwStruct.m_qwQword)[5] = ((UINT8 *) pAddr_p)[5];
-    ((UINT8 *) &qwStruct.m_qwQword)[6] = ((UINT8 *) pAddr_p)[6];
-    ((UINT8 *) &qwStruct.m_qwQword)[7] = ((UINT8 *) pAddr_p)[7];
+    ((UINT8 *) &qwStruct.qword_m)[0] = ((UINT8 *) pAddr_p)[0];
+    ((UINT8 *) &qwStruct.qword_m)[1] = ((UINT8 *) pAddr_p)[1];
+    ((UINT8 *) &qwStruct.qword_m)[2] = ((UINT8 *) pAddr_p)[2];
+    ((UINT8 *) &qwStruct.qword_m)[3] = ((UINT8 *) pAddr_p)[3];
+    ((UINT8 *) &qwStruct.qword_m)[4] = ((UINT8 *) pAddr_p)[4];
+    ((UINT8 *) &qwStruct.qword_m)[5] = ((UINT8 *) pAddr_p)[5];
+    ((UINT8 *) &qwStruct.qword_m)[6] = ((UINT8 *) pAddr_p)[6];
+    ((UINT8 *) &qwStruct.qword_m)[7] = ((UINT8 *) pAddr_p)[7];
 
-    return ( qwStruct.m_qwQword );
+    return ( qwStruct.qword_m );
 #else
-tqwStruct * pqwStruct;
-tqwStruct      qwStruct;
+    tqwStruct* pqwStruct;
+    tqwStruct qwStruct;
 
     pqwStruct = (tqwStruct *) pAddr_p;
-    qwStruct.m_qwQword = pqwStruct->m_qwQword;
+    qwStruct.qword_m = pqwStruct->qword_m;
 
-    return ( qwStruct.m_qwQword );
+    return ( qwStruct.qword_m );
 #endif
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief    AmiGetQword64FromLe
 
-//---------------------------------------------------------------------------
-//
-// Function:    AmiSetQword40ToLe()
-//
-// Description: sets a 40 bit value to a buffer in little endian
-//
-// Parameters:  pAddr_p         = pointer to destination buffer
-//              qwQwordVal_p    = quadruple word value
-//
-// Return:      void
-//
-// State:       not tested
-//
-//---------------------------------------------------------------------------
+Reads a 64 bit value from a buffer in little endian
 
-void AmiSetQword40ToLe (void * pAddr_p, UINT64 qwQwordVal_p)
+\param[in]  pAddr_p         Pointer to the source buffer
+
+\return UINT64
+\retval Value       The data in platform endian
+
+\ingroup module_ami
+*/
+//------------------------------------------------------------------------------
+UINT64 AmiGetQword64FromLe(void * pAddr_p)
 {
-    ((UINT8 *) pAddr_p)[0] = ((UINT8 *) &qwQwordVal_p)[7];
-    ((UINT8 *) pAddr_p)[1] = ((UINT8 *) &qwQwordVal_p)[6];
-    ((UINT8 *) pAddr_p)[2] = ((UINT8 *) &qwQwordVal_p)[5];
-    ((UINT8 *) pAddr_p)[3] = ((UINT8 *) &qwQwordVal_p)[4];
-    ((UINT8 *) pAddr_p)[4] = ((UINT8 *) &qwQwordVal_p)[3];
-}
+    tqwStruct qwStruct = { 0 };
 
+    ((UINT8 *) &qwStruct.qword_m)[0] = ((UINT8 *) pAddr_p)[7];
+    ((UINT8 *) &qwStruct.qword_m)[1] = ((UINT8 *) pAddr_p)[6];
+    ((UINT8 *) &qwStruct.qword_m)[2] = ((UINT8 *) pAddr_p)[5];
+    ((UINT8 *) &qwStruct.qword_m)[3] = ((UINT8 *) pAddr_p)[4];
+    ((UINT8 *) &qwStruct.qword_m)[4] = ((UINT8 *) pAddr_p)[3];
+    ((UINT8 *) &qwStruct.qword_m)[5] = ((UINT8 *) pAddr_p)[2];
+    ((UINT8 *) &qwStruct.qword_m)[6] = ((UINT8 *) pAddr_p)[1];
+    ((UINT8 *) &qwStruct.qword_m)[7] = ((UINT8 *) pAddr_p)[0];
 
-//---------------------------------------------------------------------------
-//
-// Function:    AmiSetQword40ToBe()
-//
-// Description: sets a 40 bit value to a buffer in big endian
-//
-// Parameters:  pAddr_p         = pointer to destination buffer
-//              qwQwordVal_p    = quadruple word value
-//
-// Return:      void
-//
-// State:       not tested
-//
-//---------------------------------------------------------------------------
-
-void  AmiSetQword40ToBe (void * pAddr_p, UINT64 qwQwordVal_p)
-{
-    ((UINT8 *) pAddr_p)[0] = ((UINT8 *) &qwQwordVal_p)[3];
-    ((UINT8 *) pAddr_p)[1] = ((UINT8 *) &qwQwordVal_p)[4];
-    ((UINT8 *) pAddr_p)[2] = ((UINT8 *) &qwQwordVal_p)[5];
-    ((UINT8 *) pAddr_p)[3] = ((UINT8 *) &qwQwordVal_p)[6];
-    ((UINT8 *) pAddr_p)[4] = ((UINT8 *) &qwQwordVal_p)[7];
-}
-
-
-//---------------------------------------------------------------------------
-//
-// Function:    AmiGetQword40FromLe()
-//
-// Description: reads a 40 bit value from a buffer in little endian
-//
-// Parameters:  pAddr_p         = pointer to source buffer
-//
-// Return:      UINT64
-//
-// State:       not tested
-//
-//---------------------------------------------------------------------------
-
-UINT64  AmiGetQword40FromLe (void * pAddr_p)
-{
-tqwStruct      qwStruct = { 0 };
-
-    qwStruct.m_qwQword  = AmiGetQword64FromLe (pAddr_p);
-    qwStruct.m_qwQword &= 0x000000FFFFFFFFFFLL;
-
-    return ( qwStruct.m_qwQword );
-}
-
-
-//---------------------------------------------------------------------------
-//
-// Function:    AmiGetQword40FromBe()
-//
-// Description: reads a 40 bit value from a buffer in big endian
-//
-// Parameters:  pAddr_p         = pointer to source buffer
-//
-// Return:      UINT64
-//
-// State:       not tested
-//
-//---------------------------------------------------------------------------
-
-UINT64  AmiGetQword40FromBe (void * pAddr_p)
-{
-tqwStruct      qwStruct = { 0 };
-
-    qwStruct.m_qwQword  = AmiGetQword64FromBe (pAddr_p);
-    qwStruct.m_qwQword >>= 24;
-#if defined (__MICROBLAZE__)
-    qwStruct.m_qwQword &= 0x000000FFFFFFFFFFLL;
-#endif
-    return ( qwStruct.m_qwQword );
-}
-
-
-//---------------------------------------------------------------------------
-//
-// Function:    AmiSetQword48ToLe()
-//
-// Description: sets a 48 bit value to a buffer in little endian
-//
-// Parameters:  pAddr_p         = pointer to destination buffer
-//              qwQwordVal_p    = quadruple word value
-//
-// Return:      void
-//
-// State:       not tested
-//
-//---------------------------------------------------------------------------
-
-void  AmiSetQword48ToLe (void * pAddr_p, UINT64 qwQwordVal_p)
-{
-    ((UINT8 *) pAddr_p)[0] = ((UINT8 *) &qwQwordVal_p)[7];
-    ((UINT8 *) pAddr_p)[1] = ((UINT8 *) &qwQwordVal_p)[6];
-    ((UINT8 *) pAddr_p)[2] = ((UINT8 *) &qwQwordVal_p)[5];
-    ((UINT8 *) pAddr_p)[3] = ((UINT8 *) &qwQwordVal_p)[4];
-    ((UINT8 *) pAddr_p)[4] = ((UINT8 *) &qwQwordVal_p)[3];
-    ((UINT8 *) pAddr_p)[5] = ((UINT8 *) &qwQwordVal_p)[2];
-}
-
-
-//---------------------------------------------------------------------------
-//
-// Function:    AmiSetQword48ToBe()
-//
-// Description: sets a 48 bit value to a buffer in big endian
-//
-// Parameters:  pAddr_p         = pointer to destination buffer
-//              qwQwordVal_p    = quadruple word value
-//
-// Return:      void
-//
-// State:       not tested
-//
-//---------------------------------------------------------------------------
-
-void  AmiSetQword48ToBe (void * pAddr_p, UINT64 qwQwordVal_p)
-{
-    ((UINT8 *) pAddr_p)[0] = ((UINT8 *) &qwQwordVal_p)[2];
-    ((UINT8 *) pAddr_p)[1] = ((UINT8 *) &qwQwordVal_p)[3];
-    ((UINT8 *) pAddr_p)[2] = ((UINT8 *) &qwQwordVal_p)[4];
-    ((UINT8 *) pAddr_p)[3] = ((UINT8 *) &qwQwordVal_p)[5];
-    ((UINT8 *) pAddr_p)[4] = ((UINT8 *) &qwQwordVal_p)[6];
-    ((UINT8 *) pAddr_p)[5] = ((UINT8 *) &qwQwordVal_p)[7];
-}
-
-
-//---------------------------------------------------------------------------
-//
-// Function:    AmiGetQword48FromLe()
-//
-// Description: reads a 48 bit value from a buffer in little endian
-//
-// Parameters:  pAddr_p         = pointer to source buffer
-//
-// Return:      UINT64
-//
-// State:       not tested
-//
-//---------------------------------------------------------------------------
-
-UINT64  AmiGetQword48FromLe (void * pAddr_p)
-{
-tqwStruct      qwStruct = { 0 };
-
-    qwStruct.m_qwQword  = AmiGetQword64FromLe (pAddr_p);
-    qwStruct.m_qwQword &= 0x0000FFFFFFFFFFFFLL;
-
-    return ( qwStruct.m_qwQword );
-}
-
-
-//---------------------------------------------------------------------------
-//
-// Function:    AmiGetQword48FromBe()
-//
-// Description: reads a 48 bit value from a buffer in big endian
-//
-// Parameters:  pAddr_p         = pointer to source buffer
-//
-// Return:      UINT64
-//
-// State:       not tested
-//
-//---------------------------------------------------------------------------
-
-UINT64  AmiGetQword48FromBe (void * pAddr_p)
-{
-tqwStruct      qwStruct = { 0 };
-
-    qwStruct.m_qwQword  = AmiGetQword64FromBe (pAddr_p);
-    qwStruct.m_qwQword >>= 16;
-#if defined (__MICROBLAZE__)
-    qwStruct.m_qwQword &= 0x0000FFFFFFFFFFFFLL;
-#endif
-    return ( qwStruct.m_qwQword );
-}
-
-
-//---------------------------------------------------------------------------
-//
-// Function:    AmiSetQword56ToLe()
-//
-// Description: sets a 56 bit value to a buffer in little endian
-//
-// Parameters:  pAddr_p         = pointer to destination buffer
-//              qwQwordVal_p    = quadruple word value
-//
-// Return:      void
-//
-// State:       not tested
-//
-//---------------------------------------------------------------------------
-
-void  AmiSetQword56ToLe (void * pAddr_p, UINT64 qwQwordVal_p)
-{
-    ((UINT8 *) pAddr_p)[0] = ((UINT8 *) &qwQwordVal_p)[7];
-    ((UINT8 *) pAddr_p)[1] = ((UINT8 *) &qwQwordVal_p)[6];
-    ((UINT8 *) pAddr_p)[2] = ((UINT8 *) &qwQwordVal_p)[5];
-    ((UINT8 *) pAddr_p)[3] = ((UINT8 *) &qwQwordVal_p)[4];
-    ((UINT8 *) pAddr_p)[4] = ((UINT8 *) &qwQwordVal_p)[3];
-    ((UINT8 *) pAddr_p)[5] = ((UINT8 *) &qwQwordVal_p)[2];
-    ((UINT8 *) pAddr_p)[6] = ((UINT8 *) &qwQwordVal_p)[1];
-}
-
-
-//---------------------------------------------------------------------------
-//
-// Function:    AmiSetQword56ToBe()
-//
-// Description: sets a 56 bit value to a buffer in big endian
-//
-// Parameters:  pAddr_p         = pointer to destination buffer
-//              qwQwordVal_p    = quadruple word value
-//
-// Return:      void
-//
-// State:       not tested
-//
-//---------------------------------------------------------------------------
-
-void  AmiSetQword56ToBe (void * pAddr_p, UINT64 qwQwordVal_p)
-{
-    ((UINT8 *) pAddr_p)[0] = ((UINT8 *) &qwQwordVal_p)[1];
-    ((UINT8 *) pAddr_p)[1] = ((UINT8 *) &qwQwordVal_p)[2];
-    ((UINT8 *) pAddr_p)[2] = ((UINT8 *) &qwQwordVal_p)[3];
-    ((UINT8 *) pAddr_p)[3] = ((UINT8 *) &qwQwordVal_p)[4];
-    ((UINT8 *) pAddr_p)[4] = ((UINT8 *) &qwQwordVal_p)[5];
-    ((UINT8 *) pAddr_p)[5] = ((UINT8 *) &qwQwordVal_p)[6];
-    ((UINT8 *) pAddr_p)[6] = ((UINT8 *) &qwQwordVal_p)[7];
-}
-
-
-//---------------------------------------------------------------------------
-//
-// Function:    AmiGetQword56FromLe()
-//
-// Description: reads a 56 bit value from a buffer in little endian
-//
-// Parameters:  pAddr_p         = pointer to source buffer
-//
-// Return:      UINT64
-//
-// State:       not tested
-//
-//---------------------------------------------------------------------------
-
-UINT64  AmiGetQword56FromLe(void * pAddr_p)
-{
-tqwStruct      qwStruct = { 0 };
-
-    qwStruct.m_qwQword  = AmiGetQword64FromLe (pAddr_p);
-    qwStruct.m_qwQword &= 0x00FFFFFFFFFFFFFFLL;
-
-    return ( qwStruct.m_qwQword );
-}
-
-
-//---------------------------------------------------------------------------
-//
-// Function:    AmiGetQword56FromBe()
-//
-// Description: reads a 56 bit value from a buffer in big endian
-//
-// Parameters:  pAddr_p         = pointer to source buffer
-//
-// Return:      UINT64
-//
-// State:       not tested
-//
-//---------------------------------------------------------------------------
-
-UINT64 AmiGetQword56FromBe(void * pAddr_p)
-{
-tqwStruct      qwStruct = { 0 };
-
-    qwStruct.m_qwQword  = AmiGetQword64FromBe (pAddr_p);
-    qwStruct.m_qwQword >>= 8;
-#if defined (__MICROBLAZE__)
-    qwStruct.m_qwQword &= 0x00FFFFFFFFFFFFFFLL;
-#endif
-
-    return ( qwStruct.m_qwQword );
-}
-
-
-//---------------------------------------------------------------------------
-//
-// Function:    AmiSetTimeOfDay()
-//
-// Description: sets a TIME_OF_DAY (CANopen) value to a buffer
-//
-// Parameters:  pAddr_p         = pointer to destination buffer
-//              pTimeOfDay_p    = pointer to struct TIME_OF_DAY
-//
-// Return:      void
-//
-// State:       not tested
-//
-//---------------------------------------------------------------------------
-
-void AmiSetTimeOfDay(void * pAddr_p, tTimeOfDay * pTimeOfDay_p)
-{
-    AmiSetDwordToLe(((UINT8 *) pAddr_p),     pTimeOfDay_p->m_dwMs & 0x0FFFFFFF);
-    AmiSetWordToLe(((UINT8 *) pAddr_p) + 4, pTimeOfDay_p->m_wDays);
-}
-
-
-//---------------------------------------------------------------------------
-//
-// Function:    AmiGetTimeOfDay()
-//
-// Description: reads a TIME_OF_DAY (CANopen) value from a buffer
-//
-// Parameters:  pAddr_p         = pointer to source buffer
-//              pTimeOfDay_p    = pointer to struct TIME_OF_DAY
-//
-// Return:      void
-//
-// State:       not tested
-//
-//---------------------------------------------------------------------------
-
-void AmiGetTimeOfDay (void * pAddr_p, tTimeOfDay * pTimeOfDay_p)
-{
-    pTimeOfDay_p->m_dwMs  = AmiGetDwordFromLe (((UINT8 *) pAddr_p)) & 0x0FFFFFFF;
-    pTimeOfDay_p->m_wDays = AmiGetWordFromLe  (((UINT8 *) pAddr_p) + 4);
+    return qwStruct.qword_m;
 }
 
 //============================================================================//
@@ -897,6 +496,4 @@ void AmiGetTimeOfDay (void * pAddr_p, tTimeOfDay * pTimeOfDay_p)
 
 
 /// \}
-
-
 
