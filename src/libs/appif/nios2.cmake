@@ -1,6 +1,6 @@
  ################################################################################
 #
-# CMake file of application interface common library for PIFA
+# CMake file of application interface library (nios2 target) for PIFA
 #
 # Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 # All rights reserved.
@@ -28,43 +28,42 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ################################################################################
 
-CMAKE_MINIMUM_REQUIRED (VERSION 2.8)
-
-PROJECT (appifcommon)
+##########################################################################
+# Create build directory
+FILE( MAKE_DIRECTORY ${ALT_LIBAPPIF_BUILD_DIR} )
 
 ########################################################################
-# Set all source files
+# Adapt source file lists and includes
 ########################################################################
-SET ( LIB_SRCS
-    ${PROJECT_SOURCE_DIR}/ccobject.c
-    ${PROJECT_SOURCE_DIR}/timeout.c
+SET( ALT_LIB_SRCS ${LIB_SRCS} )
+
+SET( ALT_LIB_INCS ${LIB_INCS}
+                  ${ALT_TARGET_DIR}/include
 )
 
 ########################################################################
-# Set include paths
+# Library Makefile
 ########################################################################
-SET ( LIB_INCS
-    ${PROJECT_SOURCE_DIR}/include
-    ${endian_SOURCE_DIR}/include
-    ${DEMO_CONFIG_DIR}/config/tbuf/include
+
+SET( LIB_CFLAGS "-D${DBG_MODE} -DDEF_DEBUG_LVL=${DEF_DEBUG_LVL}" )
+
+EXECUTE_PROCESS( COMMAND nios2-lib-generate-makefile --bsp-dir ${ALT_APP_BSP_DIR} --lib-dir ${ALT_LIBAPPIF_BUILD_DIR} --lib-name ${PROJECT_NAME} --set LIB_CFLAGS_DEFINED_SYMBOLS=${LIB_CFLAGS} --set LIB_CFLAGS_OPTIMIZATION=${OPT_LEVEL} --set LIB_INCLUDE_DIRS=${ALT_LIB_INCS} --src-files ${ALT_LIB_SRCS}
+                 WORKING_DIRECTORY ${ALT_LIBAPPIF_BUILD_DIR}
+                 RESULT_VARIABLE GEN_LIB_RES
+                 OUTPUT_VARIABLE GEN_LIB_STDOUT
+                 ERROR_VARIABLE GEN_LIB_STDERR
 )
 
-IF ( CFG_GEN_NIOS_TARGET )
-    INCLUDE (nios2.cmake)
-ENDIF ( CFG_GEN_NIOS_TARGET )
+IF( NOT ${GEN_LIB_RES} MATCHES "0" )
+    MESSAGE ( FATAL_ERROR "nios2-lib-generate-makefile failed with: ${GEN_LIB_STDERR}" )
+ENDIF ( NOT  ${GEN_LIB_RES} MATCHES "0" )
 
-INCLUDE_DIRECTORIES ( ${LIB_INCS} 
-                      ${TARGET_DIR}/include
-)
+MESSAGE ( STATUS "Generate ${PROJECT_NAME} Makefile: ${GEN_LIB_STDOUT}" )
 
 ########################################################################
-# Build library
+# Eclipse project files
 ########################################################################
-ADD_LIBRARY ( appifcommon ${LIB_TYPE} ${LIB_SRCS} )
+GenEclipseFileList("${ALT_LIB_SRCS}" "" ECLIPSE_FILE_LIST)
 
-TARGET_LINK_LIBRARIES ( appifcommon "endian" )
-ADD_DEPENDENCIES ( appifcommon "endian" )
-
-IF ( ( WIN32 OR CYGWIN ) AND ( ${LIB_TYPE} STREQUAL "SHARED" ) )
-    EnsureLibraries(appifcommon "endian" )
-ENDIF ( ( WIN32 OR CYGWIN ) AND ( ${LIB_TYPE} STREQUAL "SHARED" ) )
+CONFIGURE_FILE( ${ALT_MISC_DIR}/project/libproject.in ${ALT_LIBAPPIF_BUILD_DIR}/.project @ONLY )
+CONFIGURE_FILE( ${ALT_MISC_DIR}/project/libcproject.in ${ALT_LIBAPPIF_BUILD_DIR}/.cproject @ONLY )

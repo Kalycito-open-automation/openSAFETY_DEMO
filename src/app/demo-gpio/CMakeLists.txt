@@ -1,6 +1,6 @@
 ################################################################################
 #
-# CMake generic user options for PIFA
+# CMake file of application interface on demo-gpio for PIFA
 #
 # Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 # All rights reserved.
@@ -28,34 +28,29 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ################################################################################
 
-Include(CMakeDependentOption)
+CMAKE_MINIMUM_REQUIRED (VERSION 2.8)
 
-# The version number.
-# Allow the developer to select if Dynamic or Static libraries are built
-OPTION ( BUILD_SHARED_LIBS "Build Shared Libraries" ON)
-MARK_AS_ADVANCED ( BUILD_SHARED_LIBS )
+PROJECT( demo-gpio )
 
-OPTION( CFG_GEN_NIOS_TARGET "Generate Makefiles for Altera Nios2 by using the Altera buils system generation tools!" OFF )
+########################################################################
+# Set all source files
+########################################################################
+SET ( DEMO_SRCS
+    ${PROJECT_SOURCE_DIR}/main.c
+)
 
-IF( NOT CMAKE_BUILD_TYPE )
-    SET(CMAKE_BUILD_TYPE Release CACHE STRING
-        "Choose the type of build"
-        FORCE)
-    SET_PROPERTY(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "None;Debug;Release;RelWithDebInfo;MinSizeRel")
-ENDIF( NOT CMAKE_BUILD_TYPE )
+########################################################################
+# Set include paths
+########################################################################
+SET ( DEMO_INCS
+    ${PROJECT_SOURCE_DIR}
+    ${endian_SOURCE_DIR}/include
+    ${appif_SOURCE_DIR}/include
+    ${appifcommon_SOURCE_DIR}/include
+    ${DEMO_CONFIG_DIR}/config/tbuf/include
+)
 
-IF( NOT CFG_DEMO_TYPE )
-    SET(CFG_DEMO_TYPE gpio CACHE STRING
-        "Choose the demo you want to build"
-        FORCE)
-    SET_PROPERTY(CACHE CFG_DEMO_TYPE PROPERTY STRINGS "gpio;safety")
-ENDIF( NOT CFG_DEMO_TYPE )
-
-OPTION ( UNITTEST_ENABLE "Enables the unittest integration for the openSAFETY distribution" ON )
-
-CMAKE_DEPENDENT_OPTION ( UNITTEST_SMALL_TARGETS "Splits the unittest into smaller targets, to enable building for smaller memory footprint targets"  OFF "UNITTEST_ENABLE" OFF )
-CMAKE_DEPENDENT_OPTION ( UNITTEST_XML_REPORTS "Generates XML reports instead of stdout output" ON "UNITTEST_ENABLE" ON )
-
-OPTION ( UNITTEST_PIFA "Enables the unittest integration for the tools directory" ON )
-MARK_AS_ADVANCED ( UNITTEST_PIFA )
+IF ( CFG_GEN_NIOS_TARGET )
+    INCLUDE (nios2.cmake)
+ENDIF ( CFG_GEN_NIOS_TARGET )
 

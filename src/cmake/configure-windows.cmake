@@ -1,6 +1,6 @@
 ################################################################################
 #
-# CMake generic user options for PIFA
+# Windows configuration options for POWERLINK Interface For Applications
 #
 # Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 # All rights reserved.
@@ -28,34 +28,45 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ################################################################################
 
-Include(CMakeDependentOption)
 
-# The version number.
-# Allow the developer to select if Dynamic or Static libraries are built
-OPTION ( BUILD_SHARED_LIBS "Build Shared Libraries" ON)
-MARK_AS_ADVANCED ( BUILD_SHARED_LIBS )
+############################################################
+# Check includes
+CHECK_INCLUDE_FILE ( "sys/socket.h" HAVE_SYS_SOCKET_H )
+CHECK_INCLUDE_FILE ( "winsock2.h" HAVE_WINSOCK2_H )
+CHECK_INCLUDE_FILE ( "bits/predefs.h" HAVE_BITS_PREDEFS_H )
+CHECK_INCLUDE_FILE ( "netinet/in.h" HAVE_NETINET_IN_H )
+CHECK_INCLUDE_FILE ( "arpa/inet.h" HAVE_ARPA_INET_H )
+CHECK_INCLUDE_FILE ( "features.h" HAVE_FEATURES_H )
+CHECK_INCLUDE_FILE ( "arpa/nameser.h" HAVE_ARPA_NAMESER_H )
+CHECK_INCLUDE_FILE ( "sys/param.h" HAVE_SYS_PARAM_H )
+CHECK_INCLUDE_FILE ( "sys/types.h" HAVE_SYS_TYPES_H )
+CHECK_INCLUDE_FILE ( "sys/libgen.h" HAVE_LIBGEN_H )
+CHECK_INCLUDE_FILE ( "stdarg.h" HAVE_STDARG_H )
 
-OPTION( CFG_GEN_NIOS_TARGET "Generate Makefiles for Altera Nios2 by using the Altera buils system generation tools!" OFF )
+CHECK_FUNCTION_EXISTS( "bzero" HAVE_BZERO )
+CHECK_FUNCTION_EXISTS( "inet_pton" HAVE_INET_PTON )
 
-IF( NOT CMAKE_BUILD_TYPE )
-    SET(CMAKE_BUILD_TYPE Release CACHE STRING
-        "Choose the type of build"
-        FORCE)
-    SET_PROPERTY(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "None;Debug;Release;RelWithDebInfo;MinSizeRel")
-ENDIF( NOT CMAKE_BUILD_TYPE )
+CHECK_FUNCTION_EXISTS( "snprintf" HAVE_SNPRINTF )
+CHECK_FUNCTION_EXISTS( "strdup" HAVE_STRDUP )
+CHECK_FUNCTION_EXISTS( "vsnprintf" HAVE_VSNPRINTF )
 
-IF( NOT CFG_DEMO_TYPE )
-    SET(CFG_DEMO_TYPE gpio CACHE STRING
-        "Choose the demo you want to build"
-        FORCE)
-    SET_PROPERTY(CACHE CFG_DEMO_TYPE PROPERTY STRINGS "gpio;safety")
-ENDIF( NOT CFG_DEMO_TYPE )
+# Set the LIB_TYPE variable to STATIC
+SET (LIB_TYPE STATIC)
+IF (BUILD_SHARED_LIBS)
+  # User wants to build Dynamic Libraries, so change the LIB_TYPE variable to CMake keyword 'SHARED'
+  SET (LIB_TYPE SHARED)
+ENDIF (BUILD_SHARED_LIBS)
 
-OPTION ( UNITTEST_ENABLE "Enables the unittest integration for the openSAFETY distribution" ON )
+IF (CMAKE_COMPILER_IS_GNUCC)
+    MESSAGE ( STATUS "Cross-compiling for Windows" )
+    ADD_DEFINITIONS ( "-DWIN32 -D_WIN32_WINNT=0x0501" )
+ELSE (CMAKE_COMPILER_IS_GNUCC)
+    MESSAGE ( STATUS "Building on Windows" )
+    ADD_DEFINITIONS ( "/D_WIN32_WINNT=0x0501" )
+ENDIF (CMAKE_COMPILER_IS_GNUCC)
 
-CMAKE_DEPENDENT_OPTION ( UNITTEST_SMALL_TARGETS "Splits the unittest into smaller targets, to enable building for smaller memory footprint targets"  OFF "UNITTEST_ENABLE" OFF )
-CMAKE_DEPENDENT_OPTION ( UNITTEST_XML_REPORTS "Generates XML reports instead of stdout output" ON "UNITTEST_ENABLE" ON )
+SET ( WIN32_EXECUTABLE "WIN32" )
 
-OPTION ( UNITTEST_PIFA "Enables the unittest integration for the tools directory" ON )
-MARK_AS_ADVANCED ( UNITTEST_PIFA )
+SET( TARGET_DIR ${CMAKE_SOURCE_DIR}/app/target/x86 )
 
+ADD_SUBDIRECTORY ( "${PROJECT_SOURCE_DIR}/contrib/win32" )

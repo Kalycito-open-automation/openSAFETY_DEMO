@@ -1,20 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
-	<name>demo_safety</name>
+	<name>lib@PROJECT_NAME@</name>
 	<comment></comment>
 	<projects>
 	</projects>
 	<buildSpec>
-		<buildCommand>
-			<name>com.altera.sbtgui.project.makefileBuilder</name>
-			<arguments>
-			</arguments>
-		</buildCommand>
-		<buildCommand>
-			<name>com.altera.sbtgui.project.makefileBuilder</name>
-			<arguments>
-			</arguments>
-		</buildCommand>
 		<buildCommand>
 			<name>org.eclipse.cdt.managedbuilder.core.genmakebuilder</name>
 			<triggers>clean,full,incremental,</triggers>
@@ -41,7 +31,7 @@
 				</dictionary>
 				<dictionary>
 					<key>org.eclipse.cdt.make.core.buildLocation</key>
-					<value>${workspace_loc://demo_safety}</value>
+					<value>${workspace_loc://lib@PROJECT_NAME@}</value>
 				</dictionary>
 				<dictionary>
 					<key>org.eclipse.cdt.make.core.cleanBuildTarget</key>
@@ -90,55 +80,16 @@
 		<nature>org.eclipse.cdt.managedbuilder.core.ScannerConfigNature</nature>
 		<nature>org.eclipse.cdt.core.ccnature</nature>
 		<nature>com.altera.sbtgui.project.SBTGUINature</nature>
-		<nature>com.altera.sbtgui.project.SBTGUIAppNature</nature>
+		<nature>com.altera.sbtgui.project.SBTGUILibNature</nature>
 		<nature>com.altera.sbtgui.project.SBTGUIManagedNature</nature>
 	</natures>
 	<linkedResources>
-		<link>
-			<name>appif</name>
-			<type>2</type>
-			<locationURI>APPIF_LOC</locationURI>
-		</link>
-		<link>
-			<name>appifcommon</name>
-			<type>2</type>
-			<locationURI>APPIFCOMMON_LOC</locationURI>
-		</link>
-		<link>
-			<name>endian</name>
-			<type>2</type>
-			<locationURI>AMI_LOC</locationURI>
-		</link>
-		<link>
-			<name>target</name>
-			<type>2</type>
-			<locationURI>TARGET_LOC</locationURI>
-		</link>
+@ECLIPSE_FILE_LIST@
 	</linkedResources>
 	<variableList>
 		<variable>
-			<name>APPIFCOMMON_LOC</name>
-			<value>$%7BSDK_LOC%7D/libs/appifcommon</value>
-		</variable>
-		<variable>
-			<name>APPIF_LOC</name>
-			<value>$%7BSDK_LOC%7D/libs/appif</value>
-		</variable>
-		<variable>
-			<name>AMI_LOC</name>
-			<value>$%7BSDK_LOC%7D/libs/endian</value>
-		</variable>
-		<variable>
-			<name>DEMO_LOC</name>
-			<value>$%7BSDK_LOC%7D/app/demo_safety</value>
-		</variable>
-		<variable>
-			<name>SDK_LOC</name>
-			<value>$%7BPARENT-2-PROJECT_LOC%7D</value>
-		</variable>
-		<variable>
-			<name>TARGET_LOC</name>
-			<value>$%7BSDK_LOC%7D/app/target</value>
+			<name>LIB_LOC</name>
+			<value>file:/@PROJECT_SOURCE_DIR@</value>
 		</variable>
 	</variableList>
 </projectDescription>
