@@ -1,0 +1,15 @@
+# Dirs
+obj/
+bsp/
+
+# Files
+*.elf
+*.map
+Makefile
+*.flash
+*.ld
+*.bak
+*.mem
+*.size
+*.elfcheck
+*.log
