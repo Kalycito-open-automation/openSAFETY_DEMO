@@ -6,6 +6,15 @@ Include(CMakeDependentOption)
 OPTION ( BUILD_SHARED_LIBS "Build Shared Libraries" ON)
 MARK_AS_ADVANCED ( BUILD_SHARED_LIBS )
 
+SET ( DEMO_CONFIG_DEFAULT_PATH   ${CMAKE_SOURCE_DIR}/app/demo-gpio )
+
+SET( DEMO_CONFIG_DIR PATH_TO_CONFIG CACHE PATH "Application interface demo configuration files")
+
+IF( (NOT EXISTS "${DEMO_CONFIG_DIR}") OR (NOT IS_DIRECTORY "${DEMO_CONFIG_DIR}") )
+    MESSAGE ( WARNING "Path to the demo configuration files is not set using '${DEMO_CONFIG_DEFAULT_PATH}' as default path!")
+    SET( DEMO_CONFIG_DIR ${DEMO_CONFIG_DEFAULT_PATH} )
+ENDIF ( (NOT EXISTS "${DEMO_CONFIG_DIR}") OR (NOT IS_DIRECTORY "${DEMO_CONFIG_DIR}") )
+
 OPTION ( UNITTEST_ENABLE "Enables the unittest integration for the openSAFETY distribution" ON )
 
 CMAKE_DEPENDENT_OPTION ( UNITTEST_SMALL_TARGETS "Splits the unittest into smaller targets, to enable building for smaller memory footprint targets"  OFF "UNITTEST_ENABLE" OFF )

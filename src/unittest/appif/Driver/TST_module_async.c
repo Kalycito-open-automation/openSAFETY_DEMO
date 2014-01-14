@@ -2,7 +2,7 @@
 
 #include <cunit/CUnit.h>
 
-#include <appif/appif.h>
+#include <libappif/appif.h>
 
 #define SUCCESS		0
 #define FAIL		1

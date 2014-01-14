@@ -2,7 +2,7 @@
 
 #include <cunit/CUnit.h>
 
-#include <appif/appif.h>
+#include <libappif/appif.h>
 
 void TST_statusWirTestenWas(void)
 {
