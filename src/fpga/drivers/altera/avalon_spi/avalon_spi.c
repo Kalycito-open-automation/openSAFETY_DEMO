@@ -45,6 +45,8 @@ This Spi driver supports duplex write/read transfers.
 //------------------------------------------------------------------------------
 #include <avalon_spi/avalon_spi.h>
 
+#include <apptarget/target.h>
+
 #include <stdlib.h>
 #include <alt_types.h>
 #include <altera_avalon_spi_regs.h>

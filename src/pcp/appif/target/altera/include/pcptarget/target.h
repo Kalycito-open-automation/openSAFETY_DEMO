@@ -89,6 +89,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define APPIF_MALLOC(siz)              malloc(siz)
 #define APPIF_FREE(ptr)                free(ptr)
 
+#define DLLEXPORT
+
 //------------------------------------------------------------------------------
 // typedef
 //------------------------------------------------------------------------------

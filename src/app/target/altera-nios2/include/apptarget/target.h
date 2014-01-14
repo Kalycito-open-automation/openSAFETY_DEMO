@@ -5,7 +5,7 @@
 \brief  Target specific header file of the application interface module
 
 This file contains definitions for the platform of the application interface
-user library.
+user library for target nios2.
 
 *******************************************************************************/
 
@@ -49,7 +49,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // const defines
 //------------------------------------------------------------------------------
 
-#if defined(__NIOS2__) && defined(__GNUC__)
+#if defined(__GNUC__)
 
 #ifndef CHAR
     #define CHAR char
@@ -117,7 +117,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endif  //_TIME_OF_DAY_DEFINED_
 
 #else
-    #error "Please define the datatypes for your target and compiler here!"
+    #error "Please define the datatypes for your compiler here!"
 #endif
 
 
