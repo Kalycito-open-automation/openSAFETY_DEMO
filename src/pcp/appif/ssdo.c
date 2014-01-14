@@ -489,37 +489,53 @@ tEplKernel PUBLIC ssdo_obdAccessCb(tObdCbParam MEM* pParam_p)
         goto Exit;
     }
 
-    // Check action
-    if(pParam_p->obdEvent == kObdEvPostWrite)
+    // Find instance handle
+    pInstance = ssdo_getInstance(pParam_p->subIndex - 1);
+    if(pInstance == NULL)
     {
-        // Find instance handle
-        pInstance = ssdo_getInstance(pParam_p->subIndex - 1);
-        if(pInstance == NULL)
+        eplret = kEplObdSubindexNotExist;
+        goto Exit;
+    }
+
+    // Check action
+    switch(pParam_p->obdEvent)
+    {
+        case kObdEvInitWrite:
         {
-            eplret = kEplObdSubindexNotExist;
-            goto Exit;
+            if(*(UINT16*)pParam_p->pArg > SSDO_STUB_DATA_DOM_SIZE)
+            {
+                eplret = kEplObdValueLengthError;
+            }
+            else
+            {
+                // Save object size for later use
+                pInstance->prodRxParam_m.objSize_m = *(UINT16*)pParam_p->pArg;
+            }
+
+            break;
         }
 
-//        // No segmented transfer allowed!
-//        if(pParam_p->m_SegmentSize != pParam_p->m_TransferSize)
-//        {
-//            eplret = kEplObdAccessViolation;
-//            goto Exit;
-//        }
-
-        // Post frame to receive FIFO
-        ret = fifo_insertElement(pInstance->prodRxParam_m.pRxFifoInst_m,
-                (tFifoElement) pParam_p->pArg,
-                pParam_p->objSize);
-        if(ret != kAppIfSuccessful)
+        case kObdEvPostWrite:
         {
-            eplret = kEplObdAccessViolation;
-            goto Exit;
+            // Post frame to receive FIFO
+            ret = fifo_insertElement(pInstance->prodRxParam_m.pRxFifoInst_m,
+                    (tFifoElement) pParam_p->pArg,
+                    pInstance->prodRxParam_m.objSize_m);
+            if(ret != kAppIfSuccessful)
+            {
+                eplret = kEplObdAccessViolation;
+            }
+            else
+            {
+                // Start timeout timer for this frame!
+                timeout_startTimer(pInstance->prodRxParam_m.pTimeoutInst_m);
+            }
+            break;
         }
-        else
+        default:
         {
-            // Start timeout timer for this frame!
-            timeout_startTimer(pInstance->prodRxParam_m.pTimeoutInst_m);
+            // do nothing here!
+            break;
         }
     }
 
@@ -743,15 +759,12 @@ static tSsdoInstance ssdo_getInstance(tSsdoChanNum  chanNum_p )
 {
     tSsdoInstance  pInstance = NULL;
 
-    if(chanNum_p >= kNumSsdoInstCount )
+    if(chanNum_p < kNumSsdoInstCount )
     {
-        goto Exit;
+        // Set pointer to instance
+        pInstance = &ssdoInstance_l[chanNum_p];
     }
 
-    // Set pointer to instance
-    pInstance = &ssdoInstance_l[chanNum_p];
-
-Exit:
     return pInstance;
 }
 

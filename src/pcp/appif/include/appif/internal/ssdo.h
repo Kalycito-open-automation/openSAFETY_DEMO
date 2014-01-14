@@ -111,6 +111,7 @@ typedef struct {
     tSeqNrValue       currProdSeq_m;        ///< Current producing buffer sequence number
     tProdRxBuffer     prodRecvBuff_m;       ///< Producing receive buffer for packet retransmission
     tTimeoutInstance  pTimeoutInst_m;       ///< Timer for SSDO transmissions over the tbuf
+    UINT16            objSize_m;            ///< Size of incomming object
 } tSsdoProdRx;
 
 /**

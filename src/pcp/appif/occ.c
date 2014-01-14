@@ -96,6 +96,7 @@ typedef struct
 {
     tTbufInstance        pTbufInstance_m;      ///< Instance pointer to the triple buffer
     UINT8                fSeqNr_m;             ///< Sequence flag to indicate new data
+    UINT16               objSize_m;            ///< Size of an incomming object
 } tConfChanOutInstance;
 
 //------------------------------------------------------------------------------
@@ -245,6 +246,7 @@ tEplKernel PUBLIC cc_obdAccessCb(tObdCbParam MEM* pParam_p)
 {
     tEplKernel eplret = kEplSuccessful;
     tConfChanObject  object;
+    UINT16 objSize;
 
     APPIF_MEMSET(&object, 0, sizeof(tConfChanObject));
 
@@ -254,20 +256,32 @@ tEplKernel PUBLIC cc_obdAccessCb(tObdCbParam MEM* pParam_p)
         goto Exit;
     }
 
-    if(pParam_p->objSize > sizeof(UINT64))
-    {
-        eplret = kEplObdValueLengthError;
-        goto Exit;
-    }
-
     switch(pParam_p->obdEvent)
     {
+        case kObdEvInitWrite:
+        {
+            objSize = *(UINT16*)pParam_p->pArg;
+
+            // Check object size (pArg is size of object!)
+            if(objSize > sizeof(UINT64))
+            {
+                eplret = kEplObdValueLengthError;
+            }
+            else
+            {
+                // Make object size global
+                occInstance_l.objSize_m = objSize;
+            }
+
+            break;
+        }
+
         case kObdEvPostWrite:
         {
             object.objIdx_m = pParam_p->index;
             object.objSubIdx_m = pParam_p->subIndex;
-            object.objSize_m = (UINT16)pParam_p->objSize;
-            APPIF_MEMCPY(&object.objPayloadLow_m, pParam_p->pArg, pParam_p->objSize);
+            object.objSize_m = (UINT16)occInstance_l.objSize_m;
+            APPIF_MEMCPY(&object.objPayloadLow_m, pParam_p->pArg, occInstance_l.objSize_m);
 
             if(ccobject_writeObject(&object) == FALSE)
             {
