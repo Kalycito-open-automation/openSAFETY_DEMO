@@ -202,10 +202,10 @@ architecture rtl of toplevel is
             ledr_pio_export                         : out   std_logic_vector(15 downto 0);
             key_pio_export                          : in    std_logic_vector(3 downto 0)  := (others => 'X');
             -- PCP SPI BRIDGE
-            spi_bridge_0_spi_clk                    : in    std_logic                     := 'X';
-            spi_bridge_0_spi_sel_n                  : in    std_logic                     := 'X';
-            spi_bridge_0_spi_mosi                   : in    std_logic                     := 'X';
-            spi_bridge_0_spi_miso                   : out   std_logic;
+            plkif_0_spi_bridge_0_clk                : in    std_logic                     := 'X';
+            plkif_0_spi_bridge_0_sel_n              : in    std_logic                     := 'X';
+            plkif_0_spi_bridge_0_mosi               : in    std_logic                     := 'X';
+            plkif_0_spi_bridge_0_miso               : out   std_logic;
             -- AP SPI MASTER
             spi_master_external_MISO                : in    std_logic                     := 'X';
             spi_master_external_MOSI                : out   std_logic;
@@ -324,10 +324,10 @@ begin
             ledr_pio_export                                 => LEDR,
             key_pio_export                                  => KEY,
             -- PCP SPI BRIDGE
-            spi_bridge_0_spi_clk                            => SPI_CLK,
-            spi_bridge_0_spi_sel_n                          => SPI_SEL_n,
-            spi_bridge_0_spi_mosi                           => SPI_MOSI,
-            spi_bridge_0_spi_miso                           => SPI_MISO,
+            plkif_0_spi_bridge_0_clk                        => SPI_CLK,
+            plkif_0_spi_bridge_0_sel_n                      => SPI_SEL_n,
+            plkif_0_spi_bridge_0_mosi                       => SPI_MOSI,
+            plkif_0_spi_bridge_0_miso                       => SPI_MISO,
             -- AP SPI MASTER
             spi_master_external_MISO                        => SPIM_MISO,
             spi_master_external_MOSI                        => SPIM_MOSI,

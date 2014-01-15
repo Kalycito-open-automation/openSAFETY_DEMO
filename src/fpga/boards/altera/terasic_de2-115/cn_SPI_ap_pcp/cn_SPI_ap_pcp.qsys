@@ -7,7 +7,7 @@
    description=""
    tags=""
    categories="System" />
- <parameter name="bonusData"><![CDATA[bonusData 
+ <parameter name="bonusData"><![CDATA[bonusData
 {
    element $${FILENAME}
    {
@@ -184,20 +184,12 @@
          type = "int";
       }
    }
-   element tripleBuffer.porta
+   element plkif_0
    {
-      datum baseAddress
+      datum _sortIndex
       {
-         value = "0";
-         type = "String";
-      }
-   }
-   element tripleBuffer.portb
-   {
-      datum baseAddress
-      {
-         value = "2048";
-         type = "String";
+         value = "18";
+         type = "int";
       }
    }
    element remote_update_cycloneiii_0
@@ -211,6 +203,38 @@
       {
          value = "0";
          type = "boolean";
+      }
+   }
+   element remote_update_cycloneiii_0.s1
+   {
+      datum baseAddress
+      {
+         value = "2304";
+         type = "String";
+      }
+   }
+   element status_led_pio.s1
+   {
+      datum baseAddress
+      {
+         value = "2560";
+         type = "String";
+      }
+   }
+   element sdram_0.s1
+   {
+      datum baseAddress
+      {
+         value = "0";
+         type = "String";
+      }
+   }
+   element key_pio.s1
+   {
+      datum baseAddress
+      {
+         value = "32";
+         type = "String";
       }
    }
    element ledr_pio.s1
@@ -229,38 +253,6 @@
          type = "String";
       }
    }
-   element key_pio.s1
-   {
-      datum baseAddress
-      {
-         value = "32";
-         type = "String";
-      }
-   }
-   element remote_update_cycloneiii_0.s1
-   {
-      datum baseAddress
-      {
-         value = "2304";
-         type = "String";
-      }
-   }
-   element sdram_0.s1
-   {
-      datum baseAddress
-      {
-         value = "0";
-         type = "String";
-      }
-   }
-   element status_led_pio.s1
-   {
-      datum baseAddress
-      {
-         value = "2560";
-         type = "String";
-      }
-   }
    element node_switch_pio.s1
    {
       datum baseAddress
@@ -275,19 +267,6 @@
       {
          value = "4";
          type = "int";
-      }
-   }
-   element spi_bridge
-   {
-      datum _sortIndex
-      {
-         value = "19";
-         type = "int";
-      }
-      datum sopceditor_expanded
-      {
-         value = "1";
-         type = "boolean";
       }
    }
    element spi_master.spi_control_port
@@ -350,6 +329,14 @@
          type = "boolean";
       }
    }
+   element plkif_0.tbufPortB_s0
+   {
+      datum baseAddress
+      {
+         value = "4096";
+         type = "String";
+      }
+   }
    element tri_state_0
    {
       datum _sortIndex
@@ -360,19 +347,6 @@
       datum sopceditor_expanded
       {
          value = "0";
-         type = "boolean";
-      }
-   }
-   element tripleBuffer
-   {
-      datum _sortIndex
-      {
-         value = "18";
-         type = "int";
-      }
-      datum sopceditor_expanded
-      {
-         value = "1";
          type = "boolean";
       }
    }
@@ -399,7 +373,7 @@
  <parameter name="projectName" value="ink_de2-115.qpf" />
  <parameter name="sopcBorderPoints" value="false" />
  <parameter name="systemHash" value="1" />
- <parameter name="timeStamp" value="1383144814664" />
+ <parameter name="timeStamp" value="1386075997595" />
  <parameter name="useTestBenchNamingPattern" value="false" />
  <instanceScript></instanceScript>
  <interface name="clk50" internal="clk50.clk_in" type="clock" dir="end" />
@@ -473,11 +447,6 @@
    type="conduit"
    dir="end" />
  <interface
-   name="spi_bridge_0_spi"
-   internal="spi_bridge.spi"
-   type="conduit"
-   dir="end" />
- <interface
    name="spi_master_external"
    internal="spi_master.external"
    type="conduit"
@@ -510,6 +479,11 @@
  <interface
    name="app_0_sync_irq_in"
    internal="app_0.sync_irq_external_connection"
+   type="conduit"
+   dir="end" />
+ <interface
+   name="plkif_0_spi_bridge_0"
+   internal="plkif_0.spi_bridge_0_spi"
    type="conduit"
    dir="end" />
  <module kind="clock_source" version="13.0" enabled="1" name="clk50">
@@ -773,13 +747,34 @@
   <parameter name="clockRate" value="100000000" />
   <parameter name="componentName">$${FILENAME}_sdram_0</parameter>
  </module>
- <module kind="tripleBuffer" version="0.0.1" enabled="1" name="tripleBuffer">
-  <parameter name="numOfCon" value="4" />
+ <module
+   kind="altera_avalon_spi"
+   version="13.0.1.99.2"
+   enabled="1"
+   name="spi_master">
+  <parameter name="clockPhase" value="0" />
+  <parameter name="clockPolarity" value="0" />
+  <parameter name="dataWidth" value="8" />
+  <parameter name="disableAvalonFlowControl" value="false" />
+  <parameter name="insertDelayBetweenSlaveSelectAndSClk" value="false" />
+  <parameter name="insertSync" value="false" />
+  <parameter name="lsbOrderedFirst" value="false" />
+  <parameter name="masterSPI" value="true" />
+  <parameter name="numberOfSlaves" value="1" />
+  <parameter name="syncRegDepth" value="2" />
+  <parameter name="targetClockRate" value="12500000" />
+  <parameter name="targetSlaveSelectToSClkDelay" value="0.0" />
+  <parameter name="avalonSpec" value="2.0" />
+  <parameter name="inputClockRate" value="50000000" />
+ </module>
+ <module kind="plkif" version="0.1" enabled="1" name="plkif_0">
+  <parameter name="gDemoCfg" value="gpio" />
+  <parameter name="numOfCon" value="1" />
   <parameter name="conBufSize0" value="12" />
   <parameter name="conBufSize1" value="12" />
-  <parameter name="conBufSize2" value="28" />
-  <parameter name="conBufSize3" value="36" />
-  <parameter name="conBufSize4" value="0" />
+  <parameter name="conBufSize2" value="3" />
+  <parameter name="conBufSize3" value="4" />
+  <parameter name="conBufSize4" value="5" />
   <parameter name="conBufSize5" value="0" />
   <parameter name="conBufSize6" value="0" />
   <parameter name="conBufSize7" value="0" />
@@ -807,11 +802,11 @@
   <parameter name="conBufSize29" value="0" />
   <parameter name="conBufSize30" value="0" />
   <parameter name="conBufSize31" value="0" />
-  <parameter name="numOfPro" value="4" />
+  <parameter name="numOfPro" value="1" />
   <parameter name="proBufSize0" value="4" />
-  <parameter name="proBufSize1" value="12" />
-  <parameter name="proBufSize2" value="36" />
-  <parameter name="proBufSize3" value="36" />
+  <parameter name="proBufSize1" value="0" />
+  <parameter name="proBufSize2" value="0" />
+  <parameter name="proBufSize3" value="0" />
   <parameter name="proBufSize4" value="0" />
   <parameter name="proBufSize5" value="0" />
   <parameter name="proBufSize6" value="0" />
@@ -840,42 +835,16 @@
   <parameter name="proBufSize29" value="0" />
   <parameter name="proBufSize30" value="0" />
   <parameter name="proBufSize31" value="0" />
-  <parameter name="gui_enableStream" value="true" />
-  <parameter name="AUTO_C0_CLOCK_RATE" value="50000000" />
- </module>
- <module kind="spi_bridge" version="0.0.1" enabled="1" name="spi_bridge">
-  <parameter name="sys_bdgAddrw" value="8" />
-  <parameter name="sys_bdgDataw" value="32" />
+  <parameter name="gConCfg" value="spi" />
   <parameter name="gui_cpol" value="0" />
   <parameter name="gui_cpha" value="0" />
   <parameter name="gui_shiftdir" value="1" />
   <parameter name="gui_regsize" value="8" />
-  <parameter name="gui_readsize" value="92" />
-  <parameter name="gui_writesize" value="92" />
-  <parameter name="gui_readbase" value="0" />
-  <parameter name="gui_writebase" value="128" />
-  <parameter name="gui_enconmem" value="true" />
-  <parameter name="AUTO_C0_CLOCK_RATE" value="50000000" />
- </module>
- <module
-   kind="altera_avalon_spi"
-   version="13.0.1.99.2"
-   enabled="1"
-   name="spi_master">
-  <parameter name="clockPhase" value="0" />
-  <parameter name="clockPolarity" value="0" />
-  <parameter name="dataWidth" value="8" />
-  <parameter name="disableAvalonFlowControl" value="false" />
-  <parameter name="insertDelayBetweenSlaveSelectAndSClk" value="false" />
-  <parameter name="insertSync" value="false" />
-  <parameter name="lsbOrderedFirst" value="false" />
-  <parameter name="masterSPI" value="true" />
-  <parameter name="numberOfSlaves" value="1" />
-  <parameter name="syncRegDepth" value="2" />
-  <parameter name="targetClockRate" value="12500000" />
-  <parameter name="targetSlaveSelectToSClkDelay" value="0.0" />
-  <parameter name="avalonSpec" value="2.0" />
-  <parameter name="inputClockRate" value="50000000" />
+  <parameter name="AUTO_CLK_CLOCK_RATE" value="50000000" />
+  <parameter name="AUTO_CLK_CLOCK_DOMAIN" value="3" />
+  <parameter name="AUTO_CLK_RESET_DOMAIN" value="3" />
+  <parameter name="AUTO_DEVICE_FAMILY" value="Cyclone IV E" />
+  <parameter name="AUTO_DEVICE" value="EP4CE115F29C7" />
  </module>
  <connection kind="clock" version="13.0" start="clk50.clk" end="lcd.clk" />
  <connection
@@ -1252,56 +1221,6 @@
    version="13.0"
    start="clk25.clk_reset"
    end="sdram_0.reset" />
- <connection kind="clock" version="13.0" start="clk50.clk" end="tripleBuffer.c0" />
- <connection
-   kind="avalon"
-   version="13.0"
-   start="pcp_0.slow_bridge"
-   end="tripleBuffer.portb">
-  <parameter name="arbitrationPriority" value="1" />
-  <parameter name="baseAddress" value="0x0800" />
-  <parameter name="defaultConnection" value="false" />
- </connection>
- <connection kind="clock" version="13.0" start="clk50.clk" end="spi_bridge.c0" />
- <connection
-   kind="avalon"
-   version="13.0"
-   start="spi_bridge.bridge"
-   end="tripleBuffer.porta">
-  <parameter name="arbitrationPriority" value="1" />
-  <parameter name="baseAddress" value="0x0000" />
-  <parameter name="defaultConnection" value="false" />
- </connection>
- <connection
-   kind="reset"
-   version="13.0"
-   start="clk100.clk_reset"
-   end="tripleBuffer.r0" />
- <connection
-   kind="reset"
-   version="13.0"
-   start="clk50.clk_reset"
-   end="tripleBuffer.r0" />
- <connection
-   kind="reset"
-   version="13.0"
-   start="clk25.clk_reset"
-   end="tripleBuffer.r0" />
- <connection
-   kind="reset"
-   version="13.0"
-   start="clk25.clk_reset"
-   end="spi_bridge.r0" />
- <connection
-   kind="reset"
-   version="13.0"
-   start="clk50.clk_reset"
-   end="spi_bridge.r0" />
- <connection
-   kind="reset"
-   version="13.0"
-   start="clk100.clk_reset"
-   end="spi_bridge.r0" />
  <connection kind="clock" version="13.0" start="clk50.clk" end="spi_master.clk" />
  <connection
    kind="avalon"
@@ -1334,6 +1253,31 @@
    end="sysid.control_slave">
   <parameter name="arbitrationPriority" value="1" />
   <parameter name="baseAddress" value="0x0a30" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection kind="clock" version="13.0" start="clk50.clk" end="plkif_0.clk" />
+ <connection
+   kind="reset"
+   version="13.0"
+   start="clk100.clk_reset"
+   end="plkif_0.reset" />
+ <connection
+   kind="reset"
+   version="13.0"
+   start="clk50.clk_reset"
+   end="plkif_0.reset" />
+ <connection
+   kind="reset"
+   version="13.0"
+   start="clk25.clk_reset"
+   end="plkif_0.reset" />
+ <connection
+   kind="avalon"
+   version="13.0"
+   start="pcp_0.slow_bridge"
+   end="plkif_0.tbufPortB_s0">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x1000" />
   <parameter name="defaultConnection" value="false" />
  </connection>
  <interconnectRequirement for="$system" name="qsys_mm.clockCrossingAdapter" value="HANDSHAKE" />

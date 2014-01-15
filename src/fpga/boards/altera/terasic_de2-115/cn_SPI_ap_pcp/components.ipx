@@ -3,4 +3,5 @@
     <path path="../../../../ipcore/altera/components.ipx" />
     <path path="../../../../ipcore/altera/qsys/cn_pcp.qsys"/>
     <path path="../../../../ipcore/altera/qsys/cn_app.qsys"/>
+    <path path="../../../../ipcore/altera/qsys/plkif_hw.tcl"/>
 </library>

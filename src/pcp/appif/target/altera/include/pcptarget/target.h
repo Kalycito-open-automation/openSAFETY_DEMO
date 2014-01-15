@@ -59,22 +59,22 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define ACK_REGISTER_COUNT      2       ///< Number of acknowledge registers
 
 
-#ifdef TRIPLEBUFFER_BASE
-  #define TBUF_BASE_ADDRESS           TRIPLEBUFFER_BASE
+#ifdef PLKIF_0_TRIPLEBUFFER_0_BASE
+  #define TBUF_BASE_ADDRESS           PLKIF_0_TRIPLEBUFFER_0_BASE
 #else
   #error "Triple buffer base address invalid! Check your FPGA design parameters!"
 #endif  //SOPC_TBUF_BASE_ADDRESS
 
 // Number of producing triple buffers (Consumer <-> Producer buffer defines are swapped in system.h)
-#ifdef TRIPLEBUFFER_TBUF_NUM_CON
-  #define PROD_TRIPLE_BUFFER_COUNT     TRIPLEBUFFER_TBUF_NUM_CON
+#ifdef PLKIF_0_TRIPLEBUFFER_0_TBUF_NUM_CON
+  #define PROD_TRIPLE_BUFFER_COUNT     PLKIF_0_TRIPLEBUFFER_0_TBUF_NUM_CON
 #else
   #error "Triple buffer consumer count not found! Check your FPGA design parameters!"
 #endif
 
 // Number of consumer triple buffers (Consumer <-> Producer buffer defines are swapped in system.h)
-#ifdef TRIPLEBUFFER_TBUF_NUM_PRO
-  #define CONS_TRIPLE_BUFFER_COUNT     TRIPLEBUFFER_TBUF_NUM_PRO
+#ifdef PLKIF_0_TRIPLEBUFFER_0_TBUF_NUM_PRO
+  #define CONS_TRIPLE_BUFFER_COUNT     PLKIF_0_TRIPLEBUFFER_0_TBUF_NUM_PRO
 #else
   #error "Triple buffer producer count not found! Check your FPGA design parameters!"
 #endif
