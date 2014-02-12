@@ -390,6 +390,9 @@ static BOOL pdo_processRpdo(UINT8* pBuffer_p, UINT16 bufSize_p, void * pUserArg_
 {
     tTbufRpdoImage*  pRpdoImage;
 
+    UNUSED_PARAMETER(bufSize_p);
+    UNUSED_PARAMETER(pUserArg_p);
+
     // Convert to configuration channel buffer structure
     pRpdoImage = (tTbufRpdoImage*) pBuffer_p;
 
@@ -417,6 +420,10 @@ static BOOL pdo_processRpdo(UINT8* pBuffer_p, UINT16 bufSize_p, void * pUserArg_
 //------------------------------------------------------------------------------
 static BOOL pdo_ackTpdo(UINT8* pBuffer_p, UINT16 bufSize_p, void * pUserArg_p)
 {
+    UNUSED_PARAMETER(pBuffer_p);
+    UNUSED_PARAMETER(bufSize_p);
+    UNUSED_PARAMETER(pUserArg_p);
+
     stream_ackBuffer(pdoInstance_l.tpdoId_m);
 
     return TRUE;

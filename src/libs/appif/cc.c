@@ -607,6 +607,9 @@ static BOOL cc_handleOccRxObjects(UINT8* pBuffer_p, UINT16 bufSize_p,
     tCcWriteState  writeState;
     tTbufCcStructure*  pOccBuff;
 
+    UNUSED_PARAMETER(bufSize_p);
+    UNUSED_PARAMETER(pUserArg_p);
+
     // Convert to configuration channel buffer structure
     pOccBuff = (tTbufCcStructure*) pBuffer_p;
 

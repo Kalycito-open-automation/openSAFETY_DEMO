@@ -361,6 +361,7 @@ static void appif_genDescList(tBuffDescriptor* pBuffDescList_p, UINT8 buffCount_
 //------------------------------------------------------------------------------
 static BOOL appif_appCbSync(tAppIfTimeStamp* pTimeStamp_p )
 {
+    UNUSED_PARAMETER(pTimeStamp_p);
 
     // Note: This is your place to do local synchronization. Synchronize
     //       your local clock here by using the provided timestamp.
@@ -388,6 +389,8 @@ static BOOL appif_workInputOutput(UINT32 rpdoRelTimeLow_p,
     UINT8 i;
     UINT32 outPort = 0;
     UINT8 inPort;
+
+    UNUSED_PARAMETER(rpdoRelTimeLow_p);
 
     // Digital IN: read push- and joystick buttons
     inPort = app_readInputPort();
@@ -440,6 +443,8 @@ static void appif_syncIntH(void* pArg_p, void* dwInt_p)
 static void appif_syncIntH(void* pArg_p)
 #endif
 {
+    UNUSED_PARAMETER(pArg_p);
+
     BENCHMARK_MOD_01_SET(0);
 
     // Call internal synchronous process function

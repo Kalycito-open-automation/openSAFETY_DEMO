@@ -540,6 +540,8 @@ static BOOL ssdo_receiveFrame(UINT8* pBuffer_p, UINT16 bufSize_p,
     tTbufSsdoRxStructure*  pSsdoRxBuff;
     tSeqNrValue  currSeqNr = kSeqNrValueInvalid;
 
+    UNUSED_PARAMETER(bufSize_p);
+
     // Get pointer to current instance
     pInstance = (tSsdoInstance) pUserArg_p;
 

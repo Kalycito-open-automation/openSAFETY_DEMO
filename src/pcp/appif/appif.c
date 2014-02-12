@@ -102,6 +102,7 @@ typedef struct {
 #if(((APPIF_MODULE_INTEGRATION) & (APPIF_MODULE_SSDO)) != 0)
     tSsdoInstance    instSsdoChan_m[kNumSsdoInstCount];    ///< Instance of the SSDO channels
 #endif
+    UINT8            nodeId_m;                             ///< The node Id of the CN
 } tAppIfInstance;
 
 //------------------------------------------------------------------------------
@@ -160,6 +161,9 @@ tAppIfStatus appif_init(UINT8 nodeId_p, tAppIfCritSec pfnCritSec_p)
     // Reset appif instance structure
     APPIF_MEMSET(&appifInstance_l, 0 , sizeof(tAppIfInstance));
 
+    // Make node id global
+    appifInstance_l.nodeId_m = nodeId_p;
+
 #if _DEBUG
     if(TRIPLE_BUFFER_COUNT != kTbufCount)
     {
@@ -199,7 +203,7 @@ tAppIfStatus appif_init(UINT8 nodeId_p, tAppIfCritSec pfnCritSec_p)
     }
 
 #if(((APPIF_MODULE_INTEGRATION) & (APPIF_MODULE_SSDO)) != 0)
-    ssdo_init(nodeId_p, SSDO_STUB_OBJECT_INDEX, SSDO_STUB_DATA_OBJECT_INDEX);
+    ssdo_init(appifInstance_l.nodeId_m, SSDO_STUB_OBJECT_INDEX, SSDO_STUB_DATA_OBJECT_INDEX);
 #endif
 
     // Initialize the status module
@@ -550,6 +554,8 @@ tAppIfStatus appif_sdoAccFinished(tEplSdoComFinished* pSdoComFinHdl_p )
 
 #if(((APPIF_MODULE_INTEGRATION) & (APPIF_MODULE_SSDO)) != 0)
     ret = ssdo_consTxTransferFinished((tSsdoInstance)pSdoComFinHdl_p->m_pUserArg);
+#else
+    UNUSED_PARAMETER(pSdoComFinHdl_p);
 #endif
 
     return ret;

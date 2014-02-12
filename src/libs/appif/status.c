@@ -398,6 +398,9 @@ static BOOL status_processSync(UINT8* pBuffer_p, UINT16 bufSize_p,
     tAppIfTimeStamp        timeStamp;
     tTbufStatusOutStructure*  pStatusBuff;
 
+    UNUSED_PARAMETER(bufSize_p);
+    UNUSED_PARAMETER(pUserArg_p);
+
     // Convert to status buffer structure
     pStatusBuff = (tTbufStatusOutStructure*) pBuffer_p;
 
@@ -437,6 +440,9 @@ static BOOL status_updateOutStatusReg(UINT8* pBuffer_p, UINT16 bufSize_p,
 {
     tTbufStatusOutStructure*  pStatusBuff;
 
+    UNUSED_PARAMETER(bufSize_p);
+    UNUSED_PARAMETER(pUserArg_p);
+
     // Convert to status buffer structure
     pStatusBuff = (tTbufStatusOutStructure*) pBuffer_p;
 
@@ -471,6 +477,9 @@ static BOOL status_updateInStatusReg(UINT8* pBuffer_p, UINT16 bufSize_p,
         void * pUserArg_p)
 {
     tTbufStatusInStructure*  pStatusBuff;
+
+    UNUSED_PARAMETER(bufSize_p);
+    UNUSED_PARAMETER(pUserArg_p);
 
     // Convert to status buffer structure
     pStatusBuff = (tTbufStatusInStructure*) pBuffer_p;

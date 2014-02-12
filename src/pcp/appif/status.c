@@ -524,14 +524,14 @@ static tAppIfStatus status_setRelTime(UINT32 relTimeLow_p, UINT32 relTimeHigh_p)
     tAppIfStatus ret = kAppIfSuccessful;
 
     ret = tbuf_writeDword(statusInstance_l.pTbufOutInstance_m, TBUF_RELTIME_LOW_OFF,
-            statusInstance_l.relTimeLow_m);
+            relTimeLow_p);
     if(ret != kAppIfSuccessful)
     {
         goto Exit;
     }
 
     ret = tbuf_writeDword(statusInstance_l.pTbufOutInstance_m, TBUF_RELTIME_HIGH_OFF,
-            statusInstance_l.relTimeHigh_m);
+            relTimeHigh_p);
 
 Exit:
     return ret;

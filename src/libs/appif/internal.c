@@ -256,6 +256,8 @@ BOOL appif_processAsync(tSsdoInstance* ppInstance_p)
 #if(((APPIF_MODULE_INTEGRATION) & (APPIF_MODULE_SSDO)) != 0)
     fReturn = appif_processSsdo(ppInstance_p);
 #else
+    UNUSED_PARAMETER(ppInstance_p);
+
     fReturn = TRUE;
 #endif
 

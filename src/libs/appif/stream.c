@@ -347,6 +347,8 @@ BOOL stream_processSync(void)
 //------------------------------------------------------------------------------
 void stream_ackBuffer(UINT8 buffId_p)
 {
+    UNUSED_PARAMETER(buffId_p);
+
     // Empty function! (No acknowledge needed with SPI!)
 }
 

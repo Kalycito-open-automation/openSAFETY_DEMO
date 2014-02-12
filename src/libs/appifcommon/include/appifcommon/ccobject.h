@@ -69,7 +69,7 @@ typedef enum {
 //------------------------------------------------------------------------------
 DLLEXPORT BOOL ccobject_init(tAppIfCritSec pfnCritSec_p);
 DLLEXPORT void ccobject_exit(void);
-DLLEXPORT BOOL ccobject_initObject(UINT8 objId_p, tConfChanObject* pObjDef_p);;
+DLLEXPORT BOOL ccobject_initObject(UINT8 objId_p, tConfChanObject* pObjDef_p);
 DLLEXPORT BOOL ccobject_writeObject(tConfChanObject* objDef_p);
 DLLEXPORT tCcWriteState ccobject_writeCurrObject(UINT16 objIdx_p, UINT8 objSubIdx_p,
         UINT8* pData_p);
