@@ -40,8 +40,8 @@ OPTION( CFG_SINGLE_BITSTREAM "Both processors are in a single bitstream" ON )
 ###############################################################################
 # Hardware settings
 IF( CFG_DEMO_INTERCONNECT MATCHES "spi" AND CFG_SINGLE_BITSTREAM )
-    set( QSYS_SYSTEM_NAME cn_SPI_ap_pcp)
-    SET( NIOS2_QUARTUS_DIR ${CMAKE_SOURCE_DIR}/fpga/boards/altera/terasic_de2-115/${QSYS_SYSTEM_NAME} )
+    set( QSYS_SYSTEM_NAME cnDualSpiGpio)
+    SET( NIOS2_QUARTUS_DIR ${CMAKE_SOURCE_DIR}/fpga/boards/altera/terasic-de2-115/cn-dual-spi-gpio )
     SET( QSYS_SYSTEM_FILE ${NIOS2_QUARTUS_DIR}/${QSYS_SYSTEM_NAME}.qsys )
 ELSE( CFG_DEMO_INTERCONNECT MATCHES "spi" AND CFG_SINGLE_BITSTREAM )
     MESSAGE( FATAL_ERROR "Only demos with 'spi' interconnect and CFG_SINGLE_BITSTREAM is supported!" )

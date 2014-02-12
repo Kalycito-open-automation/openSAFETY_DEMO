@@ -1,7 +1,7 @@
 -------------------------------------------------------------------------------
 --! @file toplevel.vhd
 --
---! @brief Toplevel of Nios CN FPGA appif dual processor design
+--! @brief Toplevel of Nios CN FPGA dual processor design with gpio application
 --
 --! @details This is the toplevel of the Nios CN FPGA appif dual processor
 --! design for the INK DE2-115 Evaluation Board.
@@ -43,39 +43,26 @@
 
 library ieee;
 use ieee.std_logic_1164.all;
+library libcommon;
+use libcommon.all;
 
 entity toplevel is
     port (
         -- 50 MHZ CLK IN
         EXT_CLK             :  in std_logic;
-        -- PHY0 Interface
-        PHY0_GXCLK          :  out std_logic;
-        PHY0_RXCLK          :  in std_logic;
-        PHY0_RXER           :  in std_logic;
-        PHY0_RXDV           :  in std_logic;
-        PHY0_RXD            :  in std_logic_vector(3 downto 0);
-        PHY0_TXCLK          :  in std_logic;
-        PHY0_TXER           :  out std_logic;
-        PHY0_TXEN           :  out std_logic;
-        PHY0_TXD            :  out std_logic_vector(3 downto 0);
-        PHY0_LINK           :  in std_logic;
-        PHY0_MDIO           :  inout std_logic;
-        PHY0_MDC            :  out std_logic;
-        PHY0_RESET_n        :  out std_logic;
-        -- PHY1 Interface
-        PHY1_GXCLK          :  out std_logic;
-        PHY1_RXCLK          :  in std_logic;
-        PHY1_RXER           :  in std_logic;
-        PHY1_RXDV           :  in std_logic;
-        PHY1_RXD            :  in std_logic_vector(3 downto 0);
-        PHY1_TXCLK          :  in std_logic;
-        PHY1_TXER           :  out std_logic;
-        PHY1_TXEN           :  out std_logic;
-        PHY1_TXD            :  out std_logic_vector(3 downto 0);
-        PHY1_LINK           :  in std_logic;
-        PHY1_MDIO           :  inout std_logic;
-        PHY1_MDC            :  out std_logic;
-        PHY1_RESET_n        :  out std_logic;
+        -- PHY Interfaces
+        PHY_GXCLK           : out   std_logic_vector(1 downto 0);
+        PHY_RXCLK           : in    std_logic_vector(1 downto 0);
+        PHY_RXER            : in    std_logic_vector(1 downto 0);
+        PHY_RXDV            : in    std_logic_vector(1 downto 0);
+        PHY_RXD             : in    std_logic_vector(7 downto 0);
+        PHY_TXCLK           : in    std_logic_vector(1 downto 0);
+        PHY_TXER            : out   std_logic_vector(1 downto 0);
+        PHY_TXEN            : out   std_logic_vector(1 downto 0);
+        PHY_TXD             : out   std_logic_vector(7 downto 0);
+        PHY_MDIO            : inout std_logic_vector(1 downto 0);
+        PHY_MDC             : out   std_logic_vector(1 downto 0);
+        PHY_RESET_n         : out   std_logic_vector(1 downto 0);
         -- EPCS
         EPCS_DCLK           :  out std_logic;
         EPCS_SCE            :  out std_logic;
@@ -144,38 +131,23 @@ end toplevel;
 
 architecture rtl of toplevel is
 
-    component cn_SPI_ap_pcp is
+    component cnDualSpiGpio is
         port (
             clk50_clk                               : in    std_logic                     := 'X';
             clk100_clk                              : in    std_logic                     := 'X';
             clk25_clk                               : in    std_logic                     := 'X';
             reset_reset_n                           : in    std_logic                     := 'X';
-            -- PHY 0
-            powerlink_0_mii0_phyMii0_TxClk          : in    std_logic                     := 'X';
-            powerlink_0_mii0_phyMii0_TxEn           : out   std_logic;
-            powerlink_0_mii0_phyMii0_TxEr           : out   std_logic;
-            powerlink_0_mii0_phyMii0_TxDat          : out   std_logic_vector(3 downto 0);
-            powerlink_0_mii0_phyMii0_RxClk          : in    std_logic                     := 'X';
-            powerlink_0_mii0_phyMii0_RxDv           : in    std_logic                     := 'X';
-            powerlink_0_mii0_phyMii0_RxEr           : in    std_logic                     := 'X';
-            powerlink_0_mii0_phyMii0_RxDat          : in    std_logic_vector(3 downto 0)  := (others => 'X');
-            powerlink_0_mii0_phyMii1_RxEr           : in    std_logic                     := 'X';
-            powerlink_0_phym0_SMIClk                : out   std_logic;
-            powerlink_0_phym0_SMIDat                : inout std_logic                     := 'X';
-            powerlink_0_phym0_Rst_n                 : out   std_logic;
-            powerlink_0_phyl_phy0_link              : in    std_logic                     := 'X';
-            -- PHY 1
-            powerlink_0_mii1_TxClk                  : in    std_logic                     := 'X';
-            powerlink_0_mii1_TxEn                   : out   std_logic;
-            powerlink_0_mii1_TxEr                   : out   std_logic;
-            powerlink_0_mii1_TxDat                  : out   std_logic_vector(3 downto 0);
-            powerlink_0_mii1_RxClk                  : in    std_logic                     := 'X';
-            powerlink_0_mii1_RxDv                   : in    std_logic                     := 'X';
-            powerlink_0_mii1_RxDat                  : in    std_logic_vector(3 downto 0)  := (others => 'X');
-            powerlink_0_phym1_SMIClk                : out   std_logic;
-            powerlink_0_phym1_SMIDat                : inout std_logic                     := 'X';
-            powerlink_0_phym1_Rst_n                 : out   std_logic;
-            powerlink_0_phyl_phy1_link              : in    std_logic                     := 'X';
+            -- OPENMAC
+            openmac_0_mii_txEnable                  : out   std_logic_vector(1 downto 0);
+            openmac_0_mii_txData                    : out   std_logic_vector(7 downto 0);
+            openmac_0_mii_txClk                     : in    std_logic_vector(1 downto 0)  := (others => 'X');
+            openmac_0_mii_rxError                   : in    std_logic_vector(1 downto 0)  := (others => 'X');
+            openmac_0_mii_rxDataValid               : in    std_logic_vector(1 downto 0)  := (others => 'X');
+            openmac_0_mii_rxData                    : in    std_logic_vector(7 downto 0)  := (others => 'X');
+            openmac_0_mii_rxClk                     : in    std_logic_vector(1 downto 0)  := (others => 'X');
+            openmac_0_smi_nPhyRst                   : out   std_logic_vector(1 downto 0);
+            openmac_0_smi_clk                       : out   std_logic_vector(1 downto 0);
+            openmac_0_smi_dio                       : inout std_logic_vector(1 downto 0)  := (others => 'X');
             -- SRAM
             tri_state_0_tcm_address_out             : out   std_logic_vector(20 downto 0);
             tri_state_0_tcm_byteenable_n_out        : out   std_logic_vector(1 downto 0);
@@ -216,8 +188,8 @@ architecture rtl of toplevel is
             -- BENCHMARK PCP
             pcp_0_benchmark_pio_export              : out   std_logic_vector(7 downto 0);
             -- SYNC IRQ
-            powerlink_0_ap_ex_irq_export            : out   std_logic;
-            app_0_sync_irq_in_export                : in   std_logic;
+            openmac_0_mactimerout_export            : out   std_logic_vector(1 downto 0);
+            app_0_sync_irq_in_export                : in    std_logic;
             -- SDRAM
             app_0_sdram_0_addr                      : out   std_logic_vector(12 downto 0);
             app_0_sdram_0_ba                        : out   std_logic_vector(1 downto 0);
@@ -229,7 +201,7 @@ architecture rtl of toplevel is
             app_0_sdram_0_ras_n                     : out   std_logic;
             app_0_sdram_0_we_n                      : out   std_logic
         );
-    end component cn_SPI_ap_pcp;
+    end component cnDualSpiGpio;
 
     -- PLL component
     component pll
@@ -249,6 +221,7 @@ architecture rtl of toplevel is
     signal pllLocked        : std_logic;
     signal sramAddr         : std_logic_vector(SRAM_ADDR'high downto 0);
     signal plk_status_error : std_logic_vector(1 downto 0);
+    signal timer_out        : std_logic_vector(1 downto 0);
 
     type tSevenSegArray is array (natural range <>) of std_logic_vector(6 downto 0);
     constant cNumberOfHex   : natural := 8;
@@ -258,46 +231,33 @@ architecture rtl of toplevel is
 begin
     SRAM_ADDR   <= sramAddr(SRAM_ADDR'range);
 
-    PHY0_GXCLK  <= '0';
-    PHY1_GXCLK  <= '0';
+    PHY_GXCLK   <= (others => '0');
+    PHY_TXER    <= (others => '0');
 
     LCD_ON      <= '1';
     LCD_BLON    <= '1';
 
     LEDG        <= "000000" & plk_status_error;
 
-    inst: cn_SPI_ap_pcp
+    SYNC_IRQ    <= timer_out(1);
+
+    inst: cnDualSpiGpio
         port map (
             clk25_clk                                       => clk25,
             clk50_clk                                       => clk50,
             clk100_clk                                      => clk100,
             reset_reset_n                                   => pllLocked,
-            -- PHY 0
-            powerlink_0_mii0_phyMii0_TxClk                  => PHY0_TXCLK,
-            powerlink_0_mii0_phyMii0_TxEn                   => PHY0_TXEN,
-            powerlink_0_mii0_phyMii0_TxEr                   => PHY0_TXER,
-            powerlink_0_mii0_phyMii0_TxDat                  => PHY0_TXD,
-            powerlink_0_mii0_phyMii0_RxClk                  => PHY0_RXCLK,
-            powerlink_0_mii0_phyMii0_RxDv                   => PHY0_RXDV,
-            powerlink_0_mii0_phyMii0_RxEr                   => PHY0_RXER,
-            powerlink_0_mii0_phyMii0_RxDat                  => PHY0_RXD,
-            powerlink_0_phym0_SMIClk                        => PHY0_MDC,
-            powerlink_0_phym0_SMIDat                        => PHY0_MDIO,
-            powerlink_0_phym0_Rst_n                         => PHY0_RESET_n,
-            powerlink_0_phyl_phy0_link                      => open,
-            -- PHY 1
-            powerlink_0_mii1_TxClk                          => PHY1_TXCLK,
-            powerlink_0_mii1_TxEn                           => PHY1_TXEN,
-            powerlink_0_mii1_TxEr                           => PHY1_TXER,
-            powerlink_0_mii1_TxDat                          => PHY1_TXD,
-            powerlink_0_mii1_RxClk                          => PHY1_RXCLK,
-            powerlink_0_mii1_RxDv                           => PHY1_RXDV,
-            powerlink_0_mii1_RxDat                          => PHY1_RXD,
-            powerlink_0_mii0_phyMii1_RxEr                   => PHY1_RXER,
-            powerlink_0_phym1_SMIClk                        => PHY1_MDC,
-            powerlink_0_phym1_SMIDat                        => PHY1_MDIO,
-            powerlink_0_phym1_Rst_n                         => PHY1_RESET_n,
-            powerlink_0_phyl_phy1_link                      => open,
+            -- OPENMAC
+            openmac_0_mii_txEnable                          => PHY_TXEN,
+            openmac_0_mii_txData                            => PHY_TXD,
+            openmac_0_mii_txClk                             => PHY_TXCLK,
+            openmac_0_mii_rxError                           => PHY_RXER,
+            openmac_0_mii_rxDataValid                       => PHY_RXDV,
+            openmac_0_mii_rxData                            => PHY_RXD,
+            openmac_0_mii_rxClk                             => PHY_RXCLK,
+            openmac_0_smi_nPhyRst                           => PHY_RESET_n,
+            openmac_0_smi_clk                               => PHY_MDC,
+            openmac_0_smi_dio                               => PHY_MDIO,
             -- SRAM
             tri_state_0_tcm_address_out                     => sramAddr,
             tri_state_0_tcm_read_n_out                      => SRAM_OE_n,
@@ -338,7 +298,7 @@ begin
             -- BENCHMARK PCP
             pcp_0_benchmark_pio_export                      => BENCHMARK_PCP,
             -- SYNC IRQ
-            powerlink_0_ap_ex_irq_export                    => SYNC_IRQ,
+            openmac_0_mactimerout_export                    => timer_out,
             app_0_sync_irq_in_export                        => SYNC_IRQ_IN,
             -- SDRAM
             app_0_sdram_0_addr                              => SDRAM_ADDR,
@@ -371,7 +331,7 @@ begin
         tmpHex <= hex((i+1)*4-1 downto i*4);
         sevenSegArray(i) <= tmpSev;
 
-        bcdTo7Seg0 : entity work.bcd2led
+        bcdTo7Seg0 : entity libcommon.bcd2led
             port map (
                 iBcdVal => tmpHex,
                 oLed    => open,

@@ -7,7 +7,7 @@
    description=""
    tags=""
    categories="System" />
- <parameter name="bonusData"><![CDATA[bonusData
+ <parameter name="bonusData"><![CDATA[bonusData 
 {
    element $${FILENAME}
    {
@@ -68,7 +68,7 @@
    {
       datum baseAddress
       {
-         value = "2608";
+         value = "11584";
          type = "String";
       }
    }
@@ -84,7 +84,7 @@
    {
       datum baseAddress
       {
-         value = "0";
+         value = "8192";
          type = "String";
       }
    }
@@ -92,7 +92,7 @@
    {
       datum _sortIndex
       {
-         value = "15";
+         value = "16";
          type = "int";
       }
       datum megawizard_uipreferences
@@ -163,7 +163,68 @@
          type = "boolean";
       }
    }
+   element openmac_0.macReg
+   {
+      datum baseAddress
+      {
+         value = "0";
+         type = "String";
+      }
+   }
+   element openmac_0.macTimer
+   {
+      datum baseAddress
+      {
+         value = "11552";
+         type = "String";
+      }
+   }
    element node_switch_pio
+   {
+      datum _sortIndex
+      {
+         value = "18";
+         type = "int";
+      }
+      datum sopceditor_expanded
+      {
+         value = "0";
+         type = "boolean";
+      }
+   }
+   element openmac_0
+   {
+      datum _sortIndex
+      {
+         value = "15";
+         type = "int";
+      }
+   }
+   element pcp_0
+   {
+      datum _sortIndex
+      {
+         value = "10";
+         type = "int";
+      }
+   }
+   element openmac_0.pktBuf
+   {
+      datum baseAddress
+      {
+         value = "2097152";
+         type = "String";
+      }
+   }
+   element plkif_0
+   {
+      datum _sortIndex
+      {
+         value = "19";
+         type = "int";
+      }
+   }
+   element remote_update_cycloneiii_0
    {
       datum _sortIndex
       {
@@ -176,56 +237,11 @@
          type = "boolean";
       }
    }
-   element pcp_0
-   {
-      datum _sortIndex
-      {
-         value = "10";
-         type = "int";
-      }
-   }
-   element plkif_0
-   {
-      datum _sortIndex
-      {
-         value = "18";
-         type = "int";
-      }
-   }
-   element remote_update_cycloneiii_0
-   {
-      datum _sortIndex
-      {
-         value = "16";
-         type = "int";
-      }
-      datum sopceditor_expanded
-      {
-         value = "0";
-         type = "boolean";
-      }
-   }
    element remote_update_cycloneiii_0.s1
    {
       datum baseAddress
       {
-         value = "2304";
-         type = "String";
-      }
-   }
-   element status_led_pio.s1
-   {
-      datum baseAddress
-      {
-         value = "2560";
-         type = "String";
-      }
-   }
-   element sdram_0.s1
-   {
-      datum baseAddress
-      {
-         value = "0";
+         value = "11264";
          type = "String";
       }
    }
@@ -237,11 +253,19 @@
          type = "String";
       }
    }
-   element ledr_pio.s1
+   element status_led_pio.s1
    {
       datum baseAddress
       {
-         value = "48";
+         value = "11520";
+         type = "String";
+      }
+   }
+   element sdram_0.s1
+   {
+      datum baseAddress
+      {
+         value = "0";
          type = "String";
       }
    }
@@ -253,11 +277,19 @@
          type = "String";
       }
    }
+   element ledr_pio.s1
+   {
+      datum baseAddress
+      {
+         value = "48";
+         type = "String";
+      }
+   }
    element node_switch_pio.s1
    {
       datum baseAddress
       {
-         value = "2592";
+         value = "11568";
          type = "String";
       }
    }
@@ -333,7 +365,7 @@
    {
       datum baseAddress
       {
-         value = "4096";
+         value = "10240";
          type = "String";
       }
    }
@@ -346,7 +378,7 @@
       }
       datum sopceditor_expanded
       {
-         value = "0";
+         value = "1";
          type = "boolean";
       }
    }
@@ -370,10 +402,10 @@
  <parameter name="globalResetBus" value="false" />
  <parameter name="hdlLanguage" value="VERILOG" />
  <parameter name="maxAdditionalLatency" value="1" />
- <parameter name="projectName" value="ink_de2-115.qpf" />
+ <parameter name="projectName" value="ink-de2-115.qpf" />
  <parameter name="sopcBorderPoints" value="false" />
  <parameter name="systemHash" value="1" />
- <parameter name="timeStamp" value="1386075997595" />
+ <parameter name="timeStamp" value="1392209102286" />
  <parameter name="useTestBenchNamingPattern" value="false" />
  <instanceScript></instanceScript>
  <interface name="clk50" internal="clk50.clk_in" type="clock" dir="end" />
@@ -395,27 +427,10 @@
    internal="epcs_flash_controller_0.external"
    type="conduit"
    dir="end" />
- <interface name="pcp_0_sync_irq" internal="pcp_0.sync_irq" />
- <interface
-   name="powerlink_0_mii1"
-   internal="pcp_0.powerlink_0_mii1"
-   type="conduit"
-   dir="end" />
- <interface
-   name="powerlink_0_mii0"
-   internal="pcp_0.powerlink_0_mii0"
-   type="conduit"
-   dir="end" />
- <interface
-   name="powerlink_0_phym1"
-   internal="pcp_0.powerlink_0_phym1"
-   type="conduit"
-   dir="end" />
- <interface
-   name="powerlink_0_phym0"
-   internal="pcp_0.powerlink_0_phym0"
-   type="conduit"
-   dir="end" />
+ <interface name="powerlink_0_mii1" internal="pcp_0.powerlink_0_mii1" />
+ <interface name="powerlink_0_mii0" internal="pcp_0.powerlink_0_mii0" />
+ <interface name="powerlink_0_phym1" internal="pcp_0.powerlink_0_phym1" />
+ <interface name="powerlink_0_phym0" internal="pcp_0.powerlink_0_phym0" />
  <interface
    name="pcp_0_benchmark_pio_external_connection"
    internal="pcp_0.benchmark_pio_external_connection" />
@@ -463,19 +478,11 @@
    name="app_0_irq_bridge_sender0_irq"
    internal="app_0.irq_bridge_sender0_irq" />
  <interface name="app_0_sdram_0" internal="sdram_0.wire" type="conduit" dir="end" />
- <interface
-   name="powerlink_0_phyl"
-   internal="pcp_0.powerlink_0_phyl"
-   type="conduit"
-   dir="end" />
+ <interface name="powerlink_0_phyl" internal="pcp_0.powerlink_0_phyl" />
  <interface
    name="app_0_sync_irq_receiver"
    internal="app_0.irq_bridge_receiver_irq" />
- <interface
-   name="powerlink_0_ap_ex_irq"
-   internal="pcp_0.powerlink_0_ap_ex_irq"
-   type="conduit"
-   dir="end" />
+ <interface name="powerlink_0_ap_ex_irq" internal="pcp_0.powerlink_0_ap_ex_irq" />
  <interface
    name="app_0_sync_irq_in"
    internal="app_0.sync_irq_external_connection"
@@ -484,6 +491,21 @@
  <interface
    name="plkif_0_spi_bridge_0"
    internal="plkif_0.spi_bridge_0_spi"
+   type="conduit"
+   dir="end" />
+ <interface
+   name="openmac_0_mii"
+   internal="openmac_0.mii"
+   type="conduit"
+   dir="end" />
+ <interface
+   name="openmac_0_smi"
+   internal="openmac_0.smi"
+   type="conduit"
+   dir="end" />
+ <interface
+   name="openmac_0_mactimerout"
+   internal="openmac_0.macTimerOut"
    type="conduit"
    dir="end" />
  <module kind="clock_source" version="13.0" enabled="1" name="clk50">
@@ -846,6 +868,27 @@
   <parameter name="AUTO_DEVICE_FAMILY" value="Cyclone IV E" />
   <parameter name="AUTO_DEVICE" value="EP4CE115F29C7" />
  </module>
+ <module kind="openmac" version="1.0.0" enabled="1" name="openmac_0">
+  <parameter name="sys_mainClk" value="50000000" />
+  <parameter name="sys_mainClkx2" value="100000000" />
+  <parameter name="sys_dmaAddrWidth" value="21" />
+  <parameter name="gui_phyType" value="2" />
+  <parameter name="gui_phyCount" value="2" />
+  <parameter name="gui_extraSmi" value="true" />
+  <parameter name="gui_txBufLoc" value="1" />
+  <parameter name="gui_txBufSize" value="7" />
+  <parameter name="gui_txBurstSize" value="1" />
+  <parameter name="gui_rxBufLoc" value="2" />
+  <parameter name="gui_rxBufSize" value="1" />
+  <parameter name="gui_rxBurstSize" value="4" />
+  <parameter name="gui_tmrCount" value="2" />
+  <parameter name="gui_tmrPulseEn" value="true" />
+  <parameter name="gui_tmrPulseWdt" value="10" />
+  <parameter name="gui_actEn" value="false" />
+  <parameter name="gui_sdcEn" value="true" />
+  <parameter name="AUTO_DMACLK_CLOCK_RATE" value="100000000" />
+  <parameter name="AUTO_PKTCLK_CLOCK_RATE" value="100000000" />
+ </module>
  <connection kind="clock" version="13.0" start="clk50.clk" end="lcd.clk" />
  <connection
    kind="clock"
@@ -939,7 +982,7 @@
    start="pcp_0.slow_bridge"
    end="sysid.control_slave">
   <parameter name="arbitrationPriority" value="1" />
-  <parameter name="baseAddress" value="0x0a30" />
+  <parameter name="baseAddress" value="0x2d40" />
   <parameter name="defaultConnection" value="false" />
  </connection>
  <connection
@@ -953,7 +996,7 @@
    start="pcp_0.slow_bridge"
    end="epcs_flash_controller_0.epcs_control_port">
   <parameter name="arbitrationPriority" value="1" />
-  <parameter name="baseAddress" value="0x0000" />
+  <parameter name="baseAddress" value="0x2000" />
   <parameter name="defaultConnection" value="false" />
  </connection>
  <connection
@@ -962,7 +1005,7 @@
    start="pcp_0.slow_bridge"
    end="node_switch_pio.s1">
   <parameter name="arbitrationPriority" value="1" />
-  <parameter name="baseAddress" value="0x0a20" />
+  <parameter name="baseAddress" value="0x2d30" />
   <parameter name="defaultConnection" value="false" />
  </connection>
  <connection kind="reset" version="13.0" start="clk50.clk_reset" end="sysid.reset" />
@@ -994,15 +1037,6 @@
    version="13.0"
    start="sram_0.tcm"
    end="tri_state_0.tcs" />
- <connection
-   kind="avalon"
-   version="13.0"
-   start="pcp_0.mac_dma_bridge"
-   end="sram_0.uas">
-  <parameter name="arbitrationPriority" value="1" />
-  <parameter name="baseAddress" value="0x0000" />
-  <parameter name="defaultConnection" value="false" />
- </connection>
  <connection
    kind="avalon"
    version="13.0"
@@ -1101,7 +1135,7 @@
    start="pcp_0.slow_bridge"
    end="remote_update_cycloneiii_0.s1">
   <parameter name="arbitrationPriority" value="1" />
-  <parameter name="baseAddress" value="0x0900" />
+  <parameter name="baseAddress" value="0x2c00" />
   <parameter name="defaultConnection" value="false" />
  </connection>
  <connection
@@ -1157,7 +1191,7 @@
    start="pcp_0.slow_bridge"
    end="status_led_pio.s1">
   <parameter name="arbitrationPriority" value="1" />
-  <parameter name="baseAddress" value="0x0a00" />
+  <parameter name="baseAddress" value="0x2d00" />
   <parameter name="defaultConnection" value="false" />
  </connection>
  <connection
@@ -1252,7 +1286,7 @@
    start="app_0.slow_bridge"
    end="sysid.control_slave">
   <parameter name="arbitrationPriority" value="1" />
-  <parameter name="baseAddress" value="0x0a30" />
+  <parameter name="baseAddress" value="0x2d40" />
   <parameter name="defaultConnection" value="false" />
  </connection>
  <connection kind="clock" version="13.0" start="clk50.clk" end="plkif_0.clk" />
@@ -1277,8 +1311,107 @@
    start="pcp_0.slow_bridge"
    end="plkif_0.tbufPortB_s0">
   <parameter name="arbitrationPriority" value="1" />
-  <parameter name="baseAddress" value="0x1000" />
+  <parameter name="baseAddress" value="0x2800" />
   <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection kind="clock" version="13.0" start="clk50.clk" end="openmac_0.mainClk" />
+ <connection
+   kind="clock"
+   version="13.0"
+   start="clk100.clk"
+   end="openmac_0.mainClkx2" />
+ <connection kind="clock" version="13.0" start="clk100.clk" end="openmac_0.dmaClk" />
+ <connection kind="clock" version="13.0" start="clk100.clk" end="openmac_0.pktClk" />
+ <connection
+   kind="avalon"
+   version="13.0"
+   start="pcp_0.slow_bridge"
+   end="openmac_0.macReg">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x0000" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection
+   kind="avalon"
+   version="13.0"
+   start="pcp_0.slow_bridge"
+   end="openmac_0.macTimer">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x2d20" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection kind="avalon" version="13.0" start="openmac_0.dma" end="sram_0.uas">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x0000" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection
+   kind="avalon"
+   version="13.0"
+   start="pcp_0.cpu_bridge"
+   end="openmac_0.pktBuf">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x00200000" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection
+   kind="reset"
+   version="13.0"
+   start="clk50.clk_reset"
+   end="openmac_0.mainRst" />
+ <connection
+   kind="reset"
+   version="13.0"
+   start="clk100.clk_reset"
+   end="openmac_0.mainRst" />
+ <connection
+   kind="reset"
+   version="13.0"
+   start="clk25.clk_reset"
+   end="openmac_0.mainRst" />
+ <connection
+   kind="reset"
+   version="13.0"
+   start="clk50.clk_reset"
+   end="openmac_0.dmaRst" />
+ <connection
+   kind="reset"
+   version="13.0"
+   start="clk100.clk_reset"
+   end="openmac_0.dmaRst" />
+ <connection
+   kind="reset"
+   version="13.0"
+   start="clk25.clk_reset"
+   end="openmac_0.dmaRst" />
+ <connection
+   kind="reset"
+   version="13.0"
+   start="clk50.clk_reset"
+   end="openmac_0.pktRst" />
+ <connection
+   kind="reset"
+   version="13.0"
+   start="clk100.clk_reset"
+   end="openmac_0.pktRst" />
+ <connection
+   kind="reset"
+   version="13.0"
+   start="clk25.clk_reset"
+   end="openmac_0.pktRst" />
+ <connection
+   kind="interrupt"
+   version="13.0"
+   start="pcp_0.sync_irq"
+   end="openmac_0.timerIrq">
+  <parameter name="irqNumber" value="0" />
+ </connection>
+ <connection
+   kind="interrupt"
+   version="13.0"
+   start="pcp_0.mac_irq"
+   end="openmac_0.macIrq">
+  <parameter name="irqNumber" value="0" />
  </connection>
  <interconnectRequirement for="$system" name="qsys_mm.clockCrossingAdapter" value="HANDSHAKE" />
  <interconnectRequirement for="$system" name="qsys_mm.maxAdditionalLatency" value="1" />

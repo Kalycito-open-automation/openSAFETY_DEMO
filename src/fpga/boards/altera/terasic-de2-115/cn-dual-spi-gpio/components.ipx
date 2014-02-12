@@ -4,4 +4,5 @@
     <path path="../../../../ipcore/altera/qsys/cn_pcp.qsys"/>
     <path path="../../../../ipcore/altera/qsys/cn_app.qsys"/>
     <path path="../../../../ipcore/altera/qsys/plkif_hw.tcl"/>
+    <path path="../../../../../stacks/openPOWERLINK/hardware/ipcore/altera/components.ipx" />
 </library>
