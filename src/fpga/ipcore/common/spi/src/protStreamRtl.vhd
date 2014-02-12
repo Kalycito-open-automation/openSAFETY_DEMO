@@ -45,7 +45,11 @@
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
-use work.global.all;
+
+--! Common library
+library libcommon;
+--! Use common library global package
+use libcommon.global.all;
 
 entity protStream is
     generic (
@@ -196,7 +200,7 @@ architecture rtl of protStream is
     --! Skip counter value for skip valids
     constant cSkipValids        : natural := gStreamSkipValids;
     --! Maximum skip counter value
-    constant cStreamSkipMax     : natural := MAX(cSkipLoads, cSkipValids);
+    constant cStreamSkipMax     : natural := maximum(cSkipLoads, cSkipValids);
     --! Skip counter
     signal skipCnt              : std_logic_vector(logDualis(cStreamSkipMax) downto 0);
     --! Skip counter next

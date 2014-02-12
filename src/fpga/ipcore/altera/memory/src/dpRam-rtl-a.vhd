@@ -1,8 +1,15 @@
+--! @file dpRam-bhv-a.vhd
+--
+--! @brief Dual Port Ram Register Transfer Level Architecture
+--
+--! @details This is the DPRAM intended for synthesis on Altera platforms only.
+--!          Timing as follows [clk-cycles]: write=0 / read=1
+--
 -------------------------------------------------------------------------------
--- Entity : enableGen
+-- Architecture : rtl
 -------------------------------------------------------------------------------
 --
---    (c) B&R, 2012
+--    (c) B&R, 2013
 --
 --    Redistribution and use in source and binary forms, with or without
 --    modification, are permitted provided that the following conditions
@@ -34,38 +41,44 @@
 --    POSSIBILITY OF SUCH DAMAGE.
 --
 -------------------------------------------------------------------------------
-
 library ieee;
 use ieee.std_logic_1164.all;
+use ieee.numeric_std.all;
 
-library work;
-use work.global.all;
+--! use altera_mf library
+library altera_mf;
+use altera_mf.altera_mf_components.all;
 
-entity enableGen is
-    generic (
-        gEnableDelay : time := 100 ns
-    );
-    port (
-        iReset : in std_logic;
-        oEnable : out std_logic;
-        onEnable : out std_logic
-    );
-end enableGen;
-
-architecture bhv of enableGen is
-    signal enable : std_logic;
+architecture rtl of dpRam is
 begin
-
-    oEnable <= enable;
-    onEnable <= not enable;
-
-    process
-    begin
-        enable <= cInactivated;
-        wait until iReset = cInactivated;
-        wait for gEnableDelay;
-        enable <= not enable;
-        wait;
-    end process;
-
-end bhv;
+    altsyncram_component : altsyncram
+        generic map (
+            operation_mode          => "BIDIR_DUAL_PORT",
+            intended_device_family  => "Cyclone IV",
+            init_file               => gInitFile,
+            numwords_a              => gNumberOfWords,
+            numwords_b              => gNumberOfWords,
+            widthad_a               => logDualis(gNumberOfWords),
+            widthad_b               => logDualis(gNumberOfWords),
+            width_a                 => gWordWidth,
+            width_b                 => gWordWidth,
+            width_byteena_a         => gWordWidth/8,
+            width_byteena_b         => gWordWidth/8
+        )
+        port map (
+            clock0      => iClk_A,
+            clocken0    => iEnable_A,
+            wren_a      => iWriteEnable_A,
+            address_a   => iAddress_A,
+            byteena_a   => iByteenable_A,
+            data_a      => iWritedata_A,
+            q_a         => oReaddata_A,
+            clock1      => iClk_B,
+            clocken1    => iEnable_B,
+            wren_b      => iWriteEnable_B,
+            address_b   => iAddress_B,
+            byteena_b   => iByteenable_B,
+            data_b      => iWritedata_B,
+            q_b         => oReaddata_B
+        );
+end architecture rtl;

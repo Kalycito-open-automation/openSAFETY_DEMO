@@ -44,8 +44,9 @@
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
---! use global library
-use work.global.all;
+
+library libcommon;
+use libcommon.global.all;
 
 entity cnt is
     generic (

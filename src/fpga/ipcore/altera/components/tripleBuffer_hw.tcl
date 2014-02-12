@@ -43,7 +43,7 @@ source ../components/tcl/tripleBuffer.tcl
 # module
 # -----------------------------------------------------------------------------
 set_module_property NAME tripleBuffer
-set_module_property VERSION 0.0.1
+set_module_property VERSION 1.0.0
 set_module_property INTERNAL false
 set_module_property GROUP "Memory"
 set_module_property AUTHOR "B&R"
@@ -60,12 +60,8 @@ set_module_property ANALYZE_HDL false
 # file sets
 # -----------------------------------------------------------------------------
 add_file "../../altera/tripleBuffer/src/alteraTripleBufferRtl.vhd" {SYNTHESIS SIMULATION}
-add_file "../../altera/lib/src/dpRam-rtl-a.vhd" {SYNTHESIS SIMULATION}
-add_file "../../common/lib/src/addrDecodeRtl.vhd" {SYNTHESIS SIMULATION}
-add_file "../../common/lib/src/binaryEncoderRtl.vhd" {SYNTHESIS SIMULATION}
-add_file "../../common/lib/src/dpRam-e.vhd" {SYNTHESIS SIMULATION}
-add_file "../../common/lib/src/edgedetectorRtl.vhd" {SYNTHESIS SIMULATION}
-add_file "../../common/lib/src/global.vhd" {SYNTHESIS SIMULATION}
+add_file "../../altera/memory/src/dpRam-rtl-a.vhd" {SYNTHESIS SIMULATION}
+add_file "../../common/memory/src/dpRam-e.vhd" {SYNTHESIS SIMULATION}
 add_file "../../common/tripleBuffer/src/tripleBridgeRtl.vhd" {SYNTHESIS SIMULATION}
 add_file "../../common/tripleBuffer/src/tripleBufferPkg.vhd" {SYNTHESIS SIMULATION}
 add_file "../../common/tripleBuffer/src/tripleBufferRtl.vhd" {SYNTHESIS SIMULATION}

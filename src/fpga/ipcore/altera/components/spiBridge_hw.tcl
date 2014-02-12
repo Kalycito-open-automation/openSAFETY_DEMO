@@ -41,7 +41,7 @@ package require -exact sopc 10.1
 # module
 # -----------------------------------------------------------------------------
 set_module_property NAME spi_bridge
-set_module_property VERSION 0.0.1
+set_module_property VERSION 1.0.0
 set_module_property INTERNAL false
 set_module_property GROUP "Bridges and Adapters"
 set_module_property AUTHOR "B&R"
@@ -58,9 +58,6 @@ set_module_property ANALYZE_HDL false
 # -----------------------------------------------------------------------------
 add_file "../../altera/components/sdc/spiBridge-aclk.sdc" {SYNTHESIS}
 add_file "../../altera/spi/src/alteraSpiBridgeRtl.vhd" {SYNTHESIS SIMULATION}
-add_file "../../common/lib/src/edgedetectorRtl.vhd" {SYNTHESIS SIMULATION}
-add_file "../../common/lib/src/global.vhd" {SYNTHESIS SIMULATION}
-add_file "../../common/lib/src/synchronizerRtl.vhd" {SYNTHESIS SIMULATION}
 add_file "../../common/spi/src/protStreamRtl.vhd" {SYNTHESIS SIMULATION}
 add_file "../../common/spi/src/spiBridgeRtl.vhd" {SYNTHESIS SIMULATION}
 add_file "../../common/spi/src/spiSlave-e.vhd" {SYNTHESIS SIMULATION}

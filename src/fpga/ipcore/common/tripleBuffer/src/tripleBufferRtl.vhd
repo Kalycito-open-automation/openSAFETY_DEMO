@@ -45,7 +45,13 @@
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
-use work.global.all;
+
+--! Common library
+library libcommon;
+--! Use common library global package
+use libcommon.global.all;
+
+library work;
 use work.tripleBufferPkg.all;
 
 entity tripleBuffer is
@@ -213,7 +219,7 @@ architecture rtl of tripleBuffer is
 
     --! Typedef for port acknowledge
     type tAckPort is record
-        cnt     : unsigned(logDualis(MAX(cDpramReadDelay, cDpramWriteDelay)) downto 0);
+        cnt     : unsigned(logDualis(maximum(cDpramReadDelay, cDpramWriteDelay)) downto 0);
         ack     : std_logic;
     end record;
 
@@ -478,12 +484,14 @@ begin
         )
         port map (
             iClk_A          => dprPortA.clk,
+            iEnable_A       => cActivated,
             iWriteEnable_A  => dprPortA.write,
             iAddress_A      => dprPortA.address,
             iByteenable_A   => dprPortA.byteenable,
             iWritedata_A    => dprPortA.writedata,
             oReaddata_A     => dprPortA.readdata,
             iClk_B          => dprPortB.clk,
+            iEnable_B       => cActivated,
             iWriteEnable_B  => dprPortB.write,
             iAddress_B      => dprPortB.address,
             iByteenable_B   => dprPortB.byteenable,
