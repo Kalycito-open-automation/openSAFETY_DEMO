@@ -44,7 +44,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <appif/pcpglobal.h>
 
-#include <Epl.h>
+#include <oplk/oplk.h>
 
 //------------------------------------------------------------------------------
 // const defines
@@ -76,7 +76,7 @@ tAppIfStatus appif_handleAsync(void);
 tAppIfStatus appif_handleSync(void);
 
 void appif_pdoProcFinished(tAppIfPdoDir pdoDir_p);
-tAppIfStatus appif_sdoAccFinished(tEplSdoComFinished* pSdoComFinParam_p );
+tAppIfStatus appif_sdoAccFinished(tSdoComFinished* pSdoComFinParam_p );
 
 
 #endif /* _INC_appif_H_ */

@@ -53,7 +53,7 @@ triple buffers.
 #include <appif/status.h>
 #include <appif/tbuf.h>
 
-#include <Epl.h>
+#include <oplk/oplk.h>
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
@@ -253,7 +253,7 @@ dictionary.
 tAppIfStatus icc_process(void)
 {
     tAppIfStatus     ret = kAppIfSuccessful;
-    tEplKernel       eplret = kEplSuccessful;
+    tOplkError       oplkret = kErrorOk;
     tConfChanObject  object;
 
     APPIF_MEMSET(&object, 0, sizeof(tConfChanObject));
@@ -272,9 +272,9 @@ tAppIfStatus icc_process(void)
             }
 
             // Write object data to local obdict.h
-            eplret = oplk_writeLocalObject(object.objIdx_m, object.objSubIdx_m,
+            oplkret = oplk_writeLocalObject(object.objIdx_m, object.objSubIdx_m,
                     &object.objPayloadLow_m, object.objSize_m);
-            if(eplret != kEplSuccessful)
+            if(oplkret != kErrorOk)
             {
                 ret = kAppIfConfChanWriteToObDictFailed;
             }

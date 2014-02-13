@@ -51,7 +51,7 @@ to the status triple buffer. It also updates the SSDO channel status information
 
 #include <appif/tbuf.h>
 
-#include <kernel/EplTimerSynck.h>
+#include <kernel/synctimer.h>
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
@@ -314,7 +314,7 @@ Exit:
 void status_enableSyncInt(void)
 {
     /* Enable the interrupt in the EPL status sync module*/
-    EplTimerSynckExtSyncIrqEnable(SYNC_INT_CYCLE_NUM, SYNC_INT_PULSE_WIDTH_NS);
+    synctimer_enableExtSyncIrq(SYNC_INT_CYCLE_NUM, SYNC_INT_PULSE_WIDTH_NS);
 }
 
 //------------------------------------------------------------------------------
@@ -327,7 +327,7 @@ void status_enableSyncInt(void)
 void status_disableSyncInt(void)
 {
     /* Disable the interrupt in the EPL status sync module*/
-    EplTimerSynckExtSyncIrqDisable();
+    synctimer_disableExtSyncIrq();
 }
 
 //------------------------------------------------------------------------------

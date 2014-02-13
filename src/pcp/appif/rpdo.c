@@ -53,8 +53,6 @@ receive PDO triple buffers.
 #include <appif/tbuf.h>
 #include <appif/status.h>
 
-#include <Epl.h>
-
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
 //============================================================================//

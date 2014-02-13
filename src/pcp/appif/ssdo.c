@@ -72,7 +72,7 @@ to the target.
 // global function prototypes
 //------------------------------------------------------------------------------
 
-extern tEplKernel PUBLIC ssdo_obdAccessCb(tObdCbParam MEM* pParam_p);
+extern tOplkError ssdo_obdAccessCb(tObdCbParam* pParam_p);
 
 //============================================================================//
 //            P R I V A T E   D E F I N I T I O N S                           //
@@ -464,28 +464,28 @@ channel objects the payload needs to be forwarded to the triple buffer
 
 \param[in] pParam_p               Object access parameter
 
-\return  tEplKernel
-\retval  kEplSuccessful        On success
+\return  tOplkError
+\retval  kErrorOk        On success
 
 \ingroup module_ssdo
 */
 //------------------------------------------------------------------------------
-tEplKernel PUBLIC ssdo_obdAccessCb(tObdCbParam MEM* pParam_p)
+tOplkError ssdo_obdAccessCb(tObdCbParam* pParam_p)
 {
     tAppIfStatus ret = kAppIfSuccessful;
-    tEplKernel eplret = kEplSuccessful;
+    tOplkError oplkret = kErrorOk;
     tSsdoInstance  pInstance;
 
     if(pParam_p == NULL)
     {
-        eplret = kEplApiInvalidParam;
+        oplkret = kErrorApiInvalidParam;
         goto Exit;
     }
 
     // Check if callback is on the right object
     if(pParam_p->index != idxSsdoStubData_l)
     {
-        eplret = kEplObdIndexNotExist;
+        oplkret = kErrorObdIndexNotExist;
         goto Exit;
     }
 
@@ -493,18 +493,18 @@ tEplKernel PUBLIC ssdo_obdAccessCb(tObdCbParam MEM* pParam_p)
     pInstance = ssdo_getInstance(pParam_p->subIndex - 1);
     if(pInstance == NULL)
     {
-        eplret = kEplObdSubindexNotExist;
+        oplkret = kErrorObdSubindexNotExist;
         goto Exit;
     }
 
     // Check action
     switch(pParam_p->obdEvent)
     {
-        case kObdEvInitWrite:
+        case kObdEvWrStringDomain:
         {
             if(*(UINT16*)pParam_p->pArg > SSDO_STUB_DATA_DOM_SIZE)
             {
-                eplret = kEplObdValueLengthError;
+                oplkret = kErrorObdValueLengthError;
             }
             else
             {
@@ -523,7 +523,7 @@ tEplKernel PUBLIC ssdo_obdAccessCb(tObdCbParam MEM* pParam_p)
                     pInstance->prodRxParam_m.objSize_m);
             if(ret != kAppIfSuccessful)
             {
-                eplret = kEplObdAccessViolation;
+                oplkret = kErrorObdAccessViolation;
             }
             else
             {
@@ -541,7 +541,7 @@ tEplKernel PUBLIC ssdo_obdAccessCb(tObdCbParam MEM* pParam_p)
 
 
 Exit:
-    return eplret;
+    return oplkret;
 }
 
 //============================================================================//
@@ -789,15 +789,15 @@ Read nodeId, index and subindex from the local object dictionary.
 static tAppIfStatus ssdo_getTargetNode(tSsdoInstance pInstance_p,
         UINT8* pTargNode_p, UINT16* pTargIdx_p, UINT8* pTargSubIdx_p)
 {
-    tEplKernel eplret = kEplSuccessful;
+    tOplkError oplkret = kErrorOk;
     tAppIfStatus ret = kAppIfSuccessful;
     UINT32   accTargNode;
     UINT32   accTargSize = sizeof(accTargNode);
 
     // Read SSDO-Stub object to get target node, idx and subindex
-    eplret = oplk_readLocalObject(idxSsdoStub_l, pInstance_p->instId_m + 1,
+    oplkret = oplk_readLocalObject(idxSsdoStub_l, pInstance_p->instId_m + 1,
             &accTargNode, &accTargSize);
-    if(eplret != kEplSuccessful)
+    if(oplkret != kErrorOk)
     {
         ret = kAppIfSsdoDestinationUnknown;
         goto Exit;
@@ -895,29 +895,29 @@ static tAppIfStatus ssdo_sendToDestTarget(tSsdoInstance pInstance_p,
         UINT8* pMsgBuffer_p, UINT16* pBuffSize_p)
 {
     tAppIfStatus ret = kAppIfSuccessful;
-    tEplKernel   eplret = kEplSuccessful;
+    tOplkError   oplkret = kErrorOk;
 
     // Write incoming message to target node
-    eplret = oplk_writeObject(&pInstance_p->consTxParam_m.sdoComConHdl_m,
+    oplkret = oplk_writeObject(&pInstance_p->consTxParam_m.sdoComConHdl_m,
             *pTargNode_p, *pTargIdx_p, *pTargSubIdx_p, // Target node, index and subindex
             pMsgBuffer_p,                              // Object data to transfer
             *pBuffSize_p,                              // Object size to transfer
-            kEplSdoTypeUdp,                            // Type of SDO carrier (Always use UDP!)
+            kSdoTypeUdp,                               // Type of SDO carrier (Always use UDP!)
             (void *)pInstance_p);                      // User argument is the instance pointer
-    switch(eplret)
+    switch(oplkret)
     {
-        case kEplApiTaskDeferred:
+        case kErrorApiTaskDeferred:
         {
             pInstance_p->consTxParam_m.consTxState_m = kConsTxStateWaitForTxFinished;
             break;
         }
-        case kEplSuccessful:
+        case kErrorOk:
         {
             // Transfer is finished -> Free channel!
             ret = ssdo_consTxTransferFinished(pInstance_p);
             break;
         }
-        case kEplSdoUdpArpInProgress:
+        case kErrorSdoUdpArpInProgress:
         {
             // ARP table is still not updated -> Retry to transmit the frame later!
             timeout_startTimer(pInstance_p->consTxParam_m.pArpTimeoutInst_m);
@@ -985,8 +985,8 @@ Exit:
 \param[out] ppMsgBuffer_p           Pointer to the pointer of the payload
 \param[out] pBuffSize_p             Size of the payload
 
-\return  tEplKernel
-\retval  kEplSuccessful                 On success
+\return  tAppIfStatus
+\retval  kAppIfSuccessful              On success
 \retval  kAppIfSsdoTxConsSizeInvalid   Size of the payload too high
 
 \ingroup module_ssdo

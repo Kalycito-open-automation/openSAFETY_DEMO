@@ -52,7 +52,7 @@ object list.
 
 #include <config/ccobjectlist.h>
 
-#include <Epl.h>
+#include <oplk/oplk.h>
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
@@ -110,7 +110,7 @@ object list.
 tAppIfStatus appif_initCcObjects(void)
 {
     tAppIfStatus     ret = kAppIfSuccessful;
-    tEplKernel       eplret = kEplSuccessful;
+    tOplkError       oplkret = kErrorOk;
     tConfChanObject  object;
     UINT32           objSize;
     UINT8            i;
@@ -125,9 +125,9 @@ tAppIfStatus appif_initCcObjects(void)
         objSize = initObjList[i].objSize;
 
         // Read object details from local obdict
-        eplret = oplk_readLocalObject(initObjList[i].objIdx, initObjList[i].objSubIdx,
+        oplkret = oplk_readLocalObject(initObjList[i].objIdx, initObjList[i].objSubIdx,
                 &paylDest, &objSize);
-        if(eplret != kEplSuccessful)
+        if(oplkret != kErrorOk)
         {
             ret = kAppIfConfChanInitCcObjectFailed;
             break;

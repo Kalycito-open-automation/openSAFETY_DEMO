@@ -211,7 +211,7 @@ tAppIfStatus tbuf_setAck(tTbufInstance pInstance_p)
     tAppIfStatus ret = kAppIfSuccessful;
     UINT32       ackData = (1 << (pInstance_p->id_m - 1));
 
-    AmiSetDwordToLe((UINT8* )pInstance_p->pAckBaseAddr_m, ackData);
+    ami_setUint32Le((UINT8* )pInstance_p->pAckBaseAddr_m, ackData);
 
     return ret;
 }
@@ -236,7 +236,7 @@ tAppIfStatus tbuf_writeByte(tTbufInstance pInstance_p, UINT32 targetOffset_p,
 {
     tAppIfStatus ret = kAppIfSuccessful;
 
-    AmiSetByteToLe((UINT8* )((UINT32)pInstance_p->pBaseAddr_m + targetOffset_p),
+    ami_setUint8Le((UINT8* )((UINT32)pInstance_p->pBaseAddr_m + targetOffset_p),
                 data_p);
 
     return ret;
@@ -268,7 +268,7 @@ tAppIfStatus tbuf_readByte(tTbufInstance pInstance_p, UINT32 targetOffset_p,
     }
     else
     {
-        *pData_p = AmiGetByteFromLe((UINT8 *)((UINT32)pInstance_p->pBaseAddr_m +
+        *pData_p = ami_getUint8Le((UINT8 *)((UINT32)pInstance_p->pBaseAddr_m +
                 targetOffset_p));
     }
 
@@ -295,7 +295,7 @@ tAppIfStatus tbuf_writeWord(tTbufInstance pInstance_p, UINT32 targetOffset_p,
 {
     tAppIfStatus ret = kAppIfSuccessful;
 
-    AmiSetWordToLe((UINT8* )((UINT32)pInstance_p->pBaseAddr_m + targetOffset_p),
+    ami_setUint16Le((UINT8* )((UINT32)pInstance_p->pBaseAddr_m + targetOffset_p),
                 data_p);
 
     return ret;
@@ -327,7 +327,7 @@ tAppIfStatus tbuf_readWord(tTbufInstance pInstance_p, UINT32 targetOffset_p,
     }
     else
     {
-        *pData_p = AmiGetWordFromLe((UINT8 *)((UINT32)pInstance_p->pBaseAddr_m +
+        *pData_p = ami_getUint16Le((UINT8 *)((UINT32)pInstance_p->pBaseAddr_m +
                 targetOffset_p));
     }
 
@@ -354,7 +354,7 @@ tAppIfStatus tbuf_writeDword(tTbufInstance pInstance_p, UINT32 targetOffset_p,
 {
     tAppIfStatus ret = kAppIfSuccessful;
 
-    AmiSetDwordToLe((UINT8* )((UINT32)pInstance_p->pBaseAddr_m + targetOffset_p),
+    ami_setUint32Le((UINT8* )((UINT32)pInstance_p->pBaseAddr_m + targetOffset_p),
                 data_p);
 
     return ret;
@@ -386,7 +386,7 @@ tAppIfStatus tbuf_readDword(tTbufInstance pInstance_p, UINT32 targetOffset_p,
     }
     else
     {
-        *pData_p = AmiGetDwordFromLe((UINT8 *)((UINT32)pInstance_p->pBaseAddr_m +
+        *pData_p = ami_getUint32Le((UINT8 *)((UINT32)pInstance_p->pBaseAddr_m +
                 targetOffset_p));
     }
 

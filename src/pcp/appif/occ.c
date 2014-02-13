@@ -71,7 +71,7 @@ triple buffers.
 // global function prototypes
 //------------------------------------------------------------------------------
 
-extern tEplKernel PUBLIC cc_obdAccessCb(tObdCbParam MEM* pParam_p);
+extern tOplkError cc_obdAccessCb(tObdCbParam MEM* pParam_p);
 
 //============================================================================//
 //            P R I V A T E   D E F I N I T I O N S                           //
@@ -236,15 +236,15 @@ channel objects the local object list needs to be forwarded.
 
 \param[in] pParam_p               Object access parameter
 
-\return  tEplKernel
-\retval  kEplSuccessful        On success
+\return  tOplkError
+\retval  kErrorOk        On success
 
 \ingroup module_main
 */
 //------------------------------------------------------------------------------
-tEplKernel PUBLIC cc_obdAccessCb(tObdCbParam MEM* pParam_p)
+tOplkError cc_obdAccessCb(tObdCbParam MEM* pParam_p)
 {
-    tEplKernel eplret = kEplSuccessful;
+    tOplkError oplkret = kErrorOk;
     tConfChanObject  object;
     UINT16 objSize;
 
@@ -252,7 +252,7 @@ tEplKernel PUBLIC cc_obdAccessCb(tObdCbParam MEM* pParam_p)
 
     if(pParam_p == NULL)
     {
-        eplret = kEplApiInvalidParam;
+        oplkret = kErrorApiInvalidParam;
         goto Exit;
     }
 
@@ -265,7 +265,7 @@ tEplKernel PUBLIC cc_obdAccessCb(tObdCbParam MEM* pParam_p)
             // Check object size (pArg is size of object!)
             if(objSize > sizeof(UINT64))
             {
-                eplret = kEplObdValueLengthError;
+                oplkret = kErrorObdValueLengthError;
             }
             else
             {
@@ -285,7 +285,7 @@ tEplKernel PUBLIC cc_obdAccessCb(tObdCbParam MEM* pParam_p)
 
             if(ccobject_writeObject(&object) == FALSE)
             {
-                eplret = kEplObdAccessViolation;
+                oplkret = kErrorObdAccessViolation;
             }
 
             break;
@@ -298,7 +298,7 @@ tEplKernel PUBLIC cc_obdAccessCb(tObdCbParam MEM* pParam_p)
     }
 
 Exit:
-    return eplret;
+    return oplkret;
 
 }
 

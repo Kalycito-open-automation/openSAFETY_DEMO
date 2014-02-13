@@ -42,11 +42,34 @@ SET( BSP_DIR ${ALT_BUILD_DIR}/bsp )
 
 SET( NIOS2_TC_I_MEM ${NIOS2_QSYS_SUB}_tc_i_mem )
 
-# Create altera source list
-SET( ALT_APPIF_SRCS ${APPIF_SRCS} ${IPSTACK_SRCS} ${PLKSTACK_SRCS} )
+SET(ALT_TARGET_SRCS
+    ${PROJECT_SOURCE_DIR}/target/altera/target.c
+    ${ARCH_SOURCE_DIR}/altera_nios2/target-nios2.c
+    ${ARCH_SOURCE_DIR}/altera_nios2/openmac-nios2.c
+    ${ARCH_SOURCE_DIR}/altera_nios2/lock-localnoos.c
+    ${OPLK_HW_DIR}/boards/terasic-de2-115/common/drivers/openmac/omethlib_phycfg.c
+   )
 
-# Create altera include list
-SET( ALT_APPIF_INCS  ${APPIF_INCS} ${BSP_DIR} ${BSP_DIR}/HAL/inc ${BSP_DIR}/drivers/inc )
+# Create Altera source list
+SET(ALT_APPIF_SRCS
+    ${APPIF_SRCS}
+    ${ALT_TARGET_SRCS}
+    ${IP_SRCS}
+    ${OPLK_SRCS}
+    ${OMETHLIB_SRCS}
+   )
+
+# Create Altera include list
+SET(ALT_APPIF_INCS
+    ${APPIF_INCS}
+    ${OPLK_INCS}
+    ${OMETHLIB_INCS}
+    ${BSP_DIR}
+    ${BSP_DIR}/HAL/inc
+    ${BSP_DIR}/drivers/inc
+    ${ARCH_SOURCE_DIR}/altera_nios2
+    ${PROJECT_SOURCE_DIR}/target/altera/include
+   )
 
 ########################################################################
 # Board Support Package
@@ -59,7 +82,7 @@ SET( NIOS2_BSP_ARGS
                     "--set hal.linker.enable_alt_load_copy_exceptions false"
                     "--set hal.enable_clean_exit false"
                     "--set hal.enable_exit false"
-                    "--cmd add_section_mapping .tc_i_mem_pcp ${NIOS2_TC_I_MEM}"
+                    "--cmd add_section_mapping .tc_i_mem ${NIOS2_TC_I_MEM}"
                     "--set hal.make.bsp_cflags_optimization ${OPT_LEVEL}"
    )
 
@@ -164,10 +187,16 @@ ConnectCMakeAlteraExeTargets(${PROJECT_NAME} ${ALT_BUILD_DIR})
 GenEclipseFileList("${APPIF_SRCS}" "" PART_ECLIPSE_FILE_LIST )
 SET( ECLIPSE_FILE_LIST "${ECLIPSE_FILE_LIST} ${PART_ECLIPSE_FILE_LIST}" )
 
-GenEclipseFileList("${IPSTACK_SRCS}" "ip" PART_ECLIPSE_FILE_LIST )
+GenEclipseFileList("${IP_SRCS}" "ip" PART_ECLIPSE_FILE_LIST )
 SET( ECLIPSE_FILE_LIST "${ECLIPSE_FILE_LIST} ${PART_ECLIPSE_FILE_LIST}" )
 
-GenEclipseFileList("${PLKSTACK_SRCS}" "plk" PART_ECLIPSE_FILE_LIST )
+GenEclipseFileList("${OPLK_SRCS}" "oplk" PART_ECLIPSE_FILE_LIST )
+SET( ECLIPSE_FILE_LIST "${ECLIPSE_FILE_LIST} ${PART_ECLIPSE_FILE_LIST}" )
+
+GenEclipseFileList("${OMETHLIB_SRCS}" "omethlib" PART_ECLIPSE_FILE_LIST )
+SET( ECLIPSE_FILE_LIST "${ECLIPSE_FILE_LIST} ${PART_ECLIPSE_FILE_LIST}" )
+
+GenEclipseFileList("${ALT_TARGET_SRCS}" "target" PART_ECLIPSE_FILE_LIST )
 SET( ECLIPSE_FILE_LIST "${ECLIPSE_FILE_LIST} ${PART_ECLIPSE_FILE_LIST}" )
 
 CONFIGURE_FILE( ${ALT_MISC_DIR}/project/appproject.in ${ALT_BUILD_DIR}/.project @ONLY )

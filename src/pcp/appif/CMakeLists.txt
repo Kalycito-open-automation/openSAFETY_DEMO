@@ -32,13 +32,25 @@ CMAKE_MINIMUM_REQUIRED (VERSION 2.8)
 
 PROJECT( pcpappif C )
 
-SET( PLK_STACK_DIR ${CMAKE_SOURCE_DIR}/stacks/openPOWERLINK )
-SET( IP_STACK_DIR ${CMAKE_SOURCE_DIR}/stacks/ip )
+########################################################################
+# Set paths
+SET(OPLK_BASE_DIR ${CMAKE_SOURCE_DIR}/stacks/openPOWERLINK)
+SET(IP_BASE_DIR ${CMAKE_SOURCE_DIR}/stacks/ip)
+
+SET(OPLK_STACK_DIR ${OPLK_BASE_DIR}/stack)
+SET(OPLK_APPS_DIR ${OPLK_BASE_DIR}/apps)
+SET(OPLK_HW_DIR ${OPLK_BASE_DIR}/hardware)
+SET(OPLK_OMETHLIB_DIR ${OPLK_HW_DIR}/drivers/openmac)
+
+########################################################################
+# Set includes
+INCLUDE(${OPLK_STACK_DIR}/cmake/directories.cmake)
+INCLUDE(${OPLK_STACK_DIR}/cmake/stackfiles.cmake)
 
 ########################################################################
 # Set all source files
 ########################################################################
-SET ( APPIF_SRCS
+SET(APPIF_SRCS
     ${PROJECT_SOURCE_DIR}/appif.c
     ${PROJECT_SOURCE_DIR}/main.c
     ${PROJECT_SOURCE_DIR}/tbuf.c
@@ -53,101 +65,71 @@ SET ( APPIF_SRCS
     ${PROJECT_SOURCE_DIR}/fifo.c
     ${appifcommon_SOURCE_DIR}/timeout.c
     ${appifcommon_SOURCE_DIR}/ccobject.c
-)
+    ${PROJECT_SOURCE_DIR}/event.c
+   )
 
-SET ( IPSTACK_SRCS
-    ${IP_STACK_DIR}/ip.c
-    ${IP_STACK_DIR}/ip_name.c
-    ${IP_STACK_DIR}/ip_dhcp.c
-    ${IP_STACK_DIR}/edrv2veth.c
-    ${IP_STACK_DIR}/hton.c
-)
+SET(IP_SRCS
+    ${IP_BASE_DIR}/ip.c
+    ${IP_BASE_DIR}/ip_name.c
+    ${IP_BASE_DIR}/ip_dhcp.c
+    ${IP_BASE_DIR}/edrv2veth.c
+    ${IP_BASE_DIR}/hton.c
+   )
 
-SET ( PLKSTACK_SRCS
-    ${PLK_STACK_DIR}/examples/demo_cn_embedded/event-cn.c
-    ${PLK_STACK_DIR}/libs/ami/amiarm.c
-    ${PLK_STACK_DIR}/libs/omethlib/omethlib.c
-    ${PLK_STACK_DIR}/libs/omethlib/omethlibint.c
-    ${PLK_STACK_DIR}/libs/omethlib/omethlib_phycfg_generic.c
-    ${PLK_STACK_DIR}/libs/circbuf/circbuffer.c
-    ${PLK_STACK_DIR}/libs/circbuf/circbuf-noos.c
-    ${PLK_STACK_DIR}/libs/trace/trace-printf.c
-    ${PLK_STACK_DIR}/stack/src/arch/altera_nios2/target-nios2.c
-    ${PLK_STACK_DIR}/stack/src/arch/altera_nios2/lock-localnoos.c
-    ${PLK_STACK_DIR}/stack/src/common/debug.c
-    ${PLK_STACK_DIR}/stack/src/common/errstring.c
-    ${PLK_STACK_DIR}/stack/src/common/dll/dllcal-direct.c
-    ${PLK_STACK_DIR}/stack/src/common/event/event.c
-    ${PLK_STACK_DIR}/stack/src/common/timer/timer-generic.c
-    ${PLK_STACK_DIR}/stack/src/kernel/ctrl/ctrlk.c
-    ${PLK_STACK_DIR}/stack/src/kernel/ctrl/ctrlkcal-direct.c
-    ${PLK_STACK_DIR}/stack/src/kernel/dll/dllk.c
-    ${PLK_STACK_DIR}/stack/src/kernel/dll/dllkfilter.c
-    ${PLK_STACK_DIR}/stack/src/kernel/dll/dllkstatemachine.c
-    ${PLK_STACK_DIR}/stack/src/kernel/dll/dllkevent.c
-    ${PLK_STACK_DIR}/stack/src/kernel/dll/dllkframe.c
-    ${PLK_STACK_DIR}/stack/src/kernel/dll/dllkcal.c
-    ${PLK_STACK_DIR}/stack/src/kernel/dll/dllkcal-circbuf.c
-    ${PLK_STACK_DIR}/stack/src/kernel/edrv/edrv-openmac.c
-    ${PLK_STACK_DIR}/stack/src/kernel/errhnd/errhndk.c
-    ${PLK_STACK_DIR}/stack/src/kernel/errhnd/errhndkcal-local.c
-    ${PLK_STACK_DIR}/stack/src/kernel/event/eventk.c
-    ${PLK_STACK_DIR}/stack/src/kernel/event/eventkcalintf-circbuf.c
-    ${PLK_STACK_DIR}/stack/src/kernel/event/eventkcal-nooscircbuf.c
-    ${PLK_STACK_DIR}/stack/src/kernel/hrtimer/hrtimersync-openmac.c
-    ${PLK_STACK_DIR}/stack/src/kernel/nmt/nmtk.c
-    ${PLK_STACK_DIR}/stack/src/kernel/pdo/pdok.c
-    ${PLK_STACK_DIR}/stack/src/kernel/pdo/pdokcal.c
-    ${PLK_STACK_DIR}/stack/src/kernel/pdo/pdokcalmem-local.c
-    ${PLK_STACK_DIR}/stack/src/kernel/pdo/pdokcalsync-null.c
-    ${PLK_STACK_DIR}/stack/src/kernel/pdo/pdokcal-triplebufshm.c
-    ${PLK_STACK_DIR}/stack/src/kernel/timestamp/timestamp-openmac.c
-    ${PLK_STACK_DIR}/stack/src/user/api/generic.c
-    ${PLK_STACK_DIR}/stack/src/user/ctrl/ctrlu.c
-    ${PLK_STACK_DIR}/stack/src/user/ctrl/ctrlucal-direct.c
-    ${PLK_STACK_DIR}/stack/src/user/dll/dllucal.c
-    ${PLK_STACK_DIR}/stack/src/user/dll/dllucal-circbuf.c
-    ${PLK_STACK_DIR}/stack/src/user/errhnd/errhndu.c
-    ${PLK_STACK_DIR}/stack/src/user/errhnd/errhnducal-local.c
-    ${PLK_STACK_DIR}/stack/src/user/event/eventu.c
-    ${PLK_STACK_DIR}/stack/src/user/event/eventucalintf-circbuf.c
-    ${PLK_STACK_DIR}/stack/src/user/event/eventucal-nooscircbuf.c
-    ${PLK_STACK_DIR}/stack/src/user/nmt/nmtu.c
-    ${PLK_STACK_DIR}/stack/src/user/nmt/nmtcnu.c
-    ${PLK_STACK_DIR}/stack/src/user/obd/obd.c
-    ${PLK_STACK_DIR}/stack/src/user/obd/obdcreate.c
-    ${PLK_STACK_DIR}/stack/src/user/pdo/pdou.c
-    ${PLK_STACK_DIR}/stack/src/user/pdo/pdoucal.c
-    ${PLK_STACK_DIR}/stack/src/user/pdo/pdoucalmem-local.c
-    ${PLK_STACK_DIR}/stack/src/user/pdo/pdoucalsync-null.c
-    ${PLK_STACK_DIR}/stack/src/user/pdo/pdoucal-triplebufshm.c
-    ${PLK_STACK_DIR}/stack/src/user/sdo/sdo-asndu.c
-    ${PLK_STACK_DIR}/stack/src/user/sdo/sdo-asysequ.c
-    ${PLK_STACK_DIR}/stack/src/user/sdo/sdo-comu.c
-    ${PLK_STACK_DIR}/stack/src/user/veth/veth-noos.c
-    ${PLK_STACK_DIR}/stack/src/user/sdo/sdoudp-noos.c
-    ${PLK_STACK_DIR}/stack/src/user/ledu.c
-)
+SET(OPLK_SRCS
+     ${KERNEL_SOURCES}
+     ${CTRL_KCAL_DIRECT_SOURCES}
+     ${DLL_KCAL_CIRCBUF_SOURCES}
+     ${EVENT_KCAL_NOOSKERNEL_SOURCES}
+     ${ERRHND_KCAL_LOCAL_SOURCES}
+     ${PDO_KCAL_LOCAL_SOURCES}
+     ${HARDWARE_DRIVER_OPENMAC_SOURCES}
+     ${HARDWARE_DRIVER_OPENMAC_CN_SOURCES}
+     ${USER_SOURCES}
+     ${CTRL_UCAL_DIRECT_SOURCES}
+     ${DLL_UCAL_CIRCBUF_SOURCES}
+     ${ERRHND_UCAL_LOCAL_SOURCES}
+     ${PDO_UCAL_LOCAL_SOURCES}
+     ${EVENT_UCAL_NOOSKERNEL_SOURCES}
+     ${USER_TIMER_GENERIC_SOURCES}
+     ${VETH_USER_NOOS_SOURCES}
+     ${COMMON_SOURCES}
+     ${COMMON_CAL_DIRECT_SOURCES}
+     ${CIRCBUF_NOOS_SOURCES}
+     ${COMMON_NOOS_SOURCES}
+     ${ARCH_LE_SOURCES}
+     ${LIB_KERNEL_SOURCES}
+     ${LIB_USER_SOURCES}
+     ${LIB_COMMON_SOURCES}
+   )
+
+SET(OMETHLIB_SRCS
+    ${OPLK_OMETHLIB_DIR}/src/omethlib.c
+    ${OPLK_OMETHLIB_DIR}/src/omethlibint.c
+   )
 
 ########################################################################
 # Set include paths
 ########################################################################
-SET ( APPIF_INCS
+SET(APPIF_INCS
     ${PROJECT_SOURCE_DIR}
     ${PROJECT_SOURCE_DIR}/include
-    ${PROJECT_SOURCE_DIR}/target/altera/include
     ${appifcommon_SOURCE_DIR}/include
-    ${DEMO_CONFIG_DIR}/config/objdict
     ${DEMO_CONFIG_DIR}/config/tbuf/include
-    ${IP_STACK_DIR}
-    ${PLK_STACK_DIR}/examples/demo_cn_embedded
-    ${PLK_STACK_DIR}/include
-    ${PLK_STACK_DIR}/objdicts/generic
-    ${PLK_STACK_DIR}/libs/omethlib
-    ${PLK_STACK_DIR}/libs/circbuf
-    ${PLK_STACK_DIR}/stack/include/target/openmac
-    ${PLK_STACK_DIR}/stack/src/arch/altera_nios2
-    ${PLK_STACK_DIR}/stack/src
+    ${IP_BASE_DIR}
+   )
+
+SET(OPLK_INCS
+    ${STACK_INCLUDE_DIR}
+    ${STACK_SOURCE_DIR}
+    ${CONTRIB_SOURCE_DIR}
+    ${DEMO_CONFIG_DIR}/config/objdict
+    ${OBJDICT_DIR}/generic
+   )
+
+SET(OMETHLIB_INCS
+    ${OPLK_OMETHLIB_DIR}/include
+    ${OPLK_OMETHLIB_DIR}/src
    )
 
 IF((CMAKE_SYSTEM_NAME STREQUAL "Generic") AND (CMAKE_SYSTEM_PROCESSOR STREQUAL "Nios2"))

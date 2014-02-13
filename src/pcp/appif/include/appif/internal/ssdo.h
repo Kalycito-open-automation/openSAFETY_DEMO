@@ -50,7 +50,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <appifcommon/timeout.h>
 #include <config/ssdo.h>
 
-#include <Epl.h>
+#include <oplk/oplk.h>
 
 //------------------------------------------------------------------------------
 // const defines
@@ -96,7 +96,7 @@ typedef struct {
     tTbufInstance     pTbufConsTxInst_m;    ///< Instance pointer to the consuming transmit triple buffer
     tSeqNrValue       currConsSeq_m;        ///< Consuming buffer sequence number
     tConsTxState      consTxState_m;        ///< State of the consuming transmit buffer
-    tEplSdoComConHdl  sdoComConHdl_m;       ///< SDO connection handler
+    tSdoComConHdl     sdoComConHdl_m;       ///< SDO connection handler
     UINT8*            pConsTxPayl_m;        ///< Pointer to transmit buffer
     tTimeoutInstance  pArpTimeoutInst_m;    ///< Timer for ARP request retry
 } tSsdoConsTx;

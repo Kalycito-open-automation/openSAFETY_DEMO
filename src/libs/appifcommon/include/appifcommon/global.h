@@ -45,7 +45,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #ifdef APPIF_BUILD_PCP
   #include <pcptarget/target.h>
-  #include <EplAmi.h>
+  #include <oplk/ami.h>
 #else
   #include <apptarget/target.h>
   #include <ami/ami.h>

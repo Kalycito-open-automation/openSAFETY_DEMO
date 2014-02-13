@@ -49,7 +49,7 @@ and transmit channels.
 
 #include <appif/pdo.h>
 
-#include <Epl.h>
+#include <oplk/oplk.h>
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
@@ -120,7 +120,7 @@ tAppIfStatus appif_linkPdo(UINT16 objIdx_p, UINT8 objSubIdx_p, UINT8* pTargBase_
         UINT32 targAddrOff_p, UINT16 objSize_p)
 {
     tAppIfStatus ret = kAppIfSuccessful;
-    tEplKernel   eplret = kEplSuccessful;
+    tOplkError   oplkret = kErrorOk;
     UINT32       objSize = objSize_p;
     UINT32       pVarEntries = 1;
     UINT8*       pTargetAddr;
@@ -131,17 +131,17 @@ tAppIfStatus appif_linkPdo(UINT16 objIdx_p, UINT8 objSubIdx_p, UINT8* pTargBase_
     if(objSize_p == 0)
     {
         // Read object size from local obdict
-        eplret = oplk_readLocalObject(objIdx_p, objSubIdx_p,
+        oplkret = oplk_readLocalObject(objIdx_p, objSubIdx_p,
                 pTargetAddr, &objSize);
-        if(eplret != kEplSuccessful)
+        if(oplkret != kErrorOk)
         {
             ret = kAppIfConfChanObjLinkFailed;
             goto Exit;
         }
     }
 
-    eplret = oplk_linkObject(objIdx_p, pTargetAddr, &pVarEntries, &objSize, objSubIdx_p);
-    if(eplret != kEplSuccessful)
+    oplkret = oplk_linkObject(objIdx_p, pTargetAddr, &pVarEntries, &objSize, objSubIdx_p);
+    if(oplkret != kErrorOk)
     {
         ret = kAppIfConfChanObjLinkFailed;
         goto Exit;

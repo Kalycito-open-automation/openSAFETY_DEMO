@@ -42,7 +42,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // includes
 //------------------------------------------------------------------------------
 
-#include <Epl.h>
+#include <oplk/oplk.h>
 
 #include <config/triplebuffer.h>
 
@@ -60,11 +60,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // function prototypes
 //------------------------------------------------------------------------------
 #if(((APPIF_MODULE_INTEGRATION) & (APPIF_MODULE_CC)) != 0)
-  extern tEplKernel PUBLIC cc_obdAccessCb(tObdCbParam MEM* pParam_p);
+  extern tOplkError cc_obdAccessCb(tObdCbParam MEM* pParam_p);
 #endif
 
 #if(((APPIF_MODULE_INTEGRATION) & (APPIF_MODULE_SSDO)) != 0)
-  extern tEplKernel PUBLIC ssdo_obdAccessCb(tObdCbParam MEM* pParam_p);
+  extern tOplkError ssdo_obdAccessCb(tObdCbParam MEM* pParam_p);
 #endif
 
 #endif /* _INC_appif_obdict_H_ */

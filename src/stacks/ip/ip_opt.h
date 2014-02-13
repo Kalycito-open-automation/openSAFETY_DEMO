@@ -43,7 +43,7 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef __IP_OPT_H__
 #define __IP_OPT_H__
 
-#include "EplInc.h"
+#include <oplk/oplkinc.h>
 
 //-------------------------------------------------------------------------
 // Number of entries in the ARP table

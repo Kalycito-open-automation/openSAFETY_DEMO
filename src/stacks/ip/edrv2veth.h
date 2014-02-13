@@ -59,10 +59,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // function prototypes
 //---------------------------------------------------------------------------
 
-tEplKernel edrv2veth_init (eth_addr* pEthMac);
+tOplkError edrv2veth_init (eth_addr* pEthMac);
 void edrv2veth_exit (void);
-tEplKernel edrv2veth_setIpHandler(IP_STACK_H pIpHandler);
-unsigned long edrv2veth_transmit( void *hEth, ip_packet_typ *pPacket,
+tOplkError edrv2veth_setIpHandler(IP_STACK_H pIpHandler);
+ULONG edrv2veth_transmit( void *hEth, ip_packet_typ *pPacket,
         IP_BUF_FREE_FCT *pFctFree);
 
 

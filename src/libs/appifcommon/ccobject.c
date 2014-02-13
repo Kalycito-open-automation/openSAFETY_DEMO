@@ -259,27 +259,27 @@ tCcWriteState ccobject_writeCurrObject(UINT16 objIdx_p, UINT8 objSubIdx_p,
         {
             case sizeof(UINT8):
             {
-                pObjDest->objPayloadLow_m = AmiGetByteFromLe((UINT8 *)pData_p);
+                pObjDest->objPayloadLow_m = ami_getUint8Le((UINT8 *)pData_p);
                 writeState = kCcWriteStateSuccessful;
                 break;
             }
             case sizeof(UINT16):
             {
-                pObjDest->objPayloadLow_m = AmiGetWordFromLe((UINT8 *)pData_p);
+                pObjDest->objPayloadLow_m = ami_getUint16Le((UINT8 *)pData_p);
                 writeState = kCcWriteStateSuccessful;
                 break;
             }
             case sizeof(UINT32):
             {
-                pObjDest->objPayloadLow_m = AmiGetDwordFromLe((UINT8 *)pData_p);
+                pObjDest->objPayloadLow_m = ami_getUint32Le((UINT8 *)pData_p);
                 writeState = kCcWriteStateSuccessful;
                 break;
             }
             default:
             {
                 // Default use UINT64
-                pObjDest->objPayloadLow_m = AmiGetDwordFromLe((UINT8 *)pData_p);
-                pObjDest->objPayloadHigh_m = AmiGetDwordFromLe((UINT8 *)pData_p + 4);
+                pObjDest->objPayloadLow_m = ami_getUint32Le((UINT8 *)pData_p);
+                pObjDest->objPayloadHigh_m = ami_getUint32Le((UINT8 *)pData_p + 4);
                 writeState = kCcWriteStateSuccessful;
                 break;
             }

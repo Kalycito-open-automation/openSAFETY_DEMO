@@ -44,7 +44,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <appif/pcpglobal.h>
 
-#include <config/ssdo.h>
+#include <appifcommon/ssdo.h>
 
 //------------------------------------------------------------------------------
 // const defines

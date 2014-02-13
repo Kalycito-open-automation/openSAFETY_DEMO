@@ -548,12 +548,12 @@ void appif_pdoProcFinished(tAppIfPdoDir pdoDir_p)
 \ingroup module_appif
 */
 //------------------------------------------------------------------------------
-tAppIfStatus appif_sdoAccFinished(tEplSdoComFinished* pSdoComFinHdl_p )
+tAppIfStatus appif_sdoAccFinished(tSdoComFinished* pSdoComFinHdl_p )
 {
     tAppIfStatus ret = kAppIfSuccessful;
 
 #if(((APPIF_MODULE_INTEGRATION) & (APPIF_MODULE_SSDO)) != 0)
-    ret = ssdo_consTxTransferFinished((tSsdoInstance)pSdoComFinHdl_p->m_pUserArg);
+    ret = ssdo_consTxTransferFinished((tSsdoInstance)pSdoComFinHdl_p->pUserArg);
 #else
     UNUSED_PARAMETER(pSdoComFinHdl_p);
 #endif

@@ -50,9 +50,9 @@ buffers which can be accessed by the application processor.
 
 #include <appif/appif.h>
 #include <appif/status.h>
+#include <appif/tpdo.h>
 
-#include <Epl.h>
-#include <user/pdou.h>
+#include <oplk/oplk.h>
 
 #include <event.h>
 
@@ -69,7 +69,7 @@ buffers which can be accessed by the application processor.
 #define DEF_GATEWAY 0xc0a864f0                          ///< Default gateway: 192.168.100.254 (Object: 0x1E40/0x05)
 #define HOST_NAME   "openPOWERLINK CN"                  ///< The hostname of the CN (Object: 0x1F9A/0x00)
 
-#define CONFIG_ISOCHR_TX_MAX_PAYLOAD    max(40, sizeof(tTpdoMappedObj));
+#define CONFIG_ISOCHR_TX_MAX_PAYLOAD    max(40, sizeof(tTpdoMappedObj))
 #define CONFIG_ISOCHR_RX_MAX_PAYLOAD    1496
 #define CONFIG_IDENT_DEVICE_TYPE        -1              ///< Device type of the node
 #define CONFIG_IDENT_VENDOR_ID          0x00000000      ///< Vendor ID of the node
@@ -138,11 +138,11 @@ static tAppIfStatus appif_initPlk(tMainInstance* pInstance_p);
 static tAppIfStatus appif_processPlk(tMainInstance* pInstance_p);
 static void appif_switchOffPlk(void);
 static void appif_enterCriticalSection(UINT8 fEnable_p);
-static tEplKernel appif_userEventCb(tEplApiEventType EventType_p,
-                                   tEplApiEventArg* pEventArg_p,
-                                   void* pUserArg_p);
+static tOplkError appif_userEventCb(tOplkApiEventType eventType_p,
+                                    tOplkApiEventArg* pEventArg_p,
+                                    void* pUserArg_p);
 
-static tEplKernel PUBLIC appif_syncCb(tSocTimeStamp* socTimeStamp_p) SECTION_MAIN_APP_CB_SYNC;
+static tOplkError appif_syncCb(tSocTimeStamp* socTimeStamp_p) SECTION_MAIN_APP_CB_SYNC;
 
 //------------------------------------------------------------------------------
 // private functions
@@ -183,8 +183,6 @@ int main (void)
     PRINTF("Starting openPOWERLINK with external application interface\n");
     PRINTF("----------------------------------------------------------\n");
 
-    target_init();
-
     // Read node id from switches
     nodeId = target_getNodeid();
     if(nodeId == 0)
@@ -209,11 +207,11 @@ int main (void)
     mainInstance_l.fShutdown    = FALSE;
 
     // set mac address (last byte is set to node ID)
-    EPL_MEMCPY(mainInstance_l.aMacAddr, aMacAddr, sizeof(aMacAddr));
+    OPLK_MEMCPY(mainInstance_l.aMacAddr, aMacAddr, sizeof(aMacAddr));
     mainInstance_l.aMacAddr[MAC_ADDR_LAST_BYTE] = mainInstance_l.nodeId;
 
     // setup the hostname
-    EPL_MEMCPY(mainInstance_l.sHostName, sHostname, sizeof(sHostname));
+    OPLK_MEMCPY(mainInstance_l.sHostName, sHostname, sizeof(sHostname));
 
     // Initialize the POWERLINK stack
     ret = appif_initPlk(&mainInstance_l);
@@ -244,8 +242,6 @@ ExitShutdown:
 Exit:
     appif_exit();
 
-    target_cleanup();
-
     return 0;
 }
 
@@ -270,64 +266,64 @@ The function initializes the openPOWERLINK stack.
 //------------------------------------------------------------------------------
 static tAppIfStatus appif_initPlk(tMainInstance* pInstance_p)
 {
-    tAppIfStatus            ret = kAppIfSuccessful;
-    tEplKernel              eplret = kEplSuccessful;
-    static tEplApiInitParam initParam;
+    tAppIfStatus             ret = kAppIfSuccessful;
+    tOplkError               oplkret = kErrorOk;
+    static tOplkApiInitParam initParam;
 
     PRINTF("Initializing openPOWERLINK stack...\n");
 
-    EPL_MEMSET(&initParam, 0, sizeof(initParam));
+    OPLK_MEMSET(&initParam, 0, sizeof(initParam));
 
-    initParam.m_uiSizeOfStruct            = sizeof(initParam);
-    initParam.m_uiNodeId                  = pInstance_p->nodeId;
-    initParam.m_dwIpAddress               = (0xFFFFFF00 & IP_ADDR) | initParam.m_uiNodeId;
+    initParam.sizeOfInitParam             = sizeof(initParam);
+    initParam.nodeId                      = pInstance_p->nodeId;
+    initParam.ipAddress               = (0xFFFFFF00 & IP_ADDR) | initParam.nodeId;
 
-    EPL_MEMCPY(initParam.m_abMacAddress, pInstance_p->aMacAddr,
-            sizeof(initParam.m_abMacAddress));
+    OPLK_MEMCPY(initParam.aMacAddress, pInstance_p->aMacAddr,
+            sizeof(initParam.aMacAddress));
 
-    initParam.m_fAsyncOnly                = FALSE;
-    initParam.m_dwFeatureFlags            = -1;
-    initParam.m_dwCycleLen                = pInstance_p->cycleTime;        // required for error detection
-    initParam.m_uiIsochrTxMaxPayload      = CONFIG_ISOCHR_TX_MAX_PAYLOAD;  // const
-    initParam.m_uiIsochrRxMaxPayload      = CONFIG_ISOCHR_RX_MAX_PAYLOAD;  // const
-    initParam.m_dwPresMaxLatency          = 2000;                          // const; only required for IdentRes
-    initParam.m_dwAsndMaxLatency          = 2000;                          // const; only required for IdentRes
-    initParam.m_uiPreqActPayloadLimit     = 36;                            // required for initialization (+28 bytes)
-    initParam.m_uiPresActPayloadLimit     = 40;                            // required for initialization of Pres frame (+28 bytes)
-    initParam.m_uiMultiplCycleCnt         = 0;                             // required for error detection
-    initParam.m_uiAsyncMtu                = 300;                           // required to set up max frame size
-    initParam.m_uiPrescaler               = 2;                             // required for sync
-    initParam.m_dwLossOfFrameTolerance    = 5000000;
-    initParam.m_dwAsyncSlotTimeout        = 3000000;
-    initParam.m_dwWaitSocPreq             = 0;
-    initParam.m_uiSyncNodeId              = EPL_C_ADR_SYNC_ON_SOC;
-    initParam.m_fSyncOnPrcNode            = FALSE;
-    initParam.m_dwDeviceType              = CONFIG_IDENT_DEVICE_TYPE;      // NMT_DeviceType_U32
-    initParam.m_dwVendorId                = CONFIG_IDENT_VENDOR_ID;        // NMT_IdentityObject_REC.VendorId_U32
-    initParam.m_dwProductCode             = CONFIG_IDENT_PRODUCT_CODE;     // NMT_IdentityObject_REC.ProductCode_U32
-    initParam.m_dwRevisionNumber          = CONFIG_IDENT_REVISION;         // NMT_IdentityObject_REC.RevisionNo_U32
-    initParam.m_dwSerialNumber            = CONFIG_IDENT_SERIAL_NUMBER;    // NMT_IdentityObject_REC.SerialNo_U32
-    initParam.m_dwApplicationSwDate       = 0;
-    initParam.m_dwApplicationSwTime       = 0;
-    initParam.m_dwSubnetMask              = pInstance_p->subnetMask;
-    initParam.m_dwDefaultGateway          = pInstance_p->defGateway;
+    initParam.fAsyncOnly                  = FALSE;
+    initParam.featureFlags                = -1;
+    initParam.cycleLen                    = pInstance_p->cycleTime;        // required for error detection
+    initParam.isochrTxMaxPayload          = CONFIG_ISOCHR_TX_MAX_PAYLOAD;  // const
+    initParam.isochrRxMaxPayload          = CONFIG_ISOCHR_RX_MAX_PAYLOAD;  // const
+    initParam.presMaxLatency              = 2000;                          // const; only required for IdentRes
+    initParam.asndMaxLatency              = 2000;                          // const; only required for IdentRes
+    initParam.preqActPayloadLimit         = 36;                            // required for initialization (+28 bytes)
+    initParam.presActPayloadLimit         = 40;                            // required for initialization of Pres frame (+28 bytes)
+    initParam.multiplCylceCnt             = 0;                             // required for error detection
+    initParam.asyncMtu                    = 300;                           // required to set up max frame size
+    initParam.prescaler                   = 2;                             // required for sync
+    initParam.lossOfFrameTolerance        = 5000000;
+    initParam.asyncSlotTimeout            = 3000000;
+    initParam.waitSocPreq                 = 0;
+    initParam.syncNodeId                  = C_ADR_SYNC_ON_SOC;
+    initParam.fSyncOnPrcNode              = FALSE;
+    initParam.deviceType                  = CONFIG_IDENT_DEVICE_TYPE;      // NMT_DeviceType_U32
+    initParam.vendorId                    = CONFIG_IDENT_VENDOR_ID;        // NMT_IdentityObject_REC.VendorId_U32
+    initParam.productCode                 = CONFIG_IDENT_PRODUCT_CODE;     // NMT_IdentityObject_REC.ProductCode_U32
+    initParam.revisionNumber              = CONFIG_IDENT_REVISION;         // NMT_IdentityObject_REC.RevisionNo_U32
+    initParam.serialNumber                = CONFIG_IDENT_SERIAL_NUMBER;    // NMT_IdentityObject_REC.SerialNo_U32
+    initParam.applicationSwDate           = 0;
+    initParam.applicationSwTime           = 0;
+    initParam.subnetMask                  = pInstance_p->subnetMask;
+    initParam.defaultGateway              = pInstance_p->defGateway;
 
-    strncpy((char *)initParam.m_sHostname, (char *)pInstance_p->sHostName,
-            sizeof(initParam.m_sHostname));
+    strncpy((char *)initParam.sHostname, (char *)pInstance_p->sHostName,
+            sizeof(initParam.sHostname));
 
     // set callback functions
-    initParam.m_pfnCbEvent                = processEvents;
-    initParam.m_pfnCbSync                 = appif_syncCb;
+    initParam.pfnCbEvent                  = processEvents;
+    initParam.pfnCbSync                   = appif_syncCb;
 
     // initialize POWERLINK stack
-    eplret = oplk_init(&initParam);
-    if(eplret != kEplSuccessful)
+    oplkret = oplk_init(&initParam);
+    if(oplkret != kErrorOk)
     {
         PRINTF("oplk_init() failed (Error:0x%x!\n", ret);
         ret = kAppIfMainPlkStackInitError;
     }
 
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 
@@ -351,12 +347,12 @@ task.
 //------------------------------------------------------------------------------
 static tAppIfStatus appif_processPlk(tMainInstance* pInstance_p)
 {
-    tEplKernel eplret = kEplSuccessful;
+    tOplkError oplkret = kErrorOk;
     tAppIfStatus ret = kAppIfSuccessful;
 
     // start processing
-    eplret = oplk_execNmtCommand(kNmtEventSwReset);
-    if(eplret != kEplSuccessful)
+    oplkret = oplk_execNmtCommand(kNmtEventSwReset);
+    if(oplkret != kErrorOk)
     {
         ret = kAppIfMainPlkStackStartError;
         goto Exit;
@@ -365,8 +361,8 @@ static tAppIfStatus appif_processPlk(tMainInstance* pInstance_p)
     while(1)
     {
         // do background tasks
-        eplret = oplk_process();
-        if(eplret != kEplSuccessful)
+        oplkret = oplk_process();
+        if(oplkret != kErrorOk)
         {
             ret = kAppIfMainPlkStackProcessError;
             break;
@@ -409,10 +405,10 @@ Exit:
 //------------------------------------------------------------------------------
 static void appif_switchOffPlk(void)
 {
-    tEplKernel ret;
+    tOplkError ret;
 
     ret = oplk_execNmtCommand(kNmtEventSwitchOff);
-    if(ret != kEplSuccessful)
+    if(ret != kErrorOk)
     {
         DEBUG_TRACE(DEBUG_LVL_ERROR, "ERROR: Unable to carry out kNmtEventSwitchOff!\n");
     }
@@ -430,7 +426,7 @@ static void appif_switchOffPlk(void)
 //------------------------------------------------------------------------------
 static void appif_enterCriticalSection(UINT8 fEnable_p)
 {
-    EplTgtEnableGlobalInterrupt(fEnable_p);
+    target_criticalSection(fEnable_p);
 }
 
 
@@ -440,37 +436,37 @@ static void appif_enterCriticalSection(UINT8 fEnable_p)
 
 The function implements the applications stack event handler.
 
-\param  EventType_p         Type of event
+\param  eventType_p         Type of event
 \param  pEventArg_p         Pointer to union which describes the event in detail
 \param  pUserArg_p          User specific argument
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_main
 */
 //------------------------------------------------------------------------------
-static tEplKernel appif_userEventCb(tEplApiEventType EventType_p,
-                                   tEplApiEventArg* pEventArg_p,
-                                   void* pUserArg_p)
+static tOplkError appif_userEventCb(tOplkApiEventType eventType_p,
+                                    tOplkApiEventArg* pEventArg_p,
+                                    void* pUserArg_p)
 {
-    tEplKernel  eplret = kEplSuccessful;
+    tOplkError  oplkret = kErrorOk;
     tAppIfStatus ret = kAppIfSuccessful;
 
     UNUSED_PARAMETER(pUserArg_p);
 
-    switch(EventType_p)
+    switch(eventType_p)
     {
-        case kEplApiEventNmtStateChange:
+        case kOplkApiEventNmtStateChange:
         {
             // Make POWERLINK stack state global
-            mainInstance_l.plkState = pEventArg_p->m_NmtStateChange.newNmtState;
+            mainInstance_l.plkState = pEventArg_p->nmtStateChange.newNmtState;
 
-            switch(pEventArg_p->m_NmtStateChange.newNmtState)
+            switch(pEventArg_p->nmtStateChange.newNmtState)
             {
                 case kNmtGsOff:
                 {
                     // NMT state machine was shut down
-                    eplret = kEplShutdown;
+                    oplkret = kErrorShutdown;
 
                     break;
                 }
@@ -478,8 +474,8 @@ static tEplKernel appif_userEventCb(tEplApiEventType EventType_p,
                 {
                     UINT size = sizeof(mainInstance_l.cycleTime);;
 
-                    eplret = oplk_readLocalObject(0x1006, 0, &mainInstance_l.cycleTime, &size);
-                    if (eplret != kEplSuccessful)
+                    oplkret = oplk_readLocalObject(0x1006, 0, &mainInstance_l.cycleTime, &size);
+                    if (oplkret != kErrorOk)
                     {
                         mainInstance_l.cycleTime = 0;
                     }
@@ -497,16 +493,16 @@ static tEplKernel appif_userEventCb(tEplApiEventType EventType_p,
                     ret = status_resetRelTime();
                     if(ret != kAppIfSuccessful)
                     {
-                        eplret = kEplNoResource;
+                        oplkret = kErrorNoResource;
                     }
                     break;
                 }
                 case kNmtGsResetCommunication:
                 {
                     UINT8   nodeId = 0xF0;
-                    UINT32  nodeAssignment = EPL_NODEASSIGN_NODE_EXISTS;
+                    UINT32  nodeAssignment = NMT_NODEASSIGN_NODE_EXISTS;
 
-                    eplret = oplk_writeLocalObject(0x1F81, nodeId, &nodeAssignment, sizeof(nodeAssignment));
+                    oplkret = oplk_writeLocalObject(0x1F81, nodeId, &nodeAssignment, sizeof(nodeAssignment));
 
                     break;
                 }
@@ -521,13 +517,13 @@ static tEplKernel appif_userEventCb(tEplApiEventType EventType_p,
             }
             break;
         }
-        case kEplApiEventSdo:
+        case kOplkApiEventSdo:
         {
             // Sdo access finished -> tell appif interface
-            ret = appif_sdoAccFinished(&pEventArg_p->m_Sdo);
+            ret = appif_sdoAccFinished(&pEventArg_p->sdoInfo);
             if(ret != kAppIfSuccessful)
             {
-                eplret = kEplApiInvalidParam;
+                oplkret = kErrorApiInvalidParam;
             }
             break;
         }
@@ -535,7 +531,7 @@ static tEplKernel appif_userEventCb(tEplApiEventType EventType_p,
             break;
     }
 
-    return eplret;
+    return oplkret;
 }
 
 //------------------------------------------------------------------------------
@@ -548,21 +544,21 @@ inputs and runs the control loop.
 
 \param  socTimeStamp_p          Timestamp of the current POWERLINK cycle
 
-\return    tEplKernel
-\retval    kEplSuccessful            no error
+\return    tOplkError
+\retval    kErrorOk            no error
 \retval    otherwise                 post error event to API layer
 
 \ingroup module_main
 */
 //------------------------------------------------------------------------------
-static tEplKernel PUBLIC appif_syncCb(tSocTimeStamp* socTimeStamp_p)
+static tOplkError appif_syncCb(tSocTimeStamp* socTimeStamp_p)
 {
-    tEplKernel         eplret = kEplSuccessful;
+    tOplkError         oplkret = kErrorOk;
     tAppIfStatus       ret = kAppIfSuccessful;
     tTimeInfo          time;
 
-    eplret = pdou_copyRxPdoToPi();
-    if(eplret != kEplSuccessful)
+    oplkret = oplk_copyRxPdoToApp();
+    if(oplkret != kErrorOk)
         goto Exit;
 
     appif_pdoProcFinished(tPdoDirRpdo);
@@ -579,7 +575,7 @@ static tEplKernel PUBLIC appif_syncCb(tSocTimeStamp* socTimeStamp_p)
         ret = status_process(&time);
         if(ret != kAppIfSuccessful)
         {
-            eplret = kEplInvalidOperation;
+            oplkret = kErrorInvalidOperation;
             goto Exit;
         }
 
@@ -587,19 +583,19 @@ static tEplKernel PUBLIC appif_syncCb(tSocTimeStamp* socTimeStamp_p)
         ret = appif_handleSync();
         if(ret != kAppIfSuccessful)
         {
-            eplret = kEplInvalidOperation;
+            oplkret = kErrorInvalidOperation;
             goto Exit;
         }
     }
 
-    eplret = pdou_copyTxPdoFromPi();
-    if(eplret != kEplSuccessful)
+    oplkret = oplk_copyTxPdoFromApp();
+    if(oplkret != kErrorOk)
         goto Exit;
 
     appif_pdoProcFinished(tPdoDirTpdo);
 
 Exit:
-    return eplret;
+    return oplkret;
 }
 
 /// \}

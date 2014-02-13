@@ -39,7 +39,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <appif/obdict.h>
 
 #define OBD_DEFINE_MACRO
-    #include "obdmacro.h"
+    #include <oplk/obdmacro.h>
 #undef OBD_DEFINE_MACRO
 
 OBD_BEGIN ()
@@ -285,6 +285,6 @@ OBD_END ()
 
 
 #define OBD_UNDEFINE_MACRO
-    #include "obdmacro.h"
+    #include <oplk/obdmacro.h>
 #undef OBD_UNDEFINE_MACRO
 

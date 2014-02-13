@@ -104,7 +104,7 @@ static tEdrv2VethInstance  edrv2vethInstance_l;
 
 static void edrv2veth_changeAddress( UINT32 ipAddr_p, UINT32 subNetMask_p, UINT16 mtu_p );
 static void edrv2veth_changeGateway( UINT32 defGateway_p );
-static tEplKernel edrv2veth_receiveHandler(UINT8* pFrame_p, UINT32 frameSize_p);
+static tOplkError edrv2veth_receiveHandler(UINT8* pFrame_p, UINT32 frameSize_p);
 static void edrv2veth_freePacket(ip_packet_typ *pPacket);
 
 //============================================================================//
@@ -117,20 +117,20 @@ static void edrv2veth_freePacket(ip_packet_typ *pPacket);
 
 \param  pEthMac[out]   Pointer to the address where the MAC should be stored
 
-\return tEplKernel
-\retval kEplSuccessful      On success
+\return tOplkError
+\retval kErrorOk      On success
 
 \ingroup module_ip
 */
 //------------------------------------------------------------------------------
-tEplKernel edrv2veth_init (eth_addr* pEthMac)
+tOplkError edrv2veth_init (eth_addr* pEthMac)
 {
-    tEplKernel ret = kEplSuccessful;
+    tOplkError ret = kErrorOk;
 
-    EPL_MEMSET(&edrv2vethInstance_l, 0 , sizeof(tEdrv2VethInstance));
+    OPLK_MEMSET(&edrv2vethInstance_l, 0 , sizeof(tEdrv2VethInstance));
 
     //copy default MAC address
-    EPL_MEMCPY(pEthMac, veth_apiGetEthMac(), sizeof(eth_addr));
+    OPLK_MEMCPY(pEthMac, veth_apiGetEthMac(), sizeof(eth_addr));
 
     // register virtual Ethernet driver address changed callbacks
     veth_apiRegDefaultGatewayCb(edrv2veth_changeGateway);
@@ -160,23 +160,23 @@ void edrv2veth_exit (void)
 
 \param  pIpHandler_p    Pointer to the instance of the IP stack
 
-\return tEplKernel
-\retval kEplSuccessful          On success
+\return tOplkError
+\retval kErrorOk          On success
 \retval kEplApiInvalidParam     Invalid IP stack instance
 
 \ingroup module_ip
 */
 //------------------------------------------------------------------------------
-tEplKernel edrv2veth_setIpHandler(IP_STACK_H pIpHandler_p)
+tOplkError edrv2veth_setIpHandler(IP_STACK_H pIpHandler_p)
 {
-    tEplKernel ret = kEplSuccessful;
+    tOplkError ret = kErrorOk;
 
     if(pIpHandler_p != NULL)
     {
         edrv2vethInstance_l.pIpSocket = pIpHandler_p;
     } else
     {
-        ret = kEplApiInvalidParam;
+        ret = kErrorApiInvalidParam;
     }
 
     return ret;
@@ -197,14 +197,16 @@ tEplKernel edrv2veth_setIpHandler(IP_STACK_H pIpHandler_p)
 \ingroup module_ip
 */
 //------------------------------------------------------------------------------
-unsigned long edrv2veth_transmit(void *hEth, ip_packet_typ *pPacket, IP_BUF_FREE_FCT *pFctFree)
+ULONG edrv2veth_transmit(void *hEth, ip_packet_typ *pPacket, IP_BUF_FREE_FCT *pFctFree)
 {
-    tEplKernel ret = kEplSuccessful;
+    tOplkError ret = kErrorOk;
     unsigned long plkLen;
+
+    UNUSED_PARAMETER(hEth);
 
     // forward packet to virtual Ethernet driver
     ret = veth_apiTransmit(pPacket->data, pPacket->length);
-    if(ret != kEplSuccessful)
+    if(ret != kErrorOk)
     {
         // return error!
         plkLen = 0;
@@ -239,9 +241,11 @@ unsigned long edrv2veth_transmit(void *hEth, ip_packet_typ *pPacket, IP_BUF_FREE
 \ingroup module_ip
 */
 //------------------------------------------------------------------------------
-static void edrv2veth_changeAddress( UINT32 ipAddr_p, UINT32 subNetMask_p, UINT16 mtu_p )
+static void edrv2veth_changeAddress(UINT32 ipAddr_p, UINT32 subNetMask_p, UINT16 mtu_p)
 {
     struct in_addr IpAddr;
+
+    UNUSED_PARAMETER(mtu_p);
 
     IpAddr.S_un.S_addr = htonl(ipAddr_p);
 
@@ -280,17 +284,19 @@ to the IP stack.
 \param  pFrame_p       Pointer to the incoming payload
 \param  frameSize_p    Size of the incoming payload
 
-\return tEplKernel
-\retval kEplSuccessful          On success
+\return tOplkError
+\retval kErrorOk          On success
 
 \ingroup module_ip
 */
 //------------------------------------------------------------------------------
-static tEplKernel edrv2veth_receiveHandler(UINT8* pFrame_p, UINT32 frameSize_p)
+static tOplkError edrv2veth_receiveHandler(UINT8* pFrame_p, UINT32 frameSize_p)
 {
-    tEplKernel     ret = kEplSuccessful;
+    tOplkError     ret = kErrorOk;
     INT            rcvStatus;
     ip_packet_typ* pPacket;
+
+    UNUSED_PARAMETER(frameSize_p);
 
     // TODO: Address manipulation only works when used with openMAC!
     //       (The length field needs to be before the packet!)
@@ -319,10 +325,10 @@ static tEplKernel edrv2veth_receiveHandler(UINT8* pFrame_p, UINT32 frameSize_p)
 //------------------------------------------------------------------------------
 static void edrv2veth_freePacket(ip_packet_typ* pPacket)
 {
-    tEplKernel ret = kEplSuccessful;
+    tOplkError ret = kErrorOk;
 
     ret = veth_apiReleaseRxFrame(pPacket->data, pPacket->length);
-    if(ret != kEplSuccessful)
+    if(ret != kErrorOk)
     {
         PRINTF("%s(Err/Warn): Error while freeing the Veth receive buffer\n",
                 __func__);

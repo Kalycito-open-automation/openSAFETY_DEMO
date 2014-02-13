@@ -1,15 +1,16 @@
 /**
 ********************************************************************************
-\file   pcptarget/target.h
+\file   event.h
 
-\brief  Platform dependent header file for the application interface.
+\brief  Definitions for CN events
 
-This file contains of platform dependent code. (The platform is Altera Nios2)
-
+The file contains the definitions for the CN digital I/O events.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2013, SYSTEC electronic GmbH
+Copyright (c) 2013, Kalycito Infotech Private Ltd.All rights reserved.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -35,71 +36,36 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
 
-#ifndef _INC_pcptarget_H_
-#define _INC_pcptarget_H_
+#ifndef _INC_demo_event_H_
+#define _INC_demo_event_H_
 
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <oplk/basictypes.h>    // includes all basic datatypes for the target
-
-#include <system.h>
-#include <unistd.h>    // for usleep
-#include <stdlib.h>    // for malloc, free
-#include <string.h>    // for memcpy() memset()
 
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
 
-#define ACK_REGISTER_COUNT      2       ///< Number of acknowledge registers
-
-
-#ifdef PLKIF_0_TRIPLEBUFFER_0_BASE
-  #define TBUF_BASE_ADDRESS           PLKIF_0_TRIPLEBUFFER_0_BASE
-#else
-  #error "Triple buffer base address invalid! Check your FPGA design parameters!"
-#endif  //SOPC_TBUF_BASE_ADDRESS
-
-// Number of producing triple buffers (Consumer <-> Producer buffer defines are swapped in system.h)
-#ifdef PLKIF_0_TRIPLEBUFFER_0_TBUF_NUM_CON
-  #define PROD_TRIPLE_BUFFER_COUNT     PLKIF_0_TRIPLEBUFFER_0_TBUF_NUM_CON
-#else
-  #error "Triple buffer consumer count not found! Check your FPGA design parameters!"
-#endif
-
-// Number of consumer triple buffers (Consumer <-> Producer buffer defines are swapped in system.h)
-#ifdef PLKIF_0_TRIPLEBUFFER_0_TBUF_NUM_PRO
-  #define CONS_TRIPLE_BUFFER_COUNT     PLKIF_0_TRIPLEBUFFER_0_TBUF_NUM_PRO
-#else
-  #error "Triple buffer producer count not found! Check your FPGA design parameters!"
-#endif
-
-#define TRIPLE_BUFFER_COUNT    (PROD_TRIPLE_BUFFER_COUNT + CONS_TRIPLE_BUFFER_COUNT + \
-                                ACK_REGISTER_COUNT)
-
-// Guard standard library functions
-#define APPIF_MEMSET(ptr, bVal, bCnt)  memset(ptr, bVal, bCnt)
-#define APPIF_MEMCPY(ptr, bVal, bSize) memcpy(ptr, bVal, bSize)
-#define APPIF_USLEEP(x)                usleep(x)
-#define APPIF_MALLOC(siz)              malloc(siz)
-#define APPIF_FREE(ptr)                free(ptr)
-
-#define DLLEXPORT
-
 //------------------------------------------------------------------------------
 // typedef
 //------------------------------------------------------------------------------
-
+typedef tOplkError (*tEventCb)(tOplkApiEventType EventType_p, tOplkApiEventArg* pEventArg_p, void* pUserArg_p);
 
 //------------------------------------------------------------------------------
 // function prototypes
 //------------------------------------------------------------------------------
-UINT8 target_getNodeid(void);
-void target_setStatusLed(BOOL fOn_p);
-void target_setErrorLed(BOOL fOn_p);
-void target_criticalSection(BYTE fEnable_p);
 
-#endif /* _INC_pcptarget_H_ */
+#ifdef __cplusplus
+extern "C" {
+#endif
 
+void initEvents (tEventCb pfnEventCb_p);
+tOplkError processEvents(tOplkApiEventType EventType_p,
+        tOplkApiEventArg* pEventArg_p, void* pUserArg_p);
 
+#ifdef __cplusplus
+}
+#endif
+
+#endif /* _INC_demo_event_H_ */
