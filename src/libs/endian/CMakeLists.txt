@@ -39,7 +39,7 @@ SET(GEN_LIB_TARGET ON)
 # Set all source files
 ########################################################################
 SET ( LIB_SRCS
-    ${PROJECT_SOURCE_DIR}/amilittle.c
+    ${PROJECT_SOURCE_DIR}/amile.c
 )
 
 ########################################################################

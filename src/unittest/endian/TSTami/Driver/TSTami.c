@@ -148,22 +148,22 @@ void TST_amiUint16(void)
     UINT16 outData;
 
     // Test set uint16 to big endian
-    AmiSetWordToBe(&outData, inData);
+    ami_setUint16Be(&outData, inData);
 
     CU_ASSERT_EQUAL(outData, UINT16_OUT_DATA_SET_BE);
 
     // Test set uint16 to little endian
-    AmiSetWordToLe(&outData, inData);
+    ami_setUint16Le(&outData, inData);
 
     CU_ASSERT_EQUAL(outData, UINT16_OUT_DATA_SET_LE);
 
     // Test get uint16 from big endian
-    outData = AmiGetWordFromBe(&inData);
+    outData = ami_getUint16Be(&inData);
 
     CU_ASSERT_EQUAL(outData, UINT16_OUT_DATA_GET_FROM_BE);
 
     // Test get uint16 from little endian
-    outData = AmiGetWordFromLe(&inData);
+    outData = ami_getUint16Le(&inData);
 
     CU_ASSERT_EQUAL(outData, UINT16_OUT_DATA_GET_FROM_LE);
 }
@@ -181,22 +181,22 @@ void TST_amiUint32(void)
     UINT32 outData;
 
     // Test set uint32 to big endian
-    AmiSetDwordToBe(&outData, inData);
+    ami_setUint32Be(&outData, inData);
 
     CU_ASSERT_EQUAL(outData, UINT32_OUT_DATA_SET_BE);
 
     // Test set uint32 to little endian
-    AmiSetDwordToLe(&outData, inData);
+    ami_setUint32Le(&outData, inData);
 
     CU_ASSERT_EQUAL(outData, UINT32_OUT_DATA_SET_LE);
 
     // Test get uint32 from big endian
-    outData = AmiGetDwordFromBe(&inData);
+    outData = ami_getUint32Be(&inData);
 
     CU_ASSERT_EQUAL(outData, UINT32_OUT_DATA_GET_FROM_BE);
 
     // Test get uint32 from little endian
-    outData = AmiGetDwordFromLe(&inData);
+    outData = ami_getUint32Le(&inData);
 
     CU_ASSERT_EQUAL(outData, UINT32_OUT_DATA_GET_FROM_LE);
 }
@@ -214,22 +214,22 @@ void TST_amiUint64(void)
     UINT64 outData;
 
     // Test set uint64 to big endian
-    AmiSetQword64ToBe(&outData, inData);
+    ami_setUint64Be(&outData, inData);
     
     CU_ASSERT_EQUAL(outData, UINT64_OUT_DATA_SET_BE);
 
     // Test set uint64 to little endian
-    AmiSetQword64ToLe(&outData, inData);
+    ami_setUint64Le(&outData, inData);
 
     CU_ASSERT_EQUAL(outData, UINT64_OUT_DATA_SET_LE);
 
     // Test get uint64 from big endian
-    outData = AmiGetQword64FromBe(&inData);
+    outData = ami_getUint64Be(&inData);
 
     CU_ASSERT_EQUAL(outData, UINT64_OUT_DATA_GET_FROM_BE);
 
     // Test get uint64 from little endian
-    outData = AmiGetQword64FromLe(&inData);
+    outData = ami_getUint64Le(&inData);
 
     CU_ASSERT_EQUAL(outData, UINT64_OUT_DATA_GET_FROM_LE);
 }

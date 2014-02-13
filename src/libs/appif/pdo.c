@@ -397,7 +397,7 @@ static BOOL pdo_processRpdo(UINT8* pBuffer_p, UINT16 bufSize_p, void * pUserArg_
     pRpdoImage = (tTbufRpdoImage*) pBuffer_p;
 
     // Write relative time to local structure
-    pdoInstance_l.rpdoRelTimeLow_m = AmiGetDwordFromLe((UINT8 *)&pRpdoImage->relativeTimeLow_m);
+    pdoInstance_l.rpdoRelTimeLow_m = ami_getUint32Le((UINT8 *)&pRpdoImage->relativeTimeLow_m);
 
     stream_ackBuffer(pdoInstance_l.rpdoId_m);
 

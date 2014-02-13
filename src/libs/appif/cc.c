@@ -305,13 +305,13 @@ tCcWriteStatus cc_writeObject(tConfChanObject* pObject_p)
                             &pObject_p->objPayloadLow_m, pObject_p->objSize_m);
 
                     // Set object index and subindex
-                    AmiSetWordToLe((UINT8*)&ccInstance_l.txChannel_m.iccTxBuffer_m.pIccTxPayl_m->objIdx_m,
+                    ami_setUint16Le((UINT8*)&ccInstance_l.txChannel_m.iccTxBuffer_m.pIccTxPayl_m->objIdx_m,
                             pObject_p->objIdx_m);
-                    AmiSetByteToLe((UINT8*)&ccInstance_l.txChannel_m.iccTxBuffer_m.pIccTxPayl_m->objSubIdx_m,
+                    ami_setUint8Le((UINT8*)&ccInstance_l.txChannel_m.iccTxBuffer_m.pIccTxPayl_m->objSubIdx_m,
                             pObject_p->objSubIdx_m);
 
                     // Set sequence number in tx buffer
-                    AmiSetByteToLe((UINT8*)&ccInstance_l.txChannel_m.iccTxBuffer_m.pIccTxPayl_m->seqNr_m,
+                    ami_setUint8Le((UINT8*)&ccInstance_l.txChannel_m.iccTxBuffer_m.pIccTxPayl_m->seqNr_m,
                             ccInstance_l.txChannel_m.currTxSeqNr_m);
 
                     // Lock buffer for transmission

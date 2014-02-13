@@ -39,7 +39,7 @@ FILE ( GLOB TST_STUBS_SRC "${PROJECT_SOURCE_DIR}/Stubs/*.c" )
 SOURCE_GROUP ( Driver FILES ${TST_STUBS_SRC} )
 
 SET ( APPIF_UUT
-        ${endian_SOURCE_DIR}/amilittle.c
+        ${endian_SOURCE_DIR}/amile.c
 )
 
 SOURCE_GROUP ( Uut FILES ${APPIF_UUT} )

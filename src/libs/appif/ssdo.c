@@ -259,10 +259,10 @@ tSsdoTxStatus ssdo_postPayload(tSsdoInstance pInstance_p, UINT8* pPayload_p,
                         pPayload_p, paylSize_p);
 
                 // Set transmit size
-                AmiSetWordToLe((UINT8*)&pInstance_p->txBuffParam_m.ssdoTxBuffer_m.pSsdoTxPayl_m->paylSize_m, paylSize_p);
+                ami_setUint16Le((UINT8*)&pInstance_p->txBuffParam_m.ssdoTxBuffer_m.pSsdoTxPayl_m->paylSize_m, paylSize_p);
 
                 // Set sequence number in next tx buffer
-                AmiSetByteToLe((UINT8*)&pInstance_p->txBuffParam_m.ssdoTxBuffer_m.pSsdoTxPayl_m->seqNr_m,
+                ami_setUint8Le((UINT8*)&pInstance_p->txBuffParam_m.ssdoTxBuffer_m.pSsdoTxPayl_m->seqNr_m,
                         pInstance_p->txBuffParam_m.currTxSeqNr_m);
 
                 // Lock buffer for transmission
@@ -447,7 +447,7 @@ static BOOL ssdo_handleRxFrame(tSsdoInstance pInstance_p)
     {
         // Frame incoming -> forward to the user
         pRxBuffer = &pInstance_p->rxBuffParam_m.pSsdoRxBuffer_m->ssdoStubDataDom_m[0];
-        rxBuffSize = AmiGetWordFromLe((UINT8 *)&pInstance_p->rxBuffParam_m.pSsdoRxBuffer_m->paylSize_m);
+        rxBuffSize = ami_getUint16Le((UINT8 *)&pInstance_p->rxBuffParam_m.pSsdoRxBuffer_m->paylSize_m);
 
         // Call SSDO user handler
         if(pInstance_p->rxBuffParam_m.pfnRxHandler_m(pRxBuffer, rxBuffSize))
@@ -554,7 +554,7 @@ static BOOL ssdo_receiveFrame(UINT8* pBuffer_p, UINT16 bufSize_p,
     // Acknowledge buffer before access
     stream_ackBuffer(pInstance->rxBuffParam_m.idRxBuff_m);
 
-    currSeqNr = (tSeqNrValue)AmiGetByteFromLe((UINT8 *)&pSsdoRxBuff->seqNr_m);
+    currSeqNr = (tSeqNrValue)ami_getUint8Le((UINT8 *)&pSsdoRxBuff->seqNr_m);
 
     // Check sequence number sanity
     if(currSeqNr == kSeqNrValueFirst ||

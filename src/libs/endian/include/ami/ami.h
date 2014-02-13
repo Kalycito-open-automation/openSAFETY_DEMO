@@ -2,14 +2,12 @@
 ********************************************************************************
 \file   ami/ami.h
 
-\brief  Header file of the abstract memory interface library
-
-This file provides an abstract memory interface for endian conversion.
+\brief  Definitions for the abstract memory interface (ami)
 
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -35,46 +33,61 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
 
-
 #ifndef _INC_ami_H_
 #define _INC_ami_H_
 
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-
 #include <apptarget/target.h>
+
+//------------------------------------------------------------------------------
+// const defines
+//------------------------------------------------------------------------------
+
+// Conversion macros for datatype UINT8 (saves code size)
+#define ami_setUint8Be(pAddr_p, uint8Val_p) {*(UINT8 *)(pAddr_p) = (uint8Val_p);}
+#define ami_setUint8Le(pAddr_p, uint8Val_p) {*(UINT8 *)(pAddr_p) = (uint8Val_p);}
+
+#define ami_getUint8Be(pAddr_p) (*(UINT8 *)(pAddr_p))
+#define ami_getUint8Le(pAddr_p) (*(UINT8 *)(pAddr_p))
 
 //------------------------------------------------------------------------------
 // typedef
 //------------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------
-// const defines
-//------------------------------------------------------------------------------
-
-#define AmiSetByteToBe(pAddr_p, bByteVal_p) {*(UINT8  *)(pAddr_p) = (bByteVal_p);}
-#define AmiSetByteToLe(pAddr_p, bByteVal_p) {*(UINT8  *)(pAddr_p) = (bByteVal_p);}
-
-#define AmiGetByteFromBe(pAddr_p)    (*(UINT8 *)(pAddr_p))
-#define AmiGetByteFromLe(pAddr_p)    (*(UINT8 *)(pAddr_p))
-
-//------------------------------------------------------------------------------
 // function prototypes
 //------------------------------------------------------------------------------
-DLLEXPORT void AmiSetWordToBe(void* pAddr_p, UINT16 wordVal_p);
-DLLEXPORT void AmiSetWordToLe(void* pAddr_p, UINT16 wordVal_p);
-DLLEXPORT UINT16 AmiGetWordFromBe(void* pAddr_p);
-DLLEXPORT UINT16 AmiGetWordFromLe(void* pAddr_p);
 
-DLLEXPORT void AmiSetDwordToBe(void* pAddr_p, UINT32 dwordVal_p);
-DLLEXPORT void AmiSetDwordToLe(void* pAddr_p, UINT32 dwordVal_p);
-DLLEXPORT UINT32 AmiGetDwordFromBe(void* pAddr_p);
-DLLEXPORT UINT32 AmiGetDwordFromLe(void* pAddr_p);
+#ifdef __cplusplus
+    extern "C" {
+#endif
 
-DLLEXPORT void AmiSetQword64ToBe(void* pAddr_p, UINT64 qwordVal_p);
-DLLEXPORT void AmiSetQword64ToLe(void* pAddr_p, UINT64 qwordVal_p);
-DLLEXPORT UINT64 AmiGetQword64FromBe(void* pAddr_p);
-DLLEXPORT UINT64 AmiGetQword64FromLe(void* pAddr_p);
+// Conversion functions for datatype WORD
+DLLEXPORT void ami_setUint16Be(void* pAddr_p, UINT16 uint16Val_p);
+DLLEXPORT void ami_setUint16Le(void* pAddr_p, UINT16 uint16Val_p);
 
-#endif  /* _INC_ami_H_ */
+DLLEXPORT UINT16 ami_getUint16Be(void* pAddr_p);
+DLLEXPORT UINT16 ami_getUint16Le(void* pAddr_p);
+
+// Conversion functions for datatype DWORD
+DLLEXPORT void ami_setUint32Be(void* pAddr_p, UINT32 uint32Val_p);
+DLLEXPORT void ami_setUint32Le(void* pAddr_p, UINT32 uint32Val_p);
+
+DLLEXPORT UINT32 ami_getUint32Be(void* pAddr_p);
+DLLEXPORT UINT32 ami_getUint32Le(void* pAddr_p);
+
+// Conversion functions for datatype QWORD
+DLLEXPORT void ami_setUint64Be(void* pAddr_p, UINT64 uint64Val_p);
+DLLEXPORT void ami_setUint64Le(void* pAddr_p, UINT64 uint64Val_p);
+
+DLLEXPORT UINT64 ami_getUint64Be(void* pAddr_p);
+DLLEXPORT UINT64 ami_getUint64Le(void* pAddr_p);
+
+#ifdef __cplusplus
+    }
+#endif
+
+
+#endif /* _INC_ami_H_ */

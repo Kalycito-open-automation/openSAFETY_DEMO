@@ -405,8 +405,8 @@ static BOOL status_processSync(UINT8* pBuffer_p, UINT16 bufSize_p,
     pStatusBuff = (tTbufStatusOutStructure*) pBuffer_p;
 
     // Call synchronous callback function
-    timeStamp.relTimeLow_m = AmiGetDwordFromLe((UINT8 *)&pStatusBuff->relTimeLow_m);
-    timeStamp.relTimeHigh_m = AmiGetDwordFromLe((UINT8 *)&pStatusBuff->relTimeHigh_m);
+    timeStamp.relTimeLow_m = ami_getUint32Le((UINT8 *)&pStatusBuff->relTimeLow_m);
+    timeStamp.relTimeHigh_m = ami_getUint32Le((UINT8 *)&pStatusBuff->relTimeHigh_m);
 
     if(statusInstance_l.pfnAppCbSync_m(&timeStamp) != FALSE)
     {
@@ -447,10 +447,10 @@ static BOOL status_updateOutStatusReg(UINT8* pBuffer_p, UINT16 bufSize_p,
     pStatusBuff = (tTbufStatusOutStructure*) pBuffer_p;
 
     // Get CC status register
-    statusInstance_l.iccStatus_m = AmiGetByteFromLe((UINT8 *)&pStatusBuff->iccStatus_m);
+    statusInstance_l.iccStatus_m = ami_getUint8Le((UINT8 *)&pStatusBuff->iccStatus_m);
 
     // Update tx status register
-    statusInstance_l.ssdoTxStatus_m = AmiGetWordFromLe((UINT8 *)&pStatusBuff->ssdoConsStatus_m);
+    statusInstance_l.ssdoTxStatus_m = ami_getUint16Le((UINT8 *)&pStatusBuff->ssdoConsStatus_m);
 
     // Acknowledge buffer
     stream_ackBuffer(statusInstance_l.buffOutId_m);
@@ -488,7 +488,7 @@ static BOOL status_updateInStatusReg(UINT8* pBuffer_p, UINT16 bufSize_p,
     stream_ackBuffer(statusInstance_l.buffInId_m);
 
     // Write rx status register
-    AmiSetWordToLe((UINT8 *)&pStatusBuff->ssdoProdStatus_m, statusInstance_l.ssdoRxStatus_m);
+    ami_setUint16Le((UINT8 *)&pStatusBuff->ssdoProdStatus_m, statusInstance_l.ssdoRxStatus_m);
 
     return TRUE;
 }
