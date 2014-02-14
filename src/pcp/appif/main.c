@@ -67,7 +67,6 @@ buffers which can be accessed by the application processor.
 #define IP_ADDR     0xc0a86401                          ///< IP-Address 192.168.100.1 (Object: 0x1E40/0x02) (don't care the last byte!)
 #define SUBNET_MASK 0xFFFFFF00                          ///< Subnet mask 255.255.255.0 (Object: 0x1E40/0x03)
 #define DEF_GATEWAY 0xc0a864f0                          ///< Default gateway: 192.168.100.254 (Object: 0x1E40/0x05)
-#define HOST_NAME   "openPOWERLINK CN"                  ///< The hostname of the CN (Object: 0x1F9A/0x00)
 
 #define CONFIG_ISOCHR_TX_MAX_PAYLOAD    max(40, sizeof(tTpdoMappedObj))
 #define CONFIG_ISOCHR_RX_MAX_PAYLOAD    1496
@@ -115,7 +114,7 @@ buffers which can be accessed by the application processor.
 typedef struct
 {
     UINT8         aMacAddr[6];       ///< MAC address
-    UINT8         sHostName[33];     ///< The hostname of the node
+    INT8          sHostName[33];     ///< The hostname of the node
     UINT8         nodeId;            ///< Node ID
     UINT32        subnetMask;        ///< The subnet mask of the node
     UINT32        defGateway;        ///< The default gateway of the node
@@ -171,7 +170,6 @@ int main (void)
     UINT8    nodeId;
     tAppIfStatus ret = kAppIfSuccessful;
     const UINT8 aMacAddr[] = {MAC_ADDR};
-    const UINT8 sHostname[] = {HOST_NAME};
 
     // reset local instance of main
     APPIF_MEMSET(&mainInstance_l, 0 , sizeof(tMainInstance));
@@ -211,7 +209,7 @@ int main (void)
     mainInstance_l.aMacAddr[MAC_ADDR_LAST_BYTE] = mainInstance_l.nodeId;
 
     // setup the hostname
-    OPLK_MEMCPY(mainInstance_l.sHostName, sHostname, sizeof(sHostname));
+    sprintf(mainInstance_l.sHostName, "%02x-%08x", (UINT32)NODEID, (UINT32)CONFIG_IDENT_VENDOR_ID);
 
     // Initialize the POWERLINK stack
     ret = appif_initPlk(&mainInstance_l);
