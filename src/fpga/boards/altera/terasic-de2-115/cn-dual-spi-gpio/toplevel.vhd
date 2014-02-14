@@ -160,10 +160,10 @@ architecture rtl of toplevel is
             -- POWERLINK LEDs
             status_led_pio_export                   : out   std_logic_vector(1 downto 0);
             -- FLASH
-            epcs_flash_dclk                         : out   std_logic;
-            epcs_flash_sce                          : out   std_logic;
-            epcs_flash_sdo                          : out   std_logic;
-            epcs_flash_data0                        : in    std_logic                     := 'X';
+            pcp_0_epcs_flash_dclk                   : out   std_logic;
+            pcp_0_epcs_flash_sce                    : out   std_logic;
+            pcp_0_epcs_flash_sdo                    : out   std_logic;
+            pcp_0_epcs_flash_data0                  : in    std_logic                     := 'X';
             -- USER LCD
             lcd_RS                                  : out   std_logic;
             lcd_RW                                  : out   std_logic;
@@ -270,10 +270,10 @@ begin
             -- POWERLINK LEDs
             status_led_pio_export                           => plk_status_error,
             -- FLASH
-            epcs_flash_dclk                                 => EPCS_DCLK,
-            epcs_flash_sce                                  => EPCS_SCE,
-            epcs_flash_sdo                                  => EPCS_SDO,
-            epcs_flash_data0                                => EPCS_DATA0,
+            pcp_0_epcs_flash_dclk                           => EPCS_DCLK,
+            pcp_0_epcs_flash_sce                            => EPCS_SCE,
+            pcp_0_epcs_flash_sdo                            => EPCS_SDO,
+            pcp_0_epcs_flash_data0                          => EPCS_DATA0,
             -- USER LCD
             lcd_data                                        => LCD_DQ,
             lcd_E                                           => LCD_E,

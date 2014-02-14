@@ -33,6 +33,10 @@
 SET(ALT_BUILD_DIR ${PROJECT_BINARY_DIR}/${ALT_BUILD_DIR_NAME})
 
 ##########################################################################
+# Instance ID user option
+SET(ALT_PCP_INSTANCE_ID "0" CACHE STRING "Instance ID of the POWERLINK processor")
+
+##########################################################################
 # Set build parameters
 SET( NIOS2_QSYS_SUB pcp_0 )
 SET( NIOS2_QSYS_SUB_CPU cpu_0 )
@@ -41,6 +45,9 @@ SET( BSP_TYPE hal )
 SET( BSP_DIR ${ALT_BUILD_DIR}/bsp )
 
 SET( NIOS2_TC_I_MEM ${NIOS2_QSYS_SUB}_tc_i_mem )
+
+# Path to the nios2 flash override file
+SET(ALT_FLASH_OVERRIDE ${ALT_MISC_DIR}/scripts/nios2-flash-override.txt)
 
 SET(ALT_TARGET_SRCS
     ${PROJECT_SOURCE_DIR}/target/altera/target.c
@@ -142,6 +149,8 @@ SET( ALT_APP_GEN_ARGS
                       "--set QSYS_SUB_CPU=${NIOS2_QSYS_SUB_CPU}"
                       "--set OBJDUMP_INCLUDE_SOURCE=1"
                       "--set CREATE_OBJDUMP=0"
+                      "--set FLASH_OVERRIDE=${ALT_FLASH_OVERRIDE}"
+                      "--set INSTANCE_ID=${ALT_PCP_INSTANCE_ID}"
                       "--set CFLAGS=${APP_CFLAGS} ${APP_CFLAGS_EXTENDED}"
                       "--set APP_CFLAGS_OPTIMIZATION=${OPT_LEVEL}"
                       "--elf-name ${PROJECT_NAME}.elf"

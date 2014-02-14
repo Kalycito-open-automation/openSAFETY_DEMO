@@ -24,7 +24,7 @@
    {
       datum _sortIndex
       {
-         value = "9";
+         value = "11";
          type = "int";
       }
       datum sopceditor_expanded
@@ -37,7 +37,7 @@
    {
       datum _sortIndex
       {
-         value = "1";
+         value = "2";
          type = "int";
       }
       datum sopceditor_expanded
@@ -46,16 +46,24 @@
          type = "boolean";
       }
    }
-   element clk50
+   element clk25
    {
       datum _sortIndex
       {
          value = "0";
          type = "int";
       }
+   }
+   element clk50
+   {
+      datum _sortIndex
+      {
+         value = "1";
+         type = "int";
+      }
       datum sopceditor_expanded
       {
-         value = "0";
+         value = "1";
          type = "boolean";
       }
    }
@@ -63,7 +71,7 @@
    {
       datum _sortIndex
       {
-         value = "7";
+         value = "9";
          type = "int";
       }
       datum sopceditor_expanded
@@ -76,7 +84,7 @@
    {
       datum _sortIndex
       {
-         value = "2";
+         value = "3";
          type = "int";
       }
       datum sopceditor_expanded
@@ -89,13 +97,29 @@
    {
       datum _sortIndex
       {
-         value = "4";
+         value = "6";
          type = "int";
       }
       datum sopceditor_expanded
       {
-         value = "0";
+         value = "1";
          type = "boolean";
+      }
+   }
+   element epcs_flash_controller_0.epcs_control_port
+   {
+      datum baseAddress
+      {
+         value = "50331648";
+         type = "String";
+      }
+   }
+   element epcs_flash_controller_0
+   {
+      datum _sortIndex
+      {
+         value = "5";
+         type = "int";
       }
    }
    element cpu_0.jtag_debug_module
@@ -110,7 +134,7 @@
    {
       datum _sortIndex
       {
-         value = "10";
+         value = "12";
          type = "int";
       }
       datum sopceditor_expanded
@@ -123,7 +147,15 @@
    {
       datum _sortIndex
       {
-         value = "6";
+         value = "8";
+         type = "int";
+      }
+   }
+   element remote_update_cycloneiii_0
+   {
+      datum _sortIndex
+      {
+         value = "13";
          type = "int";
       }
    }
@@ -136,7 +168,7 @@
       }
       datum baseAddress
       {
-         value = "536870912";
+         value = "268435456";
          type = "String";
       }
    }
@@ -185,6 +217,14 @@
          type = "String";
       }
    }
+   element remote_update_cycloneiii_0.s1
+   {
+      datum baseAddress
+      {
+         value = "8192";
+         type = "String";
+      }
+   }
    element tc_i_mem.s2
    {
       datum _lockedAddress
@@ -202,7 +242,7 @@
    {
       datum _sortIndex
       {
-         value = "11";
+         value = "14";
          type = "int";
       }
       datum sopceditor_expanded
@@ -215,7 +255,7 @@
    {
       datum _sortIndex
       {
-         value = "5";
+         value = "7";
          type = "int";
       }
    }
@@ -223,7 +263,7 @@
    {
       datum _sortIndex
       {
-         value = "3";
+         value = "4";
          type = "int";
       }
       datum sopceditor_expanded
@@ -236,7 +276,7 @@
    {
       datum _sortIndex
       {
-         value = "8";
+         value = "10";
          type = "int";
       }
       datum sopceditor_expanded
@@ -260,7 +300,7 @@
  <parameter name="projectName" value="" />
  <parameter name="sopcBorderPoints" value="false" />
  <parameter name="systemHash" value="1" />
- <parameter name="timeStamp" value="1392196900728" />
+ <parameter name="timeStamp" value="1392364670588" />
  <parameter name="useTestBenchNamingPattern" value="false" />
  <instanceScript></instanceScript>
  <interface name="clk50" internal="clk50.clk_in" type="clock" dir="end" />
@@ -292,6 +332,13 @@
    internal="sync_irq.receiver_irq"
    type="interrupt"
    dir="start" />
+ <interface
+   name="epcs_flash"
+   internal="epcs_flash_controller_0.external"
+   type="conduit"
+   dir="end" />
+ <interface name="clk25" internal="clk25.clk_in" type="clock" dir="end" />
+ <interface name="rst_clk25" internal="clk25.clk_in_reset" type="reset" dir="end" />
  <module kind="clock_source" version="13.0" enabled="1" name="clk50">
   <parameter name="clockFrequency" value="50000000" />
   <parameter name="clockFrequencyKnown" value="true" />
@@ -442,12 +489,12 @@
   <parameter name="mmu_TLBMissExcOffset" value="0" />
   <parameter name="debug_jtagInstanceID" value="0" />
   <parameter name="resetOffset" value="0" />
-  <parameter name="exceptionOffset" value="32" />
+  <parameter name="exceptionOffset" value="0" />
   <parameter name="cpuID" value="1" />
   <parameter name="cpuID_stored" value="1" />
   <parameter name="breakOffset" value="32" />
   <parameter name="userDefinedSettings" value="" />
-  <parameter name="resetSlave" value="tc_i_mem.s1" />
+  <parameter name="resetSlave">epcs_flash_controller_0.epcs_control_port</parameter>
   <parameter name="mmu_TLBMissExcSlave" value="" />
   <parameter name="exceptionSlave" value="tc_i_mem.s1" />
   <parameter name="breakSlave">cpu_0.jtag_debug_module</parameter>
@@ -485,7 +532,7 @@
   <parameter name="mmu_ramBlockType" value="Automatic" />
   <parameter name="bht_ramBlockType" value="Automatic" />
   <parameter name="instAddrWidth" value="26" />
-  <parameter name="dataAddrWidth" value="30" />
+  <parameter name="dataAddrWidth" value="29" />
   <parameter name="tightlyCoupledDataMaster0AddrWidth" value="1" />
   <parameter name="tightlyCoupledDataMaster1AddrWidth" value="1" />
   <parameter name="tightlyCoupledDataMaster2AddrWidth" value="1" />
@@ -494,8 +541,8 @@
   <parameter name="tightlyCoupledInstructionMaster1AddrWidth" value="1" />
   <parameter name="tightlyCoupledInstructionMaster2AddrWidth" value="1" />
   <parameter name="tightlyCoupledInstructionMaster3AddrWidth" value="1" />
-  <parameter name="instSlaveMapParam"><![CDATA[<address-map><slave name='cpu_0.jtag_debug_module' start='0x2002800' end='0x2003000' /></address-map>]]></parameter>
-  <parameter name="dataSlaveMapParam"><![CDATA[<address-map><slave name='cpu_0.jtag_debug_module' start='0x2002800' end='0x2003000' /><slave name='tc_i_mem.s2' start='0x8000000' end='0x8001000' /><slave name='timer_0.s1' start='0x20000000' end='0x20000020' /><slave name='benchmark_pio.s1' start='0x20000020' end='0x20000040' /><slave name='jtag_uart_0.avalon_jtag_slave' start='0x20000040' end='0x20000048' /></address-map>]]></parameter>
+  <parameter name="instSlaveMapParam"><![CDATA[<address-map><slave name='cpu_0.jtag_debug_module' start='0x2002800' end='0x2003000' /><slave name='epcs_flash_controller_0.epcs_control_port' start='0x3000000' end='0x3000800' /></address-map>]]></parameter>
+  <parameter name="dataSlaveMapParam"><![CDATA[<address-map><slave name='cpu_0.jtag_debug_module' start='0x2002800' end='0x2003000' /><slave name='epcs_flash_controller_0.epcs_control_port' start='0x3000000' end='0x3000800' /><slave name='tc_i_mem.s2' start='0x8000000' end='0x8001000' /><slave name='timer_0.s1' start='0x10000000' end='0x10000020' /><slave name='benchmark_pio.s1' start='0x10000020' end='0x10000040' /><slave name='jtag_uart_0.avalon_jtag_slave' start='0x10000040' end='0x10000048' /><slave name='remote_update_cycloneiii_0.s1' start='0x10002000' end='0x10002100' /></address-map>]]></parameter>
   <parameter name="clockFrequency" value="100000000" />
   <parameter name="deviceFamilyName" value="Cyclone IV E" />
   <parameter name="internalIrqMaskSystemInfo" value="15" />
@@ -561,6 +608,31 @@
   <parameter name="IRQ_N" value="0" />
   <parameter name="AUTO_CLK_CLOCK_RATE" value="50000000" />
   <parameter name="AUTO_DEVICE_FAMILY" value="Cyclone IV E" />
+ </module>
+ <module
+   kind="altera_avalon_epcs_flash_controller"
+   version="13.0.1.99.2"
+   enabled="1"
+   name="epcs_flash_controller_0">
+  <parameter name="autoSelectASMIAtom" value="true" />
+  <parameter name="useASMIAtom" value="false" />
+  <parameter name="clockRate" value="25000000" />
+  <parameter name="deviceFamilyString" value="Cyclone IV E" />
+  <parameter name="autoInitializationFileName">$${FILENAME}_epcs_flash_controller_0</parameter>
+ </module>
+ <module
+   kind="altera_avalon_remote_update_cycloneiii"
+   version="13.0"
+   enabled="1"
+   name="remote_update_cycloneiii_0">
+  <parameter name="clockFrequency" value="25000000" />
+  <parameter name="AUTO_DEVICE_FAMILY" value="Cyclone IV E" />
+ </module>
+ <module kind="clock_source" version="13.0" enabled="1" name="clk25">
+  <parameter name="clockFrequency" value="25000000" />
+  <parameter name="clockFrequencyKnown" value="true" />
+  <parameter name="inputClockFrequency" value="0" />
+  <parameter name="resetSynchronousEdges" value="NONE" />
  </module>
  <connection
    kind="avalon"
@@ -674,7 +746,7 @@
    start="cpu_0.data_master"
    end="clock_crossing_0.s0">
   <parameter name="arbitrationPriority" value="1" />
-  <parameter name="baseAddress" value="0x20000000" />
+  <parameter name="baseAddress" value="0x10000000" />
   <parameter name="defaultConnection" value="false" />
  </connection>
  <connection
@@ -885,6 +957,53 @@
    version="13.0"
    start="clk100.clk_reset"
    end="mac_irq.clk_reset" />
+ <connection
+   kind="reset"
+   version="13.0"
+   start="cpu_0.jtag_debug_module_reset"
+   end="epcs_flash_controller_0.reset" />
+ <connection
+   kind="avalon"
+   version="13.0"
+   start="clock_crossing_0.m0"
+   end="remote_update_cycloneiii_0.s1">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x2000" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection
+   kind="clock"
+   version="13.0"
+   start="clk25.clk"
+   end="remote_update_cycloneiii_0.global_signals_clock" />
+ <connection
+   kind="reset"
+   version="13.0"
+   start="cpu_0.jtag_debug_module_reset"
+   end="remote_update_cycloneiii_0.global_signals_clock_reset" />
+ <connection
+   kind="avalon"
+   version="13.0"
+   start="cpu_0.data_master"
+   end="epcs_flash_controller_0.epcs_control_port">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x03000000" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection
+   kind="avalon"
+   version="13.0"
+   start="cpu_0.instruction_master"
+   end="epcs_flash_controller_0.epcs_control_port">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x03000000" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection
+   kind="clock"
+   version="13.0"
+   start="clk25.clk"
+   end="epcs_flash_controller_0.clk" />
  <interconnectRequirement for="$system" name="qsys_mm.clockCrossingAdapter" value="HANDSHAKE" />
  <interconnectRequirement for="$system" name="qsys_mm.maxAdditionalLatency" value="0" />
 </system>
