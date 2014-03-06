@@ -50,7 +50,7 @@
 #include <Stubs/STBdummyHandler.h>
 
 #include <libappif/internal/cc.h>
-#include <appifcommon/ccobject.h>
+#include <libappifcommon/ccobject.h>
 #include <libappif/internal/stream.h>
 
 #if (((APPIF_MODULE_INTEGRATION) & (APPIF_MODULE_CC)) != 0)

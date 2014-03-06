@@ -41,7 +41,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <appifcommon/global.h>
+#include <libappifcommon/global.h>
 
 //------------------------------------------------------------------------------
 // const defines

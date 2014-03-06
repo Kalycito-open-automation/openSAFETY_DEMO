@@ -46,7 +46,7 @@ Consists of the object list of the input and output configuration channel.
 // includes
 //------------------------------------------------------------------------------
 
-#include <appifcommon/ccobject.h>
+#include <libappifcommon/ccobject.h>
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //

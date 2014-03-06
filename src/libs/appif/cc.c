@@ -52,8 +52,8 @@ and forwards objects from the user application to the PCP.
 #include <libappif/internal/stream.h>
 #include <libappif/internal/status.h>
 
-#include <appifcommon/ccobject.h>
-#include <appifcommon/timeout.h>
+#include <libappifcommon/ccobject.h>
+#include <libappifcommon/timeout.h>
 
 #if(((APPIF_MODULE_INTEGRATION) & (APPIF_MODULE_CC)) != 0)
 

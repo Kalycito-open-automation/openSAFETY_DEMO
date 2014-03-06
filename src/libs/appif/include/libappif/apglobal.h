@@ -42,7 +42,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // includes
 //------------------------------------------------------------------------------
 
-#include <appifcommon/global.h>
+#include <libappifcommon/global.h>
 
 #include <libappif/debug.h>
 #include <libappif/error.h>

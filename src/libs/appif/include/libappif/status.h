@@ -44,7 +44,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <libappif/apglobal.h>
 
-#include <appifcommon/status.h>
+#include <libappifcommon/status.h>
 
 //------------------------------------------------------------------------------
 // const defines

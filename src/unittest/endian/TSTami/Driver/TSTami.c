@@ -47,7 +47,7 @@
 
 #include <Driver/TSTamiConfig.h>
 
-#include <ami/ami.h>
+#include <libami/ami.h>
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //

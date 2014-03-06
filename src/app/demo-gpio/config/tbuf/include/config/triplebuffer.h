@@ -42,11 +42,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <appifcommon/status.h>
-#include <appifcommon/cc.h>
-#include <appifcommon/ssdo.h>
-#include <appifcommon/rpdo.h>
-#include <appifcommon/tpdo.h>
+#include <libappifcommon/status.h>
+#include <libappifcommon/cc.h>
+#include <libappifcommon/ssdo.h>
+#include <libappifcommon/rpdo.h>
+#include <libappifcommon/tpdo.h>
 
 //------------------------------------------------------------------------------
 // typedef

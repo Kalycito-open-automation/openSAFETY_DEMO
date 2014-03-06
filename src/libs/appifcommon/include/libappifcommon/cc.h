@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   appifcommon/cc.h
+\file   libappifcommon/cc.h
 
 \brief  Header defines the layout of the configuration channel triple buffer
 
@@ -43,7 +43,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // includes
 //------------------------------------------------------------------------------
 
-#include <appifcommon/global.h>
+#include <libappifcommon/global.h>
 
 //------------------------------------------------------------------------------
 // typedef

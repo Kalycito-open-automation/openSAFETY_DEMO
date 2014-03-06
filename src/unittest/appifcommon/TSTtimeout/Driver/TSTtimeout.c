@@ -49,7 +49,7 @@ This driver tests the whole timeout module of the application interface.
 
 #include <Driver/TSTtimeoutConfig.h>
 
-#include <appifcommon/internal/timeout.h>
+#include <libappifcommon/internal/timeout.h>
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //

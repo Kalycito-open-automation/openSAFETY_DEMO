@@ -47,7 +47,7 @@
 //------------------------------------------------------------------------------
 #include <cunit/CUnit.h>
 
-#include <appifcommon/ccobject.h>
+#include <libappifcommon/ccobject.h>
 
 //------------------------------------------------------------------------------
 // const defines

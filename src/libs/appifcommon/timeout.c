@@ -46,7 +46,7 @@ the synchronous interrupts. If a limit is reached the timeout is generated.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <appifcommon/internal/timeout.h>
+#include <libappifcommon/internal/timeout.h>
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //

@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   appifcommon/global.h
+\file   libappifcommon/global.h
 
 \brief  Global header file for the application interface project
 
@@ -48,7 +48,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
   #include <oplk/ami.h>
 #else
   #include <apptarget/target.h>
-  #include <ami/ami.h>
+  #include <libami/ami.h>
 #endif
 
 //------------------------------------------------------------------------------

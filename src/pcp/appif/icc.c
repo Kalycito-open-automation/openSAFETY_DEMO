@@ -49,7 +49,7 @@ triple buffers.
 
 #include <appif/icc.h>
 
-#include <appifcommon/ccobject.h>
+#include <libappifcommon/ccobject.h>
 #include <appif/status.h>
 #include <appif/tbuf.h>
 

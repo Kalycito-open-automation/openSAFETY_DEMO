@@ -50,7 +50,7 @@ triple buffers.
 #include <appif/occ.h>
 
 #include <appif/tbuf.h>
-#include <appifcommon/ccobject.h>
+#include <libappifcommon/ccobject.h>
 #include <appif/obdict.h>
 
 //============================================================================//

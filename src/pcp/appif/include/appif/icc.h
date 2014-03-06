@@ -44,7 +44,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <appif/pcpglobal.h>
 
-#include <appifcommon/cc.h>
+#include <libappifcommon/cc.h>
 
 //------------------------------------------------------------------------------
 // const defines

@@ -54,7 +54,7 @@ processes the synchronous and asynchronous task.
 #include <libappif/internal/cc.h>
 #include <libappif/internal/error.h>
 
-#include <appifcommon/timeout.h>
+#include <libappifcommon/timeout.h>
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //

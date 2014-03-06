@@ -1,11 +1,11 @@
 /**
 ********************************************************************************
-\file   appifcommon/ssdo.h
+\file   libappifcommon/internal/timeout.h
 
-\brief  Header defines the layout of the SSDO triple buffer
+\brief  Internal header file timeout generation
 
-This header gives the basic structure of the SSDO receive and
-transmit buffers.
+This module generates a timeout for asynchronous transmissions by simply counting
+the synchronous interrupts. If a limit is reached the timeout is generated.
 
 *******************************************************************************/
 
@@ -36,58 +36,40 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
 
-#ifndef _INC_appifcommon_ssdo_H_
-#define _INC_appifcommon_ssdo_H_
+#ifndef _INC_appifcommon_int_timeout_H_
+#define _INC_appifcommon_int_timeout_H_
 
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
 
-#include <config/ssdo.h>
+#include <libappifcommon/timeout.h>
 
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
+
+#define TIMEOUT_MAX_INSTANCES       5       ///< Maximum number of timeout module instances
 
 //------------------------------------------------------------------------------
 // typedef
 //------------------------------------------------------------------------------
 
 /**
- * \brief Memory layout of the receive channel
- */
-typedef struct {
-    UINT8   seqNr_m;
-    UINT8   reserved;
-    UINT16  paylSize_m;
-    UINT8   ssdoStubDataDom_m[SSDO_STUB_DATA_DOM_SIZE];
-} tTbufSsdoRxStructure;
-
-/**
- * \brief Memory layout of the transmit channel
- */
-typedef struct {
-    UINT8   seqNr_m;
-    UINT8   reserved;
-    UINT16  paylSize_m;
-    UINT8   tssdoTransmitData_m[TSSDO_TRANSMIT_DATA_SIZE];
-} tTbufSsdoTxStructure;
-
-//------------------------------------------------------------------------------
-// offsetof defines
-//------------------------------------------------------------------------------
-
-#define TBUF_SSDORX_SEQNR_OFF                 offsetof(tTbufSsdoRxStructure, seqNr_m)
-#define TBUF_SSDORX_PAYLSIZE_OFF              offsetof(tTbufSsdoRxStructure, paylSize_m)
-#define TBUF_SSDORX_SSDO_STUB_DATA_DOM_OFF    offsetof(tTbufSsdoRxStructure, ssdoStubDataDom_m)
-
-#define TBUF_SSDOTX_SEQNR_OFF                 offsetof(tTbufSsdoTxStructure, seqNr_m)
-#define TBUF_SSDOTX_PAYLSIZE_OFF              offsetof(tTbufSsdoTxStructure, paylSize_m)
-#define TBUF_SSDOTX_TSSDO_TRANSMIT_DATA_OFF   offsetof(tTbufSsdoTxStructure, tssdoTransmitData_m)
+\brief Timeout module user instance
+*/
+struct eTimeoutInstance
+{
+    UINT8     fInstUsed_m;              ///< Instance is already allocated
+    UINT8     fTimeoutEn_m;             ///< Transmit timeout enabled
+    UINT16    timeoutCycleCount_m;      ///< Async transmit cycle count
+    UINT16    cycleLimit_m;             ///< Limit of cycles to count
+};
 
 //------------------------------------------------------------------------------
 // function prototypes
 //------------------------------------------------------------------------------
 
-#endif /* _INC_appifcommon_ssdo_H_ */
+#endif /* _INC_appifcommon_int_timeout_H_ */
+
 

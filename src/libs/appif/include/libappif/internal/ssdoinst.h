@@ -43,8 +43,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // includes
 //------------------------------------------------------------------------------
 
-#include <appifcommon/ssdo.h>
-#include <appifcommon/timeout.h>
+#include <libappifcommon/ssdo.h>
+#include <libappifcommon/timeout.h>
 
 #include <libappif/ssdo.h>
 

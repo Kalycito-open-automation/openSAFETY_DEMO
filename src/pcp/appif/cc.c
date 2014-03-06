@@ -48,7 +48,7 @@ object list.
 //------------------------------------------------------------------------------
 
 #include <appif/cc.h>
-#include <appifcommon/ccobject.h>
+#include <libappifcommon/ccobject.h>
 
 #include <config/ccobjectlist.h>
 

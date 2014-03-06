@@ -60,7 +60,7 @@ the synchronous and asynchronous tasks.
 #include <appif/tpdo.h>
 #include <appif/ssdo.h>
 #include <appif/fifo.h>
-#include <appifcommon/ccobject.h>
+#include <libappifcommon/ccobject.h>
 
 #include <config/ccobjectlist.h>
 #include <config/triplebuffer.h>

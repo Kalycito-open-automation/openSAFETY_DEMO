@@ -49,7 +49,7 @@
 #include <Stubs/STBinitObjects.h>
 #include <Stubs/STBcritSec.h>
 
-#include <appifcommon/ccobject.h>
+#include <libappifcommon/ccobject.h>
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //

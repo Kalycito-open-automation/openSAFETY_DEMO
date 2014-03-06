@@ -1,10 +1,11 @@
 /**
 ********************************************************************************
-\file   appifcommon/ccobject.h
+\file   libappifcommon/ssdo.h
 
-\brief  Header file for configuration channel output module
+\brief  Header defines the layout of the SSDO triple buffer
 
-This file contains definitions for the configuration channel output module.
+This header gives the basic structure of the SSDO receive and
+transmit buffers.
 
 *******************************************************************************/
 
@@ -35,51 +36,58 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
 
-#ifndef _INC_appifcommon_ccobject_H_
-#define _INC_appifcommon_ccobject_H_
+#ifndef _INC_appifcommon_ssdo_H_
+#define _INC_appifcommon_ssdo_H_
 
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
 
-#include <appifcommon/global.h>
-
-#include <config/ccobjectlist.h>
+#include <config/ssdo.h>
 
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
-
 
 //------------------------------------------------------------------------------
 // typedef
 //------------------------------------------------------------------------------
 
 /**
- * \brief Object list write state type
+ * \brief Memory layout of the receive channel
  */
-typedef enum {
-    kCcWriteStateError        = 0x00,   ///< Error while writing to object list
-    kCcWriteStateSuccessful   = 0x01,   ///< Successfully written to object list
-    kCcWriteStateOutOfSync    = 0x02,   ///< Object list pointer out of sync
-} tCcWriteState;
+typedef struct {
+    UINT8   seqNr_m;
+    UINT8   reserved;
+    UINT16  paylSize_m;
+    UINT8   ssdoStubDataDom_m[SSDO_STUB_DATA_DOM_SIZE];
+} tTbufSsdoRxStructure;
+
+/**
+ * \brief Memory layout of the transmit channel
+ */
+typedef struct {
+    UINT8   seqNr_m;
+    UINT8   reserved;
+    UINT16  paylSize_m;
+    UINT8   tssdoTransmitData_m[TSSDO_TRANSMIT_DATA_SIZE];
+} tTbufSsdoTxStructure;
+
+//------------------------------------------------------------------------------
+// offsetof defines
+//------------------------------------------------------------------------------
+
+#define TBUF_SSDORX_SEQNR_OFF                 offsetof(tTbufSsdoRxStructure, seqNr_m)
+#define TBUF_SSDORX_PAYLSIZE_OFF              offsetof(tTbufSsdoRxStructure, paylSize_m)
+#define TBUF_SSDORX_SSDO_STUB_DATA_DOM_OFF    offsetof(tTbufSsdoRxStructure, ssdoStubDataDom_m)
+
+#define TBUF_SSDOTX_SEQNR_OFF                 offsetof(tTbufSsdoTxStructure, seqNr_m)
+#define TBUF_SSDOTX_PAYLSIZE_OFF              offsetof(tTbufSsdoTxStructure, paylSize_m)
+#define TBUF_SSDOTX_TSSDO_TRANSMIT_DATA_OFF   offsetof(tTbufSsdoTxStructure, tssdoTransmitData_m)
 
 //------------------------------------------------------------------------------
 // function prototypes
 //------------------------------------------------------------------------------
-DLLEXPORT BOOL ccobject_init(tAppIfCritSec pfnCritSec_p);
-DLLEXPORT void ccobject_exit(void);
-DLLEXPORT BOOL ccobject_initObject(UINT8 objId_p, tConfChanObject* pObjDef_p);
-DLLEXPORT BOOL ccobject_writeObject(tConfChanObject* objDef_p);
-DLLEXPORT tCcWriteState ccobject_writeCurrObject(UINT16 objIdx_p, UINT8 objSubIdx_p,
-        UINT8* pData_p);
-DLLEXPORT tConfChanObject* ccobject_readObject(UINT16 objIdx_p, UINT8 objSubIdx_p);
-DLLEXPORT tConfChanObject* ccobject_readCurrObject(void);
-DLLEXPORT void ccobject_incObjReadPointer(void);
-DLLEXPORT void ccobject_incObjWritePointer(void);
-DLLEXPORT BOOL ccobject_getObjectSize(UINT16 objIdx_p, UINT8 objSubIdx_p,
-        UINT8* pSize_p);
 
-#endif /* _INC_appifcommon_ccobject_H_ */
-
+#endif /* _INC_appifcommon_ssdo_H_ */
 

@@ -1,8 +1,8 @@
 /**
 ********************************************************************************
-\file   appifcommon/internal/timeout.h
+\file   libappifcommon/timeout.h
 
-\brief  Internal header file timeout generation
+\brief  Module header file timeout generation
 
 This module generates a timeout for asynchronous transmissions by simply counting
 the synchronous interrupts. If a limit is reached the timeout is generated.
@@ -36,40 +36,51 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
 
-#ifndef _INC_appifcommon_int_timeout_H_
-#define _INC_appifcommon_int_timeout_H_
+#ifndef _INC_appifcommon_timeout_H_
+#define _INC_appifcommon_timeout_H_
 
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
 
-#include <appifcommon/timeout.h>
+#include <libappifcommon/global.h>
 
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
-
-#define TIMEOUT_MAX_INSTANCES       5       ///< Maximum number of timeout module instances
 
 //------------------------------------------------------------------------------
 // typedef
 //------------------------------------------------------------------------------
 
 /**
-\brief Timeout module user instance
-*/
-struct eTimeoutInstance
-{
-    UINT8     fInstUsed_m;              ///< Instance is already allocated
-    UINT8     fTimeoutEn_m;             ///< Transmit timeout enabled
-    UINT16    timeoutCycleCount_m;      ///< Async transmit cycle count
-    UINT16    cycleLimit_m;             ///< Limit of cycles to count
-};
+ * \brief Timer module instance type
+ */
+typedef struct eTimeoutInstance *tTimeoutInstance;
+
+/**
+ * \brief Current state of the timer
+ */
+typedef enum {
+    kTimerStateInvalid   = 0x00,    ///< Invalid timer state
+    kTimerStateRunning   = 0x01,    ///< Timer is currently running
+    kTimerStateExpired   = 0x02,    ///< Timer is expired
+    kTimerStateStopped   = 0x03,    ///< Timer is currently stopped
+} tTimerStatus;
 
 //------------------------------------------------------------------------------
 // function prototypes
 //------------------------------------------------------------------------------
+DLLEXPORT void timeout_init(void);
+DLLEXPORT tTimeoutInstance timeout_create(UINT16 cycleLimit_p);
+DLLEXPORT void timeout_destroy(tTimeoutInstance pInstance_p);
 
-#endif /* _INC_appifcommon_int_timeout_H_ */
+DLLEXPORT tTimerStatus timeout_checkExpire(tTimeoutInstance pInstance_p);
+DLLEXPORT void timeout_incrementCounter(tTimeoutInstance pInstance_p);
+DLLEXPORT void timeout_startTimer(tTimeoutInstance pInstance_p);
+DLLEXPORT void timeout_stopTimer(tTimeoutInstance pInstance_p);
+DLLEXPORT tTimerStatus timeout_isRunning(tTimeoutInstance pInstance_p);
+
+#endif /* _INC_appifcommon_timeout_H_ */
 
 

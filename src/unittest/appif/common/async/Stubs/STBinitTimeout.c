@@ -45,7 +45,7 @@
 //------------------------------------------------------------------------------
 #include <Stubs/STBinitTimeout.h>
 
-#include <appifcommon/internal/timeout.h>
+#include <libappifcommon/internal/timeout.h>
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //

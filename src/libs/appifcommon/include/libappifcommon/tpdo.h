@@ -1,10 +1,10 @@
 /**
 ********************************************************************************
-\file   appifcommon/status.h
+\file   libappifcommon/tpdo.h
 
-\brief  Header defines the layout of the status triple buffer
+\brief  This header defines the memory layout of the tpdo module
 
-This header gives the basic structure of the status triple buffers.
+This header gives the basic structure of the transmit pdo triple buffers.
 
 *******************************************************************************/
 
@@ -35,56 +35,42 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
 
-#ifndef _INC_appifcommon_status_H_
-#define _INC_appifcommon_status_H_
+#ifndef _INC_appifcommon_tpdo_H_
+#define _INC_appifcommon_tpdo_H_
 
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
 
-#include <appifcommon/global.h>
+#include <config/tpdo.h>
+
+//------------------------------------------------------------------------------
+// const defines
+//------------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------
 // typedef
 //------------------------------------------------------------------------------
 
 /**
- * \brief Status channel outgoing buffer layout
+ * \brief The layout of the transmit PDO image
  */
 typedef struct {
-    UINT32 relTimeLow_m;
-    UINT32 relTimeHigh_m;
-    UINT8  iccStatus_m;
-    UINT8  reserved_m;
-    UINT16 ssdoConsStatus_m;
-} tTbufStatusOutStructure;
-
-/**
- * \brief Status channel incoming buffer layout
- */
-typedef struct {
-    UINT16 reserved_m;
-    UINT16 ssdoProdStatus_m;
-} tTbufStatusInStructure;
+    tTpdoMappedObj mappedObjList_m;
+} tTbufTpdoImage;
 
 //------------------------------------------------------------------------------
-// const defines
+// offsetof defines
 //------------------------------------------------------------------------------
+#define TBUF_TPDO_MAPPED_OBJ_OFF    offsetof(tTbufTpdoImage, mappedObjList_m)
 
-#define TBUF_RELTIME_LOW_OFF            offsetof(tTbufStatusOutStructure, relTimeLow_m)
-#define TBUF_RELTIME_HIGH_OFF           offsetof(tTbufStatusOutStructure, relTimeHigh_m)
-#define TBUF_ICC_STATUS_OFF             offsetof(tTbufStatusOutStructure, iccStatus_m)
-#define TBUF_SSDO_CONS_STATUS_OFF       offsetof(tTbufStatusOutStructure, ssdoConsStatus_m)
-
-#define TBUF_SSDO_PROD_STATUS_OFF       offsetof(tTbufStatusInStructure, ssdoProdStatus_m)
-
-
-#define STATUS_ICC_BUSY_FLAG_POS        0       ///< Position of the ICC busy flag
-#define STATUS_ICC_ERROR_FLAG_POS       1       ///< Position of the ICC error flag (TODO)
+//------------------------------------------------------------------------------
+// object linking parameters
+//------------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------
 // function prototypes
 //------------------------------------------------------------------------------
 
-#endif /* _INC_appifcommon_status_H_ */
+#endif /* _INC_appifcommon_tpdo_H_ */
 

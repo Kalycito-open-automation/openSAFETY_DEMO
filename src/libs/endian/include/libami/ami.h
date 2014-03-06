@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   ami/ami.h
+\file   libami/ami.h
 
 \brief  Definitions for the abstract memory interface (ami)
 
