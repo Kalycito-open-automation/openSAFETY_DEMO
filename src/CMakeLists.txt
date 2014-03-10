@@ -30,7 +30,7 @@
 
 CMAKE_MINIMUM_REQUIRED (VERSION 2.8.4)
 
-PROJECT (openPOWERLINK-PIFA)
+PROJECT (openPOWERLINK-PIFA C)
 
 SET( CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/../cmake" "${CMAKE_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
 
@@ -44,6 +44,16 @@ INCLUDE(CheckFunctionExists)
 INCLUDE(CMakeOptions.txt)
 
 INCLUDE(FindDoxygen)
+
+MESSAGE(STATUS "CMAKE_SYSTEM_NAME is ${CMAKE_SYSTEM_NAME}")
+MESSAGE(STATUS "CMAKE_SYSTEM_PROCESSOR is ${CMAKE_SYSTEM_PROCESSOR}")
+
+#######################
+## SETUP DEFAULT VARS
+#######################
+
+# Set the LIB_TYPE variable to STATIC
+SET (LIB_TYPE STATIC)
 
 #######################
 ## UNIT TESTS
@@ -60,7 +70,7 @@ IF ( UNITTEST_ENABLE )
     ENDIF ( UNITTEST_XML_REPORTS )
 
     IF ( CMAKE_BUILD_TYPE STREQUAL "coverage" )
-        IF ( CMAKE_COMPILER_IS_GNUCXX )
+        IF ( CMAKE_COMPILER_IS_GNUCC  )
 
             INCLUDE(FindPythonInterp)
             FIND_PACKAGE(lcov)
@@ -79,9 +89,9 @@ IF ( UNITTEST_ENABLE )
                 MESSAGE ( STATUS "Disabling coverage tests, gcovr not found in path" )
             ENDIF ( NOT GCOVR_FOUND AND NOT GCOV_FOUND )
 
-        ELSE ( CMAKE_COMPILER_IS_GNUCXX )
+        ELSE ( CMAKE_COMPILER_IS_GNUCC  )
             MESSAGE ( FATAL_ERROR "Coverage is currently only possible using gcov and gnu compiler suite" )
-        ENDIF ( CMAKE_COMPILER_IS_GNUCXX )
+        ENDIF ( CMAKE_COMPILER_IS_GNUCC  )
 
     ENDIF ( CMAKE_BUILD_TYPE STREQUAL "coverage" )
 ENDIF ( UNITTEST_ENABLE )
@@ -101,27 +111,42 @@ SET( FPGA_DIR ${CMAKE_SOURCE_DIR}/fpga )
 
 #####################################################################
 # Setup architecture specific configuration
-IF (UNIX)
-    INCLUDE (configure-linux)
-ENDIF (UNIX)
+IF(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    INCLUDE(configure-linux)
+ELSEIF(CMAKE_SYSTEM_NAME STREQUAL "Windows")
+    INCLUDE(configure-windows)
+ELSEIF((CMAKE_SYSTEM_NAME STREQUAL "Generic") AND (CMAKE_SYSTEM_PROCESSOR STREQUAL "Nios2"))
+    INCLUDE(configure-nios2)
+ENDIF()
 
-IF (WIN32)
-    INCLUDE (configure-windows)
-ENDIF (WIN32)
+#####################################################################
+# Set compiler specific definitions
+IF("${CMAKE_C_COMPILER_ID}" STREQUAL "GNU")
+    SET(CFLAGS "-Wall -Wextra -pedantic -std=c99")
+ENDIF()
 
-IF( CFG_GEN_NIOS_TARGET )
-    INCLUDE (configure-nios2)
-ENDIF ( CFG_GEN_NIOS_TARGET )
+#####################################################################
+# Add the subprojects depending on the target platform
+IF((CMAKE_SYSTEM_NAME STREQUAL "Generic"))
+    # We are cross compiling for an embedded platform
+    IF(CFG_INCLUDE_SUBPROJECTS MATCHES "application" OR CFG_INCLUDE_SUBPROJECTS MATCHES "all" )
+        ADD_SUBDIRECTORY ("${PROJECT_SOURCE_DIR}/libs/endian" )
+        ADD_SUBDIRECTORY ("${PROJECT_SOURCE_DIR}/libs/appifcommon" )
+        ADD_SUBDIRECTORY ("${PROJECT_SOURCE_DIR}/libs/appif" )
 
+        # Add the current demo to the build
+        ADD_SUBDIRECTORY("${CMAKE_SOURCE_DIR}/app/demo-${CFG_DEMO_TYPE}")
+    ENDIF()
 
-ADD_SUBDIRECTORY ("${PROJECT_SOURCE_DIR}/libs/endian" )
-ADD_SUBDIRECTORY ("${PROJECT_SOURCE_DIR}/libs/appifcommon" )
-ADD_SUBDIRECTORY ("${PROJECT_SOURCE_DIR}/libs/appif" )
-
-IF( CFG_GEN_NIOS_TARGET )
-    ADD_SUBDIRECTORY( "${CMAKE_SOURCE_DIR}/app/demo-gpio" EXCLUDE_FROM_ALL )
-    ADD_SUBDIRECTORY( "${CMAKE_SOURCE_DIR}/pcp/appif" EXCLUDE_FROM_ALL )
-ENDIF ( CFG_GEN_NIOS_TARGET )
+    IF(CFG_INCLUDE_SUBPROJECTS MATCHES "pcp" OR CFG_INCLUDE_SUBPROJECTS MATCHES "all" )
+        ADD_SUBDIRECTORY("${CMAKE_SOURCE_DIR}/pcp/appif")
+    ENDIF()
+ELSE()
+    # Target platform is the local machine (Windows or Linux)
+    ADD_SUBDIRECTORY ("${PROJECT_SOURCE_DIR}/libs/endian" )
+    ADD_SUBDIRECTORY ("${PROJECT_SOURCE_DIR}/libs/appifcommon" )
+    ADD_SUBDIRECTORY ("${PROJECT_SOURCE_DIR}/libs/appif" )
+ENDIF()
 
 #######################
 ## DOXYGEN

@@ -30,7 +30,7 @@
 
 CMAKE_MINIMUM_REQUIRED (VERSION 2.8)
 
-PROJECT( pcpappif )
+PROJECT( pcpappif C )
 
 SET( PLK_STACK_DIR ${CMAKE_SOURCE_DIR}/stacks/openPOWERLINK )
 SET( IP_STACK_DIR ${CMAKE_SOURCE_DIR}/stacks/ip )
@@ -148,9 +148,12 @@ SET ( APPIF_INCS
     ${PLK_STACK_DIR}/stack/include/target/openmac
     ${PLK_STACK_DIR}/stack/src/arch/altera_nios2
     ${PLK_STACK_DIR}/stack/src
-)
+   )
 
-IF ( CFG_GEN_NIOS_TARGET )
-    INCLUDE (nios2.cmake)
-ENDIF ( CFG_GEN_NIOS_TARGET )
+IF((CMAKE_SYSTEM_NAME STREQUAL "Generic") AND (CMAKE_SYSTEM_PROCESSOR STREQUAL "Nios2"))
+    INCLUDE(nios2.cmake)
+ENDIF()
 
+################################################################################
+# Add clean files
+SET_DIRECTORY_PROPERTIES(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES "${ADD_CLEAN_FILES}")

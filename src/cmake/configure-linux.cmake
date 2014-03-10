@@ -49,8 +49,6 @@ CHECK_FUNCTION_EXISTS( "snprintf" HAVE_SNPRINTF )
 CHECK_FUNCTION_EXISTS( "strdup" HAVE_STRDUP )
 CHECK_FUNCTION_EXISTS( "vsnprintf" HAVE_VSNPRINTF )
 
-# Set the LIB_TYPE variable to STATIC
-SET (LIB_TYPE STATIC)
 IF (BUILD_SHARED_LIBS)
   # User wants to build Dynamic Libraries, so change the LIB_TYPE variable to CMake keyword 'SHARED'
   SET (LIB_TYPE SHARED)

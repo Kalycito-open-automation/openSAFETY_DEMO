@@ -30,7 +30,7 @@
 
 CMAKE_MINIMUM_REQUIRED (VERSION 2.8)
 
-PROJECT( demo-gpio )
+PROJECT( demo-gpio C)
 
 ########################################################################
 # Set all source files
@@ -50,7 +50,10 @@ SET ( DEMO_INCS
     ${DEMO_CONFIG_DIR}/config/tbuf/include
 )
 
-IF ( CFG_GEN_NIOS_TARGET )
-    INCLUDE (nios2.cmake)
-ENDIF ( CFG_GEN_NIOS_TARGET )
+IF((CMAKE_SYSTEM_NAME STREQUAL "Generic") AND (CMAKE_SYSTEM_PROCESSOR STREQUAL "Nios2"))
+    INCLUDE(nios2.cmake)
+ENDIF()
 
+################################################################################
+# Add clean files
+SET_DIRECTORY_PROPERTIES(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES "${ADD_CLEAN_FILES}")

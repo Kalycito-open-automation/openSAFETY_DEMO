@@ -28,20 +28,13 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ################################################################################
 
+INCLUDE(ConnectCMakeAlteraTargets)
 INCLUDE(GenEclipseFileList)
 
 MESSAGE ( STATUS "Generating build files for platform Altera/Nios2 ..." )
 
 ###############################################################################
 # User settings
-
-IF( NOT CFG_DEMO_INTERCONNECT )
-    SET(CFG_DEMO_INTERCONNECT spi CACHE STRING
-        "Choose the interconnect of the demo"
-        FORCE)
-    SET_PROPERTY(CACHE CFG_DEMO_INTERCONNECT PROPERTY STRINGS "spi;parallel;avalon")
-ENDIF( NOT CFG_DEMO_INTERCONNECT )
-
 OPTION( CFG_SINGLE_BITSTREAM "Both processors are in a single bitstream" ON )
 
 ###############################################################################
@@ -60,22 +53,38 @@ SET( ALT_MISC_DIR ${MISC_DIR}/altera_nios2 )
 SET( ALT_TARGET_DIR ${CMAKE_SOURCE_DIR}/app/target/altera-nios2 )
 SET( ALT_DRIVERS_DIR ${FPGA_DIR}/drivers/altera )
 
-###############################################################################
-# Create Altera build folder
-SET( ALT_BUILD_DIR ${CMAKE_BINARY_DIR}/altera )
-FILE( MAKE_DIRECTORY ${ALT_BUILD_DIR} )
+SET(ALT_BUILD_DIR_NAME "altera")
+
+# Set path to application board support package -> Needed by the libraries
+SET(ALT_APP_BUILD_DIR ${CMAKE_BINARY_DIR}/app/demo-${CFG_DEMO_TYPE}/${ALT_BUILD_DIR_NAME})
+SET(ALT_APP_BSP_DIR ${ALT_APP_BUILD_DIR}/bsp)
 
 ###############################################################################
-# Build directories
-SET( ALT_APP_BUILD_DIR ${ALT_BUILD_DIR}/app/demo-${CFG_DEMO_TYPE} )
-SET( ALT_APP_BSP_DIR ${ALT_APP_BUILD_DIR}/bsp )
+# Find Altera Nios2 tools
+FIND_PATH( ALT_BSP_GEN_DIR nios2-bsp
+           DOC "Path of the Altera Nios2 board support package generator"
+         )
+MARK_AS_ADVANCED(ALT_BSP_GEN_DIR)
 
-SET( ALT_LIBAPPIF_BUILD_DIR ${ALT_BUILD_DIR}/libs/appif )
-SET( ALT_LIBAPPIFCOMM_BUILD_DIR ${ALT_BUILD_DIR}/libs/appifcommon )
-SET( ALT_LIBENDIAN_BUILD_DIR ${ALT_BUILD_DIR}/libs/endian )
+FIND_PROGRAM(ALT_BSP_QUEUE nios2-bsp-query-settings
+             DOC "Queue information from a BSP package"
+            )
+MARK_AS_ADVANCED(ALT_BSP_QUEUE)
 
-FIND_PATH( BSP_GEN_DIR nios2-bsp )
-MARK_AS_ADVANCED( BSP_GEN_DIR )
+FIND_PROGRAM(ALT_APP_GEN_MAKEFILE nios2-app-generate-makefile
+             DOC "Generate an application Makefile for the Nios2 processor"
+            )
+MARK_AS_ADVANCED(ALT_APP_GEN_MAKEFILE)
+
+FIND_PROGRAM(ALT_LIB_GEN_MAKEFILE nios2-lib-generate-makefile
+             DOC "Generate a library Makefile for the Nios2 processor"
+            )
+MARK_AS_ADVANCED(ALT_LIB_GEN_MAKEFILE)
+
+FIND_PROGRAM(ALT_QSYS_SCRIPT qsys-script
+             DOC "Queue information from a qsys project"
+            )
+MARK_AS_ADVANCED(ALT_QSYS_SCRIPT)
 
 ###############################################################################
 # Set CFLAGS depending on build type
@@ -99,15 +108,13 @@ ENDIF( ${CMAKE_BUILD_TYPE} MATCHES "Debug" )
 
 ###############################################################################
 # Check plkif ipcore parameters
-FIND_PROGRAM( QSYS_SCRIPT qsys-script )
-
-IF( ${QSYS_SCRIPT} STREQUAL "QSYS_SCRIPT-NOTFOUND" )
-    MESSAGE( FATAL_ERROR "unexpected: program qsys-script is not in your PATH variable! Start cmake from the nios2 shell to solve this problem!" )
+IF( ${ALT_QSYS_SCRIPT} STREQUAL "ALT_QSYS_SCRIPT-NOTFOUND" )
+    MESSAGE( FATAL_ERROR "unexpected: The variable ALT_QSYS_SCRIPT is set to ${ALT_QSYS_SCRIPT}! Start CMake from the nios2 shell to solve this issue!" )
 ENDIF ()
 
 SET( QSYS_SCRIPT_COMMAND "set selDemo ${CFG_DEMO_TYPE}\; set qsysSystemName ${QSYS_SYSTEM_NAME}" )
 
-EXECUTE_PROCESS( COMMAND ${QSYS_SCRIPT} --cmd=${QSYS_SCRIPT_COMMAND} --script=${ALT_MISC_DIR}/scripts/plkif-config.tcl --system-file=${QSYS_SYSTEM_FILE}
+EXECUTE_PROCESS( COMMAND ${ALT_QSYS_SCRIPT} --cmd=${QSYS_SCRIPT_COMMAND} --script=${ALT_MISC_DIR}/scripts/plkif-config.tcl --system-file=${QSYS_SYSTEM_FILE}
                  WORKING_DIRECTORY ${NIOS2_QUARTUS_DIR}
                  RESULT_VARIABLE QSYS_RES
                  OUTPUT_VARIABLE QSYS_STDOUT

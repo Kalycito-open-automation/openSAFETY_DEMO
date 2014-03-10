@@ -1,6 +1,6 @@
 ################################################################################
 #
-# Windows configuration options for POWERLINK Interface For Applications
+# CMake target configuration file for Altera Nios2
 #
 # Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 # All rights reserved.
@@ -28,43 +28,13 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ################################################################################
 
+################################################################################
+# Name of the target platform
+SET( CMAKE_SYSTEM Altera-Nios2 )
+SET( CMAKE_SYSTEM_NAME Generic )
+SET( CMAKE_SYSTEM_PROCESSOR Nios2 )
 
-############################################################
-# Check includes
-CHECK_INCLUDE_FILE ( "sys/socket.h" HAVE_SYS_SOCKET_H )
-CHECK_INCLUDE_FILE ( "winsock2.h" HAVE_WINSOCK2_H )
-CHECK_INCLUDE_FILE ( "bits/predefs.h" HAVE_BITS_PREDEFS_H )
-CHECK_INCLUDE_FILE ( "netinet/in.h" HAVE_NETINET_IN_H )
-CHECK_INCLUDE_FILE ( "arpa/inet.h" HAVE_ARPA_INET_H )
-CHECK_INCLUDE_FILE ( "features.h" HAVE_FEATURES_H )
-CHECK_INCLUDE_FILE ( "arpa/nameser.h" HAVE_ARPA_NAMESER_H )
-CHECK_INCLUDE_FILE ( "sys/param.h" HAVE_SYS_PARAM_H )
-CHECK_INCLUDE_FILE ( "sys/types.h" HAVE_SYS_TYPES_H )
-CHECK_INCLUDE_FILE ( "sys/libgen.h" HAVE_LIBGEN_H )
-CHECK_INCLUDE_FILE ( "stdarg.h" HAVE_STDARG_H )
-
-CHECK_FUNCTION_EXISTS( "bzero" HAVE_BZERO )
-CHECK_FUNCTION_EXISTS( "inet_pton" HAVE_INET_PTON )
-
-CHECK_FUNCTION_EXISTS( "snprintf" HAVE_SNPRINTF )
-CHECK_FUNCTION_EXISTS( "strdup" HAVE_STRDUP )
-CHECK_FUNCTION_EXISTS( "vsnprintf" HAVE_VSNPRINTF )
-
-IF (BUILD_SHARED_LIBS)
-  # User wants to build Dynamic Libraries, so change the LIB_TYPE variable to CMake keyword 'SHARED'
-  SET (LIB_TYPE SHARED)
-ENDIF (BUILD_SHARED_LIBS)
-
-IF (CMAKE_COMPILER_IS_GNUCC)
-    MESSAGE ( STATUS "Cross-compiling for Windows" )
-    ADD_DEFINITIONS ( "-DWIN32 -D_WIN32_WINNT=0x0501" )
-ELSE (CMAKE_COMPILER_IS_GNUCC)
-    MESSAGE ( STATUS "Building on Windows" )
-    ADD_DEFINITIONS ( "/D_WIN32_WINNT=0x0501" )
-ENDIF (CMAKE_COMPILER_IS_GNUCC)
-
-SET ( WIN32_EXECUTABLE "WIN32" )
-
-SET( TARGET_DIR ${CMAKE_SOURCE_DIR}/app/target/x86 )
-
-ADD_SUBDIRECTORY ( "${PROJECT_SOURCE_DIR}/contrib/win32" )
+# specify the cross compiler
+SET( CMAKE_C_COMPILER nios2-elf-gcc )
+SET( CMAKE_CXX_COMPILER nios2-elf-c++ )
+SET( CMAKE_ASM-ATT_COMPILER nios2-elf-as )

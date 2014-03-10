@@ -28,9 +28,13 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ################################################################################
 
+# Disable CMake library target
+UNSET(GEN_LIB_TARGET)
+SET(GEN_LIB_TARGET OFF)
+
 ##########################################################################
-# Create build directory
-FILE( MAKE_DIRECTORY ${ALT_LIBENDIAN_BUILD_DIR} )
+# Set build directory for the Altera Makefile
+SET(ALT_BUILD_DIR ${PROJECT_BINARY_DIR}/${ALT_BUILD_DIR_NAME})
 
 ########################################################################
 # Adapt source file lists and includes
@@ -45,25 +49,40 @@ SET( ALT_LIB_INCS ${LIB_INCS}
 # Library Makefile
 ########################################################################
 
-SET( LIB_CFLAGS "-D${DBG_MODE} -DDEF_DEBUG_LVL=${DEF_DEBUG_LVL}" )
+SET( LIB_CFLAGS "${CFLAGS} -D${DBG_MODE} -DDEF_DEBUG_LVL=${DEF_DEBUG_LVL}" )
 
-EXECUTE_PROCESS( COMMAND nios2-lib-generate-makefile --bsp-dir ${ALT_APP_BSP_DIR} --lib-dir ${ALT_LIBENDIAN_BUILD_DIR} --lib-name ${PROJECT_NAME} --set LIB_CFLAGS_DEFINED_SYMBOLS=${LIB_CFLAGS} --set LIB_CFLAGS_OPTIMIZATION=${OPT_LEVEL} --set LIB_INCLUDE_DIRS=${ALT_LIB_INCS} --src-files ${ALT_LIB_SRCS}
-                 WORKING_DIRECTORY ${ALT_LIBENDIAN_BUILD_DIR}
+SET( ALT_LIB_GEN_ARGS
+                     "--bsp-dir ${ALT_APP_BSP_DIR}"
+                     "--lib-dir ${ALT_BUILD_DIR}"
+                     "--lib-name ${PROJECT_NAME}"
+                     "--set LIB_CFLAGS_DEFINED_SYMBOLS=${LIB_CFLAGS}"
+                     "--set LIB_CFLAGS_OPTIMIZATION=${OPT_LEVEL}"
+                     "--set LIB_INCLUDE_DIRS=${ALT_LIB_INCS}"
+                     "--src-files ${ALT_LIB_SRCS}"
+   )
+
+EXECUTE_PROCESS( COMMAND ${ALT_LIB_GEN_MAKEFILE} ${ALT_LIB_GEN_ARGS}
+                 WORKING_DIRECTORY ${ALT_BUILD_DIR}
                  RESULT_VARIABLE GEN_LIB_RES
                  OUTPUT_VARIABLE GEN_LIB_STDOUT
                  ERROR_VARIABLE GEN_LIB_STDERR
 )
 
 IF( NOT ${GEN_LIB_RES} MATCHES "0" )
-    MESSAGE ( FATAL_ERROR "nios2-lib-generate-makefile failed with: ${GEN_LIB_STDERR}" )
+    MESSAGE ( FATAL_ERROR "${ALT_LIB_GEN_MAKEFILE} failed with: ${GEN_LIB_STDERR}" )
 ENDIF ( NOT  ${GEN_LIB_RES} MATCHES "0" )
 
 MESSAGE ( STATUS "Generate ${PROJECT_NAME} Makefile: ${GEN_LIB_STDOUT}" )
+
+########################################################################
+# Connect the CMake Makefile with the Altera Makefile
+########################################################################
+ConnectCMakeAlteraLibTargets(${PROJECT_NAME} ${ALT_BUILD_DIR})
 
 ########################################################################
 # Eclipse project files
 ########################################################################
 GenEclipseFileList("${ALT_LIB_SRCS}" "" ECLIPSE_FILE_LIST)
 
-CONFIGURE_FILE( ${ALT_MISC_DIR}/project/libproject.in ${ALT_LIBENDIAN_BUILD_DIR}/.project @ONLY )
-CONFIGURE_FILE( ${ALT_MISC_DIR}/project/libcproject.in ${ALT_LIBENDIAN_BUILD_DIR}/.cproject @ONLY )
+CONFIGURE_FILE( ${ALT_MISC_DIR}/project/libproject.in ${ALT_BUILD_DIR}/.project @ONLY )
+CONFIGURE_FILE( ${ALT_MISC_DIR}/project/libcproject.in ${ALT_BUILD_DIR}/.cproject @ONLY )

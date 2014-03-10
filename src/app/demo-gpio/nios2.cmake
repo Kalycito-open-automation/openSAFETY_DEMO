@@ -29,11 +29,13 @@
 ################################################################################
 
 ##########################################################################
-# Create build directory
-FILE( MAKE_DIRECTORY ${ALT_APP_BUILD_DIR} )
+# Set build directory for the Altera Makefile
+SET(ALT_BUILD_DIR ${PROJECT_BINARY_DIR}/${ALT_BUILD_DIR_NAME})
 
-SET( NIOS2_QSYS_SUB app_0 )
-SET( NIOS2_QSYS_SUB_CPU cpu_1 )
+##########################################################################
+# Set build parameters
+SET(NIOS2_QSYS_SUB app_0)
+SET(NIOS2_QSYS_SUB_CPU cpu_1)
 
 SET( BSP_TYPE hal )
 
@@ -58,14 +60,21 @@ SET( ALT_DEMO_INCS ${DEMO_INCS}
 # Board Support Package
 ########################################################################
 
-SET( NIOS2_BSP_ARGS "--cpu-name ${NIOS2_QSYS_SUB}_${NIOS2_QSYS_SUB_CPU} --set hal.enable_c_plus_plus false --set hal.linker.enable_alt_load_copy_exceptions false --set hal.enable_clean_exit false --set hal.enable_exit false --set hal.make.bsp_cflags_optimization ${OPT_LEVEL}" )
+SET( NIOS2_BSP_ARGS
+                    "--cpu-name ${NIOS2_QSYS_SUB}_${NIOS2_QSYS_SUB_CPU}"
+                    "--set hal.enable_c_plus_plus false"
+                    "--set hal.linker.enable_alt_load_copy_exceptions false"
+                    "--set hal.enable_clean_exit false"
+                    "--set hal.enable_exit false"
+                    "--set hal.make.bsp_cflags_optimization ${OPT_LEVEL}"
+   )
 
 IF( ${CMAKE_BUILD_TYPE} MATCHES "Release" )
     SET( NIOS2_BSP_ARGS "${NIOS2_BSP_ARGS} --set hal.stdout none --set hal.stderr none" )
 ENDIF ( ${CMAKE_BUILD_TYPE} MATCHES "Release" )
 
-EXECUTE_PROCESS( COMMAND bash ${BSP_GEN_DIR}/nios2-bsp ${BSP_TYPE} ${ALT_APP_BSP_DIR} ${NIOS2_QUARTUS_DIR} ${NIOS2_BSP_ARGS}
-                 WORKING_DIRECTORY ${ALT_APP_BUILD_DIR}
+EXECUTE_PROCESS( COMMAND bash ${ALT_BSP_GEN_DIR}/nios2-bsp ${BSP_TYPE} ${ALT_APP_BSP_DIR} ${NIOS2_QUARTUS_DIR} ${NIOS2_BSP_ARGS}
+                 WORKING_DIRECTORY ${ALT_BUILD_DIR}
                  RESULT_VARIABLE GEN_BSP_RES
                  OUTPUT_VARIABLE GEN_BSP_STDOUT
                  ERROR_VARIABLE GEN_BSP_STDERR
@@ -81,24 +90,41 @@ MESSAGE ( STATUS  "Generate board support package: ${GEN_BSP_STDOUT}" )
 # Application Makefile
 ########################################################################
 
-SET( APP_CFLAGS "-D${DBG_MODE} -DDEF_DEBUG_LVL=${DEF_DEBUG_LVL}" )
+SET( APP_CFLAGS "${CFLAGS} -D${DBG_MODE} -DDEF_DEBUG_LVL=${DEF_DEBUG_LVL}" )
 
-EXECUTE_PROCESS( COMMAND nios2-app-generate-makefile --bsp-dir ${ALT_APP_BSP_DIR} --set QUARTUS_PROJECT_DIR=${NIOS2_QUARTUS_DIR} --src-files ${ALT_DEMO_SRCS} --set APP_INCLUDE_DIRS=${ALT_DEMO_INCS} --set APP_CFLAGS_DEFINED_SYMBOLS --set QSYS_SUB_CPU ${NIOS2_QSYS_SUB_CPU} --set OBJDUMP_INCLUDE_SOURCE 1 --set CREATE_OBJDUMP 0 --set CFLAGS=${APP_CFLAGS} --set APP_CFLAGS_OPTIMIZATION ${OPT_LEVEL} --elf-name ${PROJECT_NAME}.elf --use-lib-dir ${ALT_LIBAPPIF_BUILD_DIR} --use-lib-dir ${ALT_LIBAPPIFCOMM_BUILD_DIR} --use-lib-dir ${ALT_LIBENDIAN_BUILD_DIR}
-                 WORKING_DIRECTORY ${ALT_APP_BUILD_DIR}
+SET( ALT_LIB_GEN_ARGS
+                      "--bsp-dir ${ALT_APP_BSP_DIR}"
+                      "--set QUARTUS_PROJECT_DIR=${NIOS2_QUARTUS_DIR}"
+                      "--src-files ${ALT_DEMO_SRCS}"
+                      "--set APP_INCLUDE_DIRS=${ALT_DEMO_INCS}"
+                      "--set APP_CFLAGS_DEFINED_SYMBOLS"
+                      "--set QSYS_SUB_CPU=${NIOS2_QSYS_SUB_CPU}"
+                      "--set OBJDUMP_INCLUDE_SOURCE=1"
+                      "--set CREATE_OBJDUMP=0"
+                      "--set CFLAGS=${APP_CFLAGS}"
+                      "--set APP_CFLAGS_OPTIMIZATION=${OPT_LEVEL}"
+                      "--elf-name ${PROJECT_NAME}.elf"
+                      "--use-lib-dir ${endian_BINARY_DIR}/${ALT_BUILD_DIR_NAME}"
+                      "--use-lib-dir ${appif_BINARY_DIR}/${ALT_BUILD_DIR_NAME}"
+                      "--use-lib-dir ${appifcommon_BINARY_DIR}/${ALT_BUILD_DIR_NAME}"
+   )
+
+EXECUTE_PROCESS( COMMAND ${ALT_APP_GEN_MAKEFILE} ${ALT_LIB_GEN_ARGS}
+                 WORKING_DIRECTORY ${ALT_BUILD_DIR}
                  RESULT_VARIABLE GEN_MAKE_RES
                  OUTPUT_VARIABLE GEN_MAKE_STDOUT
                  ERROR_VARIABLE GEN_MAKE_STDERR
 )
 
 IF( NOT ${GEN_MAKE_RES} MATCHES "0" )
-    MESSAGE ( FATAL_ERROR "nios2-app-generate-makefile failed with: ${GEN_MAKE_STDERR}" )
+    MESSAGE ( FATAL_ERROR "${ALT_APP_GEN_MAKEFILE} failed with: ${GEN_MAKE_STDERR}" )
 ENDIF ( NOT  ${GEN_MAKE_RES} MATCHES "0" )
 
 MESSAGE ( STATUS "Generate application Makefile: ${GEN_MAKE_STDOUT}" )
 
 # Fix Makefile issues
 EXECUTE_PROCESS( COMMAND bash ${ALT_MISC_DIR}/scripts/fix_makefile.sh
-                 WORKING_DIRECTORY ${ALT_APP_BUILD_DIR}
+                 WORKING_DIRECTORY ${ALT_BUILD_DIR}
                  RESULT_VARIABLE FIX_RES
                  OUTPUT_VARIABLE FIX_STDOUT
                  ERROR_VARIABLE FIX_STDERR
@@ -108,11 +134,15 @@ IF( NOT ${FIX_RES} MATCHES "0" )
     MESSAGE ( FATAL_ERROR "Failed to fix Makefile with: ${FIX_STDERR}" )
 ENDIF ( NOT  ${FIX_RES} MATCHES "0" )
 
+########################################################################
+# Connect the CMake Makefile with the Altera Makefile
+########################################################################
+ConnectCMakeAlteraExeTargets(${PROJECT_NAME} ${ALT_BUILD_DIR})
 
 ########################################################################
 # Eclipse project files
 ########################################################################
 GenEclipseFileList("${ALT_DEMO_SRCS}" "" ECLIPSE_FILE_LIST )
 
-CONFIGURE_FILE( ${ALT_MISC_DIR}/project/appproject.in ${ALT_APP_BUILD_DIR}/.project @ONLY )
-CONFIGURE_FILE( ${ALT_MISC_DIR}/project/appcproject.in ${ALT_APP_BUILD_DIR}/.cproject @ONLY )
+CONFIGURE_FILE(${ALT_MISC_DIR}/project/appproject.in ${ALT_BUILD_DIR}/.project @ONLY)
+CONFIGURE_FILE(${ALT_MISC_DIR}/project/appcproject.in ${ALT_BUILD_DIR}/.cproject @ONLY)

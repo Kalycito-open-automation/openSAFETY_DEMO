@@ -30,7 +30,10 @@
 
 CMAKE_MINIMUM_REQUIRED (VERSION 2.8)
 
-PROJECT (endian)
+PROJECT (endian C)
+
+# Generate a target for this library in the CMake Makefile
+SET(GEN_LIB_TARGET ON)
 
 ########################################################################
 # Set all source files
@@ -46,9 +49,9 @@ SET ( LIB_INCS
     ${PROJECT_SOURCE_DIR}/include
 )
 
-IF ( CFG_GEN_NIOS_TARGET )
+IF((CMAKE_SYSTEM_NAME STREQUAL "Generic") AND (CMAKE_SYSTEM_PROCESSOR STREQUAL "Nios2"))
     INCLUDE (nios2.cmake)
-ENDIF ( CFG_GEN_NIOS_TARGET )
+ENDIF()
 
 INCLUDE_DIRECTORIES ( ${LIB_INCS} 
                       ${TARGET_DIR}/include
@@ -57,4 +60,10 @@ INCLUDE_DIRECTORIES ( ${LIB_INCS}
 ########################################################################
 # Build library
 ########################################################################
-ADD_LIBRARY ( endian ${LIB_TYPE} ${LIB_SRCS} )
+IF(GEN_LIB_TARGET)
+    ADD_LIBRARY(${PROJECT_NAME} ${LIB_TYPE} ${LIB_SRCS})
+ENDIF()
+
+################################################################################
+# Add clean files
+SET_DIRECTORY_PROPERTIES(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES "${ADD_CLEAN_FILES}")
