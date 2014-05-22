@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   demo-cn-gpio/config/objdict/objdict.h
+\file   demo-cn-gpio/config/pcp/objdict.h
 
 \brief  Object dictionary according to CiA401
 

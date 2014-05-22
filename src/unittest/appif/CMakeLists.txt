@@ -46,7 +46,7 @@ INCLUDE_DIRECTORIES ( "${endian_SOURCE_DIR}/include" )
 INCLUDE_DIRECTORIES ( "${TARGET_DIR}/include" )
 
 # Path to the configuration headers for the application interface
-INCLUDE_DIRECTORIES ( "${DEMO_CONFIG_DIR}/config/tbuf/include" )
+INCLUDE_DIRECTORIES ( "${DEMO_CONFIG_DIR}/tbuf/include" )
 
 # Add all test projects
 FOREACH ( TSTDIR IN ITEMS ${TSTDIRECTORIES} )

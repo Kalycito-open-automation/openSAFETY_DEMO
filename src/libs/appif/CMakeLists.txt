@@ -56,7 +56,7 @@ SET ( LIB_INCS
     ${PROJECT_SOURCE_DIR}/include
     ${appifcommon${CURR_APPLICATION}_SOURCE_DIR}/include
     ${endian_SOURCE_DIR}/include
-    ${DEMO_CONFIG_DIR}/config/tbuf/include
+    ${DEMO_CONFIG_DIR}/tbuf/include
 )
 
 IF((CMAKE_SYSTEM_NAME STREQUAL "Generic") AND (CMAKE_SYSTEM_PROCESSOR STREQUAL "Nios2"))

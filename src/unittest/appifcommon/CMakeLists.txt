@@ -43,7 +43,7 @@ INCLUDE_DIRECTORIES ( "${PROJECT_SOURCE_DIR}/../common" )
 INCLUDE_DIRECTORIES ( "${appifcommon_SOURCE_DIR}/include" )
 INCLUDE_DIRECTORIES ( "${endian_SOURCE_DIR}/include" )
 INCLUDE_DIRECTORIES ( "${TARGET_DIR}/include" )
-INCLUDE_DIRECTORIES ( "${DEMO_CONFIG_DIR}/config/tbuf/include" )
+INCLUDE_DIRECTORIES ( "${DEMO_CONFIG_DIR}/tbuf/include" )
 
 # Add all test projects
 FOREACH ( TSTDIR IN ITEMS ${TSTDIRECTORIES} )

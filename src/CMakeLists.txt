@@ -100,7 +100,7 @@ ENDIF ( UNITTEST_ENABLE )
 # Setup paths
 SET( MISC_DIR ${CMAKE_SOURCE_DIR}/misc )
 SET( FPGA_DIR ${CMAKE_SOURCE_DIR}/fpga )
-SET( DEMO_CONFIG_DIR ${CMAKE_SOURCE_DIR}/app/demo-${CFG_DEMO_TYPE} )
+SET( DEMO_CONFIG_DIR ${CMAKE_SOURCE_DIR}/app/demo-${CFG_DEMO_TYPE}/config )
 
 #####################################################################
 # Setup architecture specific configuration

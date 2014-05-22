@@ -113,7 +113,7 @@ SET(APPIF_INCS
     ${PROJECT_SOURCE_DIR}
     ${PROJECT_SOURCE_DIR}/include
     ${appifcommonpcp_SOURCE_DIR}/include
-    ${DEMO_CONFIG_DIR}/config/tbuf/include
+    ${DEMO_CONFIG_DIR}/tbuf/include
     ${IP_BASE_DIR}
    )
 
@@ -121,7 +121,7 @@ SET(OPLK_INCS
     ${STACK_INCLUDE_DIR}
     ${STACK_SOURCE_DIR}
     ${CONTRIB_SOURCE_DIR}
-    ${DEMO_CONFIG_DIR}/config/objdict
+    ${DEMO_CONFIG_DIR}/pcp
     ${OBJDICT_DIR}/generic
    )
 

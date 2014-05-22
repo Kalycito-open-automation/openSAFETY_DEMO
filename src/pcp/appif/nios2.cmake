@@ -183,8 +183,8 @@ IF( NOT ${FIX_RES} MATCHES "0" )
 ENDIF ( NOT  ${FIX_RES} MATCHES "0" )
 
 # Copy triple buffer configuration file
-FILE( MAKE_DIRECTORY ${DEMO_CONFIG_DIR}/config/tbuf/include/ipcore )
-FILE( COPY ${BSP_DIR}/tbuf-cfg.h DESTINATION ${DEMO_CONFIG_DIR}/config/tbuf/include/ipcore )
+FILE( MAKE_DIRECTORY ${DEMO_CONFIG_DIR}/tbuf/include/ipcore )
+FILE( COPY ${BSP_DIR}/tbuf-cfg.h DESTINATION ${DEMO_CONFIG_DIR}/tbuf/include/ipcore )
 
 ########################################################################
 # Connect the CMake Makefile with the Altera Makefile
