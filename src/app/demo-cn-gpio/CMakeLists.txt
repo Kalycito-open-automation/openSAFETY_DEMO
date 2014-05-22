@@ -32,6 +32,8 @@ CMAKE_MINIMUM_REQUIRED (VERSION 2.8)
 
 PROJECT( demo-${CFG_DEMO_TYPE} C)
 
+SET(COMMON_SOURCE_DIR ${PROJECT_SOURCE_DIR}/../common)
+
 ########################################################################
 # Set all source files
 ########################################################################
@@ -44,10 +46,11 @@ SET ( DEMO_SRCS
 ########################################################################
 SET ( DEMO_INCS
     ${PROJECT_SOURCE_DIR}
+    ${COMMON_SOURCE_DIR}/include
     ${endian_SOURCE_DIR}/include
     ${appif_SOURCE_DIR}/include
     ${appifcommonapp_SOURCE_DIR}/include
-    ${DEMO_CONFIG_DIR}/config/tbuf/include
+    ${DEMO_CONFIG_DIR}/tbuf/include
 )
 
 IF((CMAKE_SYSTEM_NAME STREQUAL "Generic") AND (CMAKE_SYSTEM_PROCESSOR STREQUAL "Nios2"))

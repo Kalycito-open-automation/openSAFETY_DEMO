@@ -50,6 +50,8 @@ data from and to the PCP.
 
 #include <libappif/appif.h>         // Header for the appif library
 
+#include <common/debug.h>
+
 #include <apptarget/platform.h>     // Platform specific functions
 #include <apptarget/app-gpio.h>     // Application of this demo
 #include <apptarget/benchmark.h>    // Debug header for performance measurements

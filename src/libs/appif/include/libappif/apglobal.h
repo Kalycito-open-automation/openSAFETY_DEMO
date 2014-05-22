@@ -44,7 +44,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <libappifcommon/global.h>
 
-#include <libappif/debug.h>
 #include <libappif/error.h>
 
 #include <config/triplebuffer.h>

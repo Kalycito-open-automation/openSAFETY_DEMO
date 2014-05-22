@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   libappif/debug.h
+\file   common/debug.h
 
 \brief  Header file for debugging
 
@@ -36,8 +36,8 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
 
-#ifndef _INC_libappif_debug_H_
-#define _INC_libappif_debug_H_
+#ifndef _INC_common_debug_H_
+#define _INC_common_debug_H_
 
 //------------------------------------------------------------------------------
 // includes
@@ -316,5 +316,5 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // function prototypes
 //------------------------------------------------------------------------------
 
-#endif // _INC_libappif_debug_H_
+#endif // _INC_common_debug_H_
 
