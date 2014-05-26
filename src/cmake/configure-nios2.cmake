@@ -48,6 +48,12 @@ ELSE( CFG_DEMO_INTERCONNECT MATCHES "spi" AND CFG_SINGLE_BITSTREAM )
 ENDIF( CFG_DEMO_INTERCONNECT MATCHES "spi" AND CFG_SINGLE_BITSTREAM )
 
 ###############################################################################
+# Check if QSYS system is generated
+IF(NOT EXISTS "${NIOS2_QUARTUS_DIR}/${QSYS_SYSTEM_NAME}.sopcinfo")
+    MESSAGE(FATAL_ERROR "unexpected: The Qsys system from ${NIOS2_QUARTUS_DIR} is not generated! Please build the project first!")
+ENDIF()
+
+###############################################################################
 # Target dependent paths
 SET( ALT_MISC_DIR ${MISC_DIR}/altera_nios2 )
 SET( ALT_TARGET_DIR ${CMAKE_SOURCE_DIR}/app/target/altera-nios2 )
