@@ -1,10 +1,10 @@
 /**
 ********************************************************************************
-\file   appif/obdict.h
+\file   appif/tssdo.h
 
-\brief  Header file included in the POWERLINK stack obdict
+\brief  Header file of the transmit SSDO module
 
-This header consists of all
+This file defines the interface to the transmit SSDO channel.
 
 *******************************************************************************/
 
@@ -35,38 +35,49 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
 
-#ifndef _INC_appif_obdict_H_
-#define _INC_appif_obdict_H_
+#ifndef _INC_appif_ttssdo_H_
+#define _INC_appif_ttssdo_H_
 
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
 
-#include <oplk/oplk.h>
+#include <appif/pcpglobal.h>
 
-#include <config/triplebuffer.h>
+#include <libappifcommon/ssdo.h>
 
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
 
-
 //------------------------------------------------------------------------------
 // typedef
 //------------------------------------------------------------------------------
 
+/**
+ * \brief Transmit SSDO channel initialization parameters
+ */
+typedef struct {
+    tSsdoChanNum             chanId_m;          ///< Id of the SSDO channel
+
+    UINT8                    tbufTxId_m;        ///< Id of the transmit triple buffer
+    tTbufSsdoTxStructure*    pTbufTxBase_m;     ///< Base address of the transmit triple buffer
+    UINT32                   tbufTxSize_m;      ///< Size of the transmit triple buffer
+    UINT8*                   pConsAckBase_m;    ///< Consumer acknowledge register base
+} tTssdoInitStruct;
+
+typedef struct eTssdoInstance *tTssdoInstance;
 
 //------------------------------------------------------------------------------
 // function prototypes
 //------------------------------------------------------------------------------
-#if(((APPIF_MODULE_INTEGRATION) & (APPIF_MODULE_CC)) != 0)
-  extern tOplkError cc_obdAccessCb(tObdCbParam MEM* pParam_p);
-#endif
+void tssdo_init(UINT8 nodeId_p, UINT16 idxSsdoStub_p, UINT16 idxSsdoStubData_p);
+tTssdoInstance tssdo_create(tTssdoInitStruct* pInitParam_p);
+void tssdo_destroy(tTssdoInstance pInstance_p);
+tAppIfStatus tssdo_process(tTssdoInstance pInstance_p);
+tAppIfStatus tssdo_consTxTransferFinished(tTssdoInstance pInstance_p);
+tAppIfStatus tssdo_handleIncoming(tTssdoInstance pInstance_p);
 
-#if(((APPIF_MODULE_INTEGRATION) & (APPIF_MODULE_SSDO)) != 0)
-  extern tOplkError rssdo_obdAccessCb(tObdCbParam MEM* pParam_p);
-#endif
-
-#endif /* _INC_appif_obdict_H_ */
+#endif /* _INC_appif_ttssdo_H_ */
 
 

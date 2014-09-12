@@ -1,10 +1,11 @@
 /**
 ********************************************************************************
-\file   appif/internal/ssdo.h
+\file   appif/internal/tssdo.h
 
-\brief  Internal header file of the SSDO module
+\brief  Internal header file of the transmit SSDO module
 
-This file contains internal definitions for the SSDO module.
+This file contains internal definitions for the transmit SSDO module. It
+defines the internal instance parameters of the module.
 
 *******************************************************************************/
 
@@ -35,8 +36,8 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
 
-#ifndef _INC_appif_int_ssdo_H_
-#define _INC_appif_int_ssdo_H_
+#ifndef _INC_appif_int_tssdo_H_
+#define _INC_appif_int_tssdo_H_
 
 //------------------------------------------------------------------------------
 // includes
@@ -45,7 +46,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <appif/pcpglobal.h>
 
 #include <appif/tbuf.h>
-#include <appif/fifo.h>
 
 #include <libappifcommon/timeout.h>
 #include <config/ssdo.h>
@@ -73,63 +73,26 @@ typedef enum {
 } tConsTxState;
 
 /**
- * \brief State machine type for the producing receive buffer
- */
-typedef enum {
-    kProdRxStateInvalid            = 0x00,
-    kProdRxStateWaitForFrame       = 0x01,
-    kProdRxStateRepostFrame        = 0x02,
-} tProdRxState;
+\brief SSDO transmit channel user instance
 
-/**
- * \brief
- */
-typedef struct {
-    UINT8    ssdoStubDataBuff_m[SSDO_STUB_DATA_DOM_SIZE];
-    UINT32   ssdoStubSize_m;
-} tProdRxBuffer;
+The SSDO instance holds configuration information of each SSDO channel.
+*/
+struct eTssdoInstance
+{
+    tSsdoChanNum      instId_m;             ///< Id of the SSDO instance
 
-/**
- * \brief Parameter type of the consuming transmit buffer
- */
-typedef struct {
     tTbufInstance     pTbufConsTxInst_m;    ///< Instance pointer to the consuming transmit triple buffer
     tSeqNrValue       currConsSeq_m;        ///< Consuming buffer sequence number
     tConsTxState      consTxState_m;        ///< State of the consuming transmit buffer
     tSdoComConHdl     sdoComConHdl_m;       ///< SDO connection handler
     UINT8*            pConsTxPayl_m;        ///< Pointer to transmit buffer
     tTimeoutInstance  pArpTimeoutInst_m;    ///< Timer for ARP request retry
-} tSsdoConsTx;
-
-/**
- * \brief Parameter type of the producing receive buffer
- */
-typedef struct {
-    tTbufInstance     pTbufProdRxInst_m;    ///< Instance pointer to the producing receive triple buffer
-    tFifoInstance     pRxFifoInst_m;        ///< producing receive FIFO instance pointer
-    tProdRxState      prodRxState_m;        ///< State of the producing receive buffer
-    tSeqNrValue       currProdSeq_m;        ///< Current producing buffer sequence number
-    tProdRxBuffer     prodRecvBuff_m;       ///< Producing receive buffer for packet retransmission
-    tTimeoutInstance  pTimeoutInst_m;       ///< Timer for SSDO transmissions over the tbuf
-    UINT16            objSize_m;            ///< Size of incomming object
-} tSsdoProdRx;
-
-/**
-\brief SSDO channel user instance
-
-The SSDO instance holds configuration information of each SSDO channel.
-*/
-struct eSsdoInstance
-{
-    tSsdoChanNum   instId_m;             ///< Id of the SSDO instance
-    tSsdoConsTx    consTxParam_m;        ///< Consuming receive buffer parameters
-    tSsdoProdRx    prodRxParam_m;        ///< Producing transmit buffer parameters
 };
 
 //------------------------------------------------------------------------------
 // function prototypes
 //------------------------------------------------------------------------------
 
-#endif /* _INC_appif_int_ssdo_H_ */
+#endif /* _INC_appif_int_tssdo_H_ */
 
 

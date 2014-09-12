@@ -58,7 +58,8 @@ the synchronous and asynchronous tasks.
 #include <appif/pdo.h>
 #include <appif/rpdo.h>
 #include <appif/tpdo.h>
-#include <appif/ssdo.h>
+#include <appif/rssdo.h>
+#include <appif/tssdo.h>
 #include <appif/logbook.h>
 #include <appif/fifo.h>
 #include <libappifcommon/ccobject.h>
@@ -101,7 +102,8 @@ the synchronous and asynchronous tasks.
 
 typedef struct {
 #if(((APPIF_MODULE_INTEGRATION) & (APPIF_MODULE_SSDO)) != 0)
-    tSsdoInstance    instSsdoChan_m[kNumSsdoInstCount];    ///< Instance of the SSDO channels
+    tRssdoInstance   instRssdoChan_m[kNumSsdoInstCount];    ///< Instance of the SSDO receive channels
+    tTssdoInstance   instTssdoChan_m[kNumSsdoInstCount];    ///< Instance of the SSDO transmit channels
 #endif
 #if(((APPIF_MODULE_INTEGRATION) & (APPIF_MODULE_LOGBOOK)) != 0)
     tLogInstance     instLogChan_m[kNumLogInstCount];       ///< Instance of the logger channels
@@ -154,7 +156,8 @@ tAppIfStatus appif_init(UINT8 nodeId_p, tAppIfCritSec pfnCritSec_p)
 #endif
 #if(((APPIF_MODULE_INTEGRATION) & (APPIF_MODULE_SSDO)) != 0)
     UINT8                i;
-    tSsdoInitStruct      ssdoInitParam;
+    tRssdoInitStruct     rssdoInitParam;
+    tTssdoInitStruct     tssdoInitParam;
 #endif
 #if(((APPIF_MODULE_INTEGRATION) & (APPIF_MODULE_PDO)) != 0)
     tRpdoInitStruct      rpdoInitParam;
@@ -216,7 +219,8 @@ tAppIfStatus appif_init(UINT8 nodeId_p, tAppIfCritSec pfnCritSec_p)
     }
 
 #if(((APPIF_MODULE_INTEGRATION) & (APPIF_MODULE_SSDO)) != 0)
-    ssdo_init(appifInstance_l.nodeId_m, SSDO_STUB_OBJECT_INDEX, SSDO_STUB_DATA_OBJECT_INDEX);
+    rssdo_init(appifInstance_l.nodeId_m, SSDO_STUB_OBJECT_INDEX, SSDO_STUB_DATA_OBJECT_INDEX);
+    tssdo_init(appifInstance_l.nodeId_m, SSDO_STUB_OBJECT_INDEX, SSDO_STUB_DATA_OBJECT_INDEX);
 #endif
 
 #if(((APPIF_MODULE_INTEGRATION) & (APPIF_MODULE_SSDO)) != 0)
@@ -315,25 +319,36 @@ tAppIfStatus appif_init(UINT8 nodeId_p, tAppIfCritSec pfnCritSec_p)
     // Initialize all SSDO channels
     for(i=0; i < kNumSsdoInstCount; i++)
     {
-        ssdoInitParam.chanId_m = i;
+        rssdoInitParam.chanId_m = i;
 
-        ssdoInitParam.tbufRxId_m = kTbufNumSsdoReceive0 + i;
-        ssdoInitParam.pTbufRxBase_m = (tTbufSsdoRxStructure *)(TBUF_BASE_ADDRESS +
+        rssdoInitParam.tbufRxId_m = kTbufNumSsdoReceive0 + i;
+        rssdoInitParam.pTbufRxBase_m = (tTbufSsdoRxStructure *)(TBUF_BASE_ADDRESS +
                 tbufDescList[kTbufNumSsdoReceive0 + i].buffOffset_m);
-        ssdoInitParam.pProdAckBase_m = prodAckBase;
-        ssdoInitParam.tbufRxSize_m = tbufDescList[kTbufNumSsdoReceive0 + i].buffSize_m;
+        rssdoInitParam.pProdAckBase_m = prodAckBase;
+        rssdoInitParam.tbufRxSize_m = tbufDescList[kTbufNumSsdoReceive0 + i].buffSize_m;
 
-        ssdoInitParam.tbufTxId_m = kTbufNumSsdoTransmit0 + i;
-        ssdoInitParam.pTbufTxBase_m = (tTbufSsdoTxStructure *)(TBUF_BASE_ADDRESS +
-                tbufDescList[kTbufNumSsdoTransmit0 + i].buffOffset_m);
-        ssdoInitParam.pConsAckBase_m = consAckBase;
-        ssdoInitParam.tbufTxSize_m = tbufDescList[kTbufNumSsdoTransmit0 + i].buffSize_m;
-
-        appifInstance_l.instSsdoChan_m[i] = ssdo_create(&ssdoInitParam);
-        if(appifInstance_l.instSsdoChan_m[i] == NULL)
+        appifInstance_l.instRssdoChan_m[i] = rssdo_create(&rssdoInitParam);
+        if(appifInstance_l.instRssdoChan_m[i] == NULL)
         {
             ret = kAppIfSsdoInitError;
-            DEBUG_TRACE(DEBUG_LVL_ERROR,"ERROR: ssdo_create() failed for instance "
+            DEBUG_TRACE(DEBUG_LVL_ERROR,"ERROR: rssdo_create() failed for instance "
+                    "number %d!\n", i );
+            goto Exit;
+        }
+
+        tssdoInitParam.chanId_m = i;
+
+        tssdoInitParam.tbufTxId_m = kTbufNumSsdoTransmit0 + i;
+        tssdoInitParam.pTbufTxBase_m = (tTbufSsdoTxStructure *)(TBUF_BASE_ADDRESS +
+                tbufDescList[kTbufNumSsdoTransmit0 + i].buffOffset_m);
+        tssdoInitParam.pConsAckBase_m = consAckBase;
+        tssdoInitParam.tbufTxSize_m = tbufDescList[kTbufNumSsdoTransmit0 + i].buffSize_m;
+
+        appifInstance_l.instTssdoChan_m[i] = tssdo_create(&tssdoInitParam);
+        if(appifInstance_l.instTssdoChan_m[i] == NULL)
+        {
+            ret = kAppIfSsdoInitError;
+            DEBUG_TRACE(DEBUG_LVL_ERROR,"ERROR: tssdo_create() failed for instance "
                     "number %d!\n", i );
             goto Exit;
         }
@@ -403,7 +418,8 @@ void appif_exit(void)
     // Destroy all SSDO channels
     for(i=0; i < kNumSsdoInstCount; i++)
     {
-        ssdo_destroy(appifInstance_l.instSsdoChan_m[i]);
+        rssdo_destroy(appifInstance_l.instRssdoChan_m[i]);
+        tssdo_destroy(appifInstance_l.instTssdoChan_m[i]);
     }
 #endif
 
@@ -492,10 +508,18 @@ tAppIfStatus appif_handleAsync(void)
     // Process all instantiated asynchronous channels
     for(i=0; i < kNumSsdoInstCount; i++)
     {
-        ret = ssdo_process(appifInstance_l.instSsdoChan_m[i]);
+        ret = rssdo_process(appifInstance_l.instRssdoChan_m[i]);
         if(ret != kAppIfSuccessful)
         {
-            DEBUG_TRACE(DEBUG_LVL_ERROR, "ERROR: ssdo_process() failed for "
+            DEBUG_TRACE(DEBUG_LVL_ERROR, "ERROR: rssdo_process() failed for "
+                    "instance %d with: 0x%x!\n", i, ret);
+            goto Exit;
+        }
+
+        ret = tssdo_process(appifInstance_l.instTssdoChan_m[i]);
+        if(ret != kAppIfSuccessful)
+        {
+            DEBUG_TRACE(DEBUG_LVL_ERROR, "ERROR: tssdo_process() failed for "
                     "instance %d with: 0x%x!\n", i, ret);
             goto Exit;
         }
@@ -562,10 +586,18 @@ tAppIfStatus appif_handleSync(tNetTime * pNetTime_p)
     // Process all instantiated asynchronous channels
     for(i=0; i < kNumSsdoInstCount; i++)
     {
-        ret = ssdo_handleIncoming(appifInstance_l.instSsdoChan_m[i]);
+        ret = tssdo_handleIncoming(appifInstance_l.instTssdoChan_m[i]);
         if(ret != kAppIfSuccessful)
         {
-            DEBUG_TRACE(DEBUG_LVL_ERROR, "ERROR: ssdo_handleIncoming() failed for "
+            DEBUG_TRACE(DEBUG_LVL_ERROR, "ERROR: tssdo_handleIncoming() failed for "
+                    "instance %d with: 0x%x!\n", i, ret);
+            goto Exit;
+        }
+
+        ret = rssdo_processSync(appifInstance_l.instRssdoChan_m[i]);
+        if(ret != kAppIfSuccessful)
+        {
+            DEBUG_TRACE(DEBUG_LVL_ERROR, "ERROR: rssdo_processSync() failed for "
                     "instance %d with: 0x%x!\n", i, ret);
             goto Exit;
         }
@@ -654,7 +686,7 @@ tAppIfStatus appif_sdoAccFinished(tSdoComFinished* pSdoComFinHdl_p )
     ret = forwardInstanceHandle((UINT32*)pSdoComFinHdl_p->pUserArg);
 #elif(((APPIF_MODULE_INTEGRATION) & (APPIF_MODULE_SSDO)) != 0)
     /* Only the SSDO module is active */
-    ret = ssdo_consTxTransferFinished((tSsdoInstance)pSdoComFinHdl_p->pUserArg);
+    ret = tssdo_consTxTransferFinished((tTssdoInstance)pSdoComFinHdl_p->pUserArg);
 #elif(((APPIF_MODULE_INTEGRATION) & (APPIF_MODULE_LOGBOOK)) != 0)
     /* Only the logbook module is active */
     ret = log_consTxTransferFinished((tLogInstance)pSdoComFinHdl_p->pUserArg);
@@ -694,9 +726,9 @@ static tAppIfStatus forwardInstanceHandle(UINT32* pInstHdl_p)
     /* Iterate over all SSDO channels */
     for(i=0; i < kNumSsdoInstCount; i++)
     {
-        if(pInstHdl_p == (UINT32*)appifInstance_l.instSsdoChan_m[i])
+        if(pInstHdl_p == (UINT32*)appifInstance_l.instTssdoChan_m[i])
         {
-            ret = ssdo_consTxTransferFinished((tSsdoInstance)pInstHdl_p);
+            ret = tssdo_consTxTransferFinished((tTssdoInstance)pInstHdl_p);
             goto Exit;
         }
     }

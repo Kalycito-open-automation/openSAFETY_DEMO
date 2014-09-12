@@ -1,10 +1,10 @@
 /**
 ********************************************************************************
-\file   appif/ssdo.h
+\file   appif/rssdo.h
 
-\brief  Header file of the SSDO module
+\brief  Header file of the SSDO receive module
 
-This file contains definitions for the SSDO module.
+This file contains definitions for the SSDO receive module.
 
 *******************************************************************************/
 
@@ -35,8 +35,8 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
 
-#ifndef _INC_appif_ssdo_H_
-#define _INC_appif_ssdo_H_
+#ifndef _INC_appif_rrssdo_H_
+#define _INC_appif_rrssdo_H_
 
 //------------------------------------------------------------------------------
 // includes
@@ -55,7 +55,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 
 /**
- * \brief SSDO channel initialization parameters
+ * \brief SSDO receive channel initialization parameters
  */
 typedef struct {
     tSsdoChanNum             chanId_m;          ///< Id of the SSDO channel
@@ -64,25 +64,20 @@ typedef struct {
     tTbufSsdoRxStructure*    pTbufRxBase_m;     ///< Base address of the receive triple buffer
     UINT32                   tbufRxSize_m;      ///< Size of the receive triple buffer
     UINT8*                   pProdAckBase_m;    ///< Producer acknowledge register base
+} tRssdoInitStruct;
 
-    UINT8                    tbufTxId_m;        ///< Id of the transmit triple buffer
-    tTbufSsdoTxStructure*    pTbufTxBase_m;     ///< Base address of the transmit triple buffer
-    UINT32                   tbufTxSize_m;      ///< Size of the transmit triple buffer
-    UINT8*                   pConsAckBase_m;    ///< Consumer acknowledge register base
-} tSsdoInitStruct;
-
-typedef struct eSsdoInstance *tSsdoInstance;
+typedef struct eRssdoInstance *tRssdoInstance;
 
 //------------------------------------------------------------------------------
 // function prototypes
 //------------------------------------------------------------------------------
-void ssdo_init(UINT8 nodeId_p, UINT16 idxSsdoStub_p, UINT16 idxSsdoStubData_p);
-tSsdoInstance ssdo_create(tSsdoInitStruct* pInitParam_p);
-void ssdo_destroy(tSsdoInstance pInstance_p);
-tAppIfStatus ssdo_process(tSsdoInstance pInstance_p);
-tAppIfStatus ssdo_consTxTransferFinished(tSsdoInstance pInstance_p);
-tAppIfStatus ssdo_handleIncoming(tSsdoInstance pInstance_p);
+void rssdo_init(UINT8 nodeId_p, UINT16 idxSsdoStub_p, UINT16 idxSsdoStubData_p);
+tRssdoInstance rssdo_create(tRssdoInitStruct* pInitParam_p);
+void rssdo_destroy(tRssdoInstance pInstance_p);
+tAppIfStatus rssdo_process(tRssdoInstance pInstance_p);
 
-#endif /* _INC_appif_ssdo_H_ */
+tAppIfStatus rssdo_processSync(tRssdoInstance pInstance_p);
+
+#endif /* _INC_appif_rrssdo_H_ */
 
 
