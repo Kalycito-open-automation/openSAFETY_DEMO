@@ -114,6 +114,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #define DLLEXPORT
 
+#define PACK_STRUCT __attribute__((packed))
+
 //------------------------------------------------------------------------------
 // typedef
 //------------------------------------------------------------------------------

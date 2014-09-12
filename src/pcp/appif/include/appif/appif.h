@@ -73,7 +73,7 @@ void appif_exit(void);
 tAppIfStatus appif_configureModules(void);
 
 tAppIfStatus appif_handleAsync(void);
-tAppIfStatus appif_handleSync(void);
+tAppIfStatus appif_handleSync(tNetTime * pNetTime_p);
 
 void appif_pdoProcFinished(tAppIfPdoDir pdoDir_p);
 tAppIfStatus appif_sdoAccFinished(tSdoComFinished* pSdoComFinParam_p );

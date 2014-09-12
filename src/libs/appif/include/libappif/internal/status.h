@@ -64,6 +64,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 void status_getIccStatus(tSeqNrValue* pSeqNr_p);
 void status_setSsdoRxChanFlag(UINT8 chanNum_p, tSeqNrValue seqNr_p);
 void status_getSsdoTxChanFlag(UINT8 chanNum_p, tSeqNrValue* pSeqNr_p);
+void status_getLogTxChanFlag(UINT8 chanNum_p, tSeqNrValue* pSeqNr_p);
 
 #endif /* _INC_libappif_internal_status_H_ */
 

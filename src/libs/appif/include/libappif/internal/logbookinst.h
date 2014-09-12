@@ -1,10 +1,11 @@
 /**
 ********************************************************************************
-\file   libappif/internal/ssdo.h
+\file   libappif/internal/logbookinst.h
 
-\brief  Application interface SSDO module internal header
+\brief  Application interface logbook module internal instance header
 
-Internal header for the SSDO channel which is used library internally.
+Internal header for the logbook channel which holds the instance
+declaration of one channel.
 
 *******************************************************************************/
 
@@ -35,31 +36,51 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
 
-#ifndef _INC_libappif_internal_ssdo_H_
-#define _INC_libappif_internal_ssdo_H_
+#ifndef _INC_libappif_internal_logbookinst_H_
+#define _INC_libappif_internal_logbookinst_H_
 
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
 
-#include <libappif/ssdo.h>
+#include <libappifcommon/logbook.h>
+#include <libappifcommon/timeout.h>
+
+#include <libappif/logbook.h>
 
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
-#define SSDO_TX_TIMEOUT_CYCLE_COUNT        400     ///< Number of cycles after a transmit has a timeout
 
 //------------------------------------------------------------------------------
 // typedef
 //------------------------------------------------------------------------------
 
+typedef struct {
+    UINT8                   isLocked_m;        ///< Is buffer free for filling
+    tTbufLogStructure*      pLogTxPayl_m;      ///< Pointer to transmit buffer
+} tTbufLogBuffer;
+
+/**
+\brief Logbook channel user instance
+
+The logbook instance holds configuration information of each logbook channel.
+*/
+struct eLogInstance
+{
+    tLogChanNum           chanId_m;           ///< Id of the logbook channel
+
+    tTbufNumLayout        idTxBuff_m;           ///< Id of the transmit buffer
+    tTbufLogBuffer        logTxBuffer_m;        ///< Logbook transmit buffer copy
+    tSeqNrValue           currTxSeqNr_m;        ///< Current transmit sequence number
+    UINT8                 currTxBuffer_m;       ///< Current active transmit buffer
+    tTimeoutInstance      pTimeoutInst_m;       ///< Timer instance for a logbook transmissions
+};
 
 //------------------------------------------------------------------------------
 // function prototypes
 //------------------------------------------------------------------------------
 
-void ssdo_init(void);
-
-#endif /* _INC_libappif_internal_ssdo_H_ */
+#endif /* _INC_libappif_internal_logbookinst_H_ */
 
 

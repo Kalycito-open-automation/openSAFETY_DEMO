@@ -51,6 +51,7 @@ processes the synchronous and asynchronous task.
 
 #include <libappif/internal/stream.h>
 #include <libappif/internal/ssdo.h>
+#include <libappif/internal/logbook.h>
 #include <libappif/internal/cc.h>
 #include <libappif/internal/error.h>
 
@@ -107,9 +108,6 @@ static tInternalInstance          intInstance_l;
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-#if (((APPIF_MODULE_INTEGRATION) & (APPIF_MODULE_SSDO)) != 0)
-  static BOOL appif_processSsdo(tSsdoInstance* ppInstance_p);
-#endif
 static BOOL appif_initIntModules(tAppIfInitParam* pInitParam_p);
 static tTbufAckRegister* appif_initAckRegister(tTbufNumLayout idAckReg_p);
 
@@ -235,8 +233,6 @@ BOOL appif_processSync(void)
 /**
 \brief    Process application interface asynchronous task
 
-\param[in]  ppInstance_p         Pointer to the array of SSDO instances
-
 \return  BOOL
 \retval  TRUE         Async processing successful
 \retval  FALSE        Error while processing async
@@ -244,24 +240,14 @@ BOOL appif_processSync(void)
 \ingroup module_internal
 */
 //------------------------------------------------------------------------------
-BOOL appif_processAsync(tSsdoInstance* ppInstance_p)
+BOOL appif_processAsync(void)
 {
-    BOOL fReturn = FALSE;
-
 #if(((APPIF_MODULE_INTEGRATION) & (APPIF_MODULE_CC)) != 0)
     // Process configuration channel objects
     cc_process();
 #endif
 
-#if(((APPIF_MODULE_INTEGRATION) & (APPIF_MODULE_SSDO)) != 0)
-    fReturn = appif_processSsdo(ppInstance_p);
-#else
-    UNUSED_PARAMETER(ppInstance_p);
-
-    fReturn = TRUE;
-#endif
-
-    return fReturn;
+    return TRUE;
 }
 
 //============================================================================//
@@ -269,53 +255,6 @@ BOOL appif_processAsync(tSsdoInstance* ppInstance_p)
 //============================================================================//
 /// \name Private Functions
 /// \{
-
-#if (((APPIF_MODULE_INTEGRATION) & (APPIF_MODULE_SSDO)) != 0)
-//------------------------------------------------------------------------------
-/**
-\brief    Process Ssdo asynchronous task
-
-\param[in]  ppInstance_p         Pointer to the array of SSDO instances
-
-\return  BOOL
-\retval  TRUE      Successfully processed Ssdo task
-\retval  FALSE     Error while processing
-
-\ingroup module_internal
-*/
-//------------------------------------------------------------------------------
-static BOOL appif_processSsdo(tSsdoInstance* ppInstance_p)
-{
-    BOOL fReturn = FALSE, fError = FALSE;
-    UINT8 i;
-
-    if(ppInstance_p == NULL)
-    {
-        // SSDO module is active but no instance is passed -> ERROR!
-        error_setError(kAppIfModuleInternal, kAppIfProcessSyncFailed);
-    }
-    else
-    {
-        // Process all SSDO channels
-        for(i=0; i < kNumSsdoInstCount; i++)
-        {
-            if(ssdo_process(ppInstance_p[i]) == FALSE)
-            {
-                fError = TRUE;
-                break;
-            }
-        }
-
-        if(fError == FALSE)
-        {
-
-            fReturn = TRUE;
-        }
-    }
-
-    return fReturn;
-}
-#endif //#if (((APPIF_MODULE_INTEGRATION) & (APPIF_MODULE_SSDO)) != 0)
 
 //------------------------------------------------------------------------------
 /**
@@ -338,6 +277,11 @@ static BOOL appif_initIntModules(tAppIfInitParam* pInitParam_p)
 #if(((APPIF_MODULE_INTEGRATION) & (APPIF_MODULE_SSDO)) != 0)
     // Initialize the SSDO module
     ssdo_init();
+#endif
+
+#if(((APPIF_MODULE_INTEGRATION) & (APPIF_MODULE_LOGBOOK)) != 0)
+    // Initialize the logbook module
+    log_init();
 #endif
 
     // Initialize the timeout module

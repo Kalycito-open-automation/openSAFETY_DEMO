@@ -110,6 +110,7 @@ typedef struct
 
     UINT8  iccStatus_m;                    ///< Icc status register
     UINT16 ssdoConsStatus_m;               ///< SSDO consumer buffer status register
+    UINT8  logConsStatus_m;                ///< Logger status register
 
     UINT16 ssdoProdStatus_m;              ///< SSDO producer buffer status register
 } tStatusInstance;
@@ -403,6 +404,29 @@ void status_getSsdoProdChanFlag(UINT8 chanNum_p, tSeqNrValue* pSeqNr_p)
     }
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief    Set the logbook transmit consuming channel to next element
+
+\param[in] chanNum_p     Id of the channel to acknowledge
+\param[in] seqNr_p       The value of the sequence number
+
+\ingroup module_status
+*/
+//------------------------------------------------------------------------------
+void status_setLogConsChanFlag(UINT8 chanNum_p, tSeqNrValue seqNr_p)
+{
+    if(seqNr_p == kSeqNrValueFirst)
+    {
+        statusInstance_l.logConsStatus_m &= ~(1<<chanNum_p);
+    }
+    else
+    {
+        statusInstance_l.logConsStatus_m |= (1<<chanNum_p);
+    }
+
+}
+
 //============================================================================//
 //            P R I V A T E   F U N C T I O N S                               //
 //============================================================================//
@@ -440,9 +464,17 @@ static tAppIfStatus status_processOut(tTimeInfo* pTime_p)
         goto Exit;
     }
 
-    // Write aynchronous channels status field to buffer
+    // Write SSDO channels status field to buffer
     ret = tbuf_writeWord(statusInstance_l.pTbufOutInstance_m, TBUF_SSDO_CONS_STATUS_OFF,
             statusInstance_l.ssdoConsStatus_m);
+    if(ret != kAppIfSuccessful)
+    {
+        goto Exit;
+    }
+
+    // Write logger channels status field to buffer
+    ret = tbuf_writeByte(statusInstance_l.pTbufOutInstance_m, TBUF_LOG_CONS_STATUS_OFF,
+            statusInstance_l.logConsStatus_m);
     if(ret != kAppIfSuccessful)
     {
         goto Exit;

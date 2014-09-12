@@ -61,7 +61,7 @@ typedef struct {
     UINT8   reserved;
     UINT16  paylSize_m;
     UINT8   ssdoStubDataDom_m[SSDO_STUB_DATA_DOM_SIZE];
-} tTbufSsdoRxStructure;
+} PACK_STRUCT tTbufSsdoRxStructure;
 
 /**
  * \brief Memory layout of the transmit channel
@@ -71,7 +71,7 @@ typedef struct {
     UINT8   reserved;
     UINT16  paylSize_m;
     UINT8   tssdoTransmitData_m[TSSDO_TRANSMIT_DATA_SIZE];
-} tTbufSsdoTxStructure;
+} PACK_STRUCT tTbufSsdoTxStructure;
 
 //------------------------------------------------------------------------------
 // offsetof defines

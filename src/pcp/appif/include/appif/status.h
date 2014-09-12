@@ -101,6 +101,9 @@ void status_setIccStatus(tSeqNrValue seqNr_p);
 void status_setSsdoConsChanFlag(UINT8 chanNum_p, tSeqNrValue seqNr_p);
 void status_getSsdoProdChanFlag(UINT8 chanNum_p, tSeqNrValue* pSeqNr_p);
 
+// Logbook channel status flag
+void status_setLogConsChanFlag(UINT8 chanNum_p, tSeqNrValue seqNr_p);
+
 #endif /* _INC_appif_status_H_ */
 
 

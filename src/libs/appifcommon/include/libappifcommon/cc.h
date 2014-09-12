@@ -55,7 +55,7 @@ typedef struct {
     UINT16 objIdx_m;
     UINT32 objPayloadLow_m;
     UINT32 objPayloadHigh_m;
-} tTbufCcStructure;
+} PACK_STRUCT tTbufCcStructure;
 
 //------------------------------------------------------------------------------
 // const defines

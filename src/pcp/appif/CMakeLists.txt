@@ -55,6 +55,7 @@ SET(APPIF_SRCS
     ${PROJECT_SOURCE_DIR}/main.c
     ${PROJECT_SOURCE_DIR}/tbuf.c
     ${PROJECT_SOURCE_DIR}/status.c
+    ${PROJECT_SOURCE_DIR}/logbook.c
     ${PROJECT_SOURCE_DIR}/cc.c
     ${PROJECT_SOURCE_DIR}/icc.c
     ${PROJECT_SOURCE_DIR}/occ.c

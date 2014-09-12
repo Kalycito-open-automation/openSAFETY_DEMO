@@ -100,7 +100,7 @@ and transmit channels.
 
 //------------------------------------------------------------------------------
 /**
-\brief    Link and object to the desired variable
+\brief    Link an object to the desired variable
 
 \param[in] objIdx_p             Index of the object to link
 \param[in] objSubIdx_p          Subindex of the object to link

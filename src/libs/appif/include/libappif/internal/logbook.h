@@ -1,10 +1,10 @@
 /**
 ********************************************************************************
-\file   libappif/internal/ssdo.h
+\file   libappif/internal/logbook.h
 
-\brief  Application interface SSDO module internal header
+\brief  Application interface logbook module internal header
 
-Internal header for the SSDO channel which is used library internally.
+Internal header for the logbook channel which is used library internally.
 
 *******************************************************************************/
 
@@ -35,19 +35,19 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
 
-#ifndef _INC_libappif_internal_ssdo_H_
-#define _INC_libappif_internal_ssdo_H_
+#ifndef _INC_libappif_internal_logbook_H_
+#define _INC_libappif_internal_logbook_H_
 
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
 
-#include <libappif/ssdo.h>
+#include <libappif/logbook.h>
 
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
-#define SSDO_TX_TIMEOUT_CYCLE_COUNT        400     ///< Number of cycles after a transmit has a timeout
+#define LOG_TX_TIMEOUT_CYCLE_COUNT        400     ///< Number of cycles after a transmit has a timeout
 
 //------------------------------------------------------------------------------
 // typedef
@@ -58,8 +58,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // function prototypes
 //------------------------------------------------------------------------------
 
-void ssdo_init(void);
+void log_init(void);
 
-#endif /* _INC_libappif_internal_ssdo_H_ */
+#endif /* _INC_libappif_internal_logbook_H_ */
 
 

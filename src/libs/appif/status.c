@@ -88,16 +88,17 @@ The status instance holds the status information of this module
 */
 typedef struct
 {
-    tTbufStatusOutStructure*  pStatusOutLayout_m;  ///< Local copy of the status output triple buffer
-    tTbufNumLayout            buffOutId_m;            ///< Id of the output status register buffer
-    UINT8                     iccStatus_m;            ///< Icc status register
-    UINT16                    ssdoTxStatus_m;         ///< Status of the SSDO transmit channel
+    tTbufStatusOutStructure*  pStatusOutLayout_m;   ///< Local copy of the status output triple buffer
+    tTbufNumLayout            buffOutId_m;          ///< Id of the output status register buffer
+    UINT8                     iccStatus_m;          ///< Icc status register
+    UINT16                    ssdoTxStatus_m;       ///< Status of the SSDO transmit channel
+    UINT8                     logTxStatus_m;        ///< Status of the logbook transmit channel
 
-    tTbufStatusInStructure*   pStatusInLayout_m;  ///< Local copy of the status incoming triple buffer
-    tTbufNumLayout            buffInId_m;            ///< Id of the incoming status register buffer
+    tTbufStatusInStructure*   pStatusInLayout_m;    ///< Local copy of the status incoming triple buffer
+    tTbufNumLayout            buffInId_m;           ///< Id of the incoming status register buffer
     UINT16                    ssdoRxStatus_m;       ///< Status of the SSDO receive channel
 
-    tAppIfAppCbSync       pfnAppCbSync_m;       ///< Synchronous callback function
+    tAppIfAppCbSync           pfnAppCbSync_m;       ///< Synchronous callback function
 } tStatusInstance;
 
 //------------------------------------------------------------------------------
@@ -265,6 +266,31 @@ void status_getSsdoTxChanFlag(UINT8 chanNum_p, tSeqNrValue* pSeqNr_p)
         *pSeqNr_p = kSeqNrValueFirst;
     }
 }
+
+//------------------------------------------------------------------------------
+/**
+\brief    Get the logbook transmit channel status
+
+\param[in]  chanNum_p     Id of the channel to mark as busy
+\param[out] pSeqNr_p      The value of the sequence number
+
+\ingroup module_status
+*/
+//------------------------------------------------------------------------------
+void status_getLogTxChanFlag(UINT8 chanNum_p, tSeqNrValue* pSeqNr_p)
+{
+    // Reformat to sequence number type
+    if(CHECK_BIT(statusInstance_l.logTxStatus_m, chanNum_p))
+    {
+        *pSeqNr_p = kSeqNrValueSecond;
+    }
+    else
+    {
+        *pSeqNr_p = kSeqNrValueFirst;
+    }
+}
+
+
 
 //============================================================================//
 //            P R I V A T E   F U N C T I O N S                               //
@@ -449,8 +475,11 @@ static BOOL status_updateOutStatusReg(UINT8* pBuffer_p, UINT16 bufSize_p,
     // Get CC status register
     statusInstance_l.iccStatus_m = ami_getUint8Le((UINT8 *)&pStatusBuff->iccStatus_m);
 
-    // Update tx status register
+    // Update ssdo tx status register
     statusInstance_l.ssdoTxStatus_m = ami_getUint16Le((UINT8 *)&pStatusBuff->ssdoConsStatus_m);
+
+    // Update logbook tx status register
+    statusInstance_l.logTxStatus_m = ami_getUint8Le((UINT8 *)&pStatusBuff->logConsStatus_m);
 
     // Acknowledge buffer
     stream_ackBuffer(statusInstance_l.buffOutId_m);

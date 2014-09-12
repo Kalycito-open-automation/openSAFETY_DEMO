@@ -1,10 +1,10 @@
 /**
 ********************************************************************************
-\file   libappif/internal/ssdo.h
+\file   appif/internal/logbook.h
 
-\brief  Application interface SSDO module internal header
+\brief  Internal header file of the SSDO module
 
-Internal header for the SSDO channel which is used library internally.
+This file contains internal definitions for the SSDO module.
 
 *******************************************************************************/
 
@@ -35,31 +35,78 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
 
-#ifndef _INC_libappif_internal_ssdo_H_
-#define _INC_libappif_internal_ssdo_H_
+#ifndef _INC_appif_int_logger_H_
+#define _INC_appif_int_logger_H_
 
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
 
-#include <libappif/ssdo.h>
+#include <appif/pcpglobal.h>
+
+#include <appif/tbuf.h>
+
+#include <libappifcommon/timeout.h>
+#include <config/logbook.h>
+
+#include <oplk/oplk.h>
 
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
-#define SSDO_TX_TIMEOUT_CYCLE_COUNT        400     ///< Number of cycles after a transmit has a timeout
 
 //------------------------------------------------------------------------------
 // typedef
 //------------------------------------------------------------------------------
 
+/**
+ * \brief Defines the format of a BuR logbock entry
+ */
+typedef struct
+{
+    UINT8 formatId_m;           ///< 2 for this format
+    UINT32 entryNumber_m;       ///< counting up one on each new entry
+    UINT64 timeStamp_m;         ///< absolute time stamp in ms since 1.1.1970 00:00
+    UINT16 errCode_m;           ///< unique error code display as 0x10000 + errorCode
+    UINT16 errInfo1_m;          ///< additional info
+    UINT32 errInfo2_m;          ///< additional info
+    UINT8 level_m;              ///< optional level
+} PACK_STRUCT tBuRLogEntry;
+
+/**
+ * \brief State machine type for the consuming transmit buffer
+ */
+typedef enum {
+    kConsTxStateInvalid                     = 0x00,
+    kConsTxStateWaitForFrame                = 0x01,
+    kConsTxStateProcessFrame                = 0x02,
+    kConsTxStateWaitForTxFinished           = 0x03,
+    kConsTxStateWaitForNextArpRetry         = 0x04,
+    kConsTxStateRetransmitCurrentMessage    = 0x05,
+    kConsTxStateTxFinished                  = 0x05,
+} tConsTxState;
+
+/**
+\brief Logger channel user instance
+
+The logger instance holds configuration information of each logger channel.
+*/
+struct eLogInstance
+{
+    tLogChanNum       instId_m;             ///< Id of the logger instance
+    tTbufInstance     pTbufConsTxInst_m;    ///< Instance pointer to the consuming transmit triple buffer
+    tSeqNrValue       currConsSeq_m;        ///< Consuming buffer sequence number
+    tConsTxState      consTxState_m;        ///< State of the consuming transmit buffer
+    tSdoComConHdl     sdoComConHdl_m;       ///< SDO connection handler
+    tTimeoutInstance  pArpTimeoutInst_m;    ///< Timer for ARP request retry
+    tBuRLogEntry      burLogEntry_m;        ///< The logbook entry converted into the B&R format
+    UINT32            entryCount_m;         ///< The current logbook entry count
+};
 
 //------------------------------------------------------------------------------
 // function prototypes
 //------------------------------------------------------------------------------
 
-void ssdo_init(void);
-
-#endif /* _INC_libappif_internal_ssdo_H_ */
+#endif /* _INC_appif_int_logger_H_ */
 
 

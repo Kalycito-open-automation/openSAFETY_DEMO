@@ -547,6 +547,7 @@ static tOplkError appif_syncCb(tSocTimeStamp* socTimeStamp_p)
     tOplkError         oplkret = kErrorOk;
     tAppIfStatus       ret = kAppIfSuccessful;
     tTimeInfo          time;
+    tNetTime *         pNetTime = NULL;
 
     oplkret = oplk_copyRxPdoToApp();
     if(oplkret != kErrorOk)
@@ -570,8 +571,10 @@ static tOplkError appif_syncCb(tSocTimeStamp* socTimeStamp_p)
             goto Exit;
         }
 
+        pNetTime = &socTimeStamp_p->netTime;
+
         // Handle synchronous task of application interface
-        ret = appif_handleSync();
+        ret = appif_handleSync(pNetTime);
         if(ret != kAppIfSuccessful)
         {
             oplkret = kErrorInvalidOperation;

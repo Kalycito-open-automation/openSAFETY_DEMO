@@ -58,7 +58,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 typedef struct {
     UINT32         relativeTimeLow_m;
     tRpdoMappedObj mappedObjList_m;
-} tTbufRpdoImage;
+} PACK_STRUCT tTbufRpdoImage;
 
 //------------------------------------------------------------------------------
 // offsetof defines

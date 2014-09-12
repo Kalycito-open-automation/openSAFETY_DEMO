@@ -57,7 +57,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 typedef struct {
     tTpdoMappedObj mappedObjList_m;
-} tTbufTpdoImage;
+} PACK_STRUCT tTbufTpdoImage;
 
 //------------------------------------------------------------------------------
 // offsetof defines

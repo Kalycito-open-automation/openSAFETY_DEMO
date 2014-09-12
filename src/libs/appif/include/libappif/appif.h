@@ -48,6 +48,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <libappif/status.h>
 #include <libappif/pdo.h>
 #include <libappif/ssdo.h>
+#include <libappif/logbook.h>
 #include <libappif/cc.h>
 
 
@@ -80,7 +81,7 @@ DLLEXPORT BOOL appif_init(tAppIfInitParam* pInitParam_p);
 DLLEXPORT void appif_exit(void);
 
 DLLEXPORT BOOL appif_processSync(void);
-DLLEXPORT BOOL appif_processAsync(tSsdoInstance* ppInstance_p);
+DLLEXPORT BOOL appif_processAsync(void);
 
 #endif /* _INC_libappif_appif_H_ */
 

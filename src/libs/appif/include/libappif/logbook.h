@@ -1,10 +1,10 @@
 /**
 ********************************************************************************
-\file   libappif/internal/ssdo.h
+\file   libappif/logbook.h
 
-\brief  Application interface SSDO module internal header
+\brief  Application interface logbook module header
 
-Internal header for the SSDO channel which is used library internally.
+This header provides the user API for the logbook module.
 
 *******************************************************************************/
 
@@ -35,31 +35,55 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
 
-#ifndef _INC_libappif_internal_ssdo_H_
-#define _INC_libappif_internal_ssdo_H_
+#ifndef _INC_libappif_logbook_H_
+#define _INC_libappif_logbook_H_
 
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
 
-#include <libappif/ssdo.h>
+#include <libappif/apglobal.h>
+
+#include <libappifcommon/logbook.h>
 
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
-#define SSDO_TX_TIMEOUT_CYCLE_COUNT        400     ///< Number of cycles after a transmit has a timeout
+
 
 //------------------------------------------------------------------------------
 // typedef
 //------------------------------------------------------------------------------
 
+/**
+ * \brief State of the transmit channel
+ */
+typedef enum {
+    kLogTxStatusError       = 0x00,   ///< Error while posting to the transmit channel
+    kLogTxStatusSuccessful  = 0x01,   ///< Post to transmit channel successful
+    kLogTxStatusBusy        = 0x02,   ///< Transmit channel is currently busy
+} tLogTxStatus;
+
+typedef struct eLogInstance *tLogInstance;
+
+/**
+ * \brief  Logbook module initialization structure
+ */
+typedef struct {
+    tTbufNumLayout         buffIdTx_m;      ///< Id of the transmit buffer
+} tLogInitParam;
+
 
 //------------------------------------------------------------------------------
 // function prototypes
 //------------------------------------------------------------------------------
+DLLEXPORT tLogInstance log_create(tLogChanNum chanId_m, tLogInitParam* pInitParam_p);
+DLLEXPORT void log_destroy(tLogInstance  pInstance_p);
 
-void ssdo_init(void);
+DLLEXPORT BOOL log_process(tLogInstance pInstance_p);
 
-#endif /* _INC_libappif_internal_ssdo_H_ */
+DLLEXPORT BOOL log_getCurrentLogBuffer(tLogInstance pInstance_p, tLogFormat ** ppLogData_p);
+DLLEXPORT tLogTxStatus log_postLogEntry(tLogInstance pInstance_p, tLogFormat* pLogData_p);
 
+#endif /* _INC_libappif_logbook_H_ */
 

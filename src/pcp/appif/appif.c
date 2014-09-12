@@ -59,6 +59,7 @@ the synchronous and asynchronous tasks.
 #include <appif/rpdo.h>
 #include <appif/tpdo.h>
 #include <appif/ssdo.h>
+#include <appif/logbook.h>
 #include <appif/fifo.h>
 #include <libappifcommon/ccobject.h>
 
@@ -102,7 +103,10 @@ typedef struct {
 #if(((APPIF_MODULE_INTEGRATION) & (APPIF_MODULE_SSDO)) != 0)
     tSsdoInstance    instSsdoChan_m[kNumSsdoInstCount];    ///< Instance of the SSDO channels
 #endif
-    UINT8            nodeId_m;                             ///< The node Id of the CN
+#if(((APPIF_MODULE_INTEGRATION) & (APPIF_MODULE_LOGBOOK)) != 0)
+    tLogInstance     instLogChan_m[kNumLogInstCount];       ///< Instance of the logger channels
+#endif
+    UINT8            nodeId_m;                              ///< The node Id of the CN
 } tAppIfInstance;
 
 //------------------------------------------------------------------------------
@@ -114,6 +118,10 @@ static tAppIfInstance appifInstance_l;
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
+#if(((APPIF_MODULE_INTEGRATION) & (APPIF_MODULE_SSDO)) != 0  && \
+    ((APPIF_MODULE_INTEGRATION) & (APPIF_MODULE_LOGBOOK)) != 0 )
+static tAppIfStatus forwardInstanceHandle(UINT32* pInstHdl_p);
+#endif
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
@@ -141,6 +149,8 @@ tAppIfStatus appif_init(UINT8 nodeId_p, tAppIfCritSec pfnCritSec_p)
 #if(((APPIF_MODULE_INTEGRATION) & (APPIF_MODULE_CC)) != 0)
     tOccInitStruct       occInitParam;
     tIccInitStruct       iccInitParam;
+#else
+    UNUSED_PARAMETER(pfnCritSec_p);
 #endif
 #if(((APPIF_MODULE_INTEGRATION) & (APPIF_MODULE_SSDO)) != 0)
     UINT8                i;
@@ -150,7 +160,10 @@ tAppIfStatus appif_init(UINT8 nodeId_p, tAppIfCritSec pfnCritSec_p)
     tRpdoInitStruct      rpdoInitParam;
     tTpdoInitStruct      tpdoInitParam;
 #endif
-
+#if(((APPIF_MODULE_INTEGRATION) & (APPIF_MODULE_LOGBOOK)) != 0)
+    UINT8                j;
+    tLogInitStruct       logInitParam;
+#endif
 
     tTbufDescriptor      tbufDescList[kTbufCount] = TBUF_INIT_VEC;
     UINT8*               prodAckBase = (UINT8 *)(TBUF_BASE_ADDRESS +
@@ -204,6 +217,10 @@ tAppIfStatus appif_init(UINT8 nodeId_p, tAppIfCritSec pfnCritSec_p)
 
 #if(((APPIF_MODULE_INTEGRATION) & (APPIF_MODULE_SSDO)) != 0)
     ssdo_init(appifInstance_l.nodeId_m, SSDO_STUB_OBJECT_INDEX, SSDO_STUB_DATA_OBJECT_INDEX);
+#endif
+
+#if(((APPIF_MODULE_INTEGRATION) & (APPIF_MODULE_SSDO)) != 0)
+    log_init(appifInstance_l.nodeId_m, LOG_STUB_OBJECT_INDEX, pfnCritSec_p);
 #endif
 
     // Initialize the status module
@@ -295,7 +312,7 @@ tAppIfStatus appif_init(UINT8 nodeId_p, tAppIfCritSec pfnCritSec_p)
 #endif
 
 #if(((APPIF_MODULE_INTEGRATION) & (APPIF_MODULE_SSDO)) != 0)
-    // Initialize all asynchronous channels
+    // Initialize all SSDO channels
     for(i=0; i < kNumSsdoInstCount; i++)
     {
         ssdoInitParam.chanId_m = i;
@@ -323,6 +340,29 @@ tAppIfStatus appif_init(UINT8 nodeId_p, tAppIfCritSec pfnCritSec_p)
     }
 #endif
 
+#if(((APPIF_MODULE_INTEGRATION) & (APPIF_MODULE_LOGBOOK)) != 0)
+    // Initialize all logbook channels
+    for(j=0; j < kNumLogInstCount; j++)
+    {
+        logInitParam.chanId_m = j;
+
+        logInitParam.tbufTxId_m = kTbufNumLogbook0 + j;
+        logInitParam.pTbufTxBase_m = (tTbufLogStructure *)(TBUF_BASE_ADDRESS +
+                tbufDescList[kTbufNumLogbook0 + j].buffOffset_m);
+        logInitParam.pConsAckBase_m = consAckBase;
+        logInitParam.tbufTxSize_m = tbufDescList[kTbufNumLogbook0 + j].buffSize_m;
+
+        appifInstance_l.instLogChan_m[j] = log_create(&logInitParam);
+        if(appifInstance_l.instLogChan_m[j] == NULL)
+        {
+            ret = kAppIfLogInitError;
+            DEBUG_TRACE(DEBUG_LVL_ERROR,"ERROR: log_create() failed for instance "
+                    "number %d!\n", j );
+            goto Exit;
+        }
+    }
+#endif
+
 Exit:
     return ret;
 }
@@ -340,6 +380,9 @@ void appif_exit(void)
 {
 #if(((APPIF_MODULE_INTEGRATION) & (APPIF_MODULE_SSDO)) != 0)
     UINT8 i;
+#endif
+#if(((APPIF_MODULE_INTEGRATION) & (APPIF_MODULE_LOGBOOK)) != 0)
+    UINT8 j;
 #endif
 
     // Destroy application interface modules
@@ -361,6 +404,14 @@ void appif_exit(void)
     for(i=0; i < kNumSsdoInstCount; i++)
     {
         ssdo_destroy(appifInstance_l.instSsdoChan_m[i]);
+    }
+#endif
+
+#if(((APPIF_MODULE_INTEGRATION) & (APPIF_MODULE_LOGBOOK)) != 0)
+    // Destroy all logbook channels
+    for(j=0; j < kNumLogInstCount; j++)
+    {
+        log_destroy(appifInstance_l.instLogChan_m[j]);
     }
 #endif
 }
@@ -424,6 +475,9 @@ tAppIfStatus appif_handleAsync(void)
 #if(((APPIF_MODULE_INTEGRATION) & (APPIF_MODULE_SSDO)) != 0)
     UINT8 i;
 #endif
+#if(((APPIF_MODULE_INTEGRATION) & (APPIF_MODULE_LOGBOOK)) != 0)
+    UINT8 j;
+#endif
 
 #if(((APPIF_MODULE_INTEGRATION) & (APPIF_MODULE_CC)) != 0)
     ret = icc_process();
@@ -448,6 +502,20 @@ tAppIfStatus appif_handleAsync(void)
     }
 #endif
 
+#if(((APPIF_MODULE_INTEGRATION) & (APPIF_MODULE_LOGBOOK)) != 0)
+    // Process all instantiated logger channels
+    for(j=0; j < kNumLogInstCount; j++)
+    {
+        ret = log_process(appifInstance_l.instLogChan_m[j]);
+        if(ret != kAppIfSuccessful)
+        {
+            DEBUG_TRACE(DEBUG_LVL_ERROR, "ERROR: log_process() failed for "
+                    "instance %d with: 0x%x!\n", j, ret);
+            goto Exit;
+        }
+    }
+#endif
+
 Exit:
     return ret;
 }
@@ -456,16 +524,23 @@ Exit:
 /**
 \brief    Process appif synchronous functions
 
+\param[in] pNetTime_p       Pointer to the current nettime
+
 Call modules where data needs to be forwarded in the synchronous interrupt.
 
 \ingroup module_appif
 */
 //------------------------------------------------------------------------------
-tAppIfStatus appif_handleSync(void)
+tAppIfStatus appif_handleSync(tNetTime * pNetTime_p)
 {
     tAppIfStatus ret = kAppIfSuccessful;
 #if(((APPIF_MODULE_INTEGRATION) & (APPIF_MODULE_SSDO)) != 0)
     UINT8 i;
+#endif
+#if(((APPIF_MODULE_INTEGRATION) & (APPIF_MODULE_LOGBOOK)) != 0)
+    UINT8 j;
+#else
+    UNUSED_PARAMETER(pNetTime_p);
 #endif
 
 #if(((APPIF_MODULE_INTEGRATION) & (APPIF_MODULE_CC)) != 0)
@@ -492,6 +567,27 @@ tAppIfStatus appif_handleSync(void)
         {
             DEBUG_TRACE(DEBUG_LVL_ERROR, "ERROR: ssdo_handleIncoming() failed for "
                     "instance %d with: 0x%x!\n", i, ret);
+            goto Exit;
+        }
+    }
+#endif
+
+#if(((APPIF_MODULE_INTEGRATION) & (APPIF_MODULE_LOGBOOK)) != 0)
+    // Set logbook nettime
+    ret = log_setNettime(pNetTime_p);
+    if(ret != kAppIfSuccessful)
+    {
+        goto Exit;
+    }
+
+    // Process all instantiated logger channels
+    for(j=0; j < kNumLogInstCount; j++)
+    {
+        ret = log_handleIncoming(appifInstance_l.instLogChan_m[j]);
+        if(ret != kAppIfSuccessful)
+        {
+            DEBUG_TRACE(DEBUG_LVL_ERROR, "ERROR: log_handleIncoming() failed for "
+                    "instance %d with: 0x%x!\n", j, ret);
             goto Exit;
         }
     }
@@ -552,8 +648,16 @@ tAppIfStatus appif_sdoAccFinished(tSdoComFinished* pSdoComFinHdl_p )
 {
     tAppIfStatus ret = kAppIfSuccessful;
 
-#if(((APPIF_MODULE_INTEGRATION) & (APPIF_MODULE_SSDO)) != 0)
+#if(((APPIF_MODULE_INTEGRATION) & (APPIF_MODULE_SSDO)) != 0  && \
+    ((APPIF_MODULE_INTEGRATION) & (APPIF_MODULE_LOGBOOK)) != 0 )
+    /* The SSDO and the logger module are active */
+    ret = forwardInstanceHandle((UINT32*)pSdoComFinHdl_p->pUserArg);
+#elif(((APPIF_MODULE_INTEGRATION) & (APPIF_MODULE_SSDO)) != 0)
+    /* Only the SSDO module is active */
     ret = ssdo_consTxTransferFinished((tSsdoInstance)pSdoComFinHdl_p->pUserArg);
+#elif(((APPIF_MODULE_INTEGRATION) & (APPIF_MODULE_LOGBOOK)) != 0)
+    /* Only the logbook module is active */
+    ret = log_consTxTransferFinished((tLogInstance)pSdoComFinHdl_p->pUserArg);
 #else
     UNUSED_PARAMETER(pSdoComFinHdl_p);
 #endif
@@ -566,6 +670,51 @@ tAppIfStatus appif_sdoAccFinished(tSdoComFinished* pSdoComFinHdl_p )
 //============================================================================//
 /// \name Private Functions
 /// \{
+
+#if(((APPIF_MODULE_INTEGRATION) & (APPIF_MODULE_SSDO)) != 0  && \
+    ((APPIF_MODULE_INTEGRATION) & (APPIF_MODULE_LOGBOOK)) != 0 )
+
+//------------------------------------------------------------------------------
+/**
+\brief    Search for the right instance handle and forward to module
+
+\param[in] pInstHdl_p        The instance handle which needs to be forwarded
+
+\retval kAppIfSuccessful          On success
+\retval kAppIfInvalidHandle       No handle found for this argument
+
+\ingroup module_appif
+*/
+//------------------------------------------------------------------------------
+static tAppIfStatus forwardInstanceHandle(UINT32* pInstHdl_p)
+{
+    tAppIfStatus ret = kAppIfInvalidHandle;
+    UINT8 i;
+
+    /* Iterate over all SSDO channels */
+    for(i=0; i < kNumSsdoInstCount; i++)
+    {
+        if(pInstHdl_p == (UINT32*)appifInstance_l.instSsdoChan_m[i])
+        {
+            ret = ssdo_consTxTransferFinished((tSsdoInstance)pInstHdl_p);
+            goto Exit;
+        }
+    }
+
+    /* Iterate over all logbook channels */
+    for(i=0; i < kNumLogInstCount; i++)
+    {
+        if(pInstHdl_p == (UINT32*)appifInstance_l.instLogChan_m[i])
+        {
+            ret = log_consTxTransferFinished((tLogInstance)pInstHdl_p);
+            goto Exit;
+        }
+    }
+
+Exit:
+    return ret;
+}
+#endif
 
 /// \}
 

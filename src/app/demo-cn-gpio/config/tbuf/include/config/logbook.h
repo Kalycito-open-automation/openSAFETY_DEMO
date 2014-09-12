@@ -1,15 +1,13 @@
 /**
 ********************************************************************************
-\file   libappif/internal/ssdo.h
+\file   config/logbook.h
 
-\brief  Application interface SSDO module internal header
-
-Internal header for the SSDO channel which is used library internally.
+\brief  This header provides the configuration parameters of the logbook module
 
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2013, BerneckerRainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -35,31 +33,39 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
 
-#ifndef _INC_libappif_internal_ssdo_H_
-#define _INC_libappif_internal_ssdo_H_
+#ifndef _INC_config_logbook_H_
+#define _INC_config_logbook_H_
 
-//------------------------------------------------------------------------------
-// includes
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
+/* includes                                                                   */
+/*----------------------------------------------------------------------------*/
 
-#include <libappif/ssdo.h>
+#include <libappifcommon/global.h>
 
-//------------------------------------------------------------------------------
-// const defines
-//------------------------------------------------------------------------------
-#define SSDO_TX_TIMEOUT_CYCLE_COUNT        400     ///< Number of cycles after a transmit has a timeout
+/*----------------------------------------------------------------------------*/
+/* const defines                                                              */
+/*----------------------------------------------------------------------------*/
+#define LOG_STUB_OBJECT_INDEX           0x2403     /**< Object index of the logbook stub */
 
-//------------------------------------------------------------------------------
-// typedef
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
+/* typedef                                                                    */
+/*----------------------------------------------------------------------------*/
 
+/**
+ * \brief Number of logbook channel instances
+ */
+typedef enum {
+    kNumLogChan0     = 0x00,
+    kNumLogInstCount = 0x01,
+} tLogChanNum;
 
-//------------------------------------------------------------------------------
-// function prototypes
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
+/* offsetof defines                                                           */
+/*----------------------------------------------------------------------------*/
 
-void ssdo_init(void);
+/*----------------------------------------------------------------------------*/
+/* function prototypes                                                        */
+/*----------------------------------------------------------------------------*/
 
-#endif /* _INC_libappif_internal_ssdo_H_ */
-
+#endif /* _INC_config_logbook_H_ */
 

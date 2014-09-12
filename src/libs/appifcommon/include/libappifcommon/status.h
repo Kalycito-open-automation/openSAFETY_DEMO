@@ -55,9 +55,9 @@ typedef struct {
     UINT32 relTimeLow_m;
     UINT32 relTimeHigh_m;
     UINT8  iccStatus_m;
-    UINT8  reserved_m;
+    UINT8  logConsStatus_m;
     UINT16 ssdoConsStatus_m;
-} tTbufStatusOutStructure;
+} PACK_STRUCT tTbufStatusOutStructure;
 
 /**
  * \brief Status channel incoming buffer layout
@@ -65,7 +65,7 @@ typedef struct {
 typedef struct {
     UINT16 reserved_m;
     UINT16 ssdoProdStatus_m;
-} tTbufStatusInStructure;
+} PACK_STRUCT tTbufStatusInStructure;
 
 //------------------------------------------------------------------------------
 // const defines
@@ -74,6 +74,7 @@ typedef struct {
 #define TBUF_RELTIME_LOW_OFF            offsetof(tTbufStatusOutStructure, relTimeLow_m)
 #define TBUF_RELTIME_HIGH_OFF           offsetof(tTbufStatusOutStructure, relTimeHigh_m)
 #define TBUF_ICC_STATUS_OFF             offsetof(tTbufStatusOutStructure, iccStatus_m)
+#define TBUF_LOG_CONS_STATUS_OFF        offsetof(tTbufStatusOutStructure, logConsStatus_m)
 #define TBUF_SSDO_CONS_STATUS_OFF       offsetof(tTbufStatusOutStructure, ssdoConsStatus_m)
 
 #define TBUF_SSDO_PROD_STATUS_OFF       offsetof(tTbufStatusInStructure, ssdoProdStatus_m)

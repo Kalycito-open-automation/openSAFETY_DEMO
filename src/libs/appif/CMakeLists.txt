@@ -42,6 +42,7 @@ SET ( LIB_SRCS
     ${PROJECT_SOURCE_DIR}/ssdo.c
     ${PROJECT_SOURCE_DIR}/cc.c
     ${PROJECT_SOURCE_DIR}/error.c
+    ${PROJECT_SOURCE_DIR}/logbook.c
     ${PROJECT_SOURCE_DIR}/internal.c
     ${PROJECT_SOURCE_DIR}/pdo.c
     ${PROJECT_SOURCE_DIR}/status.c

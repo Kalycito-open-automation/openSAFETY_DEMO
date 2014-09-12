@@ -1,10 +1,10 @@
 /**
 ********************************************************************************
-\file   libappif/internal/ssdo.h
+\file   appif/logbook.h
 
-\brief  Application interface SSDO module internal header
+\brief  Header file of the logger module
 
-Internal header for the SSDO channel which is used library internally.
+This file defines the interface to the logger module.
 
 *******************************************************************************/
 
@@ -35,31 +35,50 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
 
-#ifndef _INC_libappif_internal_ssdo_H_
-#define _INC_libappif_internal_ssdo_H_
+#ifndef _INC_appif_logger_H_
+#define _INC_appif_logger_H_
 
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
 
-#include <libappif/ssdo.h>
+#include <appif/pcpglobal.h>
+
+#include <libappifcommon/logbook.h>
 
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
-#define SSDO_TX_TIMEOUT_CYCLE_COUNT        400     ///< Number of cycles after a transmit has a timeout
 
 //------------------------------------------------------------------------------
 // typedef
 //------------------------------------------------------------------------------
 
+/**
+ * \brief Logger channel initialization parameters
+ */
+typedef struct {
+    tLogChanNum          chanId_m;          ///< Id of the logger channel
+
+    UINT8                tbufTxId_m;        ///< Id of the transmit triple buffer
+    tTbufLogStructure*   pTbufTxBase_m;     ///< Base address of the transmit triple buffer
+    UINT32               tbufTxSize_m;      ///< Size of the transmit triple buffer
+    UINT8*               pConsAckBase_m;    ///< Consumer acknowledge register base
+} tLogInitStruct;
+
+typedef struct eLogInstance *tLogInstance;
 
 //------------------------------------------------------------------------------
 // function prototypes
 //------------------------------------------------------------------------------
+void log_init(UINT8 nodeId_p, UINT16 idxLogStub_p, tAppIfCritSec pfnCritSec_p);
+tLogInstance log_create(tLogInitStruct* pInitParam_p);
+void log_destroy(tLogInstance pInstance_p);
+tAppIfStatus log_process(tLogInstance pInstance_p);
+tAppIfStatus log_setNettime(tNetTime * pNetTime_p);
+tAppIfStatus log_consTxTransferFinished(tLogInstance pInstance_p);
+tAppIfStatus log_handleIncoming(tLogInstance pInstance_p);
 
-void ssdo_init(void);
-
-#endif /* _INC_libappif_internal_ssdo_H_ */
+#endif /* _INC_appif_logger_H_ */
 
 

@@ -248,7 +248,7 @@ void TST_internalProcessAsync(void)
 
     CU_ASSERT_TRUE_FATAL( fReturn );
 
-    fReturn = appif_processAsync(NULL);
+    fReturn = appif_processAsync();
 
 #if (((APPIF_MODULE_INTEGRATION) & (APPIF_MODULE_SSDO)) != 0)
     CU_ASSERT_FALSE( fReturn );

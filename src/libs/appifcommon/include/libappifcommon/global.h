@@ -60,6 +60,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define APPIF_MODULE_CC          0x00000002L    ///< Configuration channel module
 #define APPIF_MODULE_PDO         0x00000004L    ///< PDO module
 #define APPIF_MODULE_SSDO        0x00000008L    ///< SSDO module
+#define APPIF_MODULE_LOGBOOK     0x00000010L    ///< Logger module
 
 // Alignment macros
 #define ALIGN16(ptr)        (((UINT16)(ptr) + 1U) & 0xFFFFFFFEU)   ///< aligns the pointer to UINT16 (2 byte)
@@ -165,10 +166,11 @@ typedef enum {
     kAppIfModuleCcObject  = 0x03,
     kAppIfModulePdo       = 0x04,
     kAppIfModuleSsdo      = 0x05,
-    kAppIfModuleTimeout   = 0x06,
-    kAppIfModuleStream    = 0x07,
-    kAppIfModuleInternal  = 0x08,
-    kAppIfModuleExternal  = 0x09,
+    kAppIfModuleLogbook   = 0x06,
+    kAppIfModuleTimeout   = 0x07,
+    kAppIfModuleStream    = 0x08,
+    kAppIfModuleInternal  = 0x09,
+    kAppIfModuleExternal  = 0x0A,
 } tAppIfModules;
 
 /**
@@ -183,6 +185,7 @@ typedef enum {
     kAppIfInvalidBuffer               = 0x05,
     kAppIfProcessSyncFailed           = 0x06,
     kAppIfProcessAsyncFailed          = 0x07,
+    kAppIfInvalidHandle               = 0x08,
 
     kAppIfMainPlkStackInitError       = 0x12,
     kAppIfMainPlkStackStartError      = 0x13,
@@ -244,6 +247,21 @@ typedef enum {
     kAppIfSsdoInvalidState            = 0x9A,
     kAppIfSsdoChannelBusy             = 0x9B,
     kAppIfSsdoInvalidTargetInfo       = 0x9C,
+
+    kAppIfLogInitError                = 0xA0,
+    kAppIfLogInvalidParameter         = 0xA1,
+    kAppIfLogProcessingFailed         = 0xA2,
+    kAppIfLogInvalidState             = 0xA3,
+    kAppIfLogDestinationUnknown       = 0xA4,
+    kAppIfLogWriteToObDictFailed      = 0xA5,
+    kAppIfLogInvalidTargetInfo        = 0xA6,
+    kAppIfLogSendError                = 0xA7,
+    kAppIfLogTxConsSizeInvalid        = 0xA8,
+    kAppIfLogBufferSizeMismatch       = 0xA9,
+    kAppIfLogInvalidBuffer            = 0xAA,
+    kAppIfLogEntryReformatFailed      = 0xAB,
+    kAppifLogInvalidErrorLevel        = 0xAC,
+    kAppIfLogNettimeInvalid           = 0xAD,
 
     kAppIfFifoInitFailed              = 0x100,
     kAppIfFifoInvalidParam            = 0x101,

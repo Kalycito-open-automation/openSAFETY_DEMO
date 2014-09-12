@@ -116,6 +116,15 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     #define DLLEXPORT extern
 #endif
 
+// define macro for packed structures
+#ifdef _MSC_VER
+    #pragma pack( push, packing )
+    #pragma pack( 1 )
+    #define PACK_STRUCT
+#elif defined( __GNUC__ )
+    #define PACK_STRUCT            __attribute__((packed))
+#endif
+
 //------------------------------------------------------------------------------
 // typedef
 //------------------------------------------------------------------------------

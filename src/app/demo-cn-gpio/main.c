@@ -198,7 +198,7 @@ int main (void)
     /* main program loop */
     while (TRUE)
     {
-        if(appif_processAsync(NULL) == FALSE)
+        if(appif_processAsync() == FALSE)
         {
             DEBUG_TRACE(DEBUG_LVL_ERROR,"ERROR: Unable to process background task!\n");
             break;
