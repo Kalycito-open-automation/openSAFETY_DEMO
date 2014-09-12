@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   demo-gpio/config/objdict/objdict.h
+\file   demo-cn-gpio/config/objdict/objdict.h
 
 \brief  Object dictionary according to CiA401
 
@@ -129,7 +129,7 @@ OBD_BEGIN ()
             OBD_SUBINDEX_RAM_VAR(0x1601, 0x19, kObdTypeUInt64, kObdAccRW, tObdUnsigned64, ObjectMapping, 0x00LL)
         OBD_END_INDEX(0x1601)
 
-		// Object 1602h: PDO_RxMappParam_02h_AU64
+        // Object 1602h: PDO_RxMappParam_02h_AU64
         OBD_BEGIN_INDEX_RAM(0x1602, 0x1A, pdou_cbObdAccess)
             OBD_SUBINDEX_RAM_VAR(0x1602, 0x00, kObdTypeUInt8, kObdAccRW, tObdUnsigned8, NumberOfEntries, 0x00)
             OBD_SUBINDEX_RAM_VAR(0x1602, 0x01, kObdTypeUInt64, kObdAccRW, tObdUnsigned64, ObjectMapping, 0x00LL)

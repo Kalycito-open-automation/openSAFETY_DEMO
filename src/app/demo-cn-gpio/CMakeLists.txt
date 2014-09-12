@@ -30,7 +30,7 @@
 
 CMAKE_MINIMUM_REQUIRED (VERSION 2.8)
 
-PROJECT( demo-gpio C)
+PROJECT( demo-${CFG_DEMO_TYPE} C)
 
 ########################################################################
 # Set all source files

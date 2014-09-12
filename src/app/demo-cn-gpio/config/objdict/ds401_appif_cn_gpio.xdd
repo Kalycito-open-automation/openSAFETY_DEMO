@@ -72,7 +72,7 @@
       <DeviceIdentity>
         <vendorName>Unknown vendor</vendorName>
         <vendorID>0x00000000</vendorID>
-        <productName>openPOWERLINK device PIFA (demo-gpio)</productName>
+        <productName>openPOWERLINK device PIFA (demo-cn-gpio)</productName>
         <version versionType="HW">1.00</version>
         <version versionType="SW">1.00</version>
         <version versionType="FW">EPL V2 V1.8 r3</version>
@@ -212,7 +212,7 @@
           <Object index="1000" name="NMT_DeviceType_U32" objectType="7" dataType="0007" accessType="const" PDOmapping="no" defaultValue="0x000F0191"/>
           <Object index="1001" name="ERR_ErrorRegister_U8" objectType="7" dataType="0005" accessType="ro" PDOmapping="optional" defaultValue="0"/>
           <Object index="1006" name="NMT_CycleLen_U32" objectType="7" dataType="0007" accessType="rw" PDOmapping="no" defaultValue="1000"/>
-          <Object index="1008" name="NMT_ManufactDevName_VS" objectType="7" dataType="0009" accessType="const" PDOmapping="no" defaultValue="openPOWERLINK device PIFA (demo-gpio)"/>
+          <Object index="1008" name="NMT_ManufactDevName_VS" objectType="7" dataType="0009" accessType="const" PDOmapping="no" defaultValue="openPOWERLINK device PIFA (demo-cn-gpio)"/>
           <Object index="1009" name="NMT_ManufactHwVers_VS" objectType="7" dataType="0009" accessType="const" PDOmapping="no" defaultValue="1.1.0"/>
           <Object index="100A" name="NMT_ManufactSwVers_VS" objectType="7" dataType="0009" accessType="const" PDOmapping="no" defaultValue="EPL V2 V1.8.3"/>
           <Object index="1018" name="NMT_IdentityObject_REC" objectType="9">

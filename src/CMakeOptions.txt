@@ -43,10 +43,10 @@ IF( NOT CMAKE_BUILD_TYPE )
 ENDIF( NOT CMAKE_BUILD_TYPE )
 
 IF( NOT CFG_DEMO_TYPE )
-    SET(CFG_DEMO_TYPE gpio CACHE STRING
+    SET(CFG_DEMO_TYPE cn-gpio CACHE STRING
         "Choose the demo you want to build"
         FORCE)
-    SET_PROPERTY(CACHE CFG_DEMO_TYPE PROPERTY STRINGS "gpio;safety;custom")
+    SET_PROPERTY(CACHE CFG_DEMO_TYPE PROPERTY STRINGS "cn-gpio;sn-gpio;custom")
 ENDIF( NOT CFG_DEMO_TYPE )
 
 # Disable Unitests when cross compiling to an embedded platform

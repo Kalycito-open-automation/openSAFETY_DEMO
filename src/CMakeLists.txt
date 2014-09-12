@@ -97,17 +97,10 @@ IF ( UNITTEST_ENABLE )
 ENDIF ( UNITTEST_ENABLE )
 
 #####################################################################
-# Set path to demo configuration
-IF( CFG_DEMO_TYPE MATCHES "gpio" )
-    SET( DEMO_CONFIG_DIR   ${CMAKE_SOURCE_DIR}/app/demo-gpio )
-ELSE( CFG_DEMO_TYPE MATCHES "gpio" )
-    SET( DEMO_CONFIG_DIR   ${CMAKE_SOURCE_DIR}/app/demo-safety )
-ENDIF( CFG_DEMO_TYPE MATCHES "gpio" )
-
-#####################################################################
 # Setup paths
 SET( MISC_DIR ${CMAKE_SOURCE_DIR}/misc )
 SET( FPGA_DIR ${CMAKE_SOURCE_DIR}/fpga )
+SET( DEMO_CONFIG_DIR ${CMAKE_SOURCE_DIR}/app/demo-${CFG_DEMO_TYPE} )
 
 #####################################################################
 # Setup architecture specific configuration

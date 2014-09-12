@@ -68,8 +68,8 @@ set tbufBridgePortA tbufPortA
 set tbufBridgePortB tbufPortB
 
 # Set id to each demo
-set ID_DEMO_GPIO 0
-set ID_DEMO_SAFETY 1
+set ID_DEMO_CN_GPIO 0
+set ID_DEMO_SN_GPIO 1
 set ID_DEMO_CUSTOM 2
 
 # Set id to each connection
@@ -99,11 +99,11 @@ set grpConAvalon "Avalon Interface:"
 # -----------------------------------------------------------------------------
 # GUI parameters triple buffer
 # -----------------------------------------------------------------------------
-add_parameter gDemoCfg STRING "gpio"
-set_parameter_property gDemoCfg DEFAULT_VALUE "gpio"
+add_parameter gDemoCfg STRING "cn-gpio"
+set_parameter_property gDemoCfg DEFAULT_VALUE "cn-gpio"
 set_parameter_property gDemoCfg TYPE STRING
 set_parameter_property gDemoCfg DISPLAY_NAME "Triple buffer layout"
-set_parameter_property gDemoCfg ALLOWED_RANGES {"gpio" "safety" "custom"}
+set_parameter_property gDemoCfg ALLOWED_RANGES {"cn-gpio" "sn-gpio" "custom"}
 
 add_display_item "" $grpBufCfg GROUP TAB
 add_display_item $grpBufCfg $grpBuffTbuf GROUP
@@ -263,11 +263,11 @@ proc getDemoId { } {
     set selDemo [ get_parameter_value gDemoCfg ]
 
     switch $selDemo {
-       "gpio" {
-              return $::ID_DEMO_GPIO
+       "cn-gpio" {
+              return $::ID_DEMO_CN_GPIO
        }
-       "safety" {
-              return $::ID_DEMO_SAFETY
+       "sn-gpio" {
+              return $::ID_DEMO_SN_GPIO
        }
        "custom" {
               return $::ID_DEMO_CUSTOM
