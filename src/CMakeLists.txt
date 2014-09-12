@@ -129,17 +129,21 @@ ENDIF()
 # Add the subprojects depending on the target platform
 IF((CMAKE_SYSTEM_NAME STREQUAL "Generic"))
     # We are cross compiling for an embedded platform
-    IF(CFG_INCLUDE_SUBPROJECTS MATCHES "application" OR CFG_INCLUDE_SUBPROJECTS MATCHES "all" )
-        ADD_SUBDIRECTORY ("${PROJECT_SOURCE_DIR}/libs/endian" )
-        ADD_SUBDIRECTORY ("${PROJECT_SOURCE_DIR}/libs/appifcommon" )
-        ADD_SUBDIRECTORY ("${PROJECT_SOURCE_DIR}/libs/appif" )
+    IF(CFG_INCLUDE_SUBPROJECTS MATCHES "application" OR CFG_INCLUDE_SUBPROJECTS MATCHES "all")
+        SET(CURR_APPLICATION "app")
+        ADD_SUBDIRECTORY("${PROJECT_SOURCE_DIR}/libs/endian" "${PROJECT_BINARY_DIR}/libs/${CURR_APPLICATION}/endian")
+        ADD_SUBDIRECTORY("${PROJECT_SOURCE_DIR}/libs/appifcommon" "${PROJECT_BINARY_DIR}/libs/${CURR_APPLICATION}/appifcommon")
+        ADD_SUBDIRECTORY("${PROJECT_SOURCE_DIR}/libs/appif" "${PROJECT_BINARY_DIR}/libs/${CURR_APPLICATION}/appif")
 
         # Add the current demo to the build
-        ADD_SUBDIRECTORY("${CMAKE_SOURCE_DIR}/app/demo-${CFG_DEMO_TYPE}")
+        ADD_SUBDIRECTORY("${PROJECT_SOURCE_DIR}/app/demo-${CFG_DEMO_TYPE}")
     ENDIF()
 
     IF(CFG_INCLUDE_SUBPROJECTS MATCHES "pcp" OR CFG_INCLUDE_SUBPROJECTS MATCHES "all" )
-        ADD_SUBDIRECTORY("${CMAKE_SOURCE_DIR}/pcp/appif")
+        SET(CURR_APPLICATION "pcp")
+        ADD_SUBDIRECTORY("${PROJECT_SOURCE_DIR}/libs/appifcommon" "${PROJECT_BINARY_DIR}/libs/${CURR_APPLICATION}/appifcommon")
+
+        ADD_SUBDIRECTORY("${PROJECT_SOURCE_DIR}/pcp/appif")
     ENDIF()
 ELSE()
     # Target platform is the local machine (Windows or Linux)

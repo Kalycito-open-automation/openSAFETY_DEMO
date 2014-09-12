@@ -54,7 +54,7 @@ SET ( LIB_SRCS
 ########################################################################
 SET ( LIB_INCS
     ${PROJECT_SOURCE_DIR}/include
-    ${appifcommon_SOURCE_DIR}/include
+    ${appifcommon${CURR_APPLICATION}_SOURCE_DIR}/include
     ${endian_SOURCE_DIR}/include
     ${DEMO_CONFIG_DIR}/config/tbuf/include
 )

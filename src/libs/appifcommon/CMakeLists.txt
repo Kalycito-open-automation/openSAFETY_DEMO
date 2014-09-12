@@ -30,7 +30,9 @@
 
 CMAKE_MINIMUM_REQUIRED (VERSION 2.8)
 
-PROJECT (appifcommon C)
+SET(LIB_NAME "appifcommon${CURR_APPLICATION}")
+
+PROJECT(${LIB_NAME} C)
 
 # Generate a target for this library in the CMake Makefile
 SET(GEN_LIB_TARGET ON)
@@ -64,14 +66,14 @@ INCLUDE_DIRECTORIES ( ${LIB_INCS}
 # Build library
 ########################################################################
 IF(GEN_LIB_TARGET)
-    ADD_LIBRARY ( appifcommon ${LIB_TYPE} ${LIB_SRCS} )
+    ADD_LIBRARY (${PROJECT_NAME} ${LIB_TYPE} ${LIB_SRCS})
 
-    TARGET_LINK_LIBRARIES ( appifcommon "endian" )
-    ADD_DEPENDENCIES ( appifcommon "endian" )
+    TARGET_LINK_LIBRARIES(${PROJECT_NAME} "endian")
+    ADD_DEPENDENCIES(${PROJECT_NAME} "endian")
 
-    IF ( ( WIN32 OR CYGWIN ) AND ( ${LIB_TYPE} STREQUAL "SHARED" ) )
-        EnsureLibraries(appifcommon "endian" )
-    ENDIF ( ( WIN32 OR CYGWIN ) AND ( ${LIB_TYPE} STREQUAL "SHARED" ) )
+    IF((WIN32 OR CYGWIN) AND (${LIB_TYPE} STREQUAL "SHARED"))
+        EnsureLibraries(${PROJECT_NAME} "endian")
+    ENDIF()
 ENDIF()
 
 ################################################################################

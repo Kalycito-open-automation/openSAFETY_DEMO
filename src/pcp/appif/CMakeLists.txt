@@ -63,8 +63,6 @@ SET(APPIF_SRCS
     ${PROJECT_SOURCE_DIR}/tpdo.c
     ${PROJECT_SOURCE_DIR}/ssdo.c
     ${PROJECT_SOURCE_DIR}/fifo.c
-    ${appifcommon_SOURCE_DIR}/timeout.c
-    ${appifcommon_SOURCE_DIR}/ccobject.c
     ${PROJECT_SOURCE_DIR}/event.c
    )
 
@@ -114,7 +112,7 @@ SET(OMETHLIB_SRCS
 SET(APPIF_INCS
     ${PROJECT_SOURCE_DIR}
     ${PROJECT_SOURCE_DIR}/include
-    ${appifcommon_SOURCE_DIR}/include
+    ${appifcommonpcp_SOURCE_DIR}/include
     ${DEMO_CONFIG_DIR}/config/tbuf/include
     ${IP_BASE_DIR}
    )

@@ -154,6 +154,7 @@ SET( ALT_APP_GEN_ARGS
                       "--set CFLAGS=${APP_CFLAGS} ${APP_CFLAGS_EXTENDED}"
                       "--set APP_CFLAGS_OPTIMIZATION=${OPT_LEVEL}"
                       "--elf-name ${PROJECT_NAME}.elf"
+                      "--use-lib-dir ${appifcommonpcp_BINARY_DIR}/${ALT_BUILD_DIR_NAME}"
    )
 
 EXECUTE_PROCESS( COMMAND ${ALT_APP_GEN_MAKEFILE} ${ALT_APP_GEN_ARGS}

@@ -106,7 +106,7 @@ SET( ALT_LIB_GEN_ARGS
                       "--elf-name ${PROJECT_NAME}.elf"
                       "--use-lib-dir ${endian_BINARY_DIR}/${ALT_BUILD_DIR_NAME}"
                       "--use-lib-dir ${appif_BINARY_DIR}/${ALT_BUILD_DIR_NAME}"
-                      "--use-lib-dir ${appifcommon_BINARY_DIR}/${ALT_BUILD_DIR_NAME}"
+                      "--use-lib-dir ${appifcommonapp_BINARY_DIR}/${ALT_BUILD_DIR_NAME}"
    )
 
 EXECUTE_PROCESS( COMMAND ${ALT_APP_GEN_MAKEFILE} ${ALT_LIB_GEN_ARGS}

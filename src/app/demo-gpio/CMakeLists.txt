@@ -46,7 +46,7 @@ SET ( DEMO_INCS
     ${PROJECT_SOURCE_DIR}
     ${endian_SOURCE_DIR}/include
     ${appif_SOURCE_DIR}/include
-    ${appifcommon_SOURCE_DIR}/include
+    ${appifcommonapp_SOURCE_DIR}/include
     ${DEMO_CONFIG_DIR}/config/tbuf/include
 )
 
