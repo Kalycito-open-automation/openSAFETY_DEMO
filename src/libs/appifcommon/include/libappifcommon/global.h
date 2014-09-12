@@ -168,6 +168,7 @@ typedef enum {
     kAppIfModuleTimeout   = 0x06,
     kAppIfModuleStream    = 0x07,
     kAppIfModuleInternal  = 0x08,
+    kAppIfModuleExternal  = 0x09,
 } tAppIfModules;
 
 /**
@@ -176,11 +177,12 @@ typedef enum {
 typedef enum {
     kAppIfSuccessful                  = 0x00,
     kAppIfInitError                   = 0x01,
-    kAppIfSpiSendReceiveError         = 0x02,
-    kAppIfBufferSizeMismatch          = 0x03,
-    kAppIfInvalidBuffer               = 0x04,
-    kAppIfProcessSyncFailed           = 0x05,
-    kAppIfProcessAsyncFailed          = 0x06,
+    kAppIfGeneralError                = 0x02,
+    kAppIfSpiSendReceiveError         = 0x03,
+    kAppIfBufferSizeMismatch          = 0x04,
+    kAppIfInvalidBuffer               = 0x05,
+    kAppIfProcessSyncFailed           = 0x06,
+    kAppIfProcessAsyncFailed          = 0x07,
 
     kAppIfMainPlkStackInitError       = 0x12,
     kAppIfMainPlkStackStartError      = 0x13,

@@ -60,12 +60,12 @@ typedef struct
 {
     tAppIfModules  srcModule_m;       ///< Source module of the error
     tAppIfStatus   errCode_m;         ///< Code of the error
-} tErrorInfo;
+} tAppifErrorInfo;
 
 /**
  * \brief Error handler user callback
  */
-typedef void (*tErrorHandler) (tErrorInfo* pErrorInfo_p);
+typedef void (*tErrorHandler) (tAppifErrorInfo* pErrorInfo_p);
 
 //------------------------------------------------------------------------------
 // function prototypes

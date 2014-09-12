@@ -116,7 +116,7 @@ static BOOL appif_workInputOutput(UINT32 rpdoRelTimeLow_p,
     static void appif_syncIntH(void* pArg_p);
 #endif
 
-static void appif_errorHandler(tErrorInfo* pErrorInfo_p);
+static void appif_errorHandler(tAppifErrorInfo* pErrorInfo_p);
 
 #if(((APPIF_MODULE_INTEGRATION) & (APPIF_MODULE_CC)) != 0)
 static void appif_ccWriteObject(void);
@@ -471,7 +471,7 @@ static void appif_syncIntH(void* pArg_p)
 \ingroup module_main
 */
 //------------------------------------------------------------------------------
-static void appif_errorHandler(tErrorInfo* pErrorInfo_p)
+static void appif_errorHandler(tAppifErrorInfo* pErrorInfo_p)
 {
         // Print error message
         DEBUG_TRACE(DEBUG_LVL_ERROR,"ERROR: Module origin: 0x%0x, Error Code: 0x%0x\n",

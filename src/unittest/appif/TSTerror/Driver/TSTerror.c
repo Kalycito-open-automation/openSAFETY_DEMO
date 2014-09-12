@@ -85,7 +85,7 @@
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-static void dummyErrorHandler (tErrorInfo* pErrorInfo_p);
+static void dummyErrorHandler (tAppifErrorInfo* pErrorInfo_p);
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
@@ -137,7 +137,7 @@ void TST_error(void)
 \ingroup module_unittests
 */
 //------------------------------------------------------------------------------
-void dummyErrorHandler (tErrorInfo* pErrorInfo_p)
+void dummyErrorHandler (tAppifErrorInfo* pErrorInfo_p)
 {
     // empty handler
 }

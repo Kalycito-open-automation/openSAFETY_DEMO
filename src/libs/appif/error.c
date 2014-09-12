@@ -154,7 +154,7 @@ void error_exit(void)
 //------------------------------------------------------------------------------
 void error_setError(tAppIfModules srcModule_p, tAppIfStatus errCode_p)
 {
-    tErrorInfo errInfo;
+    tAppifErrorInfo errInfo;
 
     if(errorInstance_l.pfnErrorHandler_m != NULL)
     {
