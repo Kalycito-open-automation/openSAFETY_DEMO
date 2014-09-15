@@ -4,7 +4,7 @@
 
 \brief  Unit tests main file
 
-This file defines the framework for unittests performed in the PIFA interface
+This file defines the framework for unittests performed in the PSI interface
 
 \ingroup module_unittests
 *******************************************************************************/

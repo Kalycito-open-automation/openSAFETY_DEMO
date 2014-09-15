@@ -199,7 +199,7 @@ BOOLEAN shnf_init(void)
     hnfInitParam.syncRcvHandler_m = shnf_processRxSpdoFrame;
     hnfInitParam.syncTxBuild_m = buildTxSpdoFrame;
 
-    /* Initialize the application interface HNF */
+    /* Initialize the slim interface HNF */
     if(hnf_init(&hnfInitParam))
     {
         /* Initialize the consecutive time module */

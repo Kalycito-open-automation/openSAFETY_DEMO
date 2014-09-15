@@ -2,9 +2,9 @@
 ********************************************************************************
 \file   apptarget/target.h
 
-\brief  Target specific header file of the application interface module
+\brief  Target specific header file of the slim interface module
 
-This file contains definitions for the platform of the application interface
+This file contains definitions for the platform of the slim interface
 user library for target nios2.
 
 *******************************************************************************/
@@ -109,8 +109,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 // Guard standard library functions
-#define APPIF_MEMSET(ptr, bVal, bCnt)  memset(ptr, bVal, bCnt)
-#define APPIF_MEMCPY(ptr, bVal, bSize) memcpy(ptr, bVal, bSize)
+#define PSI_MEMSET(ptr, bVal, bCnt)  memset(ptr, bVal, bCnt)
+#define PSI_MEMCPY(ptr, bVal, bSize) memcpy(ptr, bVal, bSize)
 
 #define DLLEXPORT
 

@@ -1,6 +1,6 @@
 ################################################################################
 #
-# CMake file of application interface on demo-gpio for PIFA
+# CMake file of slim interface on demo-cn-gpio for PSI
 #
 # Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 # All rights reserved.
@@ -48,8 +48,8 @@ SET ( DEMO_INCS
     ${PROJECT_SOURCE_DIR}
     ${COMMON_SOURCE_DIR}/include
     ${endian_SOURCE_DIR}/include
-    ${appif_SOURCE_DIR}/include
-    ${appifcommonapp_SOURCE_DIR}/include
+    ${psi_SOURCE_DIR}/include
+    ${psicommonapp_SOURCE_DIR}/include
     ${DEMO_CONFIG_DIR}/tbuf/include
 )
 

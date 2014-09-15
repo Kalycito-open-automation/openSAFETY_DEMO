@@ -1,6 +1,6 @@
 ################################################################################
 #
-# CMake main file for PIFA
+# CMake main file for the POWERLINK slim interface
 #
 # Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 # All rights reserved.
@@ -30,7 +30,7 @@
 
 CMAKE_MINIMUM_REQUIRED (VERSION 2.8.4)
 
-PROJECT (openPOWERLINK-PIFA C)
+PROJECT(psi C)
 
 SET( CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/../cmake" "${CMAKE_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
 
@@ -77,7 +77,7 @@ IF ( UNITTEST_ENABLE )
             FIND_PACKAGE(gcov)
             FIND_PACKAGE(gcovr)
 
-            SET ( COVERAGE_PIFA CACHE INTERNAL "" FORCE )
+            SET ( COVERAGE_PSI CACHE INTERNAL "" FORCE )
 
             IF ( PYTHONINTERP_FOUND )
                 INCLUDE(EnableCoverageReport)
@@ -125,8 +125,8 @@ IF((CMAKE_SYSTEM_NAME STREQUAL "Generic"))
     IF(CFG_INCLUDE_SUBPROJECTS MATCHES "application" OR CFG_INCLUDE_SUBPROJECTS MATCHES "all")
         SET(CURR_APPLICATION "app")
         ADD_SUBDIRECTORY("${PROJECT_SOURCE_DIR}/libs/endian" "${PROJECT_BINARY_DIR}/libs/${CURR_APPLICATION}/endian")
-        ADD_SUBDIRECTORY("${PROJECT_SOURCE_DIR}/libs/appifcommon" "${PROJECT_BINARY_DIR}/libs/${CURR_APPLICATION}/appifcommon")
-        ADD_SUBDIRECTORY("${PROJECT_SOURCE_DIR}/libs/appif" "${PROJECT_BINARY_DIR}/libs/${CURR_APPLICATION}/appif")
+        ADD_SUBDIRECTORY("${PROJECT_SOURCE_DIR}/libs/psicommon" "${PROJECT_BINARY_DIR}/libs/${CURR_APPLICATION}/psicommon")
+        ADD_SUBDIRECTORY("${PROJECT_SOURCE_DIR}/libs/psi" "${PROJECT_BINARY_DIR}/libs/${CURR_APPLICATION}/psi")
 
         # Add the current demo to the build
         ADD_SUBDIRECTORY("${PROJECT_SOURCE_DIR}/app/demo-${CFG_DEMO_TYPE}")
@@ -134,15 +134,15 @@ IF((CMAKE_SYSTEM_NAME STREQUAL "Generic"))
 
     IF(CFG_INCLUDE_SUBPROJECTS MATCHES "pcp" OR CFG_INCLUDE_SUBPROJECTS MATCHES "all" )
         SET(CURR_APPLICATION "pcp")
-        ADD_SUBDIRECTORY("${PROJECT_SOURCE_DIR}/libs/appifcommon" "${PROJECT_BINARY_DIR}/libs/${CURR_APPLICATION}/appifcommon")
+        ADD_SUBDIRECTORY("${PROJECT_SOURCE_DIR}/libs/psicommon" "${PROJECT_BINARY_DIR}/libs/${CURR_APPLICATION}/psicommon")
 
-        ADD_SUBDIRECTORY("${PROJECT_SOURCE_DIR}/pcp/appif")
+        ADD_SUBDIRECTORY("${PROJECT_SOURCE_DIR}/pcp/psi")
     ENDIF()
 ELSE()
     # Target platform is the local machine (Windows or Linux)
     ADD_SUBDIRECTORY ("${PROJECT_SOURCE_DIR}/libs/endian" )
-    ADD_SUBDIRECTORY ("${PROJECT_SOURCE_DIR}/libs/appifcommon" )
-    ADD_SUBDIRECTORY ("${PROJECT_SOURCE_DIR}/libs/appif" )
+    ADD_SUBDIRECTORY ("${PROJECT_SOURCE_DIR}/libs/psicommon" )
+    ADD_SUBDIRECTORY ("${PROJECT_SOURCE_DIR}/libs/psi" )
 ENDIF()
 
 #######################
@@ -174,7 +174,7 @@ IF ( UNITTEST_ENABLE )
     ADD_SUBDIRECTORY ( "${PROJECT_SOURCE_DIR}/unittest" )
 
     IF ( GCOVR_FOUND AND PYTHONINTERP_FOUND )
-        ENABLE_COVERAGE_REPORT ( TARGETS ${COVERAGE_PIFA} COVERAGE "PIFA" BINARY_DIR "${CMAKE_BINARY_DIR}/unittest/" FILTER "unittest/*" )
+        ENABLE_COVERAGE_REPORT ( TARGETS ${COVERAGE_PSI} COVERAGE "PSI" BINARY_DIR "${CMAKE_BINARY_DIR}/unittest/" FILTER "unittest/*" )
     ENDIF ( GCOVR_FOUND AND PYTHONINTERP_FOUND )
 
 ENDIF ( UNITTEST_ENABLE )

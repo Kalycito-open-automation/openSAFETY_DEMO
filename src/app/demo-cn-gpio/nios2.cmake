@@ -1,6 +1,6 @@
 ################################################################################
 #
-# CMake file of application interface on demo-gpio (nios2 target) for PIFA
+# CMake file of slim interface on demo-cn-gpio (nios2 target) for PSI
 #
 # Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 # All rights reserved.
@@ -105,8 +105,8 @@ SET( ALT_LIB_GEN_ARGS
                       "--set APP_CFLAGS_OPTIMIZATION=${OPT_LEVEL}"
                       "--elf-name ${PROJECT_NAME}.elf"
                       "--use-lib-dir ${endian_BINARY_DIR}/${ALT_BUILD_DIR_NAME}"
-                      "--use-lib-dir ${appif_BINARY_DIR}/${ALT_BUILD_DIR_NAME}"
-                      "--use-lib-dir ${appifcommonapp_BINARY_DIR}/${ALT_BUILD_DIR_NAME}"
+                      "--use-lib-dir ${psi_BINARY_DIR}/${ALT_BUILD_DIR_NAME}"
+                      "--use-lib-dir ${psicommonapp_BINARY_DIR}/${ALT_BUILD_DIR_NAME}"
    )
 
 EXECUTE_PROCESS( COMMAND ${ALT_APP_GEN_MAKEFILE} ${ALT_LIB_GEN_ARGS}

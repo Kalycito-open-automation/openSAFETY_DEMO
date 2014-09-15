@@ -1,6 +1,6 @@
 ################################################################################
 #
-# CMake generic user options for PIFA
+# CMake generic user options for POWERLINK slim interface
 #
 # Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 # All rights reserved.
@@ -56,15 +56,15 @@ IF(NOT CMAKE_SYSTEM_NAME STREQUAL "Generic")
     CMAKE_DEPENDENT_OPTION ( UNITTEST_SMALL_TARGETS "Splits the unittest into smaller targets, to enable building for smaller memory footprint targets"  OFF "UNITTEST_ENABLE" OFF )
     CMAKE_DEPENDENT_OPTION ( UNITTEST_XML_REPORTS "Generates XML reports instead of stdout output" ON "UNITTEST_ENABLE" ON )
 
-    OPTION ( UNITTEST_PIFA "Enables the unittest integration for the tools directory" ON )
-    MARK_AS_ADVANCED ( UNITTEST_PIFA )
+    OPTION ( UNITTEST_PSI "Enables the unittest integration for the tools directory" ON )
+    MARK_AS_ADVANCED ( UNITTEST_PSI )
 
     UNSET(CFG_INCLUDE_SUBPROJECTS)
 ELSE()
     UNSET(UNITTEST_ENABLE)
     UNSET(UNITTEST_SMALL_TARGETS)
     UNSET(UNITTEST_XML_REPORTS)
-    UNSET(UNITTEST_PIFA)
+    UNSET(UNITTEST_PSI)
 
     IF( NOT CFG_DEMO_INTERCONNECT )
         SET(CFG_DEMO_INTERCONNECT spi CACHE STRING

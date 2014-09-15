@@ -4,7 +4,7 @@
 
 \brief  Application interface target handling
 
-Defines the platform specific functions of the application interface example
+Defines the platform specific functions of the slim interface example
 implementation.
 
 *******************************************************************************/

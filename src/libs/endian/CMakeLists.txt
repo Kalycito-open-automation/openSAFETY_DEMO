@@ -1,6 +1,6 @@
  ################################################################################
 #
-# CMake file of application interface endian library for PIFA
+# CMake file of slim interface endian library for PSI
 #
 # Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 # All rights reserved.

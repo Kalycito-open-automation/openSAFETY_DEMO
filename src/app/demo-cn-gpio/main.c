@@ -2,11 +2,11 @@
 ********************************************************************************
 \file   main.c
 
-\brief  Example application of the application interface lite
+\brief  Example application of the POWERLINK slim interface basic CN demo
 
-This module demonstrates an exemplary use of the libAppIflite library. It
-initializes the library and all needed modules and sends/receives exemplary
-data from and to the PCP.
+This module demonstrates an exemplary use of the libpsi library as a simple
+input/output GPIO demo. It initializes the library and all needed modules and
+sends/receives exemplary data from and to the PCP.
 
 \ingroup module_main
 *******************************************************************************/
@@ -48,7 +48,7 @@ data from and to the PCP.
 // includes
 //------------------------------------------------------------------------------
 
-#include <libappif/appif.h>         // Header for the appif library
+#include <libpsi/psi.h>         // Header for the psi library
 
 #include <common/debug.h>
 
@@ -102,25 +102,25 @@ static tMainInstance mainInstance_l;            ///< Instance of main module
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-static BOOL appif_initModules(void);
-static void appif_exitModules(void);
-static void appif_genDescList(tBuffDescriptor* pBuffDescList_p, UINT8 buffCount_p);
-static BOOL appif_appCbSync(tAppIfTimeStamp* pTimeStamp_p );
-static BOOL appif_workInputOutput(UINT32 rpdoRelTimeLow_p,
+static BOOL psi_initModules(void);
+static void psi_exitModules(void);
+static void psi_genDescList(tBuffDescriptor* pBuffDescList_p, UINT8 buffCount_p);
+static BOOL psi_appCbSync(tPsiTimeStamp* pTimeStamp_p );
+static BOOL psi_workInputOutput(UINT32 rpdoRelTimeLow_p,
         tRpdoMappedObj* pRpdoImage_p,
         tTpdoMappedObj* pTpdoImage_p );
 
 #if defined(__NIOS2__) && !defined(ALT_ENHANCED_INTERRUPT_API_PRESENT)
-    static void appif_syncIntH(void* pArg_p, void* dwInt_p);
+    static void psi_syncIntH(void* pArg_p, void* dwInt_p);
 #else
-    static void appif_syncIntH(void* pArg_p);
+    static void psi_syncIntH(void* pArg_p);
 #endif
 
-static void appif_errorHandler(tAppifErrorInfo* pErrorInfo_p);
+static void psi_errorHandler(tPsiErrorInfo* pErrorInfo_p);
 
-#if(((APPIF_MODULE_INTEGRATION) & (APPIF_MODULE_CC)) != 0)
-static void appif_ccWriteObject(void);
-static void appif_ccReadObject(void);
+#if(((PSI_MODULE_INTEGRATION) & (PSI_MODULE_CC)) != 0)
+static void psi_ccWriteObject(void);
+static void psi_ccReadObject(void);
 #endif
 
 //============================================================================//
@@ -143,40 +143,40 @@ APs state machine will be updated and input/output ports will be processed.
 //------------------------------------------------------------------------------
 int main (void)
 {
-    tAppIfInitParam     initParam;
+    tPsiInitParam     initParam;
     tBuffDescriptor     buffDescList[kTbufCount];
 
-    APPIF_MEMSET(&mainInstance_l, 0, sizeof(mainInstance_l));
-    APPIF_MEMSET(&buffDescList, 0, sizeof(buffDescList));
+    PSI_MEMSET(&mainInstance_l, 0, sizeof(mainInstance_l));
+    PSI_MEMSET(&buffDescList, 0, sizeof(buffDescList));
 
     platform_init();
 
     // Generate buffer descriptor list
-    appif_genDescList(&buffDescList[0], kTbufCount);
+    psi_genDescList(&buffDescList[0], kTbufCount);
 
     // Enable test of configuration channel
     mainInstance_l.fCcWriteObjTestEnable_m = TRUE;
 
-    // initialize and start the application interface internals
-    DEBUG_TRACE(DEBUG_LVL_ALWAYS,"\n\nInitialize application interface internals...\n");
+    // initialize and start the slim interface internals
+    DEBUG_TRACE(DEBUG_LVL_ALWAYS,"\n\nInitialize slim interface internals...\n");
 
     initParam.pBuffDescList_m = &buffDescList[0];
     initParam.pfnStreamHandler_m = platform_spiCommand;
-    initParam.pfnErrorHandler_m = appif_errorHandler;
+    initParam.pfnErrorHandler_m = psi_errorHandler;
     initParam.idConsAck_m = kTbufAckRegisterCons;
     initParam.idProdAck_m = kTbufAckRegisterProd;
     initParam.idFirstProdBuffer_m = TBUF_NUM_CON + 1;   // Add one buffer for the consumer ACK register
 
-    if(appif_init(&initParam) == FALSE)
+    if(psi_init(&initParam) == FALSE)
     {
         DEBUG_TRACE(DEBUG_LVL_ERROR," ... error!\n");
         goto Exit;
     }
     DEBUG_TRACE(DEBUG_LVL_ALWAYS," ... ok!\n");
 
-    // initialize and start the application interface modules
-    DEBUG_TRACE(DEBUG_LVL_ALWAYS,"\n\nInitialize application interface modules...\n");
-    if(appif_initModules() == FALSE)
+    // initialize and start the slim interface modules
+    DEBUG_TRACE(DEBUG_LVL_ALWAYS,"\n\nInitialize slim interface modules...\n");
+    if(psi_initModules() == FALSE)
     {
         DEBUG_TRACE(DEBUG_LVL_ERROR," ... error!\n");
         goto Exit;
@@ -185,7 +185,7 @@ int main (void)
 
     /* initialize PCP interrupt handler*/
     DEBUG_TRACE(DEBUG_LVL_ALWAYS,"\n\nInitialize synchronous interrupt...\n");
-    if(platform_initSyncInterrupt(appif_syncIntH) == FALSE)
+    if(platform_initSyncInterrupt(psi_syncIntH) == FALSE)
     {
         DEBUG_TRACE(DEBUG_LVL_ERROR," ... error!\n");
         goto Exit;
@@ -198,17 +198,17 @@ int main (void)
     /* main program loop */
     while (TRUE)
     {
-        if(appif_processAsync() == FALSE)
+        if(psi_processAsync() == FALSE)
         {
             DEBUG_TRACE(DEBUG_LVL_ERROR,"ERROR: Unable to process background task!\n");
             break;
         }
 
-#if(((APPIF_MODULE_INTEGRATION) & (APPIF_MODULE_CC)) != 0)
+#if(((PSI_MODULE_INTEGRATION) & (PSI_MODULE_CC)) != 0)
         // Transmit async dummy frame for testing
         if(mainInstance_l.fCcWriteObjTestEnable_m != FALSE)
         {
-            appif_ccWriteObject();
+            psi_ccWriteObject();
         }
 #endif
 
@@ -219,12 +219,12 @@ int main (void)
     }
 
 Exit:
-    DEBUG_TRACE(DEBUG_LVL_ALWAYS,"\n\nShutdown application interface modules...\n");
-    appif_exitModules();
+    DEBUG_TRACE(DEBUG_LVL_ALWAYS,"\n\nShutdown slim interface modules...\n");
+    psi_exitModules();
     DEBUG_TRACE(DEBUG_LVL_ALWAYS,"... ok!\n");
 
-    DEBUG_TRACE(DEBUG_LVL_ALWAYS,"\n\nShutdown application interface internals...\n");
-    appif_exit();
+    DEBUG_TRACE(DEBUG_LVL_ALWAYS,"\n\nShutdown slim interface internals...\n");
+    psi_exit();
     DEBUG_TRACE(DEBUG_LVL_ALWAYS,"... ok!\n");
 
     return 0;
@@ -239,7 +239,7 @@ Exit:
 
 //------------------------------------------------------------------------------
 /**
-\brief    Initialize application interface modules
+\brief    Initialize slim interface modules
 
 \return BOOL
 \retval TRUE    Library module initialization successful
@@ -248,19 +248,19 @@ Exit:
 \ingroup module_main
 */
 //------------------------------------------------------------------------------
-static BOOL appif_initModules(void)
+static BOOL psi_initModules(void)
 {
     BOOL fReturn = FALSE;
     tStatusInitParam   statusInitParam;
-#if(((APPIF_MODULE_INTEGRATION) & (APPIF_MODULE_PDO)) != 0)
+#if(((PSI_MODULE_INTEGRATION) & (PSI_MODULE_PDO)) != 0)
     tPdoInitParam      pdoInitParam;
 #endif
-#if(((APPIF_MODULE_INTEGRATION) & (APPIF_MODULE_CC)) != 0)
+#if(((PSI_MODULE_INTEGRATION) & (PSI_MODULE_CC)) != 0)
     tCcInitParam       ccInitParam;
 #endif
 
     // Initialize the status module
-    statusInitParam.pfnAppCbSync_m = appif_appCbSync;
+    statusInitParam.pfnAppCbSync_m = psi_appCbSync;
     statusInitParam.buffOutId_m = kTbufNumStatusOut;
     statusInitParam.buffInId_m = kTbufNumStatusIn;
 
@@ -270,19 +270,19 @@ static BOOL appif_initModules(void)
         goto Exit;
     }
 
-#if(((APPIF_MODULE_INTEGRATION) & (APPIF_MODULE_PDO)) != 0)
+#if(((PSI_MODULE_INTEGRATION) & (PSI_MODULE_PDO)) != 0)
     // Initialize the pdo module
     pdoInitParam.buffIdRpdo_m = kTbufNumRpdoImage;
     pdoInitParam.buffIdTpdo_m = kTbufNumTpdoImage;
 
-    if(pdo_init(appif_workInputOutput, &pdoInitParam) == FALSE)
+    if(pdo_init(psi_workInputOutput, &pdoInitParam) == FALSE)
     {
         DEBUG_TRACE(DEBUG_LVL_ERROR,"ERROR: pdo_init() failed!\n");
         goto Exit;
     }
 #endif
 
-#if(((APPIF_MODULE_INTEGRATION) & (APPIF_MODULE_CC)) != 0)
+#if(((PSI_MODULE_INTEGRATION) & (PSI_MODULE_CC)) != 0)
     // Initialize configuration channel (CC)
     ccInitParam.iccId_m = kTbufNumInputConfChan;
     ccInitParam.occId_m = kTbufNumOutputConfChan;
@@ -304,21 +304,21 @@ Exit:
 
 //------------------------------------------------------------------------------
 /**
-\brief    Destroy application interface modules
+\brief    Destroy slim interface modules
 
 \ingroup module_main
 */
 //------------------------------------------------------------------------------
-static void appif_exitModules(void)
+static void psi_exitModules(void)
 {
     // Destroy all library modules
     status_exit();
 
-#if(((APPIF_MODULE_INTEGRATION) & (APPIF_MODULE_PDO)) != 0)
+#if(((PSI_MODULE_INTEGRATION) & (PSI_MODULE_PDO)) != 0)
     pdo_exit();
 #endif
 
-#if(((APPIF_MODULE_INTEGRATION) & (APPIF_MODULE_CC)) != 0)
+#if(((PSI_MODULE_INTEGRATION) & (PSI_MODULE_CC)) != 0)
     cc_exit();
 #endif
 
@@ -334,7 +334,7 @@ static void appif_exitModules(void)
 \ingroup module_main
 */
 //------------------------------------------------------------------------------
-static void appif_genDescList(tBuffDescriptor* pBuffDescList_p, UINT8 buffCount_p)
+static void psi_genDescList(tBuffDescriptor* pBuffDescList_p, UINT8 buffCount_p)
 {
     UINT8 i;
     tBuffDescriptor* pBuffDec = pBuffDescList_p;
@@ -361,7 +361,7 @@ static void appif_genDescList(tBuffDescriptor* pBuffDescList_p, UINT8 buffCount_
 \ingroup module_main
 */
 //------------------------------------------------------------------------------
-static BOOL appif_appCbSync(tAppIfTimeStamp* pTimeStamp_p )
+static BOOL psi_appCbSync(tPsiTimeStamp* pTimeStamp_p )
 {
     UNUSED_PARAMETER(pTimeStamp_p);
 
@@ -384,7 +384,7 @@ static BOOL appif_appCbSync(tAppIfTimeStamp* pTimeStamp_p )
 \ingroup module_main
 */
 //------------------------------------------------------------------------------
-static BOOL appif_workInputOutput(UINT32 rpdoRelTimeLow_p,
+static BOOL psi_workInputOutput(UINT32 rpdoRelTimeLow_p,
         tRpdoMappedObj* pRpdoImage_p,
         tTpdoMappedObj* pTpdoImage_p )
 {
@@ -433,16 +433,16 @@ static BOOL appif_workInputOutput(UINT32 rpdoRelTimeLow_p,
 
 \param[in] pArg_p       Interrupt handler arguments
 
- appif_syncIntH() implements the synchronous data interrupt. The PCP asserts
+ psi_syncIntH() implements the synchronous data interrupt. The PCP asserts
  the interrupt when periodic data is ready to transfer.
 
 \ingroup module_main
 */
 //------------------------------------------------------------------------------
 #if defined(__NIOS2__) && !defined(ALT_ENHANCED_INTERRUPT_API_PRESENT)
-static void appif_syncIntH(void* pArg_p, void* dwInt_p)
+static void psi_syncIntH(void* pArg_p, void* dwInt_p)
 #else
-static void appif_syncIntH(void* pArg_p)
+static void psi_syncIntH(void* pArg_p)
 #endif
 {
     UNUSED_PARAMETER(pArg_p);
@@ -450,7 +450,7 @@ static void appif_syncIntH(void* pArg_p)
     BENCHMARK_MOD_01_SET(0);
 
     // Call internal synchronous process function
-    if(appif_processSync() == FALSE)
+    if(psi_processSync() == FALSE)
     {
         DEBUG_TRACE(DEBUG_LVL_ERROR,"ERROR: Unable to process sync task!\n");
         mainInstance_l.fShutdown_m = TRUE;
@@ -471,7 +471,7 @@ static void appif_syncIntH(void* pArg_p)
 \ingroup module_main
 */
 //------------------------------------------------------------------------------
-static void appif_errorHandler(tAppifErrorInfo* pErrorInfo_p)
+static void psi_errorHandler(tPsiErrorInfo* pErrorInfo_p)
 {
         // Print error message
         DEBUG_TRACE(DEBUG_LVL_ERROR,"ERROR: Module origin: 0x%0x, Error Code: 0x%0x\n",
@@ -479,7 +479,7 @@ static void appif_errorHandler(tAppifErrorInfo* pErrorInfo_p)
                         pErrorInfo_p->errCode_m);
 }
 
-#if(((APPIF_MODULE_INTEGRATION) & (APPIF_MODULE_CC)) != 0)
+#if(((PSI_MODULE_INTEGRATION) & (PSI_MODULE_CC)) != 0)
 //------------------------------------------------------------------------------
 /**
 \brief    Write an object of the configuration channel
@@ -488,7 +488,7 @@ static void appif_errorHandler(tAppifErrorInfo* pErrorInfo_p)
 \ingroup module_main
 */
 //------------------------------------------------------------------------------
-static void appif_ccWriteObject(void)
+static void psi_ccWriteObject(void)
 {
     tCcWriteStatus retCc = kCcWriteStatusError;
     // Create test object
@@ -501,7 +501,7 @@ static void appif_ccWriteObject(void)
     }
     else if( retCc == kCcWriteStatusSuccessful)
     {
-        appif_ccReadObject();
+        psi_ccReadObject();
 
         object.objSubIdx_m++;
         if(object.objSubIdx_m > 4)
@@ -521,7 +521,7 @@ static void appif_ccWriteObject(void)
 \ingroup module_main
 */
 //------------------------------------------------------------------------------
-static void appif_ccReadObject(void)
+static void psi_ccReadObject(void)
 {
     // Create pointer to target object
     static tConfChanObject*  pObject;

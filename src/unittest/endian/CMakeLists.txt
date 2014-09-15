@@ -1,6 +1,6 @@
 ################################################################################
 #
-# CMake appif library tests main file
+# CMake psi library tests main file
 #
 # Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 # All rights reserved.

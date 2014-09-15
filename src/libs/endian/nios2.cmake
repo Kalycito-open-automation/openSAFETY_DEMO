@@ -1,6 +1,6 @@
  ################################################################################
 #
-# CMake file of application interface endian library (nios2 target) for PIFA
+# CMake file of slim interface endian library (nios2 target) for PSI
 #
 # Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 # All rights reserved.

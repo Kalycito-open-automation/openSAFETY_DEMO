@@ -1,6 +1,6 @@
 ################################################################################
 #
-# CMake file of application interface on demo-sn-gpio for PIFA
+# CMake file of slim interface on demo-sn-gpio for PSI
 #
 # Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 # All rights reserved.
@@ -58,7 +58,7 @@ FindSourceFiles("${SN_BASE_DIR}" OSFT_SN_SRCS)
 SET(SHNF_SRCS
     ${SHNF_DIR}/shnf.c
     ${SHNF_DIR}/constime.c
-    ${SHNF_DIR}/hnfappif.c
+    ${SHNF_DIR}/hnfpsi.c
 )
 
 SET(SAPL_SRCS
@@ -89,8 +89,8 @@ SET(DEMO_INCS
     ${SHNF_DIR}/include
     ${SAPL_DIR}/include
     ${endian_SOURCE_DIR}/include
-    ${appif_SOURCE_DIR}/include
-    ${appifcommonapp_SOURCE_DIR}/include
+    ${psi_SOURCE_DIR}/include
+    ${psicommonapp_SOURCE_DIR}/include
     ${DEMO_CONFIG_DIR}/tbuf/include
     ${DEMO_CONFIG_DIR}/sn
     ${DEMO_CONFIG_DIR}/pcp

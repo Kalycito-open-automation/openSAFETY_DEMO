@@ -1,6 +1,6 @@
 ################################################################################
 #
-# CMake application interface library tests for the ami module
+# CMake slim interface library tests for the ami module
 #
 # Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 # All rights reserved.
@@ -38,16 +38,16 @@ SOURCE_GROUP ( Driver FILES ${TST_DRIVER_SRC} )
 FILE ( GLOB TST_STUBS_SRC "${PROJECT_SOURCE_DIR}/Stubs/*.c" )
 SOURCE_GROUP ( Driver FILES ${TST_STUBS_SRC} )
 
-SET ( APPIF_UUT
+SET ( PSI_UUT
         ${endian_SOURCE_DIR}/amile.c
 )
 
-SOURCE_GROUP ( Uut FILES ${APPIF_UUT} )
+SOURCE_GROUP ( Uut FILES ${PSI_UUT} )
 
 SET ( TST_SOURCES
     ${TST_DRIVER_SRC}
     ${TST_STUBS_SRC}
-    ${APPIF_UUT}
+    ${PSI_UUT}
     ${PROJECT_SOURCE_DIR}/../../common/cunit_main.c
 )
 
@@ -64,4 +64,4 @@ IF (WIN32)
     ADD_DEPENDENCIES ( tstami "win32")
 endif (WIN32)
 
-AddCoverage ( "PIFA" "tstami" )
+AddCoverage ( "PSI" "tstami" )

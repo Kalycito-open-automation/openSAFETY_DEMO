@@ -42,7 +42,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // includes
 //------------------------------------------------------------------------------
 
-#include <libappifcommon/global.h>
+#include <libpsicommon/global.h>
 
 //------------------------------------------------------------------------------
 // const defines

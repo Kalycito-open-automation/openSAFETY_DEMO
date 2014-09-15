@@ -4,7 +4,7 @@
 
 \brief  Application interface system components implementation
 
-Defines the platform specific functions of the application interface example
+Defines the platform specific functions of the slim interface example
 implementation.
 
 *******************************************************************************/
@@ -42,7 +42,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <libappif/appif.h>
+#include <libpsi/psi.h>
 
 #include <system.h>
 #include <string.h>

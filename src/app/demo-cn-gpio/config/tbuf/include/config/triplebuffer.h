@@ -42,11 +42,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <libappifcommon/status.h>
-#include <libappifcommon/cc.h>
-#include <libappifcommon/ssdo.h>
-#include <libappifcommon/rpdo.h>
-#include <libappifcommon/tpdo.h>
+#include <libpsicommon/status.h>
+#include <libpsicommon/cc.h>
+#include <libpsicommon/ssdo.h>
+#include <libpsicommon/rpdo.h>
+#include <libpsicommon/tpdo.h>
 
 //------------------------------------------------------------------------------
 // typedef
@@ -76,15 +76,15 @@ typedef enum {
 /**
  * \brief Application interface module list
  */
-#define APPIF_MODULE_INTEGRATION  (0 \
-                                | APPIF_MODULE_STATUS \
-                                | APPIF_MODULE_CC \
-                                | APPIF_MODULE_PDO \
+#define PSI_MODULE_INTEGRATION  (0 \
+                                | PSI_MODULE_STATUS \
+                                | PSI_MODULE_CC \
+                                | PSI_MODULE_PDO \
                                 )
 
 // Detect configuration errors
-#if(((APPIF_MODULE_INTEGRATION) & (APPIF_MODULE_STATUS)) == 0)
-#error "Status module is not active! This module is mandatory for the application interface"
+#if(((PSI_MODULE_INTEGRATION) & (PSI_MODULE_STATUS)) == 0)
+#error "Status module is not active! This module is mandatory for the slim interface"
 #endif
 
 //------------------------------------------------------------------------------
