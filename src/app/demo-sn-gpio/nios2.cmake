@@ -33,11 +33,18 @@
 SET(ALT_BUILD_DIR ${PROJECT_BINARY_DIR}/${ALT_BUILD_DIR_NAME})
 
 ##########################################################################
+# Instance ID user option
+SET(ALT_APP_INSTANCE_ID "1" CACHE STRING "Instance ID of the application")
+
+##########################################################################
 # Set build parameters
 SET(NIOS2_QSYS_SUB app_0)
 SET(NIOS2_QSYS_SUB_CPU cpu_1)
 
 SET( BSP_TYPE hal )
+
+# Path to the nios2 flash override file
+SET(ALT_FLASH_OVERRIDE ${ALT_MISC_DIR}/scripts/nios2-flash-override.txt)
 
 ##########################################################################
 # Prepare linker script modification tcl
@@ -124,6 +131,8 @@ SET( ALT_LIB_GEN_ARGS
                       "--set CREATE_OBJDUMP=0"
                       "--set CFLAGS=${APP_CFLAGS}"
                       "--set APP_CFLAGS_OPTIMIZATION=${OPT_LEVEL}"
+                      "--set FLASH_OVERRIDE=${ALT_FLASH_OVERRIDE}"
+                      "--set INSTANCE_ID=${ALT_APP_INSTANCE_ID}"
                       "--elf-name ${PROJECT_NAME}.elf"
                       "--use-lib-dir ${endian_BINARY_DIR}/${ALT_BUILD_DIR_NAME}"
                       "--use-lib-dir ${psi_BINARY_DIR}/${ALT_BUILD_DIR_NAME}"

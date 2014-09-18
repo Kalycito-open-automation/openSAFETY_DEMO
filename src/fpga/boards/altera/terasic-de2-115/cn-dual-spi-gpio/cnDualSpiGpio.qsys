@@ -29,7 +29,7 @@
    {
       datum _sortIndex
       {
-         value = "8";
+         value = "7";
          type = "int";
       }
    }
@@ -206,14 +206,6 @@
          type = "int";
       }
    }
-   element hex_pio.s1
-   {
-      datum baseAddress
-      {
-         value = "8388672";
-         type = "String";
-      }
-   }
    element sdram_0.s1
    {
       datum baseAddress
@@ -227,6 +219,14 @@
       datum baseAddress
       {
          value = "11520";
+         type = "String";
+      }
+   }
+   element key_pio.s1
+   {
+      datum baseAddress
+      {
+         value = "8388640";
          type = "String";
       }
    }
@@ -246,11 +246,11 @@
          type = "String";
       }
    }
-   element key_pio.s1
+   element hex_pio.s1
    {
       datum baseAddress
       {
-         value = "8388640";
+         value = "8388672";
          type = "String";
       }
    }
@@ -274,7 +274,7 @@
    {
       datum _sortIndex
       {
-         value = "5";
+         value = "8";
          type = "int";
       }
       datum sopceditor_expanded
@@ -347,7 +347,7 @@
    {
       datum _sortIndex
       {
-         value = "6";
+         value = "5";
          type = "int";
       }
    }
@@ -355,7 +355,7 @@
    {
       datum _sortIndex
       {
-         value = "7";
+         value = "6";
          type = "int";
       }
    }
@@ -364,6 +364,14 @@
       datum baseAddress
       {
          value = "0";
+         type = "String";
+      }
+   }
+   element cfi_flash.uas
+   {
+      datum baseAddress
+      {
+         value = "134217728";
          type = "String";
       }
    }
@@ -382,7 +390,7 @@
  <parameter name="projectName" value="ink-de2-115.qpf" />
  <parameter name="sopcBorderPoints" value="false" />
  <parameter name="systemHash" value="1" />
- <parameter name="timeStamp" value="1404808497434" />
+ <parameter name="timeStamp" value="1411017774819" />
  <parameter name="useTestBenchNamingPattern" value="false" />
  <instanceScript></instanceScript>
  <interface name="clk50" internal="clk50.clk_in" type="clock" dir="end" />
@@ -1483,10 +1491,10 @@
  <connection
    kind="avalon"
    version="13.0"
-   start="app_0.slow_bridge"
+   start="app_0.cpu_bridge"
    end="cfi_flash.uas">
   <parameter name="arbitrationPriority" value="1" />
-  <parameter name="baseAddress" value="0x0000" />
+  <parameter name="baseAddress" value="0x08000000" />
   <parameter name="defaultConnection" value="false" />
  </connection>
  <interconnectRequirement for="$system" name="qsys_mm.clockCrossingAdapter" value="HANDSHAKE" />

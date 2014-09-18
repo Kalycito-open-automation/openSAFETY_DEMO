@@ -552,18 +552,18 @@
 				<useDefaultCommand>true</useDefaultCommand>
 				<runAllBuilders>true</runAllBuilders>
 			</target>
-			<target name="erase-epcs" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
+			<target name="erase-nvm" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 				<buildCommand>make</buildCommand>
 				<buildArguments/>
-				<buildTarget>erase-epcs</buildTarget>
+				<buildTarget>erase-nvm</buildTarget>
 				<stopOnError>true</stopOnError>
 				<useDefaultCommand>true</useDefaultCommand>
 				<runAllBuilders>true</runAllBuilders>
 			</target>
-			<target name="program-epcs" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
+			<target name="program-nvm" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 				<buildCommand>make</buildCommand>
 				<buildArguments/>
-				<buildTarget>program-epcs</buildTarget>
+				<buildTarget>program-nvm</buildTarget>
 				<stopOnError>true</stopOnError>
 				<useDefaultCommand>true</useDefaultCommand>
 				<runAllBuilders>true</runAllBuilders>

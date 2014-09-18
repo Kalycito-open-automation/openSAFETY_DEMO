@@ -127,6 +127,14 @@
          type = "boolean";
       }
    }
+   element counter_0.s0
+   {
+      datum baseAddress
+      {
+         value = "16777280";
+         type = "String";
+      }
+   }
    element cpu_bridge.s0
    {
       datum _lockedAddress
@@ -140,11 +148,11 @@
          type = "String";
       }
    }
-   element counter_0.s0
+   element slow_bridge.s0
    {
       datum baseAddress
       {
-         value = "16777280";
+         value = "0";
          type = "String";
       }
    }
@@ -161,27 +169,11 @@
          type = "String";
       }
    }
-   element slow_bridge.s0
-   {
-      datum baseAddress
-      {
-         value = "0";
-         type = "String";
-      }
-   }
    element sync_irq.s1
    {
       datum baseAddress
       {
          value = "16432";
-         type = "String";
-      }
-   }
-   element benchmark_pio.s1
-   {
-      datum baseAddress
-      {
-         value = "16777216";
          type = "String";
       }
    }
@@ -195,6 +187,14 @@
       datum baseAddress
       {
          value = "134217728";
+         type = "String";
+      }
+   }
+   element benchmark_pio.s1
+   {
+      datum baseAddress
+      {
+         value = "16777216";
          type = "String";
       }
    }
@@ -260,7 +260,7 @@
  <parameter name="projectName" value="" />
  <parameter name="sopcBorderPoints" value="false" />
  <parameter name="systemHash" value="1" />
- <parameter name="timeStamp" value="1404716844706" />
+ <parameter name="timeStamp" value="1411035642193" />
  <parameter name="useTestBenchNamingPattern" value="false" />
  <instanceScript></instanceScript>
  <interface name="clk50" internal="clk50.clk_in" type="clock" dir="end" />

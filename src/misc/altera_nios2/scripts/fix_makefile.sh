@@ -57,29 +57,37 @@ $AMEND_TOOL >> $MAKEFILE_NAME <<'Heredoc'
 PROGRAM_EPCS_SUFFIX := -epcs
 PROGRAM_EPCS_TARGET := $(addsuffix $(PROGRAM_EPCS_SUFFIX), $(FLASH_FILES))
 
-.PHONY : program-epcs
-program-epcs : $(PROGRAM_EPCS_TARGET)
+# Rule for programming the NVS memory content
+.PHONY : program-nvm
+program-nvm : $(PROGRAM_EPCS_TARGET)
 
 SOF_FILE := $(wildcard $(QUARTUS_PROJECT_DIR)/*.sof)
 
 .PHONY : $(PROGRAM_EPCS_TARGET)
 $(PROGRAM_EPCS_TARGET) : $(ELF)
-	@$(ECHO) Info: Programming $(basename $@).flash
+	@$(ECHO) Info: Programming $(basename $@).flash $($(basename $@)_EPCS_FLAGS)
+	@nios2-configure-sof $(DOWNLOAD_CABLE_FLAG) -C $(QUARTUS_PROJECT_DIR)
 	@if [ -n "$($(basename $@)_EPCS_FLAGS)" ]; \
 	then \
-		nios2-configure-sof $(DOWNLOAD_CABLE_FLAG) -C $(QUARTUS_PROJECT_DIR); \
+		$(ECHO) Info: Flash is an EPCS flash!;\
 		sof2flash --epcs --input=$(SOF_FILE) --output=sof.flash; \
 		$(ELF2FLASH) --after=sof.flash --input=$(ELF) --outfile=$(basename $@)_after_sof.flash --sim_optimize=$(SIM_OPTIMIZE) $(elf2flash_extra_args); \
 		$(ECHO) $(FLASHPROG) --instance=$(INSTANCE_ID) $(DOWNLOAD_CABLE_FLAG) $(SOPC_SYSID_FLAG) --epcs --base=$($(basename $@)_START) -g --override=$(FLASH_OVERRIDE) sof.flash $(basename $@)_after_sof.flash; \
 		$(FLASHPROG) --instance=$(INSTANCE_ID) $(DOWNLOAD_CABLE_FLAG) $(SOPC_SYSID_FLAG) --epcs --base=$($(basename $@)_START) -g --override=$(FLASH_OVERRIDE) sof.flash $(basename $@)_after_sof.flash; \
+	else \
+		$(ECHO) Info: Flash is a CFI flash!;\
+		$(ECHO) $(ELF2FLASH) --input=$(ELF) --outfile=$(basename $@).flash --base=$($(basename $@)_START) --end=$($(basename $@)_END) --reset=$($(basename $@)_START) $(elf2flash_extra_args) --verbose; \
+		$(ELF2FLASH) --input=$(ELF) --outfile=$(basename $@).flash --base=$($(basename $@)_START) --end=$($(basename $@)_END) --reset=$($(basename $@)_START) $(elf2flash_extra_args) --verbose; \
+		$(ECHO) $(FLASHPROG) --instance=$(INSTANCE_ID) $(DOWNLOAD_CABLE_FLAG) $(SOPC_SYSID_FLAG) --base=$($(basename $@)_START) -g --override=$(FLASH_OVERRIDE) $(basename $@).flash --program --verbose; \
+		$(FLASHPROG) --instance=$(INSTANCE_ID) $(DOWNLOAD_CABLE_FLAG) $(SOPC_SYSID_FLAG) --base=$($(basename $@)_START) -g --override=$(FLASH_OVERRIDE) $(basename $@).flash --program --verbose; \
 	fi
 
-# Rule for erasing the EPCS memory content
-.PHONY : erase-epcs
-erase-epcs:
-	@nios2-configure-sof $(DOWNLOAD_CABLE_FLAG) -C $(QUARTUS_PROJECT_DIR); \
-	$(ECHO) $(FLASHPROG) --instance=$(INSTANCE_ID) $(DOWNLOAD_CABLE_FLAG) $(SOPC_SYSID_FLAG) --epcs --base=$($(basename $(PROGRAM_EPCS_TARGET))_START) --accept-bad-sysid --erase-all; \
-	$(FLASHPROG) --instance=$(INSTANCE_ID) $(DOWNLOAD_CABLE_FLAG) $(SOPC_SYSID_FLAG) --epcs --base=$($(basename $(PROGRAM_EPCS_TARGET))_START) --accept-bad-sysid --erase-all
+# Rule for erasing the NVS memory content
+.PHONY : erase-nvm
+erase-nvm:
+	@nios2-configure-sof $(DOWNLOAD_CABLE_FLAG) -C $(QUARTUS_PROJECT_DIR)
+	$(ECHO) $(FLASHPROG) --instance=$(INSTANCE_ID) $(DOWNLOAD_CABLE_FLAG) $(SOPC_SYSID_FLAG) $($(basename $(PROGRAM_EPCS_TARGET))_EPCS_FLAGS) --base=$($(basename $(PROGRAM_EPCS_TARGET))_START) --accept-bad-sysid --erase-all
+	$(FLASHPROG) --instance=$(INSTANCE_ID) $(DOWNLOAD_CABLE_FLAG) $(SOPC_SYSID_FLAG) $($(basename $(PROGRAM_EPCS_TARGET))_EPCS_FLAGS) --base=$($(basename $(PROGRAM_EPCS_TARGET))_START) --accept-bad-sysid --erase-all
 
 # Rule for downloading the FPGA bitstream to the target
 .PHONY : download-bits

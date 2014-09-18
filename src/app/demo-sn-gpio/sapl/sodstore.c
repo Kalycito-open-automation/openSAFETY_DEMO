@@ -60,10 +60,10 @@ a fast bootup on SN start.
 /*----------------------------------------------------------------------------*/
 /* const defines                                                              */
 /*----------------------------------------------------------------------------*/
-#define NVS_IMG_OFFSET_MAGIC        0x0
-#define NVS_IMG_OFFSET_LENGTH       0x4
-#define NVS_IMG_OFFSET_CRC32        0x8
-#define NVS_IMG_OFFSET_DATA         0xC
+#define NVS_IMG_OFFSET_MAGIC        0x0             /**< Offset of the magic word field in the image */
+#define NVS_IMG_OFFSET_LENGTH       0x4             /**< Offset of the length field in the image */
+#define NVS_IMG_OFFSET_CRC32        0x8             /**< Offset of the crc32 field in the image */
+#define NVS_IMG_OFFSET_DATA         0xC             /**< Offset of the data field in the image */
 
 
 /*----------------------------------------------------------------------------*/
@@ -354,7 +354,7 @@ BOOLEAN sodstore_getSodImage(UINT8** ppParamSetBase_p, UINT32* pParamSetLen_p)
             /* Read the length of the parameter set */
             nvs_read(sodStoreInstance_l.sodImgOffset_m + NVS_IMG_OFFSET_LENGTH,
                      (UINT8*)&paramSetLen , sizeof(paramSetLen));
-            if(paramSetLen > 0)
+            if(paramSetLen > 0 && paramSetLen < UINT32_MAX)
             {
                 /* Verify if the CRC stored in the flash matches the data stream */
                 if(verifyParamSetCrc(paramSetLen))

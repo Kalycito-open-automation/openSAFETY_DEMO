@@ -85,7 +85,7 @@ This module manages the application near firmware parts.
 /*----------------------------------------------------------------------------*/
 /* const defines                                                              */
 /*----------------------------------------------------------------------------*/
-#define NVS_SOD_IMAGE_OFFSET        0UL       /**< Offset of the SOD in the NVS */
+#define NVS_SOD_IMAGE_OFFSET        0x200000UL       /**< Offset of the stored SOD in the NVS */
 
 #define SAPL_TASK_PROCESS_PARAM_SET_PARSE_BIT         0x00
 #define SAPL_TASK_PROCESS_PARAM_SET_PARSE_MASK        0x01
