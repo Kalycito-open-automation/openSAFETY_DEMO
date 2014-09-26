@@ -12,27 +12,6 @@
    element $${FILENAME}
    {
    }
-   element app_0
-   {
-      datum _sortIndex
-      {
-         value = "3";
-         type = "int";
-      }
-      datum sopceditor_expanded
-      {
-         value = "1";
-         type = "boolean";
-      }
-   }
-   element cfi_flash
-   {
-      datum _sortIndex
-      {
-         value = "7";
-         type = "int";
-      }
-   }
    element clk100
    {
       datum _sortIndex
@@ -72,77 +51,12 @@
          type = "boolean";
       }
    }
-   element lcd.control_slave
-   {
-      datum baseAddress
-      {
-         value = "8388688";
-         type = "String";
-      }
-   }
    element sysid.control_slave
    {
       datum baseAddress
       {
          value = "11584";
          type = "String";
-      }
-   }
-   element hex_pio
-   {
-      datum _sortIndex
-      {
-         value = "10";
-         type = "int";
-      }
-      datum sopceditor_expanded
-      {
-         value = "0";
-         type = "boolean";
-      }
-   }
-   element key_pio
-   {
-      datum _sortIndex
-      {
-         value = "12";
-         type = "int";
-      }
-      datum sopceditor_expanded
-      {
-         value = "0";
-         type = "boolean";
-      }
-   }
-   element lcd
-   {
-      datum _sortIndex
-      {
-         value = "9";
-         type = "int";
-      }
-      datum megawizard_uipreferences
-      {
-         value = "{}";
-         type = "String";
-      }
-      datum sopceditor_expanded
-      {
-         value = "0";
-         type = "boolean";
-      }
-   }
-   element ledr_pio
-   {
-      datum _sortIndex
-      {
-         value = "11";
-         type = "int";
-      }
-      datum sopceditor_expanded
-      {
-         value = "0";
-         type = "boolean";
       }
    }
    element openmac_0.macReg
@@ -165,7 +79,7 @@
    {
       datum _sortIndex
       {
-         value = "19";
+         value = "9";
          type = "int";
       }
       datum sopceditor_expanded
@@ -178,7 +92,7 @@
    {
       datum _sortIndex
       {
-         value = "18";
+         value = "8";
          type = "int";
       }
    }
@@ -186,7 +100,7 @@
    {
       datum _sortIndex
       {
-         value = "13";
+         value = "3";
          type = "int";
       }
    }
@@ -202,32 +116,8 @@
    {
       datum _sortIndex
       {
-         value = "20";
+         value = "10";
          type = "int";
-      }
-   }
-   element ledr_pio.s1
-   {
-      datum baseAddress
-      {
-         value = "8388656";
-         type = "String";
-      }
-   }
-   element hex_pio.s1
-   {
-      datum baseAddress
-      {
-         value = "8388672";
-         type = "String";
-      }
-   }
-   element sdram_0.s1
-   {
-      datum baseAddress
-      {
-         value = "0";
-         type = "String";
       }
    }
    element node_switch_pio.s1
@@ -246,48 +136,11 @@
          type = "String";
       }
    }
-   element key_pio.s1
-   {
-      datum baseAddress
-      {
-         value = "8388640";
-         type = "String";
-      }
-   }
-   element sdram_0
-   {
-      datum _sortIndex
-      {
-         value = "4";
-         type = "int";
-      }
-   }
-   element spi_master.spi_control_port
-   {
-      datum baseAddress
-      {
-         value = "8388608";
-         type = "String";
-      }
-   }
-   element spi_master
-   {
-      datum _sortIndex
-      {
-         value = "8";
-         type = "int";
-      }
-      datum sopceditor_expanded
-      {
-         value = "1";
-         type = "boolean";
-      }
-   }
    element sram_0
    {
       datum _sortIndex
       {
-         value = "14";
+         value = "4";
          type = "int";
       }
       datum sopceditor_expanded
@@ -300,7 +153,7 @@
    {
       datum _sortIndex
       {
-         value = "17";
+         value = "7";
          type = "int";
       }
       datum sopceditor_expanded
@@ -313,7 +166,7 @@
    {
       datum _sortIndex
       {
-         value = "16";
+         value = "6";
          type = "int";
       }
       datum sopceditor_expanded
@@ -334,7 +187,7 @@
    {
       datum _sortIndex
       {
-         value = "15";
+         value = "5";
          type = "int";
       }
       datum sopceditor_expanded
@@ -343,35 +196,11 @@
          type = "boolean";
       }
    }
-   element tri_state_bridge_flash_bridge_0
-   {
-      datum _sortIndex
-      {
-         value = "5";
-         type = "int";
-      }
-   }
-   element tri_state_bridge_flash_pinSharer_0
-   {
-      datum _sortIndex
-      {
-         value = "6";
-         type = "int";
-      }
-   }
    element sram_0.uas
    {
       datum baseAddress
       {
          value = "0";
-         type = "String";
-      }
-   }
-   element cfi_flash.uas
-   {
-      datum baseAddress
-      {
-         value = "134217728";
          type = "String";
       }
    }
@@ -390,12 +219,11 @@
  <parameter name="projectName" value="ink-de2-115.qpf" />
  <parameter name="sopcBorderPoints" value="false" />
  <parameter name="systemHash" value="1" />
- <parameter name="timeStamp" value="1411654698218" />
+ <parameter name="timeStamp" value="1411735621943" />
  <parameter name="useTestBenchNamingPattern" value="false" />
  <instanceScript></instanceScript>
  <interface name="clk50" internal="clk50.clk_in" type="clock" dir="end" />
  <interface name="clk100" internal="clk100.clk_in" type="clock" dir="end" />
- <interface name="lcd" internal="lcd.external" type="conduit" dir="end" />
  <interface
    name="node_switch_pio"
    internal="node_switch_pio.external_connection"
@@ -427,47 +255,10 @@
    type="conduit"
    dir="end" />
  <interface
-   name="hex_pio"
-   internal="hex_pio.external_connection"
-   type="conduit"
-   dir="end" />
- <interface
-   name="ledr_pio"
-   internal="ledr_pio.external_connection"
-   type="conduit"
-   dir="end" />
- <interface
-   name="key_pio"
-   internal="key_pio.external_connection"
-   type="conduit"
-   dir="end" />
- <interface
-   name="spi_master_external"
-   internal="spi_master.external"
-   type="conduit"
-   dir="end" />
- <interface
-   name="app_0_benchmark_pio"
-   internal="app_0.benchmark_pio"
-   type="conduit"
-   dir="end" />
- <interface
    name="pcp_0_sync_irq_sender"
    internal="pcp_0.sync_irq_bridge_0_sender0_irq" />
- <interface
-   name="app_0_irq_bridge_sender0_irq"
-   internal="app_0.irq_bridge_sender0_irq" />
- <interface name="app_0_sdram_0" internal="sdram_0.wire" type="conduit" dir="end" />
  <interface name="powerlink_0_phyl" internal="pcp_0.powerlink_0_phyl" />
- <interface
-   name="app_0_sync_irq_receiver"
-   internal="app_0.irq_bridge_receiver_irq" />
  <interface name="powerlink_0_ap_ex_irq" internal="pcp_0.powerlink_0_ap_ex_irq" />
- <interface
-   name="app_0_sync_irq_in"
-   internal="app_0.sync_irq_external_connection"
-   type="conduit"
-   dir="end" />
  <interface
    name="plkif_0_spi_bridge_0"
    internal="plkif_0.spi_bridge_0_spi"
@@ -493,14 +284,6 @@
    internal="pcp_0.epcs_flash"
    type="conduit"
    dir="end" />
- <interface
-   name="app_0_cfi_flash"
-   internal="app_0.tri_state_bridge_flash_bridge_0_out" />
- <interface
-   name="cfi_flash_out"
-   internal="tri_state_bridge_flash_bridge_0.out"
-   type="conduit"
-   dir="end" />
  <module kind="clock_source" version="13.0" enabled="1" name="clk50">
   <parameter name="clockFrequency" value="50000000" />
   <parameter name="clockFrequencyKnown" value="true" />
@@ -513,11 +296,6 @@
   <parameter name="inputClockFrequency" value="0" />
   <parameter name="resetSynchronousEdges" value="NONE" />
  </module>
- <module
-   kind="altera_avalon_lcd_16207"
-   version="13.0.1.99.2"
-   enabled="1"
-   name="lcd" />
  <module
    kind="altera_avalon_pio"
    version="13.0.1.99.2"
@@ -651,121 +429,6 @@
   <parameter name="AUTO_CLK_CLOCK_RATE" value="100000000" />
   <parameter name="AUTO_DEVICE_FAMILY" value="Cyclone IV E" />
  </module>
- <module
-   kind="altera_avalon_pio"
-   version="13.0.1.99.2"
-   enabled="1"
-   name="hex_pio">
-  <parameter name="bitClearingEdgeCapReg" value="false" />
-  <parameter name="bitModifyingOutReg" value="false" />
-  <parameter name="captureEdge" value="false" />
-  <parameter name="direction" value="Output" />
-  <parameter name="edgeType" value="RISING" />
-  <parameter name="generateIRQ" value="false" />
-  <parameter name="irqType" value="LEVEL" />
-  <parameter name="resetValue" value="0" />
-  <parameter name="simDoTestBenchWiring" value="false" />
-  <parameter name="simDrivenValue" value="0" />
-  <parameter name="width" value="32" />
-  <parameter name="clockRate" value="50000000" />
- </module>
- <module
-   kind="altera_avalon_pio"
-   version="13.0.1.99.2"
-   enabled="1"
-   name="ledr_pio">
-  <parameter name="bitClearingEdgeCapReg" value="false" />
-  <parameter name="bitModifyingOutReg" value="false" />
-  <parameter name="captureEdge" value="false" />
-  <parameter name="direction" value="Output" />
-  <parameter name="edgeType" value="RISING" />
-  <parameter name="generateIRQ" value="false" />
-  <parameter name="irqType" value="LEVEL" />
-  <parameter name="resetValue" value="0" />
-  <parameter name="simDoTestBenchWiring" value="false" />
-  <parameter name="simDrivenValue" value="0" />
-  <parameter name="width" value="16" />
-  <parameter name="clockRate" value="50000000" />
- </module>
- <module
-   kind="altera_avalon_pio"
-   version="13.0.1.99.2"
-   enabled="1"
-   name="key_pio">
-  <parameter name="bitClearingEdgeCapReg" value="false" />
-  <parameter name="bitModifyingOutReg" value="false" />
-  <parameter name="captureEdge" value="false" />
-  <parameter name="direction" value="Input" />
-  <parameter name="edgeType" value="RISING" />
-  <parameter name="generateIRQ" value="false" />
-  <parameter name="irqType" value="LEVEL" />
-  <parameter name="resetValue" value="0" />
-  <parameter name="simDoTestBenchWiring" value="false" />
-  <parameter name="simDrivenValue" value="0" />
-  <parameter name="width" value="4" />
-  <parameter name="clockRate" value="50000000" />
- </module>
- <module kind="cn_app" version="1.0" enabled="1" name="app_0">
-  <parameter name="AUTO_GENERATION_ID" value="0" />
-  <parameter name="AUTO_UNIQUE_ID" value="$${FILENAME}_app_0" />
-  <parameter name="AUTO_DEVICE_FAMILY" value="Cyclone IV E" />
-  <parameter name="AUTO_DEVICE" value="EP4CE115F29C7" />
-  <parameter name="AUTO_CLK50_CLOCK_RATE" value="50000000" />
-  <parameter name="AUTO_CLK50_CLOCK_DOMAIN" value="3" />
-  <parameter name="AUTO_CLK50_RESET_DOMAIN" value="3" />
-  <parameter name="AUTO_CLK100_CLOCK_RATE" value="100000000" />
-  <parameter name="AUTO_CLK100_CLOCK_DOMAIN" value="1" />
-  <parameter name="AUTO_CLK100_RESET_DOMAIN" value="1" />
- </module>
- <module
-   kind="altera_avalon_new_sdram_controller"
-   version="13.0.1.99.2"
-   enabled="1"
-   name="sdram_0">
-  <parameter name="TAC" value="6.0" />
-  <parameter name="TRCD" value="20.0" />
-  <parameter name="TRFC" value="70.0" />
-  <parameter name="TRP" value="20.0" />
-  <parameter name="TWR" value="14.0" />
-  <parameter name="casLatency" value="2" />
-  <parameter name="columnWidth" value="10" />
-  <parameter name="dataWidth" value="32" />
-  <parameter name="generateSimulationModel" value="false" />
-  <parameter name="initRefreshCommands" value="2" />
-  <parameter name="model">single_Micron_MT48LC4M32B2_7_chip</parameter>
-  <parameter name="numberOfBanks" value="4" />
-  <parameter name="numberOfChipSelects" value="1" />
-  <parameter name="pinsSharedViaTriState" value="false" />
-  <parameter name="powerUpDelay" value="100.0" />
-  <parameter name="refreshPeriod" value="7.8125" />
-  <parameter name="rowWidth" value="13" />
-  <parameter name="masteredTristateBridgeSlave" value="0" />
-  <parameter name="TMRD" value="3" />
-  <parameter name="initNOPDelay" value="0.0" />
-  <parameter name="registerDataIn" value="true" />
-  <parameter name="clockRate" value="100000000" />
-  <parameter name="componentName">$${FILENAME}_sdram_0</parameter>
- </module>
- <module
-   kind="altera_avalon_spi"
-   version="13.0.1.99.2"
-   enabled="1"
-   name="spi_master">
-  <parameter name="clockPhase" value="0" />
-  <parameter name="clockPolarity" value="0" />
-  <parameter name="dataWidth" value="8" />
-  <parameter name="disableAvalonFlowControl" value="false" />
-  <parameter name="insertDelayBetweenSlaveSelectAndSClk" value="false" />
-  <parameter name="insertSync" value="false" />
-  <parameter name="lsbOrderedFirst" value="false" />
-  <parameter name="masterSPI" value="true" />
-  <parameter name="numberOfSlaves" value="1" />
-  <parameter name="syncRegDepth" value="2" />
-  <parameter name="targetClockRate" value="12500000" />
-  <parameter name="targetSlaveSelectToSClkDelay" value="0.0" />
-  <parameter name="avalonSpec" value="2.0" />
-  <parameter name="inputClockRate" value="50000000" />
- </module>
  <module kind="plkif" version="0.1" enabled="1" name="plkif_0">
   <parameter name="gDemoCfg" value="cn-gpio" />
   <parameter name="numOfCon" value="1" />
@@ -866,90 +529,6 @@
   <parameter name="AUTO_DMACLK_CLOCK_RATE" value="100000000" />
   <parameter name="AUTO_PKTCLK_CLOCK_RATE" value="100000000" />
  </module>
- <module
-   kind="altera_generic_tristate_controller"
-   version="13.0"
-   enabled="1"
-   name="cfi_flash">
-  <parameter name="TCM_ADDRESS_W" value="23" />
-  <parameter name="TCM_DATA_W" value="8" />
-  <parameter name="TCM_BYTEENABLE_W" value="1" />
-  <parameter name="TCM_READ_WAIT" value="160" />
-  <parameter name="TCM_WRITE_WAIT" value="160" />
-  <parameter name="TCM_SETUP_WAIT" value="60" />
-  <parameter name="TCM_DATA_HOLD" value="60" />
-  <parameter name="TCM_MAX_PENDING_READ_TRANSACTIONS" value="3" />
-  <parameter name="TCM_TURNAROUND_TIME" value="2" />
-  <parameter name="TCM_TIMING_UNITS" value="0" />
-  <parameter name="TCM_READLATENCY" value="2" />
-  <parameter name="TCM_SYMBOLS_PER_WORD" value="1" />
-  <parameter name="USE_READDATA" value="1" />
-  <parameter name="USE_WRITEDATA" value="1" />
-  <parameter name="USE_READ" value="1" />
-  <parameter name="USE_WRITE" value="1" />
-  <parameter name="USE_BEGINTRANSFER" value="0" />
-  <parameter name="USE_BYTEENABLE" value="0" />
-  <parameter name="USE_CHIPSELECT" value="1" />
-  <parameter name="USE_LOCK" value="0" />
-  <parameter name="USE_ADDRESS" value="1" />
-  <parameter name="USE_WAITREQUEST" value="0" />
-  <parameter name="USE_WRITEBYTEENABLE" value="0" />
-  <parameter name="USE_OUTPUTENABLE" value="0" />
-  <parameter name="USE_RESETREQUEST" value="0" />
-  <parameter name="USE_IRQ" value="0" />
-  <parameter name="USE_RESET_OUTPUT" value="0" />
-  <parameter name="ACTIVE_LOW_READ" value="1" />
-  <parameter name="ACTIVE_LOW_LOCK" value="0" />
-  <parameter name="ACTIVE_LOW_WRITE" value="1" />
-  <parameter name="ACTIVE_LOW_CHIPSELECT" value="1" />
-  <parameter name="ACTIVE_LOW_BYTEENABLE" value="0" />
-  <parameter name="ACTIVE_LOW_OUTPUTENABLE" value="0" />
-  <parameter name="ACTIVE_LOW_WRITEBYTEENABLE" value="0" />
-  <parameter name="ACTIVE_LOW_WAITREQUEST" value="0" />
-  <parameter name="ACTIVE_LOW_BEGINTRANSFER" value="0" />
-  <parameter name="ACTIVE_LOW_RESETREQUEST" value="0" />
-  <parameter name="ACTIVE_LOW_IRQ" value="0" />
-  <parameter name="ACTIVE_LOW_RESET_OUTPUT" value="0" />
-  <parameter name="CHIPSELECT_THROUGH_READLATENCY" value="0" />
-  <parameter name="IS_MEMORY_DEVICE" value="1" />
-  <parameter name="MODULE_ASSIGNMENT_KEYS">embeddedsw.configuration.hwClassnameDriverSupportList,embeddedsw.configuration.hwClassnameDriverSupportDefault,embeddedsw.CMacro.SETUP_VALUE,embeddedsw.CMacro.WAIT_VALUE,embeddedsw.CMacro.HOLD_VALUE,embeddedsw.CMacro.TIMING_UNITS,embeddedsw.CMacro.SIZE,embeddedsw.memoryInfo.MEM_INIT_DATA_WIDTH,embeddedsw.memoryInfo.HAS_BYTE_LANE,embeddedsw.memoryInfo.IS_FLASH,embeddedsw.memoryInfo.GENERATE_DAT_SYM,embeddedsw.memoryInfo.GENERATE_FLASH,embeddedsw.memoryInfo.DAT_SYM_INSTALL_DIR,embeddedsw.memoryInfo.FLASH_INSTALL_DIR</parameter>
-  <parameter name="MODULE_ASSIGNMENT_VALUES">altera_avalon_lan91c111:altera_avalon_cfi_flash,altera_avalon_cfi_flash,60,160,60,ns,8388608u,8,0,1,1,1,SIM_DIR,APP_DIR</parameter>
-  <parameter name="INTERFACE_ASSIGNMENT_KEYS">embeddedsw.configuration.isFlash,embeddedsw.configuration.isMemoryDevice,embeddedsw.configuration.isNonVolatileStorage</parameter>
-  <parameter name="INTERFACE_ASSIGNMENT_VALUES" value="1,1,1" />
-  <parameter name="CLOCK_RATE" value="50000000" />
-  <parameter name="AUTO_CLK_CLOCK_DOMAIN" value="3" />
-  <parameter name="AUTO_CLK_RESET_DOMAIN" value="3" />
-  <parameter name="AUTO_TRISTATECONDUIT_MASTERS" value="" />
-  <parameter name="AUTO_DEVICE_FAMILY" value="Cyclone IV E" />
-  <parameter name="AUTO_DEVICE" value="EP4CE115F29C7" />
- </module>
- <module
-   kind="altera_tristate_conduit_pin_sharer"
-   version="13.0"
-   enabled="1"
-   name="tri_state_bridge_flash_pinSharer_0">
-  <parameter name="INTERFACE_INFO"><![CDATA[<info><slave name="tcs0"><master name="cfi_flash.tcm"><pin role="" width="1" type="Invalid" output_name="" output_enable_name="" input_name="" /><pin role="address" width="23" type="Output" output_name="tcm_address_out" output_enable_name="" input_name="" /><pin role="write_n" width="1" type="Output" output_name="tcm_write_n_out" output_enable_name="" input_name="" /><pin role="data" width="8" type="Bidirectional" output_name="tcm_data_out" output_enable_name="tcm_data_outen" input_name="tcm_data_in" /><pin role="read_n" width="1" type="Output" output_name="tcm_read_n_out" output_enable_name="" input_name="" /><pin role="chipselect_n" width="1" type="Output" output_name="tcm_chipselect_n_out" output_enable_name="" input_name="" /></master></slave></info>]]></parameter>
-  <parameter name="NUM_INTERFACES" value="1" />
-  <parameter name="MODULE_ORIGIN_LIST">cfi_flash.tcm,cfi_flash.tcm,cfi_flash.tcm,cfi_flash.tcm,cfi_flash.tcm</parameter>
-  <parameter name="SIGNAL_ORIGIN_LIST">address,read_n,write_n,data,chipselect_n</parameter>
-  <parameter name="SHARED_SIGNAL_LIST" value="" />
-  <parameter name="AUTO_CLK_CLOCK_RATE" value="50000000" />
-  <parameter name="AUTO_CLK_CLOCK_DOMAIN" value="3" />
-  <parameter name="AUTO_CLK_RESET_DOMAIN" value="3" />
-  <parameter name="AUTO_TRISTATECONDUIT_MASTERS"><![CDATA[<info><slave name="tcs0"><master name="cfi_flash.tcm"><port role="write_n_out" direction="output" width="1" /><port role="read_n_out" direction="output" width="1" /><port role="chipselect_n_out" direction="output" width="1" /><port role="request" direction="output" width="1" /><port role="grant" direction="input" width="1" /><port role="address_out" direction="output" width="23" /><port role="data_out" direction="output" width="8" /><port role="data_outen" direction="output" width="1" /><port role="data_in" direction="input" width="8" /></master></slave></info>]]></parameter>
-  <parameter name="AUTO_DEVICE_FAMILY" value="Cyclone IV E" />
-  <parameter name="AUTO_DEVICE" value="EP4CE115F29C7" />
- </module>
- <module
-   kind="altera_tristate_conduit_bridge"
-   version="13.0"
-   enabled="1"
-   name="tri_state_bridge_flash_bridge_0">
-  <parameter name="INTERFACE_INFO"><![CDATA[<info><slave name="tcs"><master name="tri_state_bridge_flash_pinSharer_0.tcm"><pin role="" width="1" type="Invalid" output_name="" output_enable_name="" input_name="" /><pin role="cfi_flash_tcm_address_out" width="23" type="Output" output_name="cfi_flash_tcm_address_out" output_enable_name="" input_name="" /><pin role="cfi_flash_tcm_data_out" width="8" type="Bidirectional" output_name="cfi_flash_tcm_data_out" output_enable_name="cfi_flash_tcm_data_outen" input_name="cfi_flash_tcm_data_in" /><pin role="cfi_flash_tcm_chipselect_n_out" width="1" type="Output" output_name="cfi_flash_tcm_chipselect_n_out" output_enable_name="" input_name="" /><pin role="cfi_flash_tcm_read_n_out" width="1" type="Output" output_name="cfi_flash_tcm_read_n_out" output_enable_name="" input_name="" /><pin role="cfi_flash_tcm_write_n_out" width="1" type="Output" output_name="cfi_flash_tcm_write_n_out" output_enable_name="" input_name="" /></master></slave></info>]]></parameter>
-  <parameter name="AUTO_CLK_CLOCK_RATE" value="50000000" />
-  <parameter name="AUTO_DEVICE_FAMILY" value="Cyclone IV E" />
- </module>
- <connection kind="clock" version="13.0" start="clk50.clk" end="lcd.clk" />
  <connection
    kind="clock"
    version="13.0"
@@ -960,8 +539,6 @@
    version="13.0"
    start="clk50.clk"
    end="status_led_pio.clk" />
- <connection kind="reset" version="13.0" start="clk50.clk_reset" end="lcd.reset" />
- <connection kind="reset" version="13.0" start="clk100.clk_reset" end="lcd.reset" />
  <connection
    kind="reset"
    version="13.0"
@@ -982,7 +559,6 @@
    version="13.0"
    start="clk100.clk_reset"
    end="status_led_pio.reset" />
- <connection kind="reset" version="13.0" start="clk25.clk_reset" end="lcd.reset" />
  <connection
    kind="reset"
    version="13.0"
@@ -1107,86 +683,6 @@
    version="13.0"
    start="clk25.clk_reset"
    end="tri_state_0.reset" />
- <connection kind="clock" version="13.0" start="clk50.clk" end="hex_pio.clk" />
- <connection
-   kind="reset"
-   version="13.0"
-   start="clk50.clk_reset"
-   end="hex_pio.reset" />
- <connection
-   kind="reset"
-   version="13.0"
-   start="clk100.clk_reset"
-   end="hex_pio.reset" />
- <connection
-   kind="reset"
-   version="13.0"
-   start="clk25.clk_reset"
-   end="hex_pio.reset" />
- <connection kind="clock" version="13.0" start="clk50.clk" end="ledr_pio.clk" />
- <connection
-   kind="reset"
-   version="13.0"
-   start="clk50.clk_reset"
-   end="ledr_pio.reset" />
- <connection
-   kind="reset"
-   version="13.0"
-   start="clk100.clk_reset"
-   end="ledr_pio.reset" />
- <connection
-   kind="reset"
-   version="13.0"
-   start="clk25.clk_reset"
-   end="ledr_pio.reset" />
- <connection kind="clock" version="13.0" start="clk50.clk" end="key_pio.clk" />
- <connection
-   kind="reset"
-   version="13.0"
-   start="clk50.clk_reset"
-   end="key_pio.reset" />
- <connection
-   kind="reset"
-   version="13.0"
-   start="clk100.clk_reset"
-   end="key_pio.reset" />
- <connection
-   kind="reset"
-   version="13.0"
-   start="clk25.clk_reset"
-   end="key_pio.reset" />
- <connection kind="clock" version="13.0" start="clk50.clk" end="app_0.clk50" />
- <connection kind="clock" version="13.0" start="clk100.clk" end="app_0.clk100" />
- <connection
-   kind="reset"
-   version="13.0"
-   start="clk100.clk_reset"
-   end="app_0.rst_clk100" />
- <connection
-   kind="reset"
-   version="13.0"
-   start="clk50.clk_reset"
-   end="app_0.rst_clk100" />
- <connection
-   kind="reset"
-   version="13.0"
-   start="clk25.clk_reset"
-   end="app_0.rst_clk100" />
- <connection
-   kind="reset"
-   version="13.0"
-   start="clk25.clk_reset"
-   end="app_0.rst_clk50" />
- <connection
-   kind="reset"
-   version="13.0"
-   start="clk50.clk_reset"
-   end="app_0.rst_clk50" />
- <connection
-   kind="reset"
-   version="13.0"
-   start="clk100.clk_reset"
-   end="app_0.rst_clk50" />
  <connection
    kind="avalon"
    version="13.0"
@@ -1196,92 +692,6 @@
   <parameter name="baseAddress" value="0x2d00" />
   <parameter name="defaultConnection" value="false" />
  </connection>
- <connection
-   kind="avalon"
-   version="13.0"
-   start="app_0.slow_bridge"
-   end="lcd.control_slave">
-  <parameter name="arbitrationPriority" value="1" />
-  <parameter name="baseAddress" value="0x00800050" />
-  <parameter name="defaultConnection" value="false" />
- </connection>
- <connection
-   kind="avalon"
-   version="13.0"
-   start="app_0.slow_bridge"
-   end="hex_pio.s1">
-  <parameter name="arbitrationPriority" value="1" />
-  <parameter name="baseAddress" value="0x00800040" />
-  <parameter name="defaultConnection" value="false" />
- </connection>
- <connection
-   kind="avalon"
-   version="13.0"
-   start="app_0.slow_bridge"
-   end="ledr_pio.s1">
-  <parameter name="arbitrationPriority" value="1" />
-  <parameter name="baseAddress" value="0x00800030" />
-  <parameter name="defaultConnection" value="false" />
- </connection>
- <connection
-   kind="avalon"
-   version="13.0"
-   start="app_0.slow_bridge"
-   end="key_pio.s1">
-  <parameter name="arbitrationPriority" value="1" />
-  <parameter name="baseAddress" value="0x00800020" />
-  <parameter name="defaultConnection" value="false" />
- </connection>
- <connection
-   kind="avalon"
-   version="13.0"
-   start="app_0.cpu_bridge"
-   end="sdram_0.s1">
-  <parameter name="arbitrationPriority" value="1" />
-  <parameter name="baseAddress" value="0x0000" />
-  <parameter name="defaultConnection" value="false" />
- </connection>
- <connection kind="clock" version="13.0" start="clk100.clk" end="sdram_0.clk" />
- <connection
-   kind="reset"
-   version="13.0"
-   start="clk100.clk_reset"
-   end="sdram_0.reset" />
- <connection
-   kind="reset"
-   version="13.0"
-   start="clk50.clk_reset"
-   end="sdram_0.reset" />
- <connection
-   kind="reset"
-   version="13.0"
-   start="clk25.clk_reset"
-   end="sdram_0.reset" />
- <connection kind="clock" version="13.0" start="clk50.clk" end="spi_master.clk" />
- <connection
-   kind="avalon"
-   version="13.0"
-   start="app_0.slow_bridge"
-   end="spi_master.spi_control_port">
-  <parameter name="arbitrationPriority" value="1" />
-  <parameter name="baseAddress" value="0x00800000" />
-  <parameter name="defaultConnection" value="false" />
- </connection>
- <connection
-   kind="reset"
-   version="13.0"
-   start="clk100.clk_reset"
-   end="spi_master.reset" />
- <connection
-   kind="reset"
-   version="13.0"
-   start="clk50.clk_reset"
-   end="spi_master.reset" />
- <connection
-   kind="reset"
-   version="13.0"
-   start="clk25.clk_reset"
-   end="spi_master.reset" />
  <connection kind="clock" version="13.0" start="clk50.clk" end="plkif_0.clk" />
  <connection
    kind="reset"
@@ -1422,81 +832,6 @@
    version="13.0"
    start="clk25.clk_reset"
    end="pcp_0.rst_clk25" />
- <connection
-   kind="tristate_conduit"
-   version="13.0"
-   start="cfi_flash.tcm"
-   end="tri_state_bridge_flash_pinSharer_0.tcs0" />
- <connection
-   kind="tristate_conduit"
-   version="13.0"
-   start="tri_state_bridge_flash_pinSharer_0.tcm"
-   end="tri_state_bridge_flash_bridge_0.tcs" />
- <connection kind="clock" version="13.0" start="clk50.clk" end="cfi_flash.clk" />
- <connection
-   kind="clock"
-   version="13.0"
-   start="clk50.clk"
-   end="tri_state_bridge_flash_pinSharer_0.clk" />
- <connection
-   kind="clock"
-   version="13.0"
-   start="clk50.clk"
-   end="tri_state_bridge_flash_bridge_0.clk" />
- <connection
-   kind="reset"
-   version="13.0"
-   start="clk25.clk_reset"
-   end="tri_state_bridge_flash_bridge_0.reset" />
- <connection
-   kind="reset"
-   version="13.0"
-   start="clk50.clk_reset"
-   end="tri_state_bridge_flash_bridge_0.reset" />
- <connection
-   kind="reset"
-   version="13.0"
-   start="clk100.clk_reset"
-   end="tri_state_bridge_flash_bridge_0.reset" />
- <connection
-   kind="reset"
-   version="13.0"
-   start="clk100.clk_reset"
-   end="tri_state_bridge_flash_pinSharer_0.reset" />
- <connection
-   kind="reset"
-   version="13.0"
-   start="clk50.clk_reset"
-   end="tri_state_bridge_flash_pinSharer_0.reset" />
- <connection
-   kind="reset"
-   version="13.0"
-   start="clk25.clk_reset"
-   end="tri_state_bridge_flash_pinSharer_0.reset" />
- <connection
-   kind="reset"
-   version="13.0"
-   start="clk25.clk_reset"
-   end="cfi_flash.reset" />
- <connection
-   kind="reset"
-   version="13.0"
-   start="clk50.clk_reset"
-   end="cfi_flash.reset" />
- <connection
-   kind="reset"
-   version="13.0"
-   start="clk100.clk_reset"
-   end="cfi_flash.reset" />
- <connection
-   kind="avalon"
-   version="13.0"
-   start="app_0.cpu_bridge"
-   end="cfi_flash.uas">
-  <parameter name="arbitrationPriority" value="1" />
-  <parameter name="baseAddress" value="0x08000000" />
-  <parameter name="defaultConnection" value="false" />
- </connection>
  <interconnectRequirement for="$system" name="qsys_mm.clockCrossingAdapter" value="HANDSHAKE" />
  <interconnectRequirement for="$system" name="qsys_mm.maxAdditionalLatency" value="1" />
 </system>
