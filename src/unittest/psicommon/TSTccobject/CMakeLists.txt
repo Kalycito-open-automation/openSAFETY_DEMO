@@ -40,6 +40,7 @@ SOURCE_GROUP ( Driver FILES ${TST_STUBS_SRC} )
 
 SET ( PSI_UUT 
         ${psicommon_SOURCE_DIR}/ccobject.c
+        ${psicommon_SOURCE_DIR}/amile.c
 )
 
 SOURCE_GROUP ( Uut FILES ${PSI_UUT} )
@@ -60,9 +61,5 @@ IF (WIN32)
     TARGET_LINK_LIBRARIES( tstccobject "win32" )
     ADD_DEPENDENCIES ( tstccobject "win32")
 endif (WIN32)
-
-TARGET_LINK_LIBRARIES( tstccobject "endian" )
-ADD_DEPENDENCIES ( tstccobject "endian")
-EnsureLibraries( tstccobject "endian" )
 
 AddCoverage ( "PSI" "tstccobject" )

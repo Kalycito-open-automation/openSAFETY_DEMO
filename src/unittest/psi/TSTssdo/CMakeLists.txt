@@ -74,9 +74,8 @@ IF (WIN32)
     ADD_DEPENDENCIES ( tstssdo "win32")
 endif (WIN32)
 
-TARGET_LINK_LIBRARIES( tstssdo "endian" "psicommon" )
-ADD_DEPENDENCIES ( tstssdo "endian" "psicommon" )
-EnsureLibraries( tstssdo "endian" )
+TARGET_LINK_LIBRARIES( tstssdo "psicommon" )
+ADD_DEPENDENCIES ( tstssdo "psicommon" )
 EnsureLibraries( tstssdo "psicommon" )
 
 AddCoverage ( "PSI" "tstssdo" )

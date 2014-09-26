@@ -39,7 +39,7 @@ FILE ( GLOB TST_STUBS_SRC "${PROJECT_SOURCE_DIR}/Stubs/*.c" )
 SOURCE_GROUP ( Driver FILES ${TST_STUBS_SRC} )
 
 SET ( PSI_UUT
-        ${endian_SOURCE_DIR}/amile.c
+        ${psicommon_SOURCE_DIR}/amile.c
 )
 
 SOURCE_GROUP ( Uut FILES ${PSI_UUT} )

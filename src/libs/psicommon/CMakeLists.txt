@@ -43,6 +43,7 @@ SET(GEN_LIB_TARGET ON)
 SET ( LIB_SRCS
     ${PROJECT_SOURCE_DIR}/ccobject.c
     ${PROJECT_SOURCE_DIR}/timeout.c
+    ${PROJECT_SOURCE_DIR}/amile.c
 )
 
 ########################################################################
@@ -50,7 +51,6 @@ SET ( LIB_SRCS
 ########################################################################
 SET ( LIB_INCS
     ${PROJECT_SOURCE_DIR}/include
-    ${endian_SOURCE_DIR}/include
     ${DEMO_CONFIG_DIR}/tbuf/include
 )
 
@@ -67,13 +67,6 @@ INCLUDE_DIRECTORIES ( ${LIB_INCS}
 ########################################################################
 IF(GEN_LIB_TARGET)
     ADD_LIBRARY (${PROJECT_NAME} ${LIB_TYPE} ${LIB_SRCS})
-
-    TARGET_LINK_LIBRARIES(${PROJECT_NAME} "endian")
-    ADD_DEPENDENCIES(${PROJECT_NAME} "endian")
-
-    IF((WIN32 OR CYGWIN) AND (${LIB_TYPE} STREQUAL "SHARED"))
-        EnsureLibraries(${PROJECT_NAME} "endian")
-    ENDIF()
 ENDIF()
 
 ################################################################################

@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   libami/ami.h
+\file   libpsicommon/ami.h
 
 \brief  Definitions for the abstract memory interface (ami)
 
@@ -33,13 +33,13 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
 
-#ifndef _INC_ami_H_
-#define _INC_ami_H_
+#ifndef _INC_libpsicommon_ami_H_
+#define _INC_libpsicommon_ami_H_
 
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <apptarget/target.h>
+#include <libpsicommon/global.h>
 
 //------------------------------------------------------------------------------
 // const defines
@@ -90,4 +90,4 @@ DLLEXPORT UINT64 ami_getUint64Le(void* pAddr_p);
 #endif
 
 
-#endif /* _INC_ami_H_ */
+#endif /* _INC_libpsicommon_ami_H_ */

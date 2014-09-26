@@ -42,7 +42,6 @@ FILE(GLOB TSTDIRECTORIES
 INCLUDE_DIRECTORIES ( "${PROJECT_SOURCE_DIR}/common/general" )
 INCLUDE_DIRECTORIES ( "${psi_SOURCE_DIR}/include" )
 INCLUDE_DIRECTORIES ( "${psicommon_SOURCE_DIR}/include" )
-INCLUDE_DIRECTORIES ( "${endian_SOURCE_DIR}/include" )
 INCLUDE_DIRECTORIES ( "${TARGET_DIR}/include" )
 
 # Path to the configuration headers for the slim interface

@@ -56,7 +56,6 @@ SET ( LIB_SRCS
 SET ( LIB_INCS
     ${PROJECT_SOURCE_DIR}/include
     ${psicommon${CURR_APPLICATION}_SOURCE_DIR}/include
-    ${endian_SOURCE_DIR}/include
     ${DEMO_CONFIG_DIR}/tbuf/include
 )
 

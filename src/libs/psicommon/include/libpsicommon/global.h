@@ -48,7 +48,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
   #include <oplk/ami.h>
 #else
   #include <apptarget/target.h>
-  #include <libami/ami.h>
+  #include <libpsicommon/ami.h>
 #endif
 
 //------------------------------------------------------------------------------

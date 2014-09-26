@@ -88,7 +88,6 @@ SET(DEMO_INCS
     ${COMMON_SOURCE_DIR}/include
     ${SHNF_DIR}/include
     ${SAPL_DIR}/include
-    ${endian_SOURCE_DIR}/include
     ${psi_SOURCE_DIR}/include
     ${psicommonapp_SOURCE_DIR}/include
     ${DEMO_CONFIG_DIR}/tbuf/include

@@ -132,7 +132,6 @@ SET( ALT_LIB_GEN_ARGS
                       "--set FLASH_OVERRIDE=${ALT_FLASH_OVERRIDE}"
                       "--set INSTANCE_ID=${ALT_APP_INSTANCE_ID}"
                       "--elf-name ${PROJECT_NAME}.elf"
-                      "--use-lib-dir ${endian_BINARY_DIR}/${ALT_BUILD_DIR_NAME}"
                       "--use-lib-dir ${psi_BINARY_DIR}/${ALT_BUILD_DIR_NAME}"
                       "--use-lib-dir ${psicommonapp_BINARY_DIR}/${ALT_BUILD_DIR_NAME}"
    )
