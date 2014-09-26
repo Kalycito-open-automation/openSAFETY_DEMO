@@ -46,13 +46,22 @@ SET( ALT_LIB_INCS ${LIB_INCS}
 )
 
 ########################################################################
+# Select board support package
+########################################################################
+IF(${CURR_APPLICATION} STREQUAL "app")
+    SET(ALT_BSP_DIR ${ALT_APP_BSP_DIR})
+ELSE()
+    SET(ALT_BSP_DIR ${ALT_PCP_BSP_DIR})
+ENDIF()
+
+########################################################################
 # Library Makefile
 ########################################################################
 
 SET( LIB_CFLAGS "${CFLAGS} -D${DBG_MODE} -DDEF_DEBUG_LVL=${DEF_DEBUG_LVL}" )
 
 SET( ALT_LIB_GEN_ARGS
-                     "--bsp-dir ${ALT_APP_BSP_DIR}"
+                     "--bsp-dir ${ALT_BSP_DIR}"
                      "--lib-dir ${ALT_BUILD_DIR}"
                      "--lib-name ${PROJECT_NAME}"
                      "--set LIB_CFLAGS_DEFINED_SYMBOLS=${LIB_CFLAGS}"

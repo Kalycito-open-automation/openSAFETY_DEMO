@@ -42,7 +42,7 @@ SET( NIOS2_QSYS_SUB pcp_0 )
 SET( NIOS2_QSYS_SUB_CPU cpu_0 )
 
 SET( BSP_TYPE hal )
-SET( BSP_DIR ${ALT_BUILD_DIR}/bsp )
+SET( ALT_PCP_BSP_DIR ${ALT_BUILD_DIR}/bsp )
 
 SET( NIOS2_TC_I_MEM ${NIOS2_QSYS_SUB}_tc_i_mem )
 
@@ -71,9 +71,9 @@ SET(ALT_PSI_INCS
     ${PSI_INCS}
     ${OPLK_INCS}
     ${OMETHLIB_INCS}
-    ${BSP_DIR}
-    ${BSP_DIR}/HAL/inc
-    ${BSP_DIR}/drivers/inc
+    ${ALT_PCP_BSP_DIR}
+    ${ALT_PCP_BSP_DIR}/HAL/inc
+    ${ALT_PCP_BSP_DIR}/drivers/inc
     ${ARCH_SOURCE_DIR}/altera_nios2
     ${PROJECT_SOURCE_DIR}/target/altera/include
    )
@@ -97,7 +97,7 @@ IF( ${CMAKE_BUILD_TYPE} MATCHES "Release" )
     SET( NIOS2_BSP_ARGS "${NIOS2_BSP_ARGS} --set hal.stdout none --set hal.stderr none" )
 ENDIF ( ${CMAKE_BUILD_TYPE} MATCHES "Release" )
 
-EXECUTE_PROCESS( COMMAND bash ${ALT_BSP_GEN_DIR}/nios2-bsp ${BSP_TYPE} ${BSP_DIR} ${CFG_NIOS2_QUARTUS_DIR} ${NIOS2_BSP_ARGS}
+EXECUTE_PROCESS( COMMAND bash ${ALT_BSP_GEN_DIR}/nios2-bsp ${BSP_TYPE} ${ALT_PCP_BSP_DIR} ${CFG_NIOS2_QUARTUS_DIR} ${NIOS2_BSP_ARGS}
                  WORKING_DIRECTORY ${ALT_BUILD_DIR}
                  RESULT_VARIABLE GEN_BSP_RES
                  OUTPUT_VARIABLE GEN_BSP_STDOUT
@@ -115,7 +115,7 @@ MESSAGE ( STATUS  "Generate board support package: ${GEN_BSP_STDOUT}" )
 ########################################################################
 
 SET( ALT_BSP_QUEUE_ARGS
-                       "--settings ${BSP_DIR}/settings.bsp"
+                       "--settings ${ALT_PCP_BSP_DIR}/settings.bsp"
                        "--cmd puts [get_addr_span ${NIOS2_TC_I_MEM}]"
    )
 
@@ -141,7 +141,7 @@ SET( APP_CFLAGS "${CFLAGS} -D${DBG_MODE} -DDEF_DEBUG_LVL=${DEF_DEBUG_LVL} -DCONF
 SET( APP_CFLAGS_EXTENDED "-DALT_TCIMEM_SIZE=${TCI_MEM_SIZE} -DPSI_BUILD_PCP" )
 
 SET( ALT_APP_GEN_ARGS
-                      "--bsp-dir ${BSP_DIR}"
+                      "--bsp-dir ${ALT_PCP_BSP_DIR}"
                       "--set QUARTUS_PROJECT_DIR=${CFG_NIOS2_QUARTUS_DIR}"
                       "--src-files ${ALT_PSI_SRCS}"
                       "--set APP_INCLUDE_DIRS=${ALT_PSI_INCS}"
@@ -184,7 +184,7 @@ ENDIF ( NOT  ${FIX_RES} MATCHES "0" )
 
 # Copy triple buffer configuration file
 FILE( MAKE_DIRECTORY ${DEMO_CONFIG_DIR}/tbuf/include/ipcore )
-FILE( COPY ${BSP_DIR}/tbuf-cfg.h DESTINATION ${DEMO_CONFIG_DIR}/tbuf/include/ipcore )
+FILE( COPY ${ALT_PCP_BSP_DIR}/tbuf-cfg.h DESTINATION ${DEMO_CONFIG_DIR}/tbuf/include/ipcore )
 
 ########################################################################
 # Connect the CMake Makefile with the Altera Makefile

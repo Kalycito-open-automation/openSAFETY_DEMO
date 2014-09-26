@@ -77,6 +77,10 @@ SET(ALT_BUILD_DIR_NAME "altera")
 SET(ALT_APP_BUILD_DIR ${CMAKE_BINARY_DIR}/app/demo-${CFG_DEMO_TYPE}/${ALT_BUILD_DIR_NAME})
 SET(ALT_APP_BSP_DIR ${ALT_APP_BUILD_DIR}/bsp)
 
+# Set path to PCP board support package -> Needed by the libraries
+SET(ALT_PCP_BUILD_DIR ${CMAKE_BINARY_DIR}/pcp/psi/${ALT_BUILD_DIR_NAME})
+SET(ALT_PCP_BSP_DIR ${ALT_PCP_BUILD_DIR}/bsp)
+
 ###############################################################################
 # Find Altera Nios2 tools
 FIND_PATH( ALT_BSP_GEN_DIR nios2-bsp
