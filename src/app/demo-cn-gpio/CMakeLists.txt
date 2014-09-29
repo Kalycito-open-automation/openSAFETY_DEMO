@@ -35,8 +35,6 @@ SET(GEN_LIB_TARGET ON)
 
 PROJECT( demo-${CFG_DEMO_TYPE} C)
 
-SET(COMMON_SOURCE_DIR ${PROJECT_SOURCE_DIR}/../common)
-
 ########################################################################
 # Set all source files
 ########################################################################
@@ -50,7 +48,7 @@ SET ( DEMO_SRCS
 ########################################################################
 SET ( DEMO_INCS
     ${PROJECT_SOURCE_DIR}/include
-    ${COMMON_SOURCE_DIR}/include
+    ${APP_COMMON_DIR}/include
     ${psi_SOURCE_DIR}/include
     ${psicommonapp_SOURCE_DIR}/include
     ${DEMO_CONFIG_DIR}/tbuf/include

@@ -100,7 +100,14 @@ ENDIF ( UNITTEST_ENABLE )
 # Setup paths
 SET( MISC_DIR ${CMAKE_SOURCE_DIR}/misc )
 SET( FPGA_DIR ${CMAKE_SOURCE_DIR}/fpga )
-SET( DEMO_CONFIG_DIR ${CMAKE_SOURCE_DIR}/app/demo-${CFG_DEMO_TYPE}/config )
+SET( LIBS_DIR ${CMAKE_SOURCE_DIR}/libs )
+SET( PCP_DIR ${CMAKE_SOURCE_DIR}/pcp )
+
+SET( APP_DIR ${CMAKE_SOURCE_DIR}/app )
+SET( APP_COMMON_DIR ${APP_DIR}/common )
+SET( APP_TARGET_DIR ${APP_DIR}/target )
+
+SET( DEMO_CONFIG_DIR ${APP_DIR}/demo-${CFG_DEMO_TYPE}/config )
 
 #####################################################################
 # Setup architecture specific configuration
@@ -124,23 +131,23 @@ IF((CMAKE_SYSTEM_NAME STREQUAL "Generic"))
     # We are cross compiling for an embedded platform
     IF(CFG_INCLUDE_SUBPROJECTS MATCHES "application" OR CFG_INCLUDE_SUBPROJECTS MATCHES "both")
         SET(CURR_APPLICATION "app")
-        ADD_SUBDIRECTORY("${PROJECT_SOURCE_DIR}/libs/psicommon" "${PROJECT_BINARY_DIR}/libs/${CURR_APPLICATION}/psicommon")
-        ADD_SUBDIRECTORY("${PROJECT_SOURCE_DIR}/libs/psi" "${PROJECT_BINARY_DIR}/libs/${CURR_APPLICATION}/psi")
+        ADD_SUBDIRECTORY("${LIBS_DIR}/psicommon" "${PROJECT_BINARY_DIR}/libs/${CURR_APPLICATION}/psicommon")
+        ADD_SUBDIRECTORY("${LIBS_DIR}/psi" "${PROJECT_BINARY_DIR}/libs/${CURR_APPLICATION}/psi")
 
         # Add the current demo to the build
-        ADD_SUBDIRECTORY("${PROJECT_SOURCE_DIR}/app/demo-${CFG_DEMO_TYPE}")
+        ADD_SUBDIRECTORY("${APP_DIR}/demo-${CFG_DEMO_TYPE}")
     ENDIF()
 
     IF(CFG_INCLUDE_SUBPROJECTS MATCHES "pcp" OR CFG_INCLUDE_SUBPROJECTS MATCHES "both" )
         SET(CURR_APPLICATION "pcp")
-        ADD_SUBDIRECTORY("${PROJECT_SOURCE_DIR}/libs/psicommon" "${PROJECT_BINARY_DIR}/libs/${CURR_APPLICATION}/psicommon")
+        ADD_SUBDIRECTORY("${LIBS_DIR}/psicommon" "${PROJECT_BINARY_DIR}/libs/${CURR_APPLICATION}/psicommon")
 
-        ADD_SUBDIRECTORY("${PROJECT_SOURCE_DIR}/pcp/psi")
+        ADD_SUBDIRECTORY("${PCP_DIR}/psi")
     ENDIF()
 ELSE()
     # Target platform is the local machine (Windows or Linux)
-    ADD_SUBDIRECTORY("${PROJECT_SOURCE_DIR}/libs/psicommon")
-    ADD_SUBDIRECTORY("${PROJECT_SOURCE_DIR}/libs/psi")
+    ADD_SUBDIRECTORY("${LIBS_DIR}/psicommon")
+    ADD_SUBDIRECTORY("${LIBS_DIR}/psi")
 ENDIF()
 
 #######################

@@ -67,7 +67,7 @@ ENDIF()
 
 ###############################################################################
 # Target dependent paths
-SET( TARGET_DIR ${CMAKE_SOURCE_DIR}/app/target/altera-nios2 )
+SET( TARGET_DIR ${APP_TARGET_DIR}/altera-nios2 )
 
 SET( ALT_MISC_DIR ${MISC_DIR}/altera_nios2 )
 SET( ALT_DRIVERS_DIR ${FPGA_DIR}/drivers/altera )
