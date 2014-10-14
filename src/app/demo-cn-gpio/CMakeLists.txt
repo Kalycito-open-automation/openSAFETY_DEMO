@@ -57,6 +57,14 @@ SET ( DEMO_INCS
 
 IF((CMAKE_SYSTEM_NAME STREQUAL "Generic") AND (CMAKE_SYSTEM_PROCESSOR STREQUAL "nios2"))
     INCLUDE(nios2.cmake)
+ELSEIF((CMAKE_SYSTEM_NAME STREQUAL "Generic") AND (CMAKE_SYSTEM_PROCESSOR STREQUAL "cortex-m3"))
+    IF(CFG_ARM_BOARD_TYPE STREQUAL "stm32f10x")
+        INCLUDE(stm32f103.cmake)
+    ELSE()
+        MESSAGE(FATAL_ERROR "The board type CFG_ARM_BOARD_TYPE=${CFG_ARM_BOARD_TYPE} is not supported by this application!")
+    ENDIF()
+ELSE()
+    MESSAGE(FATAL_ERROR "The selected platform is not supported by this application!")
 ENDIF()
 
 INCLUDE_DIRECTORIES(
@@ -72,6 +80,9 @@ IF(GEN_LIB_TARGET)
 
     SET_PROPERTY(TARGET ${PROJECT_NAME}.elf PROPERTY LINK_FLAGS ${DEMO_ARCH_LINKER_FLAGS})
     TARGET_LINK_LIBRARIES(${PROJECT_NAME}.elf "psi" "psicommonapp")
+
+    # Call target post actions (Target specific!)
+    AppPostAction(${PROJECT_NAME}.elf)
 ENDIF()
 
 ################################################################################

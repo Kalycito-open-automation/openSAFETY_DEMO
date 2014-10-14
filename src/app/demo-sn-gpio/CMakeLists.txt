@@ -109,11 +109,20 @@ SET(DEMO_INCS
     ${SN_BASE_DIR}
     ${OSCHECKSUM_BASE_DIR}/include
     ${TARGET_DIR}/include
-    ${SN_TARGET_SOURCE_DIR}/include
 )
 
 IF((CMAKE_SYSTEM_NAME STREQUAL "Generic") AND (CMAKE_SYSTEM_PROCESSOR STREQUAL "nios2"))
     INCLUDE(nios2.cmake)
+ELSEIF((CMAKE_SYSTEM_NAME STREQUAL "Generic") AND (CMAKE_SYSTEM_PROCESSOR STREQUAL "cortex-m3"))
+    IF(CFG_ARM_BOARD_TYPE STREQUAL "stm32f10x")
+        INCLUDE(stm32f103.cmake)
+    ELSE()
+        MESSAGE(FATAL_ERROR "The board type CFG_ARM_BOARD_TYPE=${CFG_ARM_BOARD_TYPE} is not supported by this application!")
+    ENDIF()
+ELSE()
+    MESSAGE(FATAL_ERROR "The selected platform is not supported by this application!")
+ENDIF()
+
 INCLUDE_DIRECTORIES(
                     ${DEMO_INCS}
                     ${DEMO_ARCH_INCS}

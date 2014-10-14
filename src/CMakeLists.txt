@@ -117,6 +117,8 @@ ELSEIF(CMAKE_SYSTEM_NAME STREQUAL "Windows")
     INCLUDE(configure-windows)
 ELSEIF((CMAKE_SYSTEM_NAME STREQUAL "Generic") AND (CMAKE_SYSTEM_PROCESSOR STREQUAL "nios2"))
     INCLUDE(configure-nios2)
+ELSEIF((CMAKE_SYSTEM_NAME STREQUAL "Generic") AND (CMAKE_SYSTEM_PROCESSOR STREQUAL "cortex-m3"))
+    INCLUDE(configure-cortexm3)
 ENDIF()
 
 #####################################################################
