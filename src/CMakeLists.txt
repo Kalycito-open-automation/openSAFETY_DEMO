@@ -123,6 +123,7 @@ ENDIF()
 # Set compiler specific definitions
 IF("${CMAKE_C_COMPILER_ID}" STREQUAL "GNU")
     SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra -pedantic -std=c99")
+    STRING(REPLACE "-O3" "-O2" CMAKE_C_FLAGS_RELEASE ${CMAKE_C_FLAGS_RELEASE})
 ENDIF()
 
 #####################################################################
