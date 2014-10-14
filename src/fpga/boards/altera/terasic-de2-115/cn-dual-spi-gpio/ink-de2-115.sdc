@@ -47,6 +47,7 @@ set_false_path -from [get_ports NODE_SWITCH[*]] -to [get_registers *]
 # -> Cut path
 set_false_path -from [get_registers *]      -to [get_ports LEDG[*]]
 set_false_path -from [get_registers *]      -to [get_ports LEDR[*]]
+set_false_path -from [get_registers *]      -to [get_ports STATUS[*]]
 set_false_path -from [get_registers *]      -to [get_ports HEX?[*]]
 set_false_path -from [get_registers *]      -to [get_ports LCD_*]
 set_false_path -from [get_registers *]      -to [get_ports LCD_DQ[*]]

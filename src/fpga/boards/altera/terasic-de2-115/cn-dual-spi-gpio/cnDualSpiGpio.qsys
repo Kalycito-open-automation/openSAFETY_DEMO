@@ -72,19 +72,19 @@
          type = "boolean";
       }
    }
-   element lcd.control_slave
-   {
-      datum baseAddress
-      {
-         value = "8388688";
-         type = "String";
-      }
-   }
    element sysid.control_slave
    {
       datum baseAddress
       {
          value = "11584";
+         type = "String";
+      }
+   }
+   element lcd.control_slave
+   {
+      datum baseAddress
+      {
+         value = "8388688";
          type = "String";
       }
    }
@@ -105,12 +105,12 @@
    {
       datum _sortIndex
       {
-         value = "12";
+         value = "13";
          type = "int";
       }
       datum sopceditor_expanded
       {
-         value = "0";
+         value = "1";
          type = "boolean";
       }
    }
@@ -136,12 +136,12 @@
    {
       datum _sortIndex
       {
-         value = "11";
+         value = "12";
          type = "int";
       }
       datum sopceditor_expanded
       {
-         value = "0";
+         value = "1";
          type = "boolean";
       }
    }
@@ -165,7 +165,7 @@
    {
       datum _sortIndex
       {
-         value = "19";
+         value = "20";
          type = "int";
       }
       datum sopceditor_expanded
@@ -178,7 +178,7 @@
    {
       datum _sortIndex
       {
-         value = "18";
+         value = "19";
          type = "int";
       }
    }
@@ -186,7 +186,7 @@
    {
       datum _sortIndex
       {
-         value = "13";
+         value = "14";
          type = "int";
       }
    }
@@ -202,8 +202,24 @@
    {
       datum _sortIndex
       {
-         value = "20";
+         value = "21";
          type = "int";
+      }
+   }
+   element hex_pio.s1
+   {
+      datum baseAddress
+      {
+         value = "8388672";
+         type = "String";
+      }
+   }
+   element key_pio.s1
+   {
+      datum baseAddress
+      {
+         value = "8388640";
+         type = "String";
       }
    }
    element ledr_pio.s1
@@ -214,11 +230,11 @@
          type = "String";
       }
    }
-   element hex_pio.s1
+   element status_pio.s1
    {
       datum baseAddress
       {
-         value = "8388672";
+         value = "8388704";
          type = "String";
       }
    }
@@ -230,14 +246,6 @@
          type = "String";
       }
    }
-   element node_switch_pio.s1
-   {
-      datum baseAddress
-      {
-         value = "11568";
-         type = "String";
-      }
-   }
    element status_led_pio.s1
    {
       datum baseAddress
@@ -246,11 +254,11 @@
          type = "String";
       }
    }
-   element key_pio.s1
+   element node_switch_pio.s1
    {
       datum baseAddress
       {
-         value = "8388640";
+         value = "11568";
          type = "String";
       }
    }
@@ -287,7 +295,7 @@
    {
       datum _sortIndex
       {
-         value = "14";
+         value = "15";
          type = "int";
       }
       datum sopceditor_expanded
@@ -300,7 +308,7 @@
    {
       datum _sortIndex
       {
-         value = "17";
+         value = "18";
          type = "int";
       }
       datum sopceditor_expanded
@@ -309,11 +317,19 @@
          type = "boolean";
       }
    }
+   element status_pio
+   {
+      datum _sortIndex
+      {
+         value = "11";
+         type = "int";
+      }
+   }
    element sysid
    {
       datum _sortIndex
       {
-         value = "16";
+         value = "17";
          type = "int";
       }
       datum sopceditor_expanded
@@ -334,7 +350,7 @@
    {
       datum _sortIndex
       {
-         value = "15";
+         value = "16";
          type = "int";
       }
       datum sopceditor_expanded
@@ -359,19 +375,19 @@
          type = "int";
       }
    }
-   element sram_0.uas
-   {
-      datum baseAddress
-      {
-         value = "0";
-         type = "String";
-      }
-   }
    element cfi_flash.uas
    {
       datum baseAddress
       {
          value = "134217728";
+         type = "String";
+      }
+   }
+   element sram_0.uas
+   {
+      datum baseAddress
+      {
+         value = "0";
          type = "String";
       }
    }
@@ -390,7 +406,7 @@
  <parameter name="projectName" value="ink-de2-115.qpf" />
  <parameter name="sopcBorderPoints" value="false" />
  <parameter name="systemHash" value="1" />
- <parameter name="timeStamp" value="1411654698218" />
+ <parameter name="timeStamp" value="1413285725960" />
  <parameter name="useTestBenchNamingPattern" value="false" />
  <instanceScript></instanceScript>
  <interface name="clk50" internal="clk50.clk_in" type="clock" dir="end" />
@@ -499,6 +515,11 @@
  <interface
    name="cfi_flash_out"
    internal="tri_state_bridge_flash_bridge_0.out"
+   type="conduit"
+   dir="end" />
+ <interface
+   name="status_pio"
+   internal="status_pio.external_connection"
    type="conduit"
    dir="end" />
  <module kind="clock_source" version="13.0" enabled="1" name="clk50">
@@ -767,7 +788,7 @@
   <parameter name="inputClockRate" value="50000000" />
  </module>
  <module kind="plkif" version="0.1" enabled="1" name="plkif_0">
-  <parameter name="gDemoCfg" value="cn-gpio" />
+  <parameter name="gDemoCfg" value="sn-gpio" />
   <parameter name="numOfCon" value="1" />
   <parameter name="conBufSize0" value="12" />
   <parameter name="conBufSize1" value="12" />
@@ -948,6 +969,24 @@
   <parameter name="INTERFACE_INFO"><![CDATA[<info><slave name="tcs"><master name="tri_state_bridge_flash_pinSharer_0.tcm"><pin role="" width="1" type="Invalid" output_name="" output_enable_name="" input_name="" /><pin role="cfi_flash_tcm_address_out" width="23" type="Output" output_name="cfi_flash_tcm_address_out" output_enable_name="" input_name="" /><pin role="cfi_flash_tcm_data_out" width="8" type="Bidirectional" output_name="cfi_flash_tcm_data_out" output_enable_name="cfi_flash_tcm_data_outen" input_name="cfi_flash_tcm_data_in" /><pin role="cfi_flash_tcm_chipselect_n_out" width="1" type="Output" output_name="cfi_flash_tcm_chipselect_n_out" output_enable_name="" input_name="" /><pin role="cfi_flash_tcm_read_n_out" width="1" type="Output" output_name="cfi_flash_tcm_read_n_out" output_enable_name="" input_name="" /><pin role="cfi_flash_tcm_write_n_out" width="1" type="Output" output_name="cfi_flash_tcm_write_n_out" output_enable_name="" input_name="" /></master></slave></info>]]></parameter>
   <parameter name="AUTO_CLK_CLOCK_RATE" value="50000000" />
   <parameter name="AUTO_DEVICE_FAMILY" value="Cyclone IV E" />
+ </module>
+ <module
+   kind="altera_avalon_pio"
+   version="13.0.1.99.2"
+   enabled="1"
+   name="status_pio">
+  <parameter name="bitClearingEdgeCapReg" value="false" />
+  <parameter name="bitModifyingOutReg" value="true" />
+  <parameter name="captureEdge" value="false" />
+  <parameter name="direction" value="Output" />
+  <parameter name="edgeType" value="RISING" />
+  <parameter name="generateIRQ" value="false" />
+  <parameter name="irqType" value="LEVEL" />
+  <parameter name="resetValue" value="0" />
+  <parameter name="simDoTestBenchWiring" value="false" />
+  <parameter name="simDrivenValue" value="0" />
+  <parameter name="width" value="2" />
+  <parameter name="clockRate" value="50000000" />
  </module>
  <connection kind="clock" version="13.0" start="clk50.clk" end="lcd.clk" />
  <connection
@@ -1497,6 +1536,31 @@
   <parameter name="baseAddress" value="0x08000000" />
   <parameter name="defaultConnection" value="false" />
  </connection>
+ <connection
+   kind="avalon"
+   version="13.0"
+   start="app_0.slow_bridge"
+   end="status_pio.s1">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x00800060" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection kind="clock" version="13.0" start="clk50.clk" end="status_pio.clk" />
+ <connection
+   kind="reset"
+   version="13.0"
+   start="clk100.clk_reset"
+   end="status_pio.reset" />
+ <connection
+   kind="reset"
+   version="13.0"
+   start="clk50.clk_reset"
+   end="status_pio.reset" />
+ <connection
+   kind="reset"
+   version="13.0"
+   start="clk25.clk_reset"
+   end="status_pio.reset" />
  <interconnectRequirement for="$system" name="qsys_mm.clockCrossingAdapter" value="HANDSHAKE" />
  <interconnectRequirement for="$system" name="qsys_mm.maxAdditionalLatency" value="1" />
 </system>

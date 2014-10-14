@@ -116,6 +116,7 @@ entity toplevel is
         -- LED
         LEDG                : out std_logic_vector(7 downto 0);
         LEDR                : out std_logic_vector(15 downto 0);
+        STATUS              : out std_logic_vector(1 downto 0);
         -- HEX LED
         HEX0                : out std_logic_vector(6 downto 0);
         HEX1                : out std_logic_vector(6 downto 0);
@@ -181,6 +182,7 @@ architecture rtl of toplevel is
             -- USE GPIOs
             hex_pio_export                          : out   std_logic_vector(31 downto 0);
             ledr_pio_export                         : out   std_logic_vector(15 downto 0);
+            status_pio_export                       : out   std_logic_vector(1 downto 0);
             key_pio_export                          : in    std_logic_vector(3 downto 0)  := (others => 'X');
             -- PCP SPI BRIDGE
             plkif_0_spi_bridge_0_clk                : in    std_logic                     := 'X';
@@ -300,6 +302,7 @@ begin
             -- USER GPIOs
             hex_pio_export                                  => hex,
             ledr_pio_export                                 => LEDR,
+            status_pio_export                               => STATUS,
             key_pio_export                                  => KEY,
             -- PCP SPI BRIDGE
             plkif_0_spi_bridge_0_clk                        => SPI_CLK,
