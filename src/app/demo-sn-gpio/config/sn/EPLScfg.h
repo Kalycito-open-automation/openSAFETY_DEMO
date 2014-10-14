@@ -40,7 +40,7 @@
  * Define to enable or disable the extended telegram error statistic.
  * Allowed values: EPLS_k_ENABLE, EPLS_k_DISABLE
  */
-#define EPLS_cfg_ERROR_STATISTIC  EPLS_k_ENABLE
+#define EPLS_cfg_ERROR_STATISTIC  EPLS_k_DISABLE
 
 /*  Define to enable or disable the Safety Configuration Manager, SNMT Master
     and SSDO.
