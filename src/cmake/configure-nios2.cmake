@@ -28,10 +28,14 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ################################################################################
 
-INCLUDE(ConnectCMakeAlteraTargets)
-INCLUDE(GenEclipseFileList)
-
 MESSAGE ( STATUS "Generating build files for platform Altera/Nios2 ..." )
+
+################################################################################
+# Handle target specific includes
+SET(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/../cmake/nios2" ${CMAKE_MODULE_PATH})
+
+INCLUDE(ConnectCMakeTargets)
+INCLUDE(GenEclipseFileList)
 
 ###############################################################################
 # User settings
