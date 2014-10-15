@@ -38,53 +38,53 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef _INC_config_tpdo_H_
 #define _INC_config_tpdo_H_
 
-//------------------------------------------------------------------------------
-// includes
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
+/* includes                                                                   */
+/*----------------------------------------------------------------------------*/
 
 #include <libpsicommon/global.h>
 
-//------------------------------------------------------------------------------
-// const defines
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
+/* const defines                                                              */
+/*----------------------------------------------------------------------------*/
 
-#define TPDO_NUM_OBJECTS    4       ///< Number of mapped TPDO objects
+#define TPDO_NUM_OBJECTS    4       /**< Number of mapped TPDO objects */
 
-//------------------------------------------------------------------------------
-// typedef
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
+/* typedef                                                                    */
+/*----------------------------------------------------------------------------*/
 /**
  * \brief List of all mappable objects
  */
 typedef struct {
-    UINT8          digitalOutput0;   ///< Digital output TPDO object 0
-    UINT8          digitalOutput1;   ///< Digital output TPDO object 1
-    UINT8          digitalOutput2;   ///< Digital output TPDO object 2
-    UINT8          digitalOutput3;   ///< Digital output TPDO object 3
+    UINT8          digitalOutput0;   /**< Digital output TPDO object 0 */
+    UINT8          digitalOutput1;   /**< Digital output TPDO object 1 */
+    UINT8          digitalOutput2;   /**< Digital output TPDO object 2 */
+    UINT8          digitalOutput3;   /**< Digital output TPDO object 3 */
 } tTpdoMappedObj;
 
-//------------------------------------------------------------------------------
-// offsetof defines
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
+/* offsetof defines                                                           */
+/*----------------------------------------------------------------------------*/
 #define TBUF_TPDO_DIGOUTPUT0_OFF     offsetof(tTpdoMappedObj, digitalOutput0)
 #define TBUF_TPDO_DIGOUTPUT1_OFF     offsetof(tTpdoMappedObj, digitalOutput1)
 #define TBUF_TPDO_DIGOUTPUT2_OFF     offsetof(tTpdoMappedObj, digitalOutput2)
 #define TBUF_TPDO_DIGOUTPUT3_OFF     offsetof(tTpdoMappedObj, digitalOutput3)
 
-//------------------------------------------------------------------------------
-// object linking parameters
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
+/* object linking parameters                                                  */
+/*----------------------------------------------------------------------------*/
 
-// Link between object and buffer address: objIdx | objSubIdx | addressOffset            | objSize
+/* Link between object and buffer address: objIdx | objSubIdx | addressOffset            | objSize */
 #define TPDO_LINKING_LIST_INIT_VECTOR   { {0x6000 , 0x01      , TBUF_TPDO_DIGOUTPUT0_OFF , 1       }, \
                                           {0x6000 , 0x02      , TBUF_TPDO_DIGOUTPUT1_OFF , 1       }, \
                                           {0x6000 , 0x03      , TBUF_TPDO_DIGOUTPUT2_OFF , 1       }, \
                                           {0x6000 , 0x04      , TBUF_TPDO_DIGOUTPUT3_OFF , 1       }  \
                                         }
 
-//------------------------------------------------------------------------------
-// function prototypes
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
+/* function prototypes                                                        */
+/*----------------------------------------------------------------------------*/
 
 #endif /* _INC_config_tpdo_H_ */
 

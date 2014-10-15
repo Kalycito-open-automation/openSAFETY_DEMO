@@ -38,35 +38,35 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef _INC_psicommon_ccobject_H_
 #define _INC_psicommon_ccobject_H_
 
-//------------------------------------------------------------------------------
-// includes
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
+/* includes                                                                   */
+/*----------------------------------------------------------------------------*/
 
 #include <libpsicommon/global.h>
 
 #include <config/ccobjectlist.h>
 
-//------------------------------------------------------------------------------
-// const defines
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
+/* const defines                                                              */
+/*----------------------------------------------------------------------------*/
 
 
-//------------------------------------------------------------------------------
-// typedef
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
+/* typedef                                                                    */
+/*----------------------------------------------------------------------------*/
 
 /**
  * \brief Object list write state type
  */
 typedef enum {
-    kCcWriteStateError        = 0x00,   ///< Error while writing to object list
-    kCcWriteStateSuccessful   = 0x01,   ///< Successfully written to object list
-    kCcWriteStateOutOfSync    = 0x02,   ///< Object list pointer out of sync
+    kCcWriteStateError        = 0x00,   /**< Error while writing to object list */
+    kCcWriteStateSuccessful   = 0x01,   /**< Successfully written to object list */
+    kCcWriteStateOutOfSync    = 0x02,   /**< Object list pointer out of sync */
 } tCcWriteState;
 
-//------------------------------------------------------------------------------
-// function prototypes
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
+/* function prototypes                                                        */
+/*----------------------------------------------------------------------------*/
 DLLEXPORT BOOL ccobject_init(tPsiCritSec pfnCritSec_p);
 DLLEXPORT void ccobject_exit(void);
 DLLEXPORT BOOL ccobject_initObject(UINT8 objId_p, tConfChanObject* pObjDef_p);
@@ -81,5 +81,3 @@ DLLEXPORT BOOL ccobject_getObjectSize(UINT16 objIdx_p, UINT8 objSubIdx_p,
         UINT8* pSize_p);
 
 #endif /* _INC_psicommon_ccobject_H_ */
-
-

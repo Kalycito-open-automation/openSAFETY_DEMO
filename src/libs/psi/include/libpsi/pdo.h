@@ -38,39 +38,39 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef _INC_libpsi_pdo_H_
 #define _INC_libpsi_pdo_H_
 
-//------------------------------------------------------------------------------
-// includes
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
+/* includes                                                                   */
+/*----------------------------------------------------------------------------*/
 
 #include <libpsi/apglobal.h>
 
 #include <libpsicommon/rpdo.h>
 #include <libpsicommon/tpdo.h>
 
-//------------------------------------------------------------------------------
-// const defines
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
+/* const defines                                                              */
+/*----------------------------------------------------------------------------*/
 
 
-//------------------------------------------------------------------------------
-// typedef
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
+/* typedef                                                                    */
+/*----------------------------------------------------------------------------*/
 
 typedef BOOL (* tPsiPdoCb) ( UINT32 rpdoRelTimeLow_p,
         tRpdoMappedObj* pRpdoImage_p,
-        tTpdoMappedObj* pTpdoImage_p );  ///< Pdo user callback function
+        tTpdoMappedObj* pTpdoImage_p );  /**< Pdo user callback function */
 
 /**
  * \brief  Pdo module initialization structure
  */
 typedef struct {
-    tTbufNumLayout     buffIdRpdo_m;      ///< Id of the rpdo buffer
-    tTbufNumLayout     buffIdTpdo_m;      ///< Id of the tpdo buffer
+    tTbufNumLayout     buffIdRpdo_m;      /**< Id of the rpdo buffer */
+    tTbufNumLayout     buffIdTpdo_m;      /**< Id of the tpdo buffer */
 } tPdoInitParam;
 
-//------------------------------------------------------------------------------
-// function prototypes
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
+/* function prototypes                                                        */
+/*----------------------------------------------------------------------------*/
 DLLEXPORT BOOL pdo_init(tPsiPdoCb pfnPdoCb_p, tPdoInitParam* pPdoInitParam_p);
 DLLEXPORT void pdo_exit(void);
 
@@ -78,9 +78,3 @@ DLLEXPORT tTpdoMappedObj * pdo_getTpdoImage(void);
 DLLEXPORT tRpdoMappedObj * pdo_getRpdoImage(void);
 
 #endif /* _INC_libpsi_pdo_H_ */
-
-
-
-
-
-

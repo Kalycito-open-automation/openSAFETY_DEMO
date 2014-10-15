@@ -44,68 +44,68 @@ sends/receives exemplary data from and to the PCP.
 * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
 
-//------------------------------------------------------------------------------
-// includes
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
+/* includes                                                                   */
+/*----------------------------------------------------------------------------*/
 
-#include <libpsi/psi.h>         // Header for the psi library
+#include <libpsi/psi.h>         /* Header for the psi library */
 
-#include <common/platform.h>      // Interface header to the platform specific functions
-#include <common/serial.h>        // Interface header to the platform specific serial device
-#include <common/syncir.h>        // Interface header to initialize the synchronous interrupt
+#include <common/platform.h>      /* Interface header to the platform specific functions */
+#include <common/serial.h>        /* Interface header to the platform specific serial device */
+#include <common/syncir.h>        /* Interface header to initialize the synchronous interrupt */
 
-#include <common/benchmark.h>     // Debug header for performance measurements
+#include <common/benchmark.h>     /* Debug header for performance measurements */
 #include <common/debug.h>
 #include <common/tbufparams.h>
 
-#include <cn/app-gpio.h>          // Interface header to the application of this demo
+#include <cn/app-gpio.h>          /* Interface header to the application of this demo */
 
 
-//============================================================================//
-//            G L O B A L   D E F I N I T I O N S                             //
-//============================================================================//
+/*============================================================================*/
+/*            G L O B A L   D E F I N I T I O N S                             */
+/*============================================================================*/
 
-//------------------------------------------------------------------------------
-// const defines
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
+/* const defines                                                              */
+/*----------------------------------------------------------------------------*/
 
-//------------------------------------------------------------------------------
-// module global vars
-//------------------------------------------------------------------------------
-
-
-//------------------------------------------------------------------------------
-// global function prototypes
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
+/* module global vars                                                         */
+/*----------------------------------------------------------------------------*/
 
 
-//============================================================================//
-//            P R I V A T E   D E F I N I T I O N S                           //
-//============================================================================//
+/*----------------------------------------------------------------------------*/
+/* global function prototypes                                                 */
+/*----------------------------------------------------------------------------*/
 
-//------------------------------------------------------------------------------
-// const defines
-//------------------------------------------------------------------------------
 
-//------------------------------------------------------------------------------
-// local types
-//------------------------------------------------------------------------------
+/*============================================================================*/
+/*            P R I V A T E   D E F I N I T I O N S                           */
+/*============================================================================*/
+
+/*----------------------------------------------------------------------------*/
+/* const defines                                                              */
+/*----------------------------------------------------------------------------*/
+
+/*----------------------------------------------------------------------------*/
+/* local types                                                                */
+/*----------------------------------------------------------------------------*/
 
 typedef struct {
-    volatile UINT8 tbufMemLayout_m[TBUF_IMAGE_SIZE];    ///< Local copy of the triple buffer memory
-    UINT8 fShutdown_m;                                  ///< Indicates CN shutdown
-    UINT8 fCcWriteObjTestEnable_m;                      ///< Enable periodic writing of a cc object
+    volatile UINT8 tbufMemLayout_m[TBUF_IMAGE_SIZE];    /**< Local copy of the triple buffer memory */
+    UINT8 fShutdown_m;                                  /**< Indicates CN shutdown */
+    UINT8 fCcWriteObjTestEnable_m;                      /**< Enable periodic writing of a cc object */
 } tMainInstance;
 
-//------------------------------------------------------------------------------
-// local vars
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
+/* local vars                                                                 */
+/*----------------------------------------------------------------------------*/
 
-static tMainInstance mainInstance_l;            ///< Instance of main module
+static tMainInstance mainInstance_l;            /**< Instance of main module */
 
-//------------------------------------------------------------------------------
-// local function prototypes
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
+/* local function prototypes                                                  */
+/*----------------------------------------------------------------------------*/
 static BOOL psi_initModules(void);
 static void psi_exitModules(void);
 static BOOL psi_appCbSync(tPsiTimeStamp* pTimeStamp_p );
@@ -121,11 +121,11 @@ static void psi_ccWriteObject(void);
 static void psi_ccReadObject(void);
 #endif
 
-//============================================================================//
-//            P U B L I C   F U N C T I O N S                                 //
-//============================================================================//
+/*============================================================================*/
+/*            P U B L I C   F U N C T I O N S                                 */
+/*============================================================================*/
 
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
 /**
 \brief    Entry function of CN API example
 
@@ -138,7 +138,7 @@ APs state machine will be updated and input/output ports will be processed.
 
 \ingroup module_main
 */
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
 int main (void)
 {
     tPsiInitParam     initParam;
@@ -149,20 +149,20 @@ int main (void)
     PSI_MEMSET(&buffDescList, 0, sizeof(buffDescList));
     PSI_MEMSET(&transferParam, 0, sizeof(tHandlerParam));
 
-    // Init the target platform
+    /* Init the target platform */
     platform_init();
 
-    // Generate buffer descriptor list
+    /* Generate buffer descriptor list */
     if(tbufp_genDescList((UINT8 *)&mainInstance_l.tbufMemLayout_m[0], kTbufCount, &buffDescList[0]))
     {
         DEBUG_TRACE(DEBUG_LVL_ERROR," ERROR: Unable to generate tbuf descriptor list!\n");
         goto Exit;
     }
 
-    // Enable test of configuration channel
+    /* Enable test of configuration channel */
     mainInstance_l.fCcWriteObjTestEnable_m = TRUE;
 
-    // initialize and start the slim interface internals
+    /* initialize and start the slim interface internals */
     DEBUG_TRACE(DEBUG_LVL_ALWAYS,"\n\nInitialize slim interface internals...\n");
 
     initParam.pBuffDescList_m = &buffDescList[0];
@@ -170,7 +170,7 @@ int main (void)
     initParam.pfnErrorHandler_m = psi_errorHandler;
     initParam.idConsAck_m = kTbufAckRegisterCons;
     initParam.idProdAck_m = kTbufAckRegisterProd;
-    initParam.idFirstProdBuffer_m = TBUF_NUM_CON + 1;   // Add one buffer for the consumer ACK register
+    initParam.idFirstProdBuffer_m = TBUF_NUM_CON + 1;   /* Add one buffer for the consumer ACK register */
 
     if(psi_init(&initParam) == FALSE)
     {
@@ -179,7 +179,7 @@ int main (void)
     }
     DEBUG_TRACE(DEBUG_LVL_ALWAYS," ... ok!\n");
 
-    // initialize and start the slim interface modules
+    /* initialize and start the slim interface modules */
     DEBUG_TRACE(DEBUG_LVL_ALWAYS,"\n\nInitialize slim interface modules...\n");
     if(psi_initModules() == FALSE)
     {
@@ -205,7 +205,7 @@ int main (void)
     DEBUG_TRACE(DEBUG_LVL_ALWAYS,"... ok!\n");
 
 
-    /* initialize PCP interrupt handler*/
+    /* initialize PCP interrupt handler */
     DEBUG_TRACE(DEBUG_LVL_ALWAYS,"\n\nInitialize synchronous interrupt...\n");
     if(syncir_init(psi_syncIntH) == FALSE)
     {
@@ -229,7 +229,7 @@ int main (void)
         }
 
 #if(((PSI_MODULE_INTEGRATION) & (PSI_MODULE_CC)) != 0)
-        // Transmit async dummy frame for testing
+        /* Transmit async dummy frame for testing */
         if(mainInstance_l.fCcWriteObjTestEnable_m != FALSE)
         {
             psi_ccWriteObject();
@@ -254,14 +254,13 @@ Exit:
     return 0;
 }
 
-//============================================================================//
-//            P R I V A T E   F U N C T I O N S                               //
-//============================================================================//
-/// \name Private Functions
-/// \{
+/*============================================================================*/
+/*            P R I V A T E   F U N C T I O N S                               */
+/*============================================================================*/
+/* \name Private Functions */
+/* \{ */
 
-
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
 /**
 \brief    Initialize slim interface modules
 
@@ -271,7 +270,7 @@ Exit:
 
 \ingroup module_main
 */
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
 static BOOL psi_initModules(void)
 {
     BOOL fReturn = FALSE;
@@ -283,7 +282,7 @@ static BOOL psi_initModules(void)
     tCcInitParam       ccInitParam;
 #endif
 
-    // Initialize the status module
+    /* Initialize the status module */
     statusInitParam.pfnAppCbSync_m = psi_appCbSync;
     statusInitParam.buffOutId_m = kTbufNumStatusOut;
     statusInitParam.buffInId_m = kTbufNumStatusIn;
@@ -295,7 +294,7 @@ static BOOL psi_initModules(void)
     }
 
 #if(((PSI_MODULE_INTEGRATION) & (PSI_MODULE_PDO)) != 0)
-    // Initialize the pdo module
+    /* Initialize the pdo module */
     pdoInitParam.buffIdRpdo_m = kTbufNumRpdoImage;
     pdoInitParam.buffIdTpdo_m = kTbufNumTpdoImage;
 
@@ -307,7 +306,7 @@ static BOOL psi_initModules(void)
 #endif
 
 #if(((PSI_MODULE_INTEGRATION) & (PSI_MODULE_CC)) != 0)
-    // Initialize configuration channel (CC)
+    /* Initialize configuration channel (CC) */
     ccInitParam.iccId_m = kTbufNumInputConfChan;
     ccInitParam.occId_m = kTbufNumOutputConfChan;
     ccInitParam.pfnCritSec_p = syncir_enterCriticalSection;
@@ -319,23 +318,23 @@ static BOOL psi_initModules(void)
     }
 #endif
 
-    // All module successfully initialized! -> Set return to success!
+    /* All module successfully initialized! -> Set return to success! */
     fReturn = TRUE;
 
 Exit:
     return fReturn;
 }
 
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
 /**
 \brief    Destroy slim interface modules
 
 \ingroup module_main
 */
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
 static void psi_exitModules(void)
 {
-    // Destroy all library modules
+    /* Destroy all library modules */
     status_exit();
 
 #if(((PSI_MODULE_INTEGRATION) & (PSI_MODULE_PDO)) != 0)
@@ -348,7 +347,7 @@ static void psi_exitModules(void)
 
 }
 
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
 /**
 \brief    Application synchronization to the POWERLINK cycle
 
@@ -358,18 +357,18 @@ static void psi_exitModules(void)
 
 \ingroup module_main
 */
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
 static BOOL psi_appCbSync(tPsiTimeStamp* pTimeStamp_p )
 {
     UNUSED_PARAMETER(pTimeStamp_p);
 
-    // Note: This is your place to do local synchronization. Synchronize
-    //       your local clock here by using the provided timestamp.
+    /* Note: This is your place to do local synchronization. Synchronize */
+    /*       your local clock here by using the provided timestamp. */
 
     return TRUE;
 }
 
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
 /**
 \brief    Process synchronous data
 
@@ -381,7 +380,7 @@ static BOOL psi_appCbSync(tPsiTimeStamp* pTimeStamp_p )
 
 \ingroup module_main
 */
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
 static BOOL psi_workInputOutput(UINT32 rpdoRelTimeLow_p,
         tRpdoMappedObj* pRpdoImage_p,
         tTpdoMappedObj* pTpdoImage_p )
@@ -392,7 +391,7 @@ static BOOL psi_workInputOutput(UINT32 rpdoRelTimeLow_p,
 
     UNUSED_PARAMETER(rpdoRelTimeLow_p);
 
-    // Digital IN: read push- and joystick buttons
+    /* Digital IN: read push- and joystick buttons */
     inPort = app_readInputPort();
 
 
@@ -401,21 +400,21 @@ static BOOL psi_workInputOutput(UINT32 rpdoRelTimeLow_p,
     pTpdoImage_p->digitalOutput2 = inPort;
     pTpdoImage_p->digitalOutput3 = inPort;
 
-    // Digital OUT: set Leds and hex digits
+    /* Digital OUT: set Leds and hex digits */
     for (i = 0; i < 3; i++)
     {
-        if (i == 0) //first 8 bit of DigOut
+        if (i == 0) /* first 8 bit of DigOut */
         {
-            // configured as output -> overwrite invalid input values with RPDO mapped variables
+            /* configured as output -> overwrite invalid input values with RPDO mapped variables */
             outPort = (outPort & ~(0xff << (i * 8))) | (pRpdoImage_p->digitalInput0 << (i * 8));
         }
-        else if (i == 1) //second 8 bit of DigOut
+        else if (i == 1) /* second 8 bit of DigOut */
         {
             outPort = (outPort & ~(0xff << (i * 8))) | (pRpdoImage_p->digitalInput1 << (i * 8));
         }
-        else if (i == 2)  //third 8 bit of DigOut
+        else if (i == 2)  /* third 8 bit of DigOut */
         {
-            // configured as input -> store in TPDO mapped variable
+            /* configured as input -> store in TPDO mapped variable */
             outPort = (outPort & ~(0xff << (i * 8))) | (pRpdoImage_p->digitalInput3 << (i * 8));
         }
     }
@@ -425,7 +424,7 @@ static BOOL psi_workInputOutput(UINT32 rpdoRelTimeLow_p,
     return TRUE;
 }
 
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
 /**
 \brief    Synchronous interrupt handler
 
@@ -436,7 +435,7 @@ static BOOL psi_workInputOutput(UINT32 rpdoRelTimeLow_p,
 
 \ingroup module_main
 */
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
 #if defined(__NIOS2__) && !defined(ALT_ENHANCED_INTERRUPT_API_PRESENT)
 static void psi_syncIntH(void* pArg_p, void* dwInt_p)
 #else
@@ -447,7 +446,7 @@ static void psi_syncIntH(void* pArg_p)
 
     BENCHMARK_MOD_01_SET(0);
 
-    // Call internal synchronous process function
+    /* Call internal synchronous process function */
     if(psi_processSync() == FALSE)
     {
         DEBUG_TRACE(DEBUG_LVL_ERROR,"ERROR: Unable to process sync task!\n");
@@ -460,7 +459,7 @@ static void psi_syncIntH(void* pArg_p)
 
 }
 
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
 /**
 \brief    Error handler callback function
 
@@ -468,32 +467,32 @@ static void psi_syncIntH(void* pArg_p)
 
 \ingroup module_main
 */
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
 static void psi_errorHandler(tPsiErrorInfo* pErrorInfo_p)
 {
 #ifdef NDEBUG
     UNUSED_PARAMETER(pErrorInfo_p);
 #else
-    // Print error message
+    /* Print error message */
     DEBUG_TRACE(DEBUG_LVL_ERROR,"ERROR: Module origin: 0x%0x, Error Code: 0x%0x\n",
                     pErrorInfo_p->srcModule_m,
                     pErrorInfo_p->errCode_m);
-#endif // #ifdef NDEBUG
+#endif /* #ifdef NDEBUG */
 }
 
 #if(((PSI_MODULE_INTEGRATION) & (PSI_MODULE_CC)) != 0)
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
 /**
 \brief    Write an object of the configuration channel
 
 
 \ingroup module_main
 */
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
 static void psi_ccWriteObject(void)
 {
     tCcWriteStatus retCc = kCcWriteStatusError;
-    // Create test object
+    /* Create test object */
     static tConfChanObject  object = { 0x2000, 0x1, 2, 0, 0};
 
     retCc = cc_writeObject(&object);
@@ -515,17 +514,17 @@ static void psi_ccWriteObject(void)
     }
 }
 
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
 /**
 \brief    Read an object from the configuration channel
 
 
 \ingroup module_main
 */
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
 static void psi_ccReadObject(void)
 {
-    // Create pointer to target object
+    /* Create pointer to target object */
     static tConfChanObject*  pObject;
     static UINT16 objIdx = 0x2000;
     static UINT8 objSubIdx = 0x1;
@@ -537,10 +536,10 @@ static void psi_ccReadObject(void)
     }
     else
     {
-//        DEBUG_TRACE(DEBUG_LVL_ALWAYS,"INFO: Idx: 0x%x Sub: 0x%x Data: %d \n",
-//                pObject->objIdx_m,
-//                pObject->objSubIdx_m,
-//                pObject->objPayloadLow_m);
+/*        DEBUG_TRACE(DEBUG_LVL_ALWAYS,"INFO: Idx: 0x%x Sub: 0x%x Data: %d \n",
+                  pObject->objIdx_m,
+                  pObject->objSubIdx_m,
+                  pObject->objPayloadLow_m); */
 
         objSubIdx++;
         if(objSubIdx > 4)
@@ -552,4 +551,4 @@ static void psi_ccReadObject(void)
 
 #endif
 
-/// \}
+/* \} */

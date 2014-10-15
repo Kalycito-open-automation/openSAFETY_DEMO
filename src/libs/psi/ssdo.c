@@ -44,9 +44,9 @@ It forwards the received data to the application.
 * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
 
-//------------------------------------------------------------------------------
-// includes
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
+/* includes                                                                   */
+/*----------------------------------------------------------------------------*/
 
 #include <libpsi/internal/ssdoinst.h>
 #include <libpsi/internal/ssdo.h>
@@ -56,54 +56,54 @@ It forwards the received data to the application.
 
 #if(((PSI_MODULE_INTEGRATION) & (PSI_MODULE_SSDO)) != 0)
 
-//============================================================================//
-//            G L O B A L   D E F I N I T I O N S                             //
-//============================================================================//
+/*============================================================================*/
+/*            G L O B A L   D E F I N I T I O N S                             */
+/*============================================================================*/
 
-//------------------------------------------------------------------------------
-// const defines
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
+/* const defines                                                              */
+/*----------------------------------------------------------------------------*/
 
-//------------------------------------------------------------------------------
-// module global vars
-//------------------------------------------------------------------------------
-
-
-//------------------------------------------------------------------------------
-// global function prototypes
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
+/* module global vars                                                         */
+/*----------------------------------------------------------------------------*/
 
 
-//============================================================================//
-//            P R I V A T E   D E F I N I T I O N S                           //
-//============================================================================//
+/*----------------------------------------------------------------------------*/
+/* global function prototypes                                                 */
+/*----------------------------------------------------------------------------*/
 
-//------------------------------------------------------------------------------
-// const defines
-//------------------------------------------------------------------------------
 
-//------------------------------------------------------------------------------
-// local types
-//------------------------------------------------------------------------------
+/*============================================================================*/
+/*            P R I V A T E   D E F I N I T I O N S                           */
+/*============================================================================*/
+
+/*----------------------------------------------------------------------------*/
+/* const defines                                                              */
+/*----------------------------------------------------------------------------*/
+
+/*----------------------------------------------------------------------------*/
+/* local types                                                                */
+/*----------------------------------------------------------------------------*/
 
 /**
  * \brief Status of the SSDO channel
  */
 typedef enum {
-    kChanStatusInvalid   = 0x00,    ///< Invalid channel status
-    kChanStatusBusy      = 0x01,    ///< Channel is currently busy
-    kChanStatusFree      = 0x02,    ///< Channel is free for transmission
+    kChanStatusInvalid   = 0x00,    /**< Invalid channel status */
+    kChanStatusBusy      = 0x01,    /**< Channel is currently busy */
+    kChanStatusFree      = 0x02,    /**< Channel is free for transmission */
 } tSsdoChanStatus;
 
-//------------------------------------------------------------------------------
-// local vars
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
+/* local vars                                                                 */
+/*----------------------------------------------------------------------------*/
 
 static struct eSsdoInstance          ssdoInstance_l[kNumSsdoInstCount];
 
-//------------------------------------------------------------------------------
-// local function prototypes
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
+/* local function prototypes                                                  */
+/*----------------------------------------------------------------------------*/
 static BOOL ssdo_initReceiveBuffer(tSsdoChanNum chanId_p,
         tTbufNumLayout rxBuffId_p);
 static BOOL ssdo_initTransmitBuffer(tSsdoChanNum chanId_p,
@@ -116,24 +116,24 @@ static BOOL ssdo_receiveFrame(UINT8* pBuffer_p, UINT16 bufSize_p,
 static void ssdo_changeLocalSeqNr(tSeqNrValue* pSeqNr_p);
 static tSsdoChanStatus ssdo_checkChannelStatus(tSsdoInstance pInstance_p);
 
-//============================================================================//
-//            P U B L I C   F U N C T I O N S                                 //
-//============================================================================//
+/*============================================================================*/
+/*            P U B L I C   F U N C T I O N S                                 */
+/*============================================================================*/
 
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
 /**
 \brief    Initialize the SSDO channel module
 
 \ingroup module_ssdo
 */
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
 void ssdo_init(void)
 {
     PSI_MEMSET(&ssdoInstance_l, 0 , sizeof(struct eSsdoInstance) * kNumSsdoInstCount);
 }
 
 
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
 /**
 \brief    Create a SSDO channel instance
 
@@ -149,7 +149,7 @@ functionality for the upper and lower layers.
 
 \ingroup module_ssdo
 */
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
 tSsdoInstance ssdo_create(tSsdoChanNum chanId_p, tSsdoInitParam* pInitParam_p)
 {
     tSsdoInstance pInstance = NULL;
@@ -169,25 +169,25 @@ tSsdoInstance ssdo_create(tSsdoChanNum chanId_p, tSsdoInitParam* pInitParam_p)
         }
         else
         {
-            // Get SSDO buffer parameters from stream module
+            /* Get SSDO buffer parameters from stream module */
             if(ssdo_initReceiveBuffer(chanId_p, pInitParam_p->buffIdRx_m) != FALSE)
             {
                 if(ssdo_initTransmitBuffer(chanId_p, pInitParam_p->buffIdTx_m) != FALSE)
                 {
-                    // Save channel Id
+                    /* Save channel Id */
                     ssdoInstance_l[chanId_p].chanId_m = chanId_p;
 
-                    // Save id of producing and consuming buffers
+                    /* Save id of producing and consuming buffers */
                     ssdoInstance_l[chanId_p].txBuffParam_m.idTxBuff_m = pInitParam_p->buffIdTx_m;
                     ssdoInstance_l[chanId_p].rxBuffParam_m.idRxBuff_m = pInitParam_p->buffIdRx_m;
 
-                    // Set sequence number init value
+                    /* Set sequence number init value */
                     ssdoInstance_l[chanId_p].txBuffParam_m.currTxSeqNr_m = kSeqNrValueSecond;
 
-                    // Register receive handler
+                    /* Register receive handler */
                     ssdoInstance_l[chanId_p].rxBuffParam_m.pfnRxHandler_m = pInitParam_p->pfnRxHandler_m;
 
-                    // Set valid instance id
+                    /* Set valid instance id */
                     pInstance = &ssdoInstance_l[chanId_p];
                 }
             }
@@ -197,7 +197,7 @@ tSsdoInstance ssdo_create(tSsdoChanNum chanId_p, tSsdoInitParam* pInitParam_p)
     return pInstance;
 }
 
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
 /**
 \brief    Destroy an SSDO channel
 
@@ -205,7 +205,7 @@ tSsdoInstance ssdo_create(tSsdoChanNum chanId_p, tSsdoInitParam* pInitParam_p)
 
 \ingroup module_ssdo
 */
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
 void ssdo_destroy(tSsdoInstance pInstance_p)
 {
     if(pInstance_p != NULL)
@@ -216,7 +216,7 @@ void ssdo_destroy(tSsdoInstance pInstance_p)
     }
 }
 
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
 /**
 \brief    Returns the address of the current active transmit buffers
 
@@ -230,7 +230,7 @@ void ssdo_destroy(tSsdoInstance pInstance_p)
 
 \ingroup module_ssdo
 */
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
 BOOL ssdo_getCurrentTxBuffer(tSsdoInstance pInstance_p, UINT8 ** ppPayload_p, UINT16 * pPaylLen_p)
 {
     BOOL fReturn = FALSE;
@@ -248,7 +248,7 @@ BOOL ssdo_getCurrentTxBuffer(tSsdoInstance pInstance_p, UINT8 ** ppPayload_p, UI
     return fReturn;
 }
 
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
 /**
 \brief    Post a frame for transmission over the SSDO channel
 
@@ -263,7 +263,7 @@ BOOL ssdo_getCurrentTxBuffer(tSsdoInstance pInstance_p, UINT8 ** ppPayload_p, UI
 
 \ingroup module_ssdo
 */
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
 tSsdoTxStatus ssdo_postPayload(tSsdoInstance pInstance_p, UINT8* pPayload_p,
         UINT16 paylSize_p)
 {
@@ -276,7 +276,7 @@ tSsdoTxStatus ssdo_postPayload(tSsdoInstance pInstance_p, UINT8* pPayload_p,
     }
     else
     {
-        // Check if payload fits inside the buffer
+        /* Check if payload fits inside the buffer */
         if(paylSize_p > sizeof(pInstance_p->txBuffParam_m.ssdoTxBuffer_m.pSsdoTxPayl_m->tssdoTransmitData_m) ||
            paylSize_p == 0                             )
         {
@@ -284,23 +284,23 @@ tSsdoTxStatus ssdo_postPayload(tSsdoInstance pInstance_p, UINT8* pPayload_p,
         }
         else
         {
-            // Check if buffer is free for filling
+            /* Check if buffer is free for filling */
             if(pInstance_p->txBuffParam_m.ssdoTxBuffer_m.isLocked_m == FALSE)
             {
-                // Set transmit size
+                /* Set transmit size */
                 ami_setUint16Le((UINT8*)&pInstance_p->txBuffParam_m.ssdoTxBuffer_m.pSsdoTxPayl_m->paylSize_m, paylSize_p);
 
-                // Set sequence number in next tx buffer
+                /* Set sequence number in next tx buffer */
                 ami_setUint8Le((UINT8*)&pInstance_p->txBuffParam_m.ssdoTxBuffer_m.pSsdoTxPayl_m->seqNr_m,
                         pInstance_p->txBuffParam_m.currTxSeqNr_m);
 
-                // Lock buffer for transmission
+                /* Lock buffer for transmission */
                 pInstance_p->txBuffParam_m.ssdoTxBuffer_m.isLocked_m = TRUE;
 
-                // Enable transmit timer
+                /* Enable transmit timer */
                 timeout_startTimer(pInstance_p->txBuffParam_m.pTimeoutInst_m);
 
-                // Acknowledge producing transmit buffer
+                /* Acknowledge producing transmit buffer */
                 stream_ackBuffer(pInstance_p->txBuffParam_m.idTxBuff_m);
 
                 chanState = kSsdoTxStatusSuccessful;
@@ -315,7 +315,7 @@ tSsdoTxStatus ssdo_postPayload(tSsdoInstance pInstance_p, UINT8* pPayload_p,
     return chanState;
 }
 
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
 /**
 \brief    Process the SSDO module
 
@@ -327,15 +327,15 @@ tSsdoTxStatus ssdo_postPayload(tSsdoInstance pInstance_p, UINT8* pPayload_p,
 
 \ingroup module_ssdo
 */
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
 BOOL ssdo_process(tSsdoInstance pInstance_p)
 {
     BOOL fReturn = FALSE;
 
-    // Process incoming frames
+    /* Process incoming frames */
     if(ssdo_handleRxFrame(pInstance_p) != FALSE)
     {
-        // Process transmit frames
+        /* Process transmit frames */
         ssdo_handleTxFrame(pInstance_p);
 
         fReturn = TRUE;
@@ -344,7 +344,7 @@ BOOL ssdo_process(tSsdoInstance pInstance_p)
     return fReturn;
 }
 
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
 /**
 \brief    This function finishes a receive message and frees the channel
 
@@ -352,19 +352,19 @@ BOOL ssdo_process(tSsdoInstance pInstance_p)
 
 \ingroup module_ssdo
 */
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
 void ssdo_receiveMsgFinished(tSsdoInstance pInstance_p)
 {
     ssdo_freeRxChannel(pInstance_p);
 }
 
-//============================================================================//
-//            P R I V A T E   F U N C T I O N S                               //
-//============================================================================//
-/// \name Private Functions
-/// \{
+/*============================================================================*/
+/*            P R I V A T E   F U N C T I O N S                               */
+/*============================================================================*/
+/* \name Private Functions */
+/* \{ */
 
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
 /**
 \brief    Initialize the SSDO receive buffer
 
@@ -377,7 +377,7 @@ void ssdo_receiveMsgFinished(tSsdoInstance pInstance_p)
 
 \ingroup module_ssdo
 */
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
 static BOOL ssdo_initReceiveBuffer(tSsdoChanNum chanId_p,
         tTbufNumLayout rxBuffId_p)
 {
@@ -389,11 +389,11 @@ static BOOL ssdo_initReceiveBuffer(tSsdoChanNum chanId_p,
     {
         if(pDescSsdoRcv->buffSize_m == sizeof(tTbufSsdoRxStructure))
         {
-            // Remember buffer address for later usage
+            /* Remember buffer address for later usage */
             ssdoInstance_l[chanId_p].rxBuffParam_m.pSsdoRxBuffer_m =
                     (tTbufSsdoRxStructure *)pDescSsdoRcv->pBuffBase_m;
 
-            // Register frame receive post action
+            /* Register frame receive post action */
             if(stream_registerAction(kStreamActionPost, rxBuffId_p,
                     ssdo_receiveFrame, (void *)&ssdoInstance_l[chanId_p]) != FALSE)
             {
@@ -413,7 +413,7 @@ static BOOL ssdo_initReceiveBuffer(tSsdoChanNum chanId_p,
     return fReturn;
 }
 
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
 /**
 \brief    Initialize the SSDO transmit buffer
 
@@ -426,7 +426,7 @@ static BOOL ssdo_initReceiveBuffer(tSsdoChanNum chanId_p,
 
 \ingroup module_ssdo
 */
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
 static BOOL ssdo_initTransmitBuffer(tSsdoChanNum chanId_p,
         tTbufNumLayout txBuffId_p)
 {
@@ -438,11 +438,11 @@ static BOOL ssdo_initTransmitBuffer(tSsdoChanNum chanId_p,
     {
         if(pDescSsdoTrans->buffSize_m == sizeof(tTbufSsdoTxStructure))
         {
-            // Remember buffer address for later usage
+            /* Remember buffer address for later usage */
             ssdoInstance_l[chanId_p].txBuffParam_m.ssdoTxBuffer_m.pSsdoTxPayl_m =
                     (tTbufSsdoTxStructure *)pDescSsdoTrans->pBuffBase_m;
 
-            // Initialize SSDO transmit timeout instance
+            /* Initialize SSDO transmit timeout instance */
             ssdoInstance_l[chanId_p].txBuffParam_m.pTimeoutInst_m = timeout_create(
                     SSDO_TX_TIMEOUT_CYCLE_COUNT);
             if(ssdoInstance_l[chanId_p].txBuffParam_m.pTimeoutInst_m != NULL)
@@ -467,7 +467,7 @@ static BOOL ssdo_initTransmitBuffer(tSsdoChanNum chanId_p,
     return fReturn;
 }
 
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
 /**
 \brief    Process SSDO receive frames
 
@@ -479,7 +479,7 @@ static BOOL ssdo_initTransmitBuffer(tSsdoChanNum chanId_p,
 
 \ingroup module_ssdo
 */
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
 static BOOL ssdo_handleRxFrame(tSsdoInstance pInstance_p)
 {
     BOOL fReturn = FALSE;
@@ -488,34 +488,34 @@ static BOOL ssdo_handleRxFrame(tSsdoInstance pInstance_p)
 
     if(pInstance_p->rxBuffParam_m.fRxFrameIncoming_m != FALSE)
     {
-        // Frame incoming -> forward to the user
+        /* Frame incoming -> forward to the user */
         pRxBuffer = &pInstance_p->rxBuffParam_m.pSsdoRxBuffer_m->ssdoStubDataDom_m[0];
         rxBuffSize = ami_getUint16Le((UINT8 *)&pInstance_p->rxBuffParam_m.pSsdoRxBuffer_m->paylSize_m);
 
-        // Call SSDO user handler
+        /* Call SSDO user handler */
         if(pInstance_p->rxBuffParam_m.pfnRxHandler_m(pRxBuffer, rxBuffSize))
         {
-            // Return true but don't free the channel! Frame will be retried later
+            /* Return true but don't free the channel! Frame will be retried later */
             fReturn = TRUE;
         }
         else
         {
             error_setError(kPsiModuleSsdo, kPsiSsdoProcessingFailed);
 
-            // Error occurred -> Free channel anyway!
+            /* Error occurred -> Free channel anyway! */
             ssdo_freeRxChannel(pInstance_p);
         }
     }
     else
     {
-        // Nothing to process -> Success anyway!
+        /* Nothing to process -> Success anyway! */
         fReturn = TRUE;
     }
 
     return fReturn;
 }
 
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
 /**
 \brief    Free the receive channel to enable transmission of the next frame
 
@@ -523,17 +523,17 @@ static BOOL ssdo_handleRxFrame(tSsdoInstance pInstance_p)
 
 \ingroup module_ssdo
 */
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
 static void ssdo_freeRxChannel(tSsdoInstance pInstance_p)
 {
-    // Access finished -> Unblock channel by writing current sequence number to status field!
+    /* Access finished -> Unblock channel by writing current sequence number to status field! */
     status_setSsdoRxChanFlag(pInstance_p->chanId_m,
             pInstance_p->rxBuffParam_m.currRxSeqNr_m);
 
     pInstance_p->rxBuffParam_m.fRxFrameIncoming_m = FALSE;
 }
 
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
 /**
 \brief    Process SSDO transmit frames
 
@@ -541,7 +541,7 @@ static void ssdo_freeRxChannel(tSsdoInstance pInstance_p)
 
 \ingroup module_ssdo
 */
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
 static void ssdo_handleTxFrame(tSsdoInstance pInstance_p)
 {
     tSsdoChanStatus  txChanState;
@@ -549,36 +549,36 @@ static void ssdo_handleTxFrame(tSsdoInstance pInstance_p)
 
     if(pInstance_p->txBuffParam_m.ssdoTxBuffer_m.isLocked_m != FALSE)
     {
-        // Check if channel is ready for transmission
+        /* Check if channel is ready for transmission */
         txChanState = ssdo_checkChannelStatus(pInstance_p);
         if(txChanState == kChanStatusFree)
         {
-            // Ongoing message is acknowledged
+            /* Ongoing message is acknowledged */
             pInstance_p->txBuffParam_m.ssdoTxBuffer_m.isLocked_m = FALSE;
 
-            // Increment local sequence number
+            /* Increment local sequence number */
             ssdo_changeLocalSeqNr(&pInstance_p->txBuffParam_m.currTxSeqNr_m);
 
-            // Message was acknowledged -> Stop timer if running!
+            /* Message was acknowledged -> Stop timer if running! */
             timeout_stopTimer(pInstance_p->txBuffParam_m.pTimeoutInst_m);
         }
         else
         {
-            // Check if timeout counter is expired
+            /* Check if timeout counter is expired */
             timerState = timeout_checkExpire(pInstance_p->txBuffParam_m.pTimeoutInst_m);
             if(timerState == kTimerStateExpired)
             {
-                // Timeout occurred -> Increment local sequence number!
+                /* Timeout occurred -> Increment local sequence number! */
                 ssdo_changeLocalSeqNr(&pInstance_p->txBuffParam_m.currTxSeqNr_m);
 
-                // Unlock channel anyway!
+                /* Unlock channel anyway! */
                 pInstance_p->txBuffParam_m.ssdoTxBuffer_m.isLocked_m = FALSE;
             }
         }
     }
 }
 
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
 /**
 \brief    Check for incoming frame from SSDO channel
 
@@ -591,7 +591,7 @@ static void ssdo_handleTxFrame(tSsdoInstance pInstance_p)
 
 \ingroup module_ssdo
 */
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
 static BOOL ssdo_receiveFrame(UINT8* pBuffer_p, UINT16 bufSize_p,
         void* pUserArg_p)
 {
@@ -601,31 +601,31 @@ static BOOL ssdo_receiveFrame(UINT8* pBuffer_p, UINT16 bufSize_p,
 
     UNUSED_PARAMETER(bufSize_p);
 
-    // Get pointer to current instance
+    /* Get pointer to current instance */
     pInstance = (tSsdoInstance) pUserArg_p;
 
-    // Increment transmit timer cycle count
+    /* Increment transmit timer cycle count */
     timeout_incrementCounter(pInstance->txBuffParam_m.pTimeoutInst_m);
 
-    // Convert to status buffer structure
+    /* Convert to status buffer structure */
     pSsdoRxBuff = (tTbufSsdoRxStructure*) pBuffer_p;
 
-    // Acknowledge buffer before access
+    /* Acknowledge buffer before access */
     stream_ackBuffer(pInstance->rxBuffParam_m.idRxBuff_m);
 
     currSeqNr = (tSeqNrValue)ami_getUint8Le((UINT8 *)&pSsdoRxBuff->seqNr_m);
 
-    // Check sequence number sanity
+    /* Check sequence number sanity */
     if(currSeqNr == kSeqNrValueFirst ||
        currSeqNr == kSeqNrValueSecond  )
     {
-        // Check sequence number against local copy
+        /* Check sequence number against local copy */
         if(currSeqNr != pInstance->rxBuffParam_m.currRxSeqNr_m)
         {
-            // Sequence number changed -> Frame available
+            /* Sequence number changed -> Frame available */
             pInstance->rxBuffParam_m.fRxFrameIncoming_m = TRUE;
 
-            // Increment local receive sequence number
+            /* Increment local receive sequence number */
             pInstance->rxBuffParam_m.currRxSeqNr_m = currSeqNr;
         }
     }
@@ -633,7 +633,7 @@ static BOOL ssdo_receiveFrame(UINT8* pBuffer_p, UINT16 bufSize_p,
     return TRUE;
 }
 
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
 /**
 \brief    Change local sequence number
 
@@ -641,7 +641,7 @@ static BOOL ssdo_receiveFrame(UINT8* pBuffer_p, UINT16 bufSize_p,
 
 \ingroup module_ssdo
 */
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
 static void ssdo_changeLocalSeqNr(tSeqNrValue* pSeqNr_p)
 {
     if(*pSeqNr_p == kSeqNrValueFirst)
@@ -654,7 +654,7 @@ static void ssdo_changeLocalSeqNr(tSeqNrValue* pSeqNr_p)
     }
 }
 
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
 /**
 \brief    Check if channel is ready for transmission
 
@@ -666,19 +666,19 @@ static void ssdo_changeLocalSeqNr(tSeqNrValue* pSeqNr_p)
 
 \ingroup module_ssdo
 */
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
 static tSsdoChanStatus ssdo_checkChannelStatus(tSsdoInstance pInstance_p)
 {
     tSsdoChanStatus chanStatus = kChanStatusInvalid;
     tSeqNrValue  seqNr = kSeqNrValueInvalid;
 
-    // Get status of transmit channel
+    /* Get status of transmit channel */
     status_getSsdoTxChanFlag(pInstance_p->chanId_m, &seqNr);
 
-    // Check if old transmission is already finished!
+    /* Check if old transmission is already finished! */
     if(seqNr != pInstance_p->txBuffParam_m.currTxSeqNr_m)
     {
-        // Message in progress -> retry later!
+        /* Message in progress -> retry later! */
         chanStatus = kChanStatusBusy;
     }
     else
@@ -689,6 +689,6 @@ static tSsdoChanStatus ssdo_checkChannelStatus(tSsdoInstance pInstance_p)
     return chanStatus;
 }
 
-// \}
+/* \} */
 
-#endif // #if (((PSI_MODULE_INTEGRATION) & (PSI_MODULE_SSDO)) != 0)
+#endif /* #if (((PSI_MODULE_INTEGRATION) & (PSI_MODULE_SSDO)) != 0) */

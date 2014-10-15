@@ -38,45 +38,45 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef _INC_libpsi_cc_H_
 #define _INC_libpsi_cc_H_
 
-//------------------------------------------------------------------------------
-// includes
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
+/* includes                                                                   */
+/*----------------------------------------------------------------------------*/
 
 #include <libpsi/apglobal.h>
 
 #include <libpsicommon/cc.h>
 
-//------------------------------------------------------------------------------
-// const defines
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
+/* const defines                                                              */
+/*----------------------------------------------------------------------------*/
 
 
-//------------------------------------------------------------------------------
-// typedef
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
+/* typedef                                                                    */
+/*----------------------------------------------------------------------------*/
 
 /**
  * \brief Status of the configuration channel write object
  */
 typedef enum {
-    kCcWriteStatusError       = 0x00,   ///< Error on writing an object
-    kCcWriteStatusSuccessful = 0x01,    ///< Writing the object successful
-    kCcWriteStatusBusy        = 0x02,   ///< Unable to write the object! Channel is busy
+    kCcWriteStatusError       = 0x00,   /**< Error on writing an object */
+    kCcWriteStatusSuccessful = 0x01,    /**< Writing the object successful */
+    kCcWriteStatusBusy        = 0x02,   /**< Unable to write the object! Channel is busy */
 } tCcWriteStatus;
 
 /**
  * \brief  Cc module initialization structure
  */
 typedef struct {
-    tTbufNumLayout     iccId_m;          ///< Id of the icc buffer
-    tTbufNumLayout     occId_m;          ///< Id of the occ buffer
-    tPsiCritSec      pfnCritSec_p;     ///< Pointer to critical section entry function
+    tTbufNumLayout     iccId_m;          /**< Id of the icc buffer */
+    tTbufNumLayout     occId_m;          /**< Id of the occ buffer */
+    tPsiCritSec      pfnCritSec_p;       /**< Pointer to critical section entry function */
 } tCcInitParam;
 
 
-//------------------------------------------------------------------------------
-// function prototypes
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
+/* function prototypes                                                        */
+/*----------------------------------------------------------------------------*/
 DLLEXPORT BOOL cc_init(tCcInitParam* pCcInitParam_p);
 DLLEXPORT void cc_exit(void);
 
@@ -84,9 +84,3 @@ DLLEXPORT tCcWriteStatus cc_writeObject(tConfChanObject* pObject_p);
 DLLEXPORT tConfChanObject* cc_readObject(UINT16 objIdx_p, UINT8 objSubIdx_p);
 
 #endif /* _INC_libpsi_cc_H_ */
-
-
-
-
-
-

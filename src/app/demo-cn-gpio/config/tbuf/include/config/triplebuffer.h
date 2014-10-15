@@ -39,40 +39,40 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef _INC_config_triplebuffer_H_
 #define _INC_config_triplebuffer_H_
 
-//------------------------------------------------------------------------------
-// includes
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
+/* includes                                                                   */
+/*----------------------------------------------------------------------------*/
 #include <libpsicommon/status.h>
 #include <libpsicommon/cc.h>
 #include <libpsicommon/ssdo.h>
 #include <libpsicommon/rpdo.h>
 #include <libpsicommon/tpdo.h>
 
-//------------------------------------------------------------------------------
-// typedef
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
+/* typedef                                                                    */
+/*----------------------------------------------------------------------------*/
 
-typedef UINT32 tTbufAckRegister;    ///< Acknowledge register size type
+typedef UINT32 tTbufAckRegister;    /**< Acknowledge register size type */
 
 /**
  * \brief This type assigns a number to each triple buffer
  */
 typedef enum {
-    kTbufAckRegisterCons     = 0x00,     ///< ID of the consumer acknowledge register
-    kTbufNumStatusOut        = 0x01,     ///< ID of the status output triple buffer
-    kTbufNumOutputConfChan   = 0x02,     ///< ID of the output configuration channel triple buffer
-    kTbufNumRpdoImage        = 0x03,     ///< ID of the RPDO triple buffer image
-    kTbufNumStatusIn         = 0x04,     ///< ID of the status input triple buffer
-    kTbufNumInputConfChan    = 0x05,     ///< ID of the input configuration channel triple buffer
-    kTbufNumTpdoImage        = 0x06,     ///< ID of the TPDO triple buffer image
-    kTbufDummyBuffer         = 0x07,     ///< Dummy buffer (Needed for serials with DMA)
-    kTbufAckRegisterProd     = 0x08,     ///< ID of the producer acknowledge register
-    kTbufCount               = 0x09,     ///< Total count of triple buffers
+    kTbufAckRegisterCons     = 0x00,     /**< ID of the consumer acknowledge register */
+    kTbufNumStatusOut        = 0x01,     /**< ID of the status output triple buffer */
+    kTbufNumOutputConfChan   = 0x02,     /**< ID of the output configuration channel triple buffer */
+    kTbufNumRpdoImage        = 0x03,     /**< ID of the RPDO triple buffer image */
+    kTbufNumStatusIn         = 0x04,     /**< ID of the status input triple buffer */
+    kTbufNumInputConfChan    = 0x05,     /**< ID of the input configuration channel triple buffer */
+    kTbufNumTpdoImage        = 0x06,     /**< ID of the TPDO triple buffer image */
+    kTbufDummyBuffer         = 0x07,     /**< Dummy buffer (Needed for serials with DMA) */
+    kTbufAckRegisterProd     = 0x08,     /**< ID of the producer acknowledge register */
+    kTbufCount               = 0x09,     /**< Total count of triple buffers */
 } tTbufNumLayout;
 
-//------------------------------------------------------------------------------
-// const defines
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
+/* const defines                                                              */
+/*----------------------------------------------------------------------------*/
 
 /**
  * \brief Application interface module list
@@ -83,14 +83,14 @@ typedef enum {
                                 | PSI_MODULE_PDO \
                                 )
 
-// Detect configuration errors
+/* Detect configuration errors */
 #if(((PSI_MODULE_INTEGRATION) & (PSI_MODULE_STATUS)) == 0)
 #error "Status module is not active! This module is mandatory for the slim interface"
 #endif
 
-//------------------------------------------------------------------------------
-// function prototypes
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
+/* function prototypes                                                        */
+/*----------------------------------------------------------------------------*/
 
 #endif /* _INC_config_triplebuffer_H_ */
 

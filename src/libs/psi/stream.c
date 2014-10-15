@@ -43,86 +43,86 @@ handler. It enables to insert pre- and post actions before and after transfer.
 * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
 
-//------------------------------------------------------------------------------
-// includes
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
+/* includes                                                                   */
+/*----------------------------------------------------------------------------*/
 
 #include <libpsi/internal/stream.h>
 
-//============================================================================//
-//            G L O B A L   D E F I N I T I O N S                             //
-//============================================================================//
+/*============================================================================*/
+/*            G L O B A L   D E F I N I T I O N S                             */
+/*============================================================================*/
 
-//------------------------------------------------------------------------------
-// const defines
-//------------------------------------------------------------------------------
-
-
-//------------------------------------------------------------------------------
-// module global vars
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
+/* const defines                                                              */
+/*----------------------------------------------------------------------------*/
 
 
-//------------------------------------------------------------------------------
-// global function prototypes
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
+/* module global vars                                                         */
+/*----------------------------------------------------------------------------*/
 
 
-//============================================================================//
-//            P R I V A T E   D E F I N I T I O N S                           //
-//============================================================================//
+/*----------------------------------------------------------------------------*/
+/* global function prototypes                                                 */
+/*----------------------------------------------------------------------------*/
 
-//------------------------------------------------------------------------------
-// const defines
-//------------------------------------------------------------------------------
 
-//------------------------------------------------------------------------------
-// local types
-//------------------------------------------------------------------------------
+/*============================================================================*/
+/*            P R I V A T E   D E F I N I T I O N S                           */
+/*============================================================================*/
+
+/*----------------------------------------------------------------------------*/
+/* const defines                                                              */
+/*----------------------------------------------------------------------------*/
+
+/*----------------------------------------------------------------------------*/
+/* local types                                                                */
+/*----------------------------------------------------------------------------*/
 
 /**
  * \brief Element of buffer action list
  */
 typedef struct {
-    tTbufNumLayout  buffId_m;          ///< Id of the buffer
-    tBuffAction     pfnBuffAction_m;   ///< Action to trigger
-    void *          pUserArg_m;        ///< User argument of the action
+    tTbufNumLayout  buffId_m;          /**< Id of the buffer */
+    tBuffAction     pfnBuffAction_m;   /**< Action to trigger */
+    void *          pUserArg_m;        /**< User argument of the action */
 } tBuffActionElem;
 
 /**
  * \brief Instance of the stream module
  */
 typedef struct {
-    tBuffDescriptor  buffDescList_m[kTbufCount];            ///< List of buffer descriptors
+    tBuffDescriptor  buffDescList_m[kTbufCount];            /**< List of buffer descriptors */
 
-    tHandlerParam    handlParam_m;                          ///< Parameters of the stream handler
-    tStreamHandler   pfnStreamHandler_m;                    ///< Stream filling handler
+    tHandlerParam    handlParam_m;                          /**< Parameters of the stream handler */
+    tStreamHandler   pfnStreamHandler_m;                    /**< Stream filling handler */
 
-    tBuffActionElem  buffPreActList_m[kTbufCount];          ///< List of buffer pre filling actions
-    tBuffActionElem  buffPostActList_m[kTbufCount];         ///< List of buffer post filling actions
+    tBuffActionElem  buffPreActList_m[kTbufCount];          /**< List of buffer pre filling actions */
+    tBuffActionElem  buffPostActList_m[kTbufCount];         /**< List of buffer post filling actions */
 
-    tBuffSyncCb      pfnSyncCb_m;                           ///< Sync callback function
+    tBuffSyncCb      pfnSyncCb_m;                           /**< Sync callback function */
 } tStreamInstance;
 
-//------------------------------------------------------------------------------
-// local vars
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
+/* local vars                                                                 */
+/*----------------------------------------------------------------------------*/
 
 static tStreamInstance streamInstance_l;
 
-//------------------------------------------------------------------------------
-// local function prototypes
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
+/* local function prototypes                                                  */
+/*----------------------------------------------------------------------------*/
 static BOOL stream_callActions(tActionType actType_p);
 static UINT16 stream_calcImageSize(tTbufNumLayout firstId_p, tTbufNumLayout lastId_p);
 static tBuffActionElem* stream_getActionList(tActionType actType_p);
 static BOOL stream_callSyncCb(void);
 
-//============================================================================//
-//            P U B L I C   F U N C T I O N S                                 //
-//============================================================================//
+/*============================================================================*/
+/*            P U B L I C   F U N C T I O N S                                 */
+/*============================================================================*/
 
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
 /**
 \brief    Initialize the stream module
 
@@ -134,7 +134,7 @@ static BOOL stream_callSyncCb(void);
 
 \ingroup module_stream
 */
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
 BOOL stream_init(tStreamInitParam* pInitParam_p)
 {
     BOOL fReturn = FALSE;
@@ -153,21 +153,21 @@ BOOL stream_init(tStreamInitParam* pInitParam_p)
         }
         else
         {
-            // Save the descriptor list internally
+            /* Save the descriptor list internally */
             PSI_MEMCPY(&streamInstance_l.buffDescList_m,
                     pInitParam_p->pBuffDescList_m,
                     sizeof(streamInstance_l.buffDescList_m));
 
-            // Remember handler of input output stream
+            /* Remember handler of input output stream */
             streamInstance_l.pfnStreamHandler_m = pInitParam_p->pfnStreamHandler_m;
 
-            // Set consuming buffer handler parameter descriptor to first consuming buffer
+            /* Set consuming buffer handler parameter descriptor to first consuming buffer */
             streamInstance_l.handlParam_m.consDesc_m.pBuffBase_m =
                     streamInstance_l.buffDescList_m[pInitParam_p->idConsAck_m].pBuffBase_m;
             streamInstance_l.handlParam_m.consDesc_m.buffSize_m =
                     stream_calcImageSize(pInitParam_p->idConsAck_m, pInitParam_p->idFirstProdBuffer_m);
 
-            // Set producing buffer handler parameter descriptor to first producing buffer
+            /* Set producing buffer handler parameter descriptor to first producing buffer */
             streamInstance_l.handlParam_m.prodDesc_m.pBuffBase_m =
                     streamInstance_l.buffDescList_m[pInitParam_p->idFirstProdBuffer_m].pBuffBase_m;
             streamInstance_l.handlParam_m.prodDesc_m.buffSize_m =
@@ -180,19 +180,19 @@ BOOL stream_init(tStreamInitParam* pInitParam_p)
     return fReturn;
 }
 
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
 /**
 \brief   Destroy stream module
 
 \ingroup module_stream
 */
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
 void stream_exit(void)
 {
-    // free internal structures
+    /* free internal structures */
 }
 
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
 /**
 \brief   Get buffer parameters for id of buffer
 
@@ -204,7 +204,7 @@ void stream_exit(void)
 
 \ingroup module_stream
 */
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
 tBuffDescriptor* stream_getBufferParam(tTbufNumLayout buffId_p)
 {
     tBuffDescriptor* buffDesc = NULL;
@@ -217,7 +217,7 @@ tBuffDescriptor* stream_getBufferParam(tTbufNumLayout buffId_p)
     return buffDesc;
 }
 
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
 /**
 \brief   Register a new action to a buffer
 
@@ -232,7 +232,7 @@ tBuffDescriptor* stream_getBufferParam(tTbufNumLayout buffId_p)
 
 \ingroup module_stream
 */
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
 BOOL stream_registerAction(tActionType actType_p, UINT8 buffId_p,
         tBuffAction pfnBuffAct_p, void * pUserArg_p)
 {
@@ -257,7 +257,7 @@ BOOL stream_registerAction(tActionType actType_p, UINT8 buffId_p,
             {
                 if(pBuffActElem->pfnBuffAction_m == NULL)
                 {
-                    // Free element found -> Insert action
+                    /* Free element found -> Insert action */
                     pBuffActElem->buffId_m = buffId_p;
                     pBuffActElem->pfnBuffAction_m = pfnBuffAct_p;
                     pBuffActElem->pUserArg_m = pUserArg_p;
@@ -269,7 +269,7 @@ BOOL stream_registerAction(tActionType actType_p, UINT8 buffId_p,
 
             if(fReturn == FALSE)
             {
-                // Set error when list is full
+                /* Set error when list is full */
                 error_setError(kPsiModuleStream, kPsiStreamNoFreeElementFound);
             }
         }
@@ -278,7 +278,7 @@ BOOL stream_registerAction(tActionType actType_p, UINT8 buffId_p,
     return fReturn;
 }
 
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
 /**
 \brief   Register synchronous callback function
 
@@ -286,13 +286,13 @@ BOOL stream_registerAction(tActionType actType_p, UINT8 buffId_p,
 
 \ingroup module_stream
 */
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
 void stream_registerSyncCb(tBuffSyncCb pfnSyncCb_p)
 {
     streamInstance_l.pfnSyncCb_m = pfnSyncCb_p;
 }
 
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
 /**
 \brief   Process the synchronous stream actions
 
@@ -305,21 +305,21 @@ actions for each type of buffer.
 
 \ingroup module_stream
 */
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
 BOOL stream_processSync(void)
 {
     BOOL fReturn = FALSE;
 
-    // Call all pre filling actions
+    /* Call all pre filling actions */
     if(stream_callActions(kStreamActionPre) != FALSE)
     {
-        // Call synchronization function handler
+        /* Call synchronization function handler */
         if(stream_callSyncCb() != FALSE)
         {
-            // Transfer stream input/output data
+            /* Transfer stream input/output data */
             if(streamInstance_l.pfnStreamHandler_m(&streamInstance_l.handlParam_m) != FALSE)
             {
-                // Call all post filling actions
+                /* Call all post filling actions */
                 if(stream_callActions(kStreamActionPost) != FALSE)
                 {
                     fReturn = TRUE;
@@ -327,7 +327,7 @@ BOOL stream_processSync(void)
             }
             else
             {
-                // Stream handler error handler
+                /* Stream handler error handler */
                 error_setError(kPsiModuleStream, kPsiStreamTransferError);
             }
         }
@@ -336,7 +336,7 @@ BOOL stream_processSync(void)
     return fReturn;
 }
 
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
 /**
 \brief   Function for buffer acknowledging
 
@@ -344,21 +344,21 @@ BOOL stream_processSync(void)
 
 \ingroup module_stream
 */
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
 void stream_ackBuffer(UINT8 buffId_p)
 {
     UNUSED_PARAMETER(buffId_p);
 
-    // Empty function! (No acknowledge needed with SPI!)
+    /* Empty function! (No acknowledge needed with SPI!) */
 }
 
-//============================================================================//
-//            P R I V A T E   F U N C T I O N S                               //
-//============================================================================//
-/// \name Private Functions
-/// \{
+/*============================================================================*/
+/*            P R I V A T E   F U N C T I O N S                               */
+/*============================================================================*/
+/* \name Private Functions */
+/* \{ */
 
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
 /**
 \brief   Call all buffer filling post actions
 
@@ -370,7 +370,7 @@ void stream_ackBuffer(UINT8 buffId_p)
 
 \ingroup module_stream
 */
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
 static BOOL stream_callActions(tActionType actType_p)
 {
     BOOL fReturn = FALSE, fRetAct;
@@ -380,12 +380,12 @@ static BOOL stream_callActions(tActionType actType_p)
 
     pBuffActList = stream_getActionList(actType_p);
 
-    // Call buffer action for each buffer
+    /* Call buffer action for each buffer */
     for(i=0; i < kTbufCount; i++, pBuffActList++)
     {
         if(pBuffActList->pfnBuffAction_m != NULL)
         {
-            // Get buffer element by Id
+            /* Get buffer element by Id */
             pBuffElement = &streamInstance_l.buffDescList_m[pBuffActList->buffId_m];
 
             fRetAct = pBuffActList->pfnBuffAction_m(pBuffElement->pBuffBase_m,
@@ -393,7 +393,7 @@ static BOOL stream_callActions(tActionType actType_p)
                                                pBuffActList->pUserArg_m);
             if(fRetAct == FALSE)
             {
-                // Error happened.. return!
+                /* Error happened.. return! */
                 error_setError(kPsiModuleStream, kPsiStreamProcessActionFailed);
 
                 break;
@@ -401,7 +401,7 @@ static BOOL stream_callActions(tActionType actType_p)
         }
         else
         {
-            // All set actions carried out! return!
+            /* All set actions carried out! return! */
             fReturn = TRUE;
             break;
         }
@@ -409,14 +409,14 @@ static BOOL stream_callActions(tActionType actType_p)
 
     if(i == kTbufCount)
     {
-        // All actions set and carried out
+        /* All actions set and carried out */
         fReturn = TRUE;
     }
 
     return fReturn;
 }
 
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
 /**
 \brief   Calculate size of transfer image
 
@@ -428,7 +428,7 @@ static BOOL stream_callActions(tActionType actType_p)
 
 \ingroup module_stream
 */
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
 static UINT16 stream_calcImageSize(tTbufNumLayout firstId_p, tTbufNumLayout lastId_p)
 {
     UINT8 i;
@@ -442,7 +442,7 @@ static UINT16 stream_calcImageSize(tTbufNumLayout firstId_p, tTbufNumLayout last
     return imgSize;
 }
 
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
 /**
 \brief   Get action list for action type
 
@@ -454,7 +454,7 @@ static UINT16 stream_calcImageSize(tTbufNumLayout firstId_p, tTbufNumLayout last
 
 \ingroup module_stream
 */
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
 static tBuffActionElem* stream_getActionList(tActionType actType_p)
 {
     tBuffActionElem* pBuffActElem = NULL;
@@ -473,7 +473,7 @@ static tBuffActionElem* stream_getActionList(tActionType actType_p)
         }
         default:
         {
-            // error occurred
+            /* error occurred */
             break;
         }
     }
@@ -481,7 +481,7 @@ static tBuffActionElem* stream_getActionList(tActionType actType_p)
     return pBuffActElem;
 }
 
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
 /**
 \brief   Call the sync callback if initialized
 
@@ -491,14 +491,14 @@ static tBuffActionElem* stream_getActionList(tActionType actType_p)
 
 \ingroup module_stream
 */
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
 static BOOL stream_callSyncCb(void)
 {
     BOOL fReturn = FALSE;
 
     if(streamInstance_l.pfnSyncCb_m != NULL)
     {
-        // Call synchronization callback function
+        /* Call synchronization callback function */
         if(streamInstance_l.pfnSyncCb_m() != FALSE)
         {
             fReturn = TRUE;
@@ -516,6 +516,4 @@ static BOOL stream_callSyncCb(void)
     return fReturn;
 }
 
-/// \}
-
-
+/* \} */

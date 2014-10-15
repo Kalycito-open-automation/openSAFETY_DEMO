@@ -39,33 +39,33 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef _INC_config_powerlink_H_
 #define _INC_config_powerlink_H_
 
-//------------------------------------------------------------------------------
-// includes
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
+/* includes                                                                   */
+/*----------------------------------------------------------------------------*/
 
-//------------------------------------------------------------------------------
-// const defines
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
+/* const defines                                                              */
+/*----------------------------------------------------------------------------*/
 
-#define CONFIG_IDENT_DEVICE_TYPE        0x00000000      ///< Device type of the node
-#define CONFIG_IDENT_VENDOR_ID          0x00000000      ///< Vendor ID of the node
-#define CONFIG_IDENT_PRODUCT_CODE       0x00000001      ///< Product code of the node
-#define CONFIG_IDENT_REVISION           0x00010020      ///< Revision number of the node
-#define CONFIG_IDENT_SERIAL_NUMBER      0x00000000      ///< Serial number of the node
+#define CONFIG_IDENT_DEVICE_TYPE        0x00000000      /**< Device type of the node */
+#define CONFIG_IDENT_VENDOR_ID          0x00000000      /**< Vendor ID of the node */
+#define CONFIG_IDENT_PRODUCT_CODE       0x00000001      /**< Product code of the node */
+#define CONFIG_IDENT_REVISION           0x00010020      /**< Revision number of the node */
+#define CONFIG_IDENT_SERIAL_NUMBER      0x00000000      /**< Serial number of the node */
 
 
-#define MAC_VENDOR_ID   0x00,0x12,0x34                      ///< Vendor specific part of the MAC address
-#define MAC_ADDR        {MAC_VENDOR_ID,0x56,0x78,0x9A}      ///< MAC address of the CN
-#define IP_ADDR         0xc0a86401                          ///< IP-Address 192.168.100.1 (Object: 0x1E40/0x02) (don't care the last byte!)
-#define SUBNET_MASK     0xFFFFFF00                          ///< Subnet mask 255.255.255.0 (Object: 0x1E40/0x03)
-#define DEF_GATEWAY     0xc0a864f0                          ///< Default gateway: 192.168.100.254 (Object: 0x1E40/0x05)
+#define MAC_VENDOR_ID   0x00,0x12,0x34                      /**< Vendor specific part of the MAC address */
+#define MAC_ADDR        {MAC_VENDOR_ID,0x56,0x78,0x9A}      /**< MAC address of the CN */
+#define IP_ADDR         0xc0a86401                          /**< IP-Address 192.168.100.1 (Object: 0x1E40/0x02) (don't care the last byte!) */
+#define SUBNET_MASK     0xFFFFFF00                          /**< Subnet mask 255.255.255.0 (Object: 0x1E40/0x03) */
+#define DEF_GATEWAY     0xc0a864f0                          /**< Default gateway: 192.168.100.254 (Object: 0x1E40/0x05) */
 
-//------------------------------------------------------------------------------
-// typedef
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
+/* typedef                                                                    */
+/*----------------------------------------------------------------------------*/
 
-//------------------------------------------------------------------------------
-// function prototypes
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
+/* function prototypes                                                        */
+/*----------------------------------------------------------------------------*/
 
 #endif /* _INC_config_powerlink_H_ */

@@ -39,21 +39,21 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef _INC_libpsi_intenal_stream_H_
 #define _INC_libpsi_intenal_stream_H_
 
-//------------------------------------------------------------------------------
-// includes
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
+/* includes                                                                   */
+/*----------------------------------------------------------------------------*/
 
 #include <libpsi/apglobal.h>
 #include <libpsi/stream.h>
 
-//------------------------------------------------------------------------------
-// const defines
-//------------------------------------------------------------------------------
-#define PDO_CHANNEL_DEACTIVATED     0xFF    ///< Id of an deactivated PDO channel
+/*----------------------------------------------------------------------------*/
+/* const defines                                                              */
+/*----------------------------------------------------------------------------*/
+#define PDO_CHANNEL_DEACTIVATED     0xFF    /**< Id of an deactivated PDO channel */
 
-//------------------------------------------------------------------------------
-// typedef
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
+/* typedef                                                                    */
+/*----------------------------------------------------------------------------*/
 
 /**
  * \brief  Buffer action types -> Before or after filling!
@@ -80,15 +80,15 @@ typedef BOOL (*tBuffSyncCb)(void);
  * \brief  Stream module initialization structure
  */
 typedef struct {
-    tBuffDescriptor* pBuffDescList_m;      ///< Triple buffer descriptor list
-    tTbufNumLayout   idConsAck_m;          ///< Id of the consumer ack register
-    tTbufNumLayout   idFirstProdBuffer_m;  ///< Id of the first producing buffer
-    tStreamHandler   pfnStreamHandler_m;   ///< Stream receive and transmit handler
+    tBuffDescriptor* pBuffDescList_m;      /**< Triple buffer descriptor list */
+    tTbufNumLayout   idConsAck_m;          /**< Id of the consumer ack register */
+    tTbufNumLayout   idFirstProdBuffer_m;  /**< Id of the first producing buffer */
+    tStreamHandler   pfnStreamHandler_m;   /**< Stream receive and transmit handler */
 } tStreamInitParam;
 
-//------------------------------------------------------------------------------
-// function prototypes
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
+/* function prototypes                                                        */
+/*----------------------------------------------------------------------------*/
 BOOL stream_init(tStreamInitParam* pInitParam_p);
 void stream_exit(void);
 
@@ -101,5 +101,3 @@ BOOL stream_processSync(void);
 void stream_ackBuffer(UINT8 buffId_p);
 
 #endif /* _INC_libpsi_intenal_stream_H_ */
-
-

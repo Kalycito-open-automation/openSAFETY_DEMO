@@ -42,42 +42,42 @@ Consists of the object list of the input and output configuration channel.
 * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
 
-//------------------------------------------------------------------------------
-// includes
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
+/* includes                                                                   */
+/*----------------------------------------------------------------------------*/
 
 #include <libpsicommon/ccobject.h>
 
-//============================================================================//
-//            G L O B A L   D E F I N I T I O N S                             //
-//============================================================================//
+/*============================================================================*/
+/*            G L O B A L   D E F I N I T I O N S                             */
+/*============================================================================*/
 
-//------------------------------------------------------------------------------
-// const defines
-//------------------------------------------------------------------------------
-
-
-//------------------------------------------------------------------------------
-// module global vars
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
+/* const defines                                                              */
+/*----------------------------------------------------------------------------*/
 
 
-//------------------------------------------------------------------------------
-// global function prototypes
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
+/* module global vars                                                         */
+/*----------------------------------------------------------------------------*/
 
 
-//============================================================================//
-//            P R I V A T E   D E F I N I T I O N S                           //
-//============================================================================//
+/*----------------------------------------------------------------------------*/
+/* global function prototypes                                                 */
+/*----------------------------------------------------------------------------*/
 
-//------------------------------------------------------------------------------
-// const defines
-//------------------------------------------------------------------------------
 
-//------------------------------------------------------------------------------
-// local types
-//------------------------------------------------------------------------------
+/*============================================================================*/
+/*            P R I V A T E   D E F I N I T I O N S                           */
+/*============================================================================*/
+
+/*----------------------------------------------------------------------------*/
+/* const defines                                                              */
+/*----------------------------------------------------------------------------*/
+
+/*----------------------------------------------------------------------------*/
+/* local types                                                                */
+/*----------------------------------------------------------------------------*/
 
 
 /**
@@ -88,28 +88,28 @@ of the slim interface.
 */
 typedef struct
 {
-    tConfChanObject      objectList_m[CONF_CHAN_NUM_OBJECTS];  ///< List of all objects to transfer
-    UINT8                currReadObj_m;                        ///< Current object read pointer
-    UINT8                currWriteObj_m;                       ///< Current object write pointer
-    tPsiCritSec        pfnCritSec_m;                         ///< Function pointer to the critical section
+    tConfChanObject      objectList_m[CONF_CHAN_NUM_OBJECTS];  /**< List of all objects to transfer */
+    UINT8                currReadObj_m;                        /**< Current object read pointer */
+    UINT8                currWriteObj_m;                       /**< Current object write pointer */
+    tPsiCritSec          pfnCritSec_m;                         /**< Function pointer to the critical section */
 } tConfChanInstance;
 
-//------------------------------------------------------------------------------
-// local vars
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
+/* local vars                                                                 */
+/*----------------------------------------------------------------------------*/
 
 static tConfChanInstance          ccobjInstance_l;
 
-//------------------------------------------------------------------------------
-// local function prototypes
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
+/* local function prototypes                                                  */
+/*----------------------------------------------------------------------------*/
 
 
-//============================================================================//
-//            P U B L I C   F U N C T I O N S                                 //
-//============================================================================//
+/*============================================================================*/
+/*            P U B L I C   F U N C T I O N S                                 */
+/*============================================================================*/
 
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
 /**
 \brief    Initialize the configuration channel output module
 
@@ -121,7 +121,7 @@ static tConfChanInstance          ccobjInstance_l;
 
 \ingroup module_ccobject
 */
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
 BOOL ccobject_init(tPsiCritSec pfnCritSec_p)
 {
     BOOL fReturn = FALSE;
@@ -137,19 +137,19 @@ BOOL ccobject_init(tPsiCritSec pfnCritSec_p)
     return fReturn;
 }
 
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
 /**
 \brief    Destroy object list module
 
 \ingroup module_ccobject
 */
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
 void ccobject_exit(void)
 {
-    // Free object list
+    /* Free object list */
 }
 
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
 /**
 \brief    Initialize an object in the object list
 
@@ -162,7 +162,7 @@ void ccobject_exit(void)
 
 \ingroup module_ccobject
 */
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
 BOOL ccobject_initObject(UINT8 objId_p, tConfChanObject* pObjDef_p)
 {
     BOOL fReturn = FALSE;
@@ -171,7 +171,7 @@ BOOL ccobject_initObject(UINT8 objId_p, tConfChanObject* pObjDef_p)
     {
         if(objId_p < CONF_CHAN_NUM_OBJECTS)
         {
-            // Copy object to list
+            /* Copy object to list */
             PSI_MEMCPY(&ccobjInstance_l.objectList_m[objId_p], pObjDef_p,
                     sizeof(tConfChanObject));
 
@@ -182,7 +182,7 @@ BOOL ccobject_initObject(UINT8 objId_p, tConfChanObject* pObjDef_p)
     return fReturn;
 }
 
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
 /**
 \brief   Write an object in the object list
 
@@ -194,7 +194,7 @@ BOOL ccobject_initObject(UINT8 objId_p, tConfChanObject* pObjDef_p)
 
 \ingroup module_ccobject
 */
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
 BOOL ccobject_writeObject(tConfChanObject* pObjDef_p)
 {
     BOOL fReturn = FALSE;
@@ -206,16 +206,16 @@ BOOL ccobject_writeObject(tConfChanObject* pObjDef_p)
            ccobjInstance_l.objectList_m[i].objSubIdx_m == pObjDef_p->objSubIdx_m  &&
            ccobjInstance_l.objectList_m[i].objSize_m == pObjDef_p->objSize_m        )
         {
-            // Enter critical section
+            /* Enter critical section */
             ccobjInstance_l.pfnCritSec_m(FALSE);
 
-            // object found in list! Remember object data
+            /* object found in list! Remember object data */
             PSI_MEMCPY(&ccobjInstance_l.objectList_m[i].objPayloadLow_m,
                     &pObjDef_p->objPayloadLow_m,
                     pObjDef_p->objSize_m);
 
             ccobjInstance_l.pfnCritSec_m(TRUE);
-            // Leave critical section
+            /* Leave critical section */
 
             fReturn = TRUE;
 
@@ -226,7 +226,7 @@ BOOL ccobject_writeObject(tConfChanObject* pObjDef_p)
     return fReturn;
 }
 
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
 /**
 \brief   Write next object in object list
 
@@ -241,7 +241,7 @@ BOOL ccobject_writeObject(tConfChanObject* pObjDef_p)
 
 \ingroup module_ccobject
 */
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
 tCcWriteState ccobject_writeCurrObject(UINT16 objIdx_p, UINT8 objSubIdx_p,
         UINT8* pData_p)
 {
@@ -251,10 +251,10 @@ tCcWriteState ccobject_writeCurrObject(UINT16 objIdx_p, UINT8 objSubIdx_p,
     if(pObjDest->objIdx_m == objIdx_p        &&
        pObjDest->objSubIdx_m == objSubIdx_p   )
     {
-        // Enter critical section
+        /* Enter critical section */
         ccobjInstance_l.pfnCritSec_m(FALSE);
 
-        // object found in list -> Copy object data and convert endian!
+        /* object found in list -> Copy object data and convert endian! */
         switch(pObjDest->objSize_m)
         {
             case sizeof(UINT8):
@@ -277,7 +277,7 @@ tCcWriteState ccobject_writeCurrObject(UINT16 objIdx_p, UINT8 objSubIdx_p,
             }
             default:
             {
-                // Default use UINT64
+                /* Default use UINT64 */
                 pObjDest->objPayloadLow_m = ami_getUint32Le((UINT8 *)pData_p);
                 pObjDest->objPayloadHigh_m = ami_getUint32Le((UINT8 *)pData_p + 4);
                 writeState = kCcWriteStateSuccessful;
@@ -286,7 +286,7 @@ tCcWriteState ccobject_writeCurrObject(UINT16 objIdx_p, UINT8 objSubIdx_p,
         }
 
         ccobjInstance_l.pfnCritSec_m(TRUE);
-        // Leave critical section
+        /* Leave critical section */
     }
     else
     {
@@ -296,7 +296,7 @@ tCcWriteState ccobject_writeCurrObject(UINT16 objIdx_p, UINT8 objSubIdx_p,
     return writeState;
 }
 
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
 /**
 \brief   Write an object in the object list
 
@@ -309,7 +309,7 @@ tCcWriteState ccobject_writeCurrObject(UINT16 objIdx_p, UINT8 objSubIdx_p,
 
 \ingroup module_ccobject
 */
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
 tConfChanObject* ccobject_readObject(UINT16 objIdx_p, UINT8 objSubIdx_p)
 {
     tConfChanObject* pObjDef = NULL;
@@ -329,7 +329,7 @@ tConfChanObject* ccobject_readObject(UINT16 objIdx_p, UINT8 objSubIdx_p)
     return pObjDef;
 }
 
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
 /**
 \brief    Grab the current object from the object list
 
@@ -339,7 +339,7 @@ tConfChanObject* ccobject_readObject(UINT16 objIdx_p, UINT8 objSubIdx_p)
 
 \ingroup module_ccobject
 */
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
 tConfChanObject* ccobject_readCurrObject(void)
 {
     tConfChanObject* pObject = &ccobjInstance_l.objectList_m[ccobjInstance_l.currReadObj_m];
@@ -347,43 +347,43 @@ tConfChanObject* ccobject_readCurrObject(void)
     return pObject;
 }
 
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
 /**
 \brief    Increment the current object read pointer
 
 \ingroup module_ccobject
 */
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
 void ccobject_incObjReadPointer(void)
 {
     ccobjInstance_l.currReadObj_m++;
 
-    // Check overflow
+    /* Check overflow */
     if(ccobjInstance_l.currReadObj_m >= CONF_CHAN_NUM_OBJECTS)
     {
         ccobjInstance_l.currReadObj_m = 0;
     }
 }
 
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
 /**
 \brief    Increment the current object write pointer
 
 \ingroup module_ccobject
 */
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
 void ccobject_incObjWritePointer(void)
 {
     ccobjInstance_l.currWriteObj_m++;
 
-    // Check overflow
+    /* Check overflow */
     if(ccobjInstance_l.currWriteObj_m >= CONF_CHAN_NUM_OBJECTS)
     {
         ccobjInstance_l.currWriteObj_m = 0;
     }
 }
 
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
 /**
 \brief    Get the size of an object
 
@@ -397,7 +397,7 @@ void ccobject_incObjWritePointer(void)
 
 \ingroup module_ccobject
 */
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
 BOOL ccobject_getObjectSize(UINT16 objIdx_p, UINT8 objSubIdx_p,
         UINT8* pSize_p)
 {
@@ -409,7 +409,7 @@ BOOL ccobject_getObjectSize(UINT16 objIdx_p, UINT8 objSubIdx_p,
         if(ccobjInstance_l.objectList_m[i].objIdx_m == objIdx_p        &&
            ccobjInstance_l.objectList_m[i].objSubIdx_m == objSubIdx_p  )
         {
-            // object found in list! Remember object data
+            /* object found in list! Remember object data */
             *pSize_p = ccobjInstance_l.objectList_m[i].objSize_m;
 
             fReturn = TRUE;
@@ -422,13 +422,11 @@ BOOL ccobject_getObjectSize(UINT16 objIdx_p, UINT8 objSubIdx_p,
 }
 
 
-//============================================================================//
-//            P R I V A T E   F U N C T I O N S                               //
-//============================================================================//
-/// \name Private Functions
-/// \{
+/*============================================================================*/
+/*            P R I V A T E   F U N C T I O N S                               */
+/*============================================================================*/
+/* \name Private Functions */
+/* \{ */
 
 
-/// \}
-
-
+/* \} */

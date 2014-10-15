@@ -134,7 +134,7 @@ BOOL tbufp_genDescList(UINT8 * pTbufBase_m, UINT16 tbufCount_m, tBuffDescriptor*
     return retVal;
 }
 
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
 /**
 \brief    Generate the transfer parameters with initialization offsets
 
@@ -145,7 +145,7 @@ BOOL tbufp_genDescList(UINT8 * pTbufBase_m, UINT16 tbufCount_m, tBuffDescriptor*
 
 \ingroup module_tbufp
 */
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
 BOOL tbufp_genTransferParams(UINT8 * pTbufBase_m, tHandlerParam * p_transParam)
 {
     tTbufDescriptor tbufDescList[] = TBUF_INIT_VEC;
@@ -177,7 +177,7 @@ BOOL tbufp_genTransferParams(UINT8 * pTbufBase_m, tHandlerParam * p_transParam)
 /* \name Private Functions */
 /* \{ */
 
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
 /**
 \brief    Determine the SPI initialization offset
 
@@ -192,7 +192,7 @@ details if this buffer needs 4 byte offset (app consuming buffers) or
 
 \ingroup module_tbufp
 */
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
 static UINT32 getInitOffset(INT8 isProducer_p, BOOL isFirstAck_p)
 {
     UINT32 offset = 0;

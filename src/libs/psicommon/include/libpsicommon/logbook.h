@@ -38,29 +38,29 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef _INC_psicommon_logbook_H_
 #define _INC_psicommon_logbook_H_
 
-//------------------------------------------------------------------------------
-// includes
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
+/* includes                                                                   */
+/*----------------------------------------------------------------------------*/
 #include <config/logbook.h>
 
-//------------------------------------------------------------------------------
-// const defines
-//------------------------------------------------------------------------------
-#define LOG_CHANNEL_SIZE   0x0C        ///< Size of the logger channel
+/*----------------------------------------------------------------------------*/
+/* const defines                                                              */
+/*----------------------------------------------------------------------------*/
+#define LOG_CHANNEL_SIZE   0x0C        /**< Size of the logger channel */
 
-//------------------------------------------------------------------------------
-// typedef
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
+/* typedef                                                                    */
+/*----------------------------------------------------------------------------*/
 
 /**
  * \brief Defines the level of an error in the logbook
  */
 typedef enum
 {
-    kLogLevelInvalid        = 0x0,      ///< Error level not defined
-    kLogLevelInfo           = 0x1,      ///< Error level is info
-    kLogLevelMinor          = 0x2,      ///< Error level is minor
-    kLogLevelFatal          = 0x3,      ///< Error level is fatal
+    kLogLevelInvalid        = 0x0,      /**< Error level not defined */
+    kLogLevelInfo           = 0x1,      /**< Error level is info */
+    kLogLevelMinor          = 0x2,      /**< Error level is minor */
+    kLogLevelFatal          = 0x3,      /**< Error level is fatal */
 } tLogLevel;
 
 
@@ -69,10 +69,10 @@ typedef enum
  */
 typedef struct
 {
-    UINT8 level_m;          ///< The error level (Info, Minor, Fatal)
-    UINT16 source_m;        ///< The source of this error
-    UINT32 code_m;          ///< The error code
-    UINT32 addInfo_m;       ///< Additional info of this error
+    UINT8 level_m;          /**< The error level (Info, Minor, Fatal) */
+    UINT16 source_m;        /**< The source of this error */
+    UINT32 code_m;          /**< The error code */
+    UINT32 addInfo_m;       /**< Additional info of this error */
 } PACK_STRUCT tLogFormat;
 
 /**
@@ -83,16 +83,15 @@ typedef struct {
     tLogFormat   logData_m;
 } PACK_STRUCT tTbufLogStructure;
 
-//------------------------------------------------------------------------------
-// offsetof defines
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
+/* offsetof defines                                                           */
+/*----------------------------------------------------------------------------*/
 
 #define TBUF_LOG_SEQNR_OFF      offsetof(tTbufLogStructure, seqNr_m)
 #define TBUF_LOG_DATA_OFF       offsetof(tTbufLogStructure, logData_m)
 
-//------------------------------------------------------------------------------
-// function prototypes
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
+/* function prototypes                                                        */
+/*----------------------------------------------------------------------------*/
 
 #endif /* _INC_psicommon_logbook_H_ */
-

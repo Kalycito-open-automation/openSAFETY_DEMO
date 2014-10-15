@@ -43,43 +43,43 @@ It also provides the SSDO channel status information.
 * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
 
-//------------------------------------------------------------------------------
-// includes
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
+/* includes                                                                   */
+/*----------------------------------------------------------------------------*/
 
 #include <libpsi/internal/status.h>
 
 #include <libpsi/internal/stream.h>
 
-//============================================================================//
-//            G L O B A L   D E F I N I T I O N S                             //
-//============================================================================//
+/*============================================================================*/
+/*            G L O B A L   D E F I N I T I O N S                             */
+/*============================================================================*/
 
-//------------------------------------------------------------------------------
-// const defines
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
+/* const defines                                                              */
+/*----------------------------------------------------------------------------*/
 
-//------------------------------------------------------------------------------
-// module global vars
-//------------------------------------------------------------------------------
-
-
-//------------------------------------------------------------------------------
-// global function prototypes
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
+/* module global vars                                                         */
+/*----------------------------------------------------------------------------*/
 
 
-//============================================================================//
-//            P R I V A T E   D E F I N I T I O N S                           //
-//============================================================================//
+/*----------------------------------------------------------------------------*/
+/* global function prototypes                                                 */
+/*----------------------------------------------------------------------------*/
 
-//------------------------------------------------------------------------------
-// const defines
-//------------------------------------------------------------------------------
 
-//------------------------------------------------------------------------------
-// local types
-//------------------------------------------------------------------------------
+/*============================================================================*/
+/*            P R I V A T E   D E F I N I T I O N S                           */
+/*============================================================================*/
+
+/*----------------------------------------------------------------------------*/
+/* const defines                                                              */
+/*----------------------------------------------------------------------------*/
+
+/*----------------------------------------------------------------------------*/
+/* local types                                                                */
+/*----------------------------------------------------------------------------*/
 
 /**
 \brief status user instance type
@@ -88,28 +88,28 @@ The status instance holds the status information of this module
 */
 typedef struct
 {
-    tTbufStatusOutStructure*  pStatusOutLayout_m;   ///< Local copy of the status output triple buffer
-    tTbufNumLayout            buffOutId_m;          ///< Id of the output status register buffer
-    UINT8                     iccStatus_m;          ///< Icc status register
-    UINT16                    ssdoTxStatus_m;       ///< Status of the SSDO transmit channel
-    UINT8                     logTxStatus_m;        ///< Status of the logbook transmit channel
+    tTbufStatusOutStructure*  pStatusOutLayout_m;   /**< Local copy of the status output triple buffer */
+    tTbufNumLayout            buffOutId_m;          /**< Id of the output status register buffer */
+    UINT8                     iccStatus_m;          /**< Icc status register */
+    UINT16                    ssdoTxStatus_m;       /**< Status of the SSDO transmit channel */
+    UINT8                     logTxStatus_m;        /**< Status of the logbook transmit channel */
 
-    tTbufStatusInStructure*   pStatusInLayout_m;    ///< Local copy of the status incoming triple buffer
-    tTbufNumLayout            buffInId_m;           ///< Id of the incoming status register buffer
-    UINT16                    ssdoRxStatus_m;       ///< Status of the SSDO receive channel
+    tTbufStatusInStructure*   pStatusInLayout_m;    /**< Local copy of the status incoming triple buffer */
+    tTbufNumLayout            buffInId_m;           /**< Id of the incoming status register buffer */
+    UINT16                    ssdoRxStatus_m;       /**< Status of the SSDO receive channel */
 
-    tPsiAppCbSync           pfnAppCbSync_m;       ///< Synchronous callback function
+    tPsiAppCbSync           pfnAppCbSync_m;       /**< Synchronous callback function */
 } tStatusInstance;
 
-//------------------------------------------------------------------------------
-// local vars
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
+/* local vars                                                                 */
+/*----------------------------------------------------------------------------*/
 
 static tStatusInstance          statusInstance_l;
 
-//------------------------------------------------------------------------------
-// local function prototypes
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
+/* local function prototypes                                                  */
+/*----------------------------------------------------------------------------*/
 static BOOL status_initOutBuffer(tTbufNumLayout statOutId_p);
 static BOOL status_initInBuffer(tTbufNumLayout statInId_p);
 static BOOL status_processSync(UINT8* pBuffer_p, UINT16 bufSize_p,
@@ -119,11 +119,11 @@ static BOOL status_updateOutStatusReg(UINT8* pBuffer_p, UINT16 bufSize_p,
 static BOOL status_updateInStatusReg(UINT8* pBuffer_p, UINT16 bufSize_p,
         void * pUserArg_p);
 
-//============================================================================//
-//            P U B L I C   F U N C T I O N S                                 //
-//============================================================================//
+/*============================================================================*/
+/*            P U B L I C   F U N C T I O N S                                 */
+/*============================================================================*/
 
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
 /**
 \brief    Initialize the status module
 
@@ -135,7 +135,7 @@ static BOOL status_updateInStatusReg(UINT8* pBuffer_p, UINT16 bufSize_p,
 
 \ingroup module_status
 */
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
 BOOL status_init(tStatusInitParam* pInitParam_p)
 {
     BOOL fReturn = FALSE;
@@ -156,16 +156,16 @@ BOOL status_init(tStatusInitParam* pInitParam_p)
         }
         else
         {
-            // Register status outgoing triple buffer
+            /* Register status outgoing triple buffer */
             if(status_initOutBuffer(pInitParam_p->buffOutId_m) != FALSE)
             {
-                // Register status incoming triple buffer
+                /* Register status incoming triple buffer */
                 if(status_initInBuffer(pInitParam_p->buffInId_m) != FALSE)
                 {
-                    // Remember id of the buffer
+                    /* Remember id of the buffer */
                     statusInstance_l.buffOutId_m = pInitParam_p->buffOutId_m;
 
-                    // Remember synchronous callback function
+                    /* Remember synchronous callback function */
                     statusInstance_l.pfnAppCbSync_m = pInitParam_p->pfnAppCbSync_m;
 
                     fReturn = TRUE;
@@ -186,19 +186,19 @@ BOOL status_init(tStatusInitParam* pInitParam_p)
     return fReturn;
 }
 
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
 /**
 \brief    Cleanup status module
 
 \ingroup module_status
 */
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
 void status_exit(void)
 {
-    // Free module internals
+    /* Free module internals */
 }
 
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
 /**
 \brief    Get Icc status register
 
@@ -206,10 +206,10 @@ void status_exit(void)
 
 \ingroup module_status
 */
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
 void status_getIccStatus(tSeqNrValue* pSeqNr_p)
 {
-    // Reformat to sequence number type
+    /* Reformat to sequence number type */
     if(CHECK_BIT(statusInstance_l.iccStatus_m, STATUS_ICC_BUSY_FLAG_POS))
     {
         *pSeqNr_p = kSeqNrValueSecond;
@@ -221,7 +221,7 @@ void status_getIccStatus(tSeqNrValue* pSeqNr_p)
 
 }
 
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
 /**
 \brief    Set the SSDO receive channel to next element
 
@@ -230,7 +230,7 @@ void status_getIccStatus(tSeqNrValue* pSeqNr_p)
 
 \ingroup module_status
 */
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
 void status_setSsdoRxChanFlag(UINT8 chanNum_p, tSeqNrValue seqNr_p)
 {
     if(seqNr_p == kSeqNrValueFirst)
@@ -244,7 +244,7 @@ void status_setSsdoRxChanFlag(UINT8 chanNum_p, tSeqNrValue seqNr_p)
 
 }
 
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
 /**
 \brief    Get the SSDO transmit channel status
 
@@ -253,10 +253,10 @@ void status_setSsdoRxChanFlag(UINT8 chanNum_p, tSeqNrValue seqNr_p)
 
 \ingroup module_status
 */
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
 void status_getSsdoTxChanFlag(UINT8 chanNum_p, tSeqNrValue* pSeqNr_p)
 {
-    // Reformat to sequence number type
+    /* Reformat to sequence number type */
     if(CHECK_BIT(statusInstance_l.ssdoTxStatus_m,chanNum_p))
     {
         *pSeqNr_p = kSeqNrValueSecond;
@@ -267,7 +267,7 @@ void status_getSsdoTxChanFlag(UINT8 chanNum_p, tSeqNrValue* pSeqNr_p)
     }
 }
 
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
 /**
 \brief    Get the logbook transmit channel status
 
@@ -276,10 +276,10 @@ void status_getSsdoTxChanFlag(UINT8 chanNum_p, tSeqNrValue* pSeqNr_p)
 
 \ingroup module_status
 */
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
 void status_getLogTxChanFlag(UINT8 chanNum_p, tSeqNrValue* pSeqNr_p)
 {
-    // Reformat to sequence number type
+    /* Reformat to sequence number type */
     if(CHECK_BIT(statusInstance_l.logTxStatus_m, chanNum_p))
     {
         *pSeqNr_p = kSeqNrValueSecond;
@@ -290,15 +290,13 @@ void status_getLogTxChanFlag(UINT8 chanNum_p, tSeqNrValue* pSeqNr_p)
     }
 }
 
+/*============================================================================*/
+/*            P R I V A T E   F U N C T I O N S                               */
+/*============================================================================*/
+/* \name Private Functions */
+/* \{ */
 
-
-//============================================================================//
-//            P R I V A T E   F U N C T I O N S                               //
-//============================================================================//
-/// \name Private Functions
-/// \{
-
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
 /**
 \brief    Initialize the outgoing status buffer
 
@@ -310,7 +308,7 @@ void status_getLogTxChanFlag(UINT8 chanNum_p, tSeqNrValue* pSeqNr_p)
 
 \ingroup module_status
 */
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
 static BOOL status_initOutBuffer( tTbufNumLayout statOutId_p)
 {
     BOOL fReturn = FALSE;
@@ -321,14 +319,14 @@ static BOOL status_initOutBuffer( tTbufNumLayout statOutId_p)
     {
         if(pDescStatOut->buffSize_m == sizeof(tTbufStatusOutStructure))
         {
-            // Remember buffer address for later usage
+            /* Remember buffer address for later usage */
             statusInstance_l.pStatusOutLayout_m = (tTbufStatusOutStructure *)pDescStatOut->pBuffBase_m;
 
-            // Register status module pre action for sync processing
+            /* Register status module pre action for sync processing */
             if(stream_registerAction(kStreamActionPre, statOutId_p,
                     status_processSync, NULL) != FALSE)
             {
-                // Register outgoing status module post action for status register update
+                /* Register outgoing status module post action for status register update */
                 if(stream_registerAction(kStreamActionPost, statOutId_p,
                         status_updateOutStatusReg, NULL) != FALSE)
                 {
@@ -337,19 +335,19 @@ static BOOL status_initOutBuffer( tTbufNumLayout statOutId_p)
             }
         }
         else
-        {   // Invalid size of output buffer
+        {   /* Invalid size of output buffer */
             error_setError(kPsiModuleStatus, kPsiStatusBufferSizeMismatch);
         }
     }
     else
-    {   // Invalid base address of output buffer
+    {   /* Invalid base address of output buffer */
         error_setError(kPsiModuleStatus, kPsiStreamInvalidBuffer);
     }
 
     return fReturn;
 }
 
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
 /**
 \brief    Initialize the incoming status buffer
 
@@ -361,7 +359,7 @@ static BOOL status_initOutBuffer( tTbufNumLayout statOutId_p)
 
 \ingroup module_status
 */
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
 static BOOL status_initInBuffer(tTbufNumLayout statInId_p)
 {
     BOOL fReturn = FALSE;
@@ -372,37 +370,37 @@ static BOOL status_initInBuffer(tTbufNumLayout statInId_p)
     {
         if(pDescStatIn->buffSize_m == sizeof(tTbufStatusInStructure))
         {
-            // Remember buffer address for later usage
+            /* Remember buffer address for later usage */
             statusInstance_l.pStatusInLayout_m = (tTbufStatusInStructure *)pDescStatIn->pBuffBase_m;
 
-            // Register incoming status module post action for status register update
+            /* Register incoming status module post action for status register update */
             if(stream_registerAction(kStreamActionPost, statInId_p,
                     status_updateInStatusReg, NULL) != FALSE)
             {
                 fReturn = TRUE;
             }
             else
-            {   // Unable to register in buffer user action
+            {   /* Unable to register in buffer user action */
                 error_setError(kPsiModuleStatus, kPsiStreamInitError);
             }
 
         }
         else
         {
-            // Invalid size of input buffer
+            /* Invalid size of input buffer */
             error_setError(kPsiModuleStatus, kPsiStatusBufferSizeMismatch);
         }
     }
     else
     {
-        // Invalid base address of input buffer
+        /* Invalid base address of input buffer */
         error_setError(kPsiModuleStatus, kPsiStreamInvalidBuffer);
     }
 
     return fReturn;
 }
 
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
 /**
 \brief    Process time synchronization task
 
@@ -416,7 +414,7 @@ static BOOL status_initInBuffer(tTbufNumLayout statInId_p)
 
 \ingroup module_status
 */
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
 static BOOL status_processSync(UINT8* pBuffer_p, UINT16 bufSize_p,
         void * pUserArg_p)
 {
@@ -427,10 +425,10 @@ static BOOL status_processSync(UINT8* pBuffer_p, UINT16 bufSize_p,
     UNUSED_PARAMETER(bufSize_p);
     UNUSED_PARAMETER(pUserArg_p);
 
-    // Convert to status buffer structure
+    /* Convert to status buffer structure */
     pStatusBuff = (tTbufStatusOutStructure*) pBuffer_p;
 
-    // Call synchronous callback function
+    /* Call synchronous callback function */
     timeStamp.relTimeLow_m = ami_getUint32Le((UINT8 *)&pStatusBuff->relTimeLow_m);
     timeStamp.relTimeHigh_m = ami_getUint32Le((UINT8 *)&pStatusBuff->relTimeHigh_m);
 
@@ -446,7 +444,7 @@ static BOOL status_processSync(UINT8* pBuffer_p, UINT16 bufSize_p,
     return fReturn;
 }
 
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
 /**
 \brief    Process outgoing status register fields
 
@@ -460,7 +458,7 @@ static BOOL status_processSync(UINT8* pBuffer_p, UINT16 bufSize_p,
 
 \ingroup module_status
 */
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
 static BOOL status_updateOutStatusReg(UINT8* pBuffer_p, UINT16 bufSize_p,
         void * pUserArg_p)
 {
@@ -469,25 +467,25 @@ static BOOL status_updateOutStatusReg(UINT8* pBuffer_p, UINT16 bufSize_p,
     UNUSED_PARAMETER(bufSize_p);
     UNUSED_PARAMETER(pUserArg_p);
 
-    // Convert to status buffer structure
+    /* Convert to status buffer structure */
     pStatusBuff = (tTbufStatusOutStructure*) pBuffer_p;
 
-    // Get CC status register
+    /* Get CC status register */
     statusInstance_l.iccStatus_m = ami_getUint8Le((UINT8 *)&pStatusBuff->iccStatus_m);
 
-    // Update ssdo tx status register
+    /* Update ssdo tx status register */
     statusInstance_l.ssdoTxStatus_m = ami_getUint16Le((UINT8 *)&pStatusBuff->ssdoConsStatus_m);
 
-    // Update logbook tx status register
+    /* Update logbook tx status register */
     statusInstance_l.logTxStatus_m = ami_getUint8Le((UINT8 *)&pStatusBuff->logConsStatus_m);
 
-    // Acknowledge buffer
+    /* Acknowledge buffer */
     stream_ackBuffer(statusInstance_l.buffOutId_m);
 
     return TRUE;
 }
 
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
 /**
 \brief    Process incoming status register fields
 
@@ -501,7 +499,7 @@ static BOOL status_updateOutStatusReg(UINT8* pBuffer_p, UINT16 bufSize_p,
 
 \ingroup module_status
 */
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
 static BOOL status_updateInStatusReg(UINT8* pBuffer_p, UINT16 bufSize_p,
         void * pUserArg_p)
 {
@@ -510,18 +508,18 @@ static BOOL status_updateInStatusReg(UINT8* pBuffer_p, UINT16 bufSize_p,
     UNUSED_PARAMETER(bufSize_p);
     UNUSED_PARAMETER(pUserArg_p);
 
-    // Convert to status buffer structure
+    /* Convert to status buffer structure */
     pStatusBuff = (tTbufStatusInStructure*) pBuffer_p;
 
-    // Acknowledge buffer
+    /* Acknowledge buffer */
     stream_ackBuffer(statusInstance_l.buffInId_m);
 
-    // Write rx status register
+    /* Write rx status register */
     ami_setUint16Le((UINT8 *)&pStatusBuff->ssdoProdStatus_m, statusInstance_l.ssdoRxStatus_m);
 
     return TRUE;
 }
 
-/// \}
+/* \} */
 
 

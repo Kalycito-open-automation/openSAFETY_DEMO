@@ -43,9 +43,9 @@ and forwards objects from the user application to the PCP.
 * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
 
-//------------------------------------------------------------------------------
-// includes
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
+/* includes                                                                   */
+/*----------------------------------------------------------------------------*/
 
 #include <libpsi/internal/cc.h>
 
@@ -57,85 +57,85 @@ and forwards objects from the user application to the PCP.
 
 #if(((PSI_MODULE_INTEGRATION) & (PSI_MODULE_CC)) != 0)
 
-//============================================================================//
-//            G L O B A L   D E F I N I T I O N S                             //
-//============================================================================//
+/*============================================================================*/
+/*            G L O B A L   D E F I N I T I O N S                             */
+/*============================================================================*/
 
-//------------------------------------------------------------------------------
-// const defines
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
+/* const defines                                                              */
+/*----------------------------------------------------------------------------*/
 
-//------------------------------------------------------------------------------
-// module global vars
-//------------------------------------------------------------------------------
-
-
-//------------------------------------------------------------------------------
-// global function prototypes
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
+/* module global vars                                                         */
+/*----------------------------------------------------------------------------*/
 
 
-//============================================================================//
-//            P R I V A T E   D E F I N I T I O N S                           //
-//============================================================================//
+/*----------------------------------------------------------------------------*/
+/* global function prototypes                                                 */
+/*----------------------------------------------------------------------------*/
 
-//------------------------------------------------------------------------------
-// const defines
-//------------------------------------------------------------------------------
 
-//------------------------------------------------------------------------------
-// local types
-//------------------------------------------------------------------------------
+/*============================================================================*/
+/*            P R I V A T E   D E F I N I T I O N S                           */
+/*============================================================================*/
+
+/*----------------------------------------------------------------------------*/
+/* const defines                                                              */
+/*----------------------------------------------------------------------------*/
+
+/*----------------------------------------------------------------------------*/
+/* local types                                                                */
+/*----------------------------------------------------------------------------*/
 
 /**
  * \brief Status of the asynchronous channel
  */
 typedef enum {
-    kChanStatusInvalid   = 0x00,    ///< Invalid channel status
-    kChanStatusBusy      = 0x01,    ///< Channel is currently busy
-    kChanStatusFree      = 0x02,    ///< Channel is free for transmission
+    kChanStatusInvalid   = 0x00,    /**< Invalid channel status */
+    kChanStatusBusy      = 0x01,    /**< Channel is currently busy */
+    kChanStatusFree      = 0x02,    /**< Channel is free for transmission */
 } tCcChanStatus;
 
 typedef struct {
-    UINT8                   isLocked_m;        ///< Is buffer free for filling
-    tTbufCcStructure*       pIccTxPayl_m;      ///< Pointer to the Icc transmit buffer
+    UINT8                   isLocked_m;        /**< Is buffer free for filling */
+    tTbufCcStructure*       pIccTxPayl_m;      /**< Pointer to the Icc transmit buffer */
 } tCcTxBuffer;
 
 /**
  * \brief Parameter type of the transmit buffer
  */
 typedef struct {
-    tTbufNumLayout     idIccTx_m;          ///< Input transmit buffer id
-    tCcTxBuffer        iccTxBuffer_m;      ///< Parameters of the Icc buffer
-    tSeqNrValue        currTxSeqNr_m;      ///< Current transmit sequence number
-    tTimeoutInstance   pTimeoutInst_m;     ///< Timer instance for asynchronous transmissions
+    tTbufNumLayout     idIccTx_m;          /**< Input transmit buffer id */
+    tCcTxBuffer        iccTxBuffer_m;      /**< Parameters of the Icc buffer */
+    tSeqNrValue        currTxSeqNr_m;      /**< Current transmit sequence number */
+    tTimeoutInstance   pTimeoutInst_m;     /**< Timer instance for asynchronous transmissions */
 } tCcTxChannel;
 
 /**
  * \brief Parameter type of the receive buffer
  */
 typedef struct {
-    tTbufNumLayout     idOccRx_m;           ///< Output receive buffer id
-    tTbufCcStructure*  pOccLayout_m;        ///< Pointer to the Occ transmit buffer
+    tTbufNumLayout     idOccRx_m;           /**< Output receive buffer id */
+    tTbufCcStructure*  pOccLayout_m;        /**< Pointer to the Occ transmit buffer */
 } tCcRxChannel;
 
 /**
 \brief CC user instance type
 */
 typedef struct {
-    tCcTxChannel       txChannel_m;         ///< Application outgoing channel
-    tCcRxChannel       rxChannel_m;         ///< Application incoming channel
+    tCcTxChannel       txChannel_m;         /**< Application outgoing channel */
+    tCcRxChannel       rxChannel_m;         /**< Application incoming channel */
 } tCcInstance;
 
-//------------------------------------------------------------------------------
-// local vars
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
+/* local vars                                                                 */
+/*----------------------------------------------------------------------------*/
 
 static tCcInstance          ccInstance_l;
 
-//------------------------------------------------------------------------------
-// local function prototypes
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
+/* local function prototypes                                                  */
+/*----------------------------------------------------------------------------*/
 static BOOL cc_initIccTxBuffer(tTbufNumLayout iccId_p);
 static BOOL cc_initOccRxBuffer(tTbufNumLayout occId_p);
 static void cc_initCcObjects(void);
@@ -145,11 +145,11 @@ static tCcChanStatus cc_checkIccStatus(void);
 static BOOL cc_handleOccRxObjects(UINT8* pBuffer_p, UINT16 bufSize_p,
         void* pUserArg_p);
 
-//============================================================================//
-//            P U B L I C   F U N C T I O N S                                 //
-//============================================================================//
+/*============================================================================*/
+/*            P U B L I C   F U N C T I O N S                                 */
+/*============================================================================*/
 
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
 /**
 \brief    Initialize the cc module
 
@@ -163,7 +163,7 @@ Initialize the input and output configuration channel
 
 \ingroup module_cc
 */
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
 BOOL cc_init(tCcInitParam* pCcInitParam_p)
 {
     BOOL fReturn = FALSE;
@@ -184,23 +184,23 @@ BOOL cc_init(tCcInitParam* pCcInitParam_p)
         }
         else
         {
-            // Register icc tx buffer to stream module
+            /* Register icc tx buffer to stream module */
             if(cc_initIccTxBuffer(pCcInitParam_p->iccId_m) != FALSE)
             {
-                // Register occ rx buffer to stream module
+                /* Register occ rx buffer to stream module */
                 if(cc_initOccRxBuffer(pCcInitParam_p->occId_m) != FALSE)
                 {
-                    // Initialize the configuration channel objects module
+                    /* Initialize the configuration channel objects module */
                     if(ccobject_init(pCcInitParam_p->pfnCritSec_p) != FALSE)
                     {
-                        // Initialize the cc object internal list
+                        /* Initialize the cc object internal list */
                         cc_initCcObjects();
 
-                        // Fill local instance structure
+                        /* Fill local instance structure */
                         ccInstance_l.txChannel_m.idIccTx_m = pCcInitParam_p->iccId_m;
                         ccInstance_l.rxChannel_m.idOccRx_m = pCcInitParam_p->occId_m;
 
-                        // Set sequence number init value
+                        /* Set sequence number init value */
                         ccInstance_l.txChannel_m.currTxSeqNr_m = kSeqNrValueSecond;
 
                         fReturn = TRUE;
@@ -219,23 +219,23 @@ BOOL cc_init(tCcInitParam* pCcInitParam_p)
     return fReturn;
 }
 
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
 /**
 \brief    Close the configuration channel
 
 \ingroup module_cc
 */
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
 void cc_exit(void)
 {
-    // Free cc object list module
+    /* Free cc object list module */
     ccobject_exit();
 
-    // Destroy timeout module
+    /* Destroy timeout module */
     timeout_destroy(ccInstance_l.txChannel_m.pTimeoutInst_m);
 }
 
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
 /**
 \brief    Read a PCP object via the configuration channel
 
@@ -248,12 +248,12 @@ void cc_exit(void)
 
 \ingroup module_cc
 */
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
 tConfChanObject* cc_readObject(UINT16 objIdx_p, UINT8 objSubIdx_p)
 {
     tConfChanObject* pObject;
 
-    // Read object from local object list
+    /* Read object from local object list */
     pObject = ccobject_readObject(objIdx_p, objSubIdx_p);
     if(pObject == NULL)
     {
@@ -263,7 +263,7 @@ tConfChanObject* cc_readObject(UINT16 objIdx_p, UINT8 objSubIdx_p)
     return pObject;
 }
 
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
 /**
 \brief    Write a PCP object via the configuration channel
 
@@ -276,7 +276,7 @@ tConfChanObject* cc_readObject(UINT16 objIdx_p, UINT8 objSubIdx_p)
 
 \ingroup module_cc
 */
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
 tCcWriteStatus cc_writeObject(tConfChanObject* pObject_p)
 {
     tCcWriteStatus stateWrite = kCcWriteStatusError;
@@ -294,33 +294,33 @@ tCcWriteStatus cc_writeObject(tConfChanObject* pObject_p)
         }
         else
         {
-            // Check if buffer is free for filling
+            /* Check if buffer is free for filling */
             if(ccInstance_l.txChannel_m.iccTxBuffer_m.isLocked_m == FALSE)
             {
-                // Write object data to local object list
+                /* Write object data to local object list */
                 if(ccobject_writeObject(pObject_p) != FALSE)
                 {
-                    // Fill transmit buffer
+                    /* Fill transmit buffer */
                     PSI_MEMCPY(&ccInstance_l.txChannel_m.iccTxBuffer_m.pIccTxPayl_m->objPayloadLow_m,
                             &pObject_p->objPayloadLow_m, pObject_p->objSize_m);
 
-                    // Set object index and subindex
+                    /* Set object index and subindex */
                     ami_setUint16Le((UINT8*)&ccInstance_l.txChannel_m.iccTxBuffer_m.pIccTxPayl_m->objIdx_m,
                             pObject_p->objIdx_m);
                     ami_setUint8Le((UINT8*)&ccInstance_l.txChannel_m.iccTxBuffer_m.pIccTxPayl_m->objSubIdx_m,
                             pObject_p->objSubIdx_m);
 
-                    // Set sequence number in tx buffer
+                    /* Set sequence number in tx buffer */
                     ami_setUint8Le((UINT8*)&ccInstance_l.txChannel_m.iccTxBuffer_m.pIccTxPayl_m->seqNr_m,
                             ccInstance_l.txChannel_m.currTxSeqNr_m);
 
-                    // Lock buffer for transmission
+                    /* Lock buffer for transmission */
                     ccInstance_l.txChannel_m.iccTxBuffer_m.isLocked_m = TRUE;
 
-                    // Enable transmit timer
+                    /* Enable transmit timer */
                     timeout_startTimer(ccInstance_l.txChannel_m.pTimeoutInst_m);
 
-                    // Acknowledge producing transmit buffer
+                    /* Acknowledge producing transmit buffer */
                     stream_ackBuffer(ccInstance_l.txChannel_m.idIccTx_m);
 
                     stateWrite = kCcWriteStatusSuccessful;
@@ -336,27 +336,27 @@ tCcWriteStatus cc_writeObject(tConfChanObject* pObject_p)
     return stateWrite;
 }
 
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
 /**
 \brief    Process configuration channel module
 
 \ingroup module_cc
 */
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
 void cc_process(void)
 {
-    // Process transmit channel objects
+    /* Process transmit channel objects */
     cc_processTxObject();
 }
 
 
-//============================================================================//
-//            P R I V A T E   F U N C T I O N S                               //
-//============================================================================//
-/// \name Private Functions
-/// \{
+/*============================================================================*/
+/*            P R I V A T E   F U N C T I O N S                               */
+/*============================================================================*/
+/* \name Private Functions */
+/* \{ */
 
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
 /**
 \brief    Process the transmit objects
 
@@ -365,7 +365,7 @@ PCP.
 
 \ingroup module_cc
 */
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
 static void cc_processTxObject(void)
 {
     tCcChanStatus chanState;
@@ -373,37 +373,37 @@ static void cc_processTxObject(void)
 
     if(ccInstance_l.txChannel_m.iccTxBuffer_m.isLocked_m != FALSE)
     {
-        // Check if channel is ready for transmission
+        /* Check if channel is ready for transmission */
         chanState = cc_checkIccStatus();
         if(chanState == kChanStatusFree)
         {
-            // Ongoing message is acknowledged
+            /* Ongoing message is acknowledged */
             ccInstance_l.txChannel_m.iccTxBuffer_m.isLocked_m = FALSE;
 
-            // Increment local sequence number
+            /* Increment local sequence number */
             cc_changeLocalSeqNr(&ccInstance_l.txChannel_m.currTxSeqNr_m);
 
-            // Stop the timer for this message
+            /* Stop the timer for this message */
             timeout_stopTimer(ccInstance_l.txChannel_m.pTimeoutInst_m);
         }
         else
         {
-            // Channel is currently busy!
-            // Check if timeout counter is expired
+            /* Channel is currently busy! */
+            /* Check if timeout counter is expired */
             timerState = timeout_checkExpire(ccInstance_l.txChannel_m.pTimeoutInst_m);
             if(timerState == kTimerStateExpired)
             {
-                // Timeout occurred -> Increment local sequence number!
+                /* Timeout occurred -> Increment local sequence number! */
                 cc_changeLocalSeqNr(&ccInstance_l.txChannel_m.currTxSeqNr_m);
 
-                // Unlock channel anyway!
+                /* Unlock channel anyway! */
                 ccInstance_l.txChannel_m.iccTxBuffer_m.isLocked_m = FALSE;
             }
         }
     }
 }
 
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
 /**
 \brief    Initialize the Icc transmit buffer
 
@@ -415,7 +415,7 @@ static void cc_processTxObject(void)
 
 \ingroup module_cc
 */
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
 static BOOL cc_initIccTxBuffer(tTbufNumLayout iccId_p)
 {
     BOOL fReturn = FALSE;
@@ -426,11 +426,11 @@ static BOOL cc_initIccTxBuffer(tTbufNumLayout iccId_p)
     {
         if(pDescIccRcv->buffSize_m == sizeof(tTbufCcStructure))
         {
-            // Remember buffer address for later usage
+            /* Remember buffer address for later usage */
             ccInstance_l.txChannel_m.iccTxBuffer_m.pIccTxPayl_m =
                     (tTbufCcStructure *)pDescIccRcv->pBuffBase_m;
 
-            // Create timeout instance for transmit channel
+            /* Create timeout instance for transmit channel */
             ccInstance_l.txChannel_m.pTimeoutInst_m = timeout_create(
                     CC_TX_TIMEOUT_CYCLE_COUNT);
             if(ccInstance_l.txChannel_m.pTimeoutInst_m != NULL)
@@ -455,7 +455,7 @@ static BOOL cc_initIccTxBuffer(tTbufNumLayout iccId_p)
     return fReturn;
 }
 
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
 /**
 \brief    Initialize the Occ receive buffer
 
@@ -467,7 +467,7 @@ static BOOL cc_initIccTxBuffer(tTbufNumLayout iccId_p)
 
 \ingroup module_cc
 */
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
 static BOOL cc_initOccRxBuffer(tTbufNumLayout occId_p)
 {
     BOOL fReturn = FALSE;
@@ -478,11 +478,11 @@ static BOOL cc_initOccRxBuffer(tTbufNumLayout occId_p)
     {
         if(pDescOccTrans->buffSize_m == sizeof(tTbufCcStructure))
         {
-            // Remember buffer address for later usage
+            /* Remember buffer address for later usage */
             ccInstance_l.rxChannel_m.pOccLayout_m =
                     (tTbufCcStructure *)pDescOccTrans->pBuffBase_m;
 
-            // Register object receive post action
+            /* Register object receive post action */
             if(stream_registerAction(kStreamActionPost, occId_p,
                     cc_handleOccRxObjects, NULL) != FALSE)
             {
@@ -502,13 +502,13 @@ static BOOL cc_initOccRxBuffer(tTbufNumLayout occId_p)
     return fReturn;
 }
 
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
 /**
 \brief    Initialize the list of configuration channel objects
 
 \ingroup module_cc
 */
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
 static void cc_initCcObjects(void)
 {
     tConfChanObject  object;
@@ -520,18 +520,18 @@ static void cc_initCcObjects(void)
 
     for(i=0; i < CONF_CHAN_NUM_OBJECTS; i++)
     {
-        // Assemble object for list
+        /* Assemble object for list */
         object.objIdx_m = initObjList[i].objIdx;
         object.objSubIdx_m = initObjList[i].objSubIdx;
         object.objSize_m = initObjList[i].objSize;
         PSI_MEMCPY(&object.objPayloadLow_m, &paylDest, object.objSize_m);
 
-        // Now initialize the object in the local list
+        /* Now initialize the object in the local list */
         ccobject_initObject(i, &object);
     }
 }
 
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
 /**
 \brief    Change local sequence number
 
@@ -539,7 +539,7 @@ static void cc_initCcObjects(void)
 
 \ingroup module_cc
 */
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
 static void cc_changeLocalSeqNr(tSeqNrValue* pSeqNr_p)
 {
     if(*pSeqNr_p == kSeqNrValueFirst)
@@ -552,7 +552,7 @@ static void cc_changeLocalSeqNr(tSeqNrValue* pSeqNr_p)
     }
 }
 
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
 /**
 \brief    Check if channel is ready for transmission
 
@@ -562,19 +562,19 @@ static void cc_changeLocalSeqNr(tSeqNrValue* pSeqNr_p)
 
 \ingroup module_cc
 */
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
 static tCcChanStatus cc_checkIccStatus(void)
 {
     tCcChanStatus chanState = kChanStatusInvalid;
     tSeqNrValue  seqNr = kSeqNrValueInvalid;
 
-    // Get status of transmit channel
+    /* Get status of transmit channel */
     status_getIccStatus(&seqNr);
 
-    // Check if old transmission is already finished!
+    /* Check if old transmission is already finished! */
     if(seqNr != ccInstance_l.txChannel_m.currTxSeqNr_m)
     {
-        // Message in progress -> retry later!
+        /* Message in progress -> retry later! */
         chanState = kChanStatusBusy;
     }
     else
@@ -585,7 +585,7 @@ static tCcChanStatus cc_checkIccStatus(void)
     return chanState;
 }
 
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
 /**
 \brief    Handle incoming objects from the occ buffer
 
@@ -599,7 +599,7 @@ static tCcChanStatus cc_checkIccStatus(void)
 
 \ingroup module_cc
 */
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
 static BOOL cc_handleOccRxObjects(UINT8* pBuffer_p, UINT16 bufSize_p,
         void* pUserArg_p)
 {
@@ -610,31 +610,31 @@ static BOOL cc_handleOccRxObjects(UINT8* pBuffer_p, UINT16 bufSize_p,
     UNUSED_PARAMETER(bufSize_p);
     UNUSED_PARAMETER(pUserArg_p);
 
-    // Convert to configuration channel buffer structure
+    /* Convert to configuration channel buffer structure */
     pOccBuff = (tTbufCcStructure*) pBuffer_p;
 
-    // Increment transmit timer cycle count
+    /* Increment transmit timer cycle count */
     timeout_incrementCounter(ccInstance_l.txChannel_m.pTimeoutInst_m);
 
-    // Forward receive objects to local list
+    /* Forward receive objects to local list */
     writeState = ccobject_writeCurrObject(pOccBuff->objIdx_m, pOccBuff->objSubIdx_m,
                  (UINT8*)&pOccBuff->objPayloadLow_m);
     if(writeState == kCcWriteStateSuccessful)
     {
-        // Increment local object write pointer
+        /* Increment local object write pointer */
         ccobject_incObjWritePointer();
 
         fReturn = TRUE;
     }
     else
     {
-        // Don't update object and wait for sync again
+        /* Don't update object and wait for sync again */
         fReturn = TRUE;
     }
 
     return fReturn;
 }
 
-/// \}
+/* \} */
 
-#endif // #if (((PSI_MODULE_INTEGRATION) & (PSI_MODULE_CC)) != 0)
+#endif /* #if (((PSI_MODULE_INTEGRATION) & (PSI_MODULE_CC)) != 0) */

@@ -38,22 +38,22 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef _INC_libpsi_status_H_
 #define _INC_libpsi_status_H_
 
-//------------------------------------------------------------------------------
-// includes
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
+/* includes                                                                   */
+/*----------------------------------------------------------------------------*/
 
 #include <libpsi/apglobal.h>
 
 #include <libpsicommon/status.h>
 
-//------------------------------------------------------------------------------
-// const defines
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
+/* const defines                                                              */
+/*----------------------------------------------------------------------------*/
 
 
-//------------------------------------------------------------------------------
-// typedef
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
+/* typedef                                                                    */
+/*----------------------------------------------------------------------------*/
 
 /**
  * \brief  Timestamp of the synchronous interrupt
@@ -71,23 +71,17 @@ typedef BOOL (* tPsiAppCbSync) ( tPsiTimeStamp* pTimeStamp_p );
  * \brief  Status module initialization structure
  */
 typedef struct {
-    tPsiAppCbSync          pfnAppCbSync_m;    ///< Syncronous callback function
+    tPsiAppCbSync          pfnAppCbSync_m;    /**< Syncronous callback function */
 
-    tTbufNumLayout           buffOutId_m;       ///< Id of the output status buffer
-    tTbufNumLayout           buffInId_m;        ///< Id of the input status buffer
+    tTbufNumLayout           buffOutId_m;       /**< Id of the output status buffer */
+    tTbufNumLayout           buffInId_m;        /**< Id of the input status buffer */
 } tStatusInitParam;
 
-//------------------------------------------------------------------------------
-// function prototypes
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
+/* function prototypes                                                        */
+/*----------------------------------------------------------------------------*/
 
 DLLEXPORT BOOL status_init(tStatusInitParam* pInitParam_p);
 DLLEXPORT void status_exit(void);
 
 #endif /* _INC_libpsi_status_H_ */
-
-
-
-
-
-

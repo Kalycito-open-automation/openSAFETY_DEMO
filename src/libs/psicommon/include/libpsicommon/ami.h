@@ -36,49 +36,49 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef _INC_libpsicommon_ami_H_
 #define _INC_libpsicommon_ami_H_
 
-//------------------------------------------------------------------------------
-// includes
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
+/* includes                                                                   */
+/*----------------------------------------------------------------------------*/
 #include <libpsicommon/global.h>
 
-//------------------------------------------------------------------------------
-// const defines
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
+/* const defines                                                              */
+/*----------------------------------------------------------------------------*/
 
-// Conversion macros for datatype UINT8 (saves code size)
+/* Conversion macros for datatype UINT8 (saves code size) */
 #define ami_setUint8Be(pAddr_p, uint8Val_p) {*(UINT8 *)(pAddr_p) = (uint8Val_p);}
 #define ami_setUint8Le(pAddr_p, uint8Val_p) {*(UINT8 *)(pAddr_p) = (uint8Val_p);}
 
 #define ami_getUint8Be(pAddr_p) (*(UINT8 *)(pAddr_p))
 #define ami_getUint8Le(pAddr_p) (*(UINT8 *)(pAddr_p))
 
-//------------------------------------------------------------------------------
-// typedef
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
+/* typedef                                                                    */
+/*----------------------------------------------------------------------------*/
 
-//------------------------------------------------------------------------------
-// function prototypes
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
+/* function prototypes                                                        */
+/*----------------------------------------------------------------------------*/
 
 #ifdef __cplusplus
     extern "C" {
 #endif
 
-// Conversion functions for datatype WORD
+/* Conversion functions for datatype WORD */
 DLLEXPORT void ami_setUint16Be(void* pAddr_p, UINT16 uint16Val_p);
 DLLEXPORT void ami_setUint16Le(void* pAddr_p, UINT16 uint16Val_p);
 
 DLLEXPORT UINT16 ami_getUint16Be(void* pAddr_p);
 DLLEXPORT UINT16 ami_getUint16Le(void* pAddr_p);
 
-// Conversion functions for datatype DWORD
+/* Conversion functions for datatype DWORD */
 DLLEXPORT void ami_setUint32Be(void* pAddr_p, UINT32 uint32Val_p);
 DLLEXPORT void ami_setUint32Le(void* pAddr_p, UINT32 uint32Val_p);
 
 DLLEXPORT UINT32 ami_getUint32Be(void* pAddr_p);
 DLLEXPORT UINT32 ami_getUint32Le(void* pAddr_p);
 
-// Conversion functions for datatype QWORD
+/* Conversion functions for datatype QWORD */
 DLLEXPORT void ami_setUint64Be(void* pAddr_p, UINT64 uint64Val_p);
 DLLEXPORT void ami_setUint64Le(void* pAddr_p, UINT64 uint64Val_p);
 

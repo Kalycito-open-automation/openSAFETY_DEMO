@@ -38,54 +38,54 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef _INC_config_rpdo_H_
 #define _INC_config_rpdo_H_
 
-//------------------------------------------------------------------------------
-// includes
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
+/* includes                                                                   */
+/*----------------------------------------------------------------------------*/
 
 #include <libpsicommon/global.h>
 
-//------------------------------------------------------------------------------
-// const defines
-//------------------------------------------------------------------------------
-#define RPDO_NUM_OBJECTS    4       ///< Number of mapped RPDO objects
+/*----------------------------------------------------------------------------*/
+/* const defines                                                              */
+/*----------------------------------------------------------------------------*/
+#define RPDO_NUM_OBJECTS    4       /**< Number of mapped RPDO objects */
 
-//------------------------------------------------------------------------------
-// typedef
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
+/* typedef                                                                    */
+/*----------------------------------------------------------------------------*/
 
 /**
  * \brief List of all mappable objects
  */
 typedef struct {
-    UINT8          digitalInput0;   ///< Digital input RPDO object 0
-    UINT8          digitalInput1;   ///< Digital input RPDO object 1
-    UINT8          digitalInput2;   ///< Digital input RPDO object 2
-    UINT8          digitalInput3;   ///< Digital input RPDO object 3
+    UINT8          digitalInput0;   /**< Digital input RPDO object 0 */
+    UINT8          digitalInput1;   /**< Digital input RPDO object 1 */
+    UINT8          digitalInput2;   /**< Digital input RPDO object 2 */
+    UINT8          digitalInput3;   /**< Digital input RPDO object 3 */
 } tRpdoMappedObj;
 
-//------------------------------------------------------------------------------
-// offsetof defines
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
+/* offsetof defines                                                           */
+/*----------------------------------------------------------------------------*/
 
 #define TBUF_RPDO_DIGINPUT0_OFF     offsetof(tRpdoMappedObj, digitalInput0)
 #define TBUF_RPDO_DIGINPUT1_OFF     offsetof(tRpdoMappedObj, digitalInput1)
 #define TBUF_RPDO_DIGINPUT2_OFF     offsetof(tRpdoMappedObj, digitalInput2)
 #define TBUF_RPDO_DIGINPUT3_OFF     offsetof(tRpdoMappedObj, digitalInput3)
 
-//------------------------------------------------------------------------------
-// object linking parameters
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
+/* object linking parameters                                                  */
+/*----------------------------------------------------------------------------*/
 
-// Link between object and buffer address: objIdx | objSubIdx | addressOffset           | objSize
+/* Link between object and buffer address: objIdx | objSubIdx | addressOffset           | objSize */
 #define RPDO_LINKING_LIST_INIT_VECTOR   { {0x6200 , 0x01      , TBUF_RPDO_DIGINPUT0_OFF , 1       }, \
                                           {0x6200 , 0x02      , TBUF_RPDO_DIGINPUT1_OFF , 1       }, \
                                           {0x6200 , 0x03      , TBUF_RPDO_DIGINPUT2_OFF , 1       }, \
                                           {0x6200 , 0x04      , TBUF_RPDO_DIGINPUT3_OFF , 1       }  \
                                         }
 
-//------------------------------------------------------------------------------
-// function prototypes
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
+/* function prototypes                                                        */
+/*----------------------------------------------------------------------------*/
 
 #endif /* _INC_config_rpdo_H_ */
 

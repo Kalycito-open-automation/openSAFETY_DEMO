@@ -43,67 +43,67 @@ application and back.
 * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
 
-//------------------------------------------------------------------------------
-// includes
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
+/* includes                                                                   */
+/*----------------------------------------------------------------------------*/
 
 #include <libpsi/internal/pdo.h>
 #include <libpsi/internal/stream.h>
 
 #if(((PSI_MODULE_INTEGRATION) & (PSI_MODULE_PDO)) != 0)
 
-//============================================================================//
-//            G L O B A L   D E F I N I T I O N S                             //
-//============================================================================//
+/*============================================================================*/
+/*            G L O B A L   D E F I N I T I O N S                             */
+/*============================================================================*/
 
-//------------------------------------------------------------------------------
-// const defines
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
+/* const defines                                                              */
+/*----------------------------------------------------------------------------*/
 
-//------------------------------------------------------------------------------
-// module global vars
-//------------------------------------------------------------------------------
-
-
-//------------------------------------------------------------------------------
-// global function prototypes
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
+/* module global vars                                                         */
+/*----------------------------------------------------------------------------*/
 
 
-//============================================================================//
-//            P R I V A T E   D E F I N I T I O N S                           //
-//============================================================================//
+/*----------------------------------------------------------------------------*/
+/* global function prototypes                                                 */
+/*----------------------------------------------------------------------------*/
 
-//------------------------------------------------------------------------------
-// const defines
-//------------------------------------------------------------------------------
 
-//------------------------------------------------------------------------------
-// local types
-//------------------------------------------------------------------------------
+/*============================================================================*/
+/*            P R I V A T E   D E F I N I T I O N S                           */
+/*============================================================================*/
+
+/*----------------------------------------------------------------------------*/
+/* const defines                                                              */
+/*----------------------------------------------------------------------------*/
+
+/*----------------------------------------------------------------------------*/
+/* local types                                                                */
+/*----------------------------------------------------------------------------*/
 
 /**
 * \brief PDO user instance type
 */
 typedef struct
 {
-    UINT8           rpdoId_m;           ///< Id of the rpdo buffer
-    tTbufRpdoImage* pRpdoLayout_m;      ///< Pointer to the rpdo triple buffer
-    UINT32          rpdoRelTimeLow_m;   ///< Low value of the relative time
-    UINT8           tpdoId_m;           ///< Id of the tpdo buffer
-    tTbufTpdoImage* pTpdoLayout_m;      ///< Pointer to the tpdo triple buffer
-    tPsiPdoCb     pfnPdoCb_m;         ///< Process PDO user callback function
+    UINT8           rpdoId_m;           /**< Id of the rpdo buffer */
+    tTbufRpdoImage* pRpdoLayout_m;      /**< Pointer to the rpdo triple buffer */
+    UINT32          rpdoRelTimeLow_m;   /**< Low value of the relative time */
+    UINT8           tpdoId_m;           /**< Id of the tpdo buffer */
+    tTbufTpdoImage* pTpdoLayout_m;      /**< Pointer to the tpdo triple buffer */
+    tPsiPdoCb       pfnPdoCb_m;         /**< Process PDO user callback function */
 } tPdoInstance;
 
-//------------------------------------------------------------------------------
-// local vars
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
+/* local vars                                                                 */
+/*----------------------------------------------------------------------------*/
 
 static tPdoInstance          pdoInstance_l;
 
-//------------------------------------------------------------------------------
-// local function prototypes
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
+/* local function prototypes                                                  */
+/*----------------------------------------------------------------------------*/
 
 static BOOL pdo_process(void);
 static BOOL pdo_initRpdoBuffer(tTbufNumLayout rpdoId_p);
@@ -111,11 +111,11 @@ static BOOL pdo_initTpdoBuffer(tTbufNumLayout tpdoId_p);
 static BOOL pdo_ackTpdo(UINT8* pBuffer_p, UINT16 bufSize_p, void * pUserArg_p);
 static BOOL pdo_processRpdo(UINT8* pBuffer_p, UINT16 bufSize_p, void * pUserArg_p);
 
-//============================================================================//
-//            P U B L I C   F U N C T I O N S                                 //
-//============================================================================//
+/*============================================================================*/
+/*            P U B L I C   F U N C T I O N S                                 */
+/*============================================================================*/
 
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
 /**
 \brief    Initialize the PDO module
 
@@ -128,7 +128,7 @@ static BOOL pdo_processRpdo(UINT8* pBuffer_p, UINT16 bufSize_p, void * pUserArg_
 
 \ingroup module_pdo
 */
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
 BOOL pdo_init(tPsiPdoCb pfnPdoCb_p, tPdoInitParam* pPdoInitParam_p)
 {
     BOOL fReturn = FALSE, fError = FALSE;
@@ -138,7 +138,7 @@ BOOL pdo_init(tPsiPdoCb pfnPdoCb_p, tPdoInitParam* pPdoInitParam_p)
     if(pfnPdoCb_p == NULL      ||
        pPdoInitParam_p == NULL  )
     {
-        // Wrong parameters passed to module
+        /* Wrong parameters passed to module */
         error_setError(kPsiModulePdo, kPsiPdoInitError);
     }
     else
@@ -147,14 +147,14 @@ BOOL pdo_init(tPsiPdoCb pfnPdoCb_p, tPdoInitParam* pPdoInitParam_p)
             pPdoInitParam_p->buffIdTpdo_m >= kTbufCount   )               ||
             pPdoInitParam_p->buffIdRpdo_m == pPdoInitParam_p->buffIdTpdo_m )
         {
-            // At least one PDO needs to be initialized
+            /* At least one PDO needs to be initialized */
             error_setError(kPsiModulePdo, kPsiPdoInitError);
         }
         else
         {
             if(pPdoInitParam_p->buffIdRpdo_m < kTbufCount)
             {
-                // Initialize the Rpdo buffer
+                /* Initialize the Rpdo buffer */
                 if(pdo_initRpdoBuffer(pPdoInitParam_p->buffIdRpdo_m) == FALSE)
                 {
                     fError = TRUE;
@@ -170,7 +170,7 @@ BOOL pdo_init(tPsiPdoCb pfnPdoCb_p, tPdoInitParam* pPdoInitParam_p)
             if(pPdoInitParam_p->buffIdTpdo_m < kTbufCount &&
                !fError                                     )
             {
-                // Initialize the Tpdo buffer
+                /* Initialize the Tpdo buffer */
                 if(pdo_initTpdoBuffer(pPdoInitParam_p->buffIdTpdo_m) == FALSE)
                 {
                     fError = TRUE;
@@ -185,10 +185,10 @@ BOOL pdo_init(tPsiPdoCb pfnPdoCb_p, tPdoInitParam* pPdoInitParam_p)
 
             if(fError == FALSE)
             {
-                // Register PDO process function
+                /* Register PDO process function */
                 stream_registerSyncCb(pdo_process);
 
-                // Remember process PDO user callback
+                /* Remember process PDO user callback */
                 pdoInstance_l.pfnPdoCb_m = pfnPdoCb_p;
 
                 fReturn = TRUE;
@@ -200,19 +200,19 @@ BOOL pdo_init(tPsiPdoCb pfnPdoCb_p, tPdoInitParam* pPdoInitParam_p)
     return fReturn;
 }
 
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
 /**
 \brief    Cleanup pdo module
 
 \ingroup module_pdo
 */
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
 void pdo_exit(void)
 {
-    // Free module internals
+    /* Free module internals */
 }
 
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
 /**
 \brief    Get the base address of the Tpdo image
 
@@ -220,13 +220,13 @@ void pdo_exit(void)
 
 \ingroup module_pdo
 */
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
 tTpdoMappedObj * pdo_getTpdoImage(void)
 {
     return &pdoInstance_l.pTpdoLayout_m->mappedObjList_m;
 }
 
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
 /**
 \brief    Get the base address of the Rpdo image
 
@@ -234,19 +234,19 @@ tTpdoMappedObj * pdo_getTpdoImage(void)
 
 \ingroup module_pdo
 */
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
 tRpdoMappedObj * pdo_getRpdoImage(void)
 {
     return &pdoInstance_l.pRpdoLayout_m->mappedObjList_m;
 }
 
-//============================================================================//
-//            P R I V A T E   F U N C T I O N S                               //
-//============================================================================//
-/// \name Private Functions
-/// \{
+/*============================================================================*/
+/*            P R I V A T E   F U N C T I O N S                               */
+/*============================================================================*/
+/* \name Private Functions */
+/* \{ */
 
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
 /**
 \brief    Initialize the RPDO buffer image
 
@@ -258,7 +258,7 @@ tRpdoMappedObj * pdo_getRpdoImage(void)
 
 \ingroup module_pdo
 */
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
 static BOOL pdo_initRpdoBuffer(tTbufNumLayout rpdoId_p)
 {
     BOOL fReturn = FALSE;
@@ -269,10 +269,10 @@ static BOOL pdo_initRpdoBuffer(tTbufNumLayout rpdoId_p)
     {
         if(pDescRpdo->buffSize_m == sizeof(tTbufRpdoImage))
         {
-            // Remember buffer address for later usage
+            /* Remember buffer address for later usage */
             pdoInstance_l.pRpdoLayout_m = (tTbufRpdoImage *)pDescRpdo->pBuffBase_m;
 
-            // Register rpdo acknowledge action
+            /* Register rpdo acknowledge action */
             if(stream_registerAction(kStreamActionPre, rpdoId_p,
                     pdo_processRpdo, NULL) != FALSE)
             {
@@ -292,7 +292,7 @@ static BOOL pdo_initRpdoBuffer(tTbufNumLayout rpdoId_p)
     return fReturn;
 }
 
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
 /**
 \brief    Initialize the TPDO buffer image
 
@@ -304,7 +304,7 @@ static BOOL pdo_initRpdoBuffer(tTbufNumLayout rpdoId_p)
 
 \ingroup module_pdo
 */
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
 static BOOL pdo_initTpdoBuffer(tTbufNumLayout tpdoId_p)
 {
     BOOL fReturn = FALSE;
@@ -315,10 +315,10 @@ static BOOL pdo_initTpdoBuffer(tTbufNumLayout tpdoId_p)
     {
         if(pDescTpdo->buffSize_m == sizeof(tTbufTpdoImage))
         {
-            // Remember buffer address for later usage
+            /* Remember buffer address for later usage */
             pdoInstance_l.pTpdoLayout_m = (tTbufTpdoImage *)pDescTpdo->pBuffBase_m;
 
-            // Register rpdo acknowledge action
+            /* Register rpdo acknowledge action */
             if(stream_registerAction(kStreamActionPost, tpdoId_p,
                     pdo_ackTpdo, NULL) != FALSE)
             {
@@ -338,7 +338,7 @@ static BOOL pdo_initTpdoBuffer(tTbufNumLayout tpdoId_p)
     return fReturn;
 }
 
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
 /**
 \brief    Process the PDO user callback function
 
@@ -348,15 +348,15 @@ static BOOL pdo_initTpdoBuffer(tTbufNumLayout tpdoId_p)
 
 \ingroup module_pdo
 */
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
 static BOOL pdo_process(void)
 {
     BOOL fReturn = FALSE;
 
-    // Call the PDO user callback function
+    /* Call the PDO user callback function */
     if(pdoInstance_l.rpdoId_m == PDO_CHANNEL_DEACTIVATED)
     {
-        // The Rpdo buffer is not initialized
+        /* The Rpdo buffer is not initialized */
         if(pdoInstance_l.pfnPdoCb_m(pdoInstance_l.rpdoRelTimeLow_m,
                     NULL,
                     &pdoInstance_l.pTpdoLayout_m->mappedObjList_m) != FALSE)
@@ -370,7 +370,7 @@ static BOOL pdo_process(void)
     }
     else if(pdoInstance_l.tpdoId_m == PDO_CHANNEL_DEACTIVATED)
     {
-        // The Tpdo buffer is not initialized
+        /* The Tpdo buffer is not initialized */
         if(pdoInstance_l.pfnPdoCb_m(pdoInstance_l.rpdoRelTimeLow_m,
                     &pdoInstance_l.pRpdoLayout_m->mappedObjList_m,
                     NULL) != FALSE)
@@ -384,7 +384,7 @@ static BOOL pdo_process(void)
     }
     else
     {
-        // Both PDO buffers are initialized
+        /* Both PDO buffers are initialized */
         if(pdoInstance_l.pfnPdoCb_m(pdoInstance_l.rpdoRelTimeLow_m,
                     &pdoInstance_l.pRpdoLayout_m->mappedObjList_m,
                     &pdoInstance_l.pTpdoLayout_m->mappedObjList_m) != FALSE)
@@ -400,7 +400,7 @@ static BOOL pdo_process(void)
     return fReturn;
 }
 
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
 /**
 \brief    Process the RPDO buffer
 
@@ -413,7 +413,7 @@ static BOOL pdo_process(void)
 
 \ingroup module_pdo
 */
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
 static BOOL pdo_processRpdo(UINT8* pBuffer_p, UINT16 bufSize_p, void * pUserArg_p)
 {
     tTbufRpdoImage*  pRpdoImage;
@@ -421,10 +421,10 @@ static BOOL pdo_processRpdo(UINT8* pBuffer_p, UINT16 bufSize_p, void * pUserArg_
     UNUSED_PARAMETER(bufSize_p);
     UNUSED_PARAMETER(pUserArg_p);
 
-    // Convert to configuration channel buffer structure
+    /* Convert to configuration channel buffer structure */
     pRpdoImage = (tTbufRpdoImage*) pBuffer_p;
 
-    // Write relative time to local structure
+    /* Write relative time to local structure */
     pdoInstance_l.rpdoRelTimeLow_m = ami_getUint32Le((UINT8 *)&pRpdoImage->relativeTimeLow_m);
 
     stream_ackBuffer(pdoInstance_l.rpdoId_m);
@@ -432,7 +432,7 @@ static BOOL pdo_processRpdo(UINT8* pBuffer_p, UINT16 bufSize_p, void * pUserArg_
     return TRUE;
 }
 
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
 /**
 \brief    Acknowledge TPDO buffer
 
@@ -445,7 +445,7 @@ static BOOL pdo_processRpdo(UINT8* pBuffer_p, UINT16 bufSize_p, void * pUserArg_
 
 \ingroup module_pdo
 */
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
 static BOOL pdo_ackTpdo(UINT8* pBuffer_p, UINT16 bufSize_p, void * pUserArg_p)
 {
     UNUSED_PARAMETER(pBuffer_p);
@@ -457,6 +457,6 @@ static BOOL pdo_ackTpdo(UINT8* pBuffer_p, UINT16 bufSize_p, void * pUserArg_p)
     return TRUE;
 }
 
-/// \}
+/* \} */
 
-#endif // #if(((PSI_MODULE_INTEGRATION) & (PSI_MODULE_PDO)) != 0)
+#endif /* #if(((PSI_MODULE_INTEGRATION) & (PSI_MODULE_PDO)) != 0) */

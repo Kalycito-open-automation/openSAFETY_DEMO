@@ -39,34 +39,34 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef _INC_libpsi_stream_H_
 #define _INC_libpsi_stream_H_
 
-//------------------------------------------------------------------------------
-// includes
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
+/* includes                                                                   */
+/*----------------------------------------------------------------------------*/
 
 #include <libpsi/apglobal.h>
 
-//------------------------------------------------------------------------------
-// const defines
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
+/* const defines                                                              */
+/*----------------------------------------------------------------------------*/
 
 
-//------------------------------------------------------------------------------
-// typedef
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
+/* typedef                                                                    */
+/*----------------------------------------------------------------------------*/
 /**
  * \brief Descriptor element of descriptor list
  */
 typedef struct {
-    UINT8*     pBuffBase_m;    ///< Base address of the buffer
-    UINT16     buffSize_m;     ///< Size of the buffer
+    UINT8*     pBuffBase_m;    /**< Base address of the buffer */
+    UINT16     buffSize_m;     /**< Size of the buffer */
 } tBuffDescriptor;
 
 /**
  * \brief Parameters of the stream handler callback function
  */
 typedef struct {
-    tBuffDescriptor consDesc_m;      ///< Descriptor of the incoming consuming payload
-    tBuffDescriptor prodDesc_m;      ///< Descriptor of the outgoing producing payload
+    tBuffDescriptor consDesc_m;      /**< Descriptor of the incoming consuming payload */
+    tBuffDescriptor prodDesc_m;      /**< Descriptor of the outgoing producing payload */
 } tHandlerParam;
 
 /**
@@ -74,11 +74,9 @@ typedef struct {
  */
 typedef BOOL (*tStreamHandler) (tHandlerParam* pHandlParam_p);
 
-//------------------------------------------------------------------------------
-// function prototypes
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
+/* function prototypes                                                        */
+/*----------------------------------------------------------------------------*/
 
 
 #endif /* _INC_libpsi_stream_H_ */
-
-

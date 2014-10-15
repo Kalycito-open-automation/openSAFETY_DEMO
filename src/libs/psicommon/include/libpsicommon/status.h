@@ -38,15 +38,15 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef _INC_psicommon_status_H_
 #define _INC_psicommon_status_H_
 
-//------------------------------------------------------------------------------
-// includes
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
+/* includes                                                                   */
+/*----------------------------------------------------------------------------*/
 
 #include <libpsicommon/global.h>
 
-//------------------------------------------------------------------------------
-// typedef
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
+/* typedef                                                                    */
+/*----------------------------------------------------------------------------*/
 
 /**
  * \brief Status channel outgoing buffer layout
@@ -67,9 +67,9 @@ typedef struct {
     UINT16 ssdoProdStatus_m;
 } PACK_STRUCT tTbufStatusInStructure;
 
-//------------------------------------------------------------------------------
-// const defines
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
+/* const defines                                                              */
+/*----------------------------------------------------------------------------*/
 
 #define TBUF_RELTIME_LOW_OFF            offsetof(tTbufStatusOutStructure, relTimeLow_m)
 #define TBUF_RELTIME_HIGH_OFF           offsetof(tTbufStatusOutStructure, relTimeHigh_m)
@@ -80,12 +80,12 @@ typedef struct {
 #define TBUF_SSDO_PROD_STATUS_OFF       offsetof(tTbufStatusInStructure, ssdoProdStatus_m)
 
 
-#define STATUS_ICC_BUSY_FLAG_POS        0       ///< Position of the ICC busy flag
-#define STATUS_ICC_ERROR_FLAG_POS       1       ///< Position of the ICC error flag (TODO)
+#define STATUS_ICC_BUSY_FLAG_POS        0       /**< Position of the ICC busy flag */
+#define STATUS_ICC_ERROR_FLAG_POS       1       /**< Position of the ICC error flag (TODO) */
 
-//------------------------------------------------------------------------------
-// function prototypes
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
+/* function prototypes                                                        */
+/*----------------------------------------------------------------------------*/
 
 #endif /* _INC_psicommon_status_H_ */
 

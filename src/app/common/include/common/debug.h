@@ -39,13 +39,13 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef _INC_common_debug_H_
 #define _INC_common_debug_H_
 
-//------------------------------------------------------------------------------
-// includes
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
+/* includes                                                                   */
+/*----------------------------------------------------------------------------*/
 
-//------------------------------------------------------------------------------
-// const defines
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
+/* const defines                                                              */
+/*----------------------------------------------------------------------------*/
 
 #define DEBUG_LVL_01                    0x00000001
 #define DEBUG_LVL_02                    0x00000002
@@ -80,9 +80,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define DEBUG_LVL_ERROR                 0x40000000
 #define DEBUG_LVL_ALWAYS                0x80000000
 
-//---------------------------------------------------------------------------
-// The default debug-level is: ERROR and ALWAYS.
-// You can define an other debug-level in project settings.
+/*----------------------------------------------------------------------------*/
+/* The default debug-level is: ERROR and ALWAYS. */
+/* You can define an other debug-level in project settings. */
 #ifndef DEF_DEBUG_LVL
     #define DEF_DEBUG_LVL                 (DEBUG_LVL_ALWAYS | DEBUG_LVL_ERROR)
 #endif
@@ -90,8 +90,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     #define DEBUG_GLB_LVL                 (DEF_DEBUG_LVL)
 #endif
 
-// At microcontrollers we do reduce the memory usage by deleting DEBUG_TRACE-lines
-// (compiler does delete the lines).
+/* At microcontrollers we do reduce the memory usage by deleting DEBUG_TRACE-lines */
+/* (compiler does delete the lines). */
 
 #if (DEBUG_GLB_LVL & DEBUG_LVL_ALWAYS)
     #define DEBUG_LVL_ALWAYS_TRACE(...)                TRACE(__VA_ARGS__)
@@ -291,10 +291,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     #define DEBUG_TRACE(lvl,...)
 #endif
 
-// Create TRACE macro for actual printing
+/* Create TRACE macro for actual printing */
 #ifndef NDEBUG
 
-    #include <stdio.h>              // prototype printf() (for TRACE)
+    #include <stdio.h>              /* prototype printf() (for TRACE) */
 
     #ifndef TRACE
         #define TRACE(...)    printf(__VA_ARGS__)
@@ -308,13 +308,13 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #endif
 
-//------------------------------------------------------------------------------
-// typedef
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
+/* typedef                                                                    */
+/*----------------------------------------------------------------------------*/
 
-//------------------------------------------------------------------------------
-// function prototypes
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
+/* function prototypes                                                        */
+/*----------------------------------------------------------------------------*/
 
-#endif // _INC_common_debug_H_
+#endif /* _INC_common_debug_H_ */
 

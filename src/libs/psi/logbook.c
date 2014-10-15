@@ -44,9 +44,9 @@ forwards the data to the PLC.
 * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
 
-//------------------------------------------------------------------------------
-// includes
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
+/* includes                                                                   */
+/*----------------------------------------------------------------------------*/
 
 #include <libpsi/internal/logbookinst.h>
 #include <libpsi/internal/logbook.h>
@@ -56,54 +56,54 @@ forwards the data to the PLC.
 
 #if(((PSI_MODULE_INTEGRATION) & (PSI_MODULE_LOGBOOK)) != 0)
 
-//============================================================================//
-//            G L O B A L   D E F I N I T I O N S                             //
-//============================================================================//
+/*============================================================================*/
+/*            G L O B A L   D E F I N I T I O N S                             */
+/*============================================================================*/
 
-//------------------------------------------------------------------------------
-// const defines
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
+/* const defines                                                              */
+/*----------------------------------------------------------------------------*/
 
-//------------------------------------------------------------------------------
-// module global vars
-//------------------------------------------------------------------------------
-
-
-//------------------------------------------------------------------------------
-// global function prototypes
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
+/* module global vars                                                         */
+/*----------------------------------------------------------------------------*/
 
 
-//============================================================================//
-//            P R I V A T E   D E F I N I T I O N S                           //
-//============================================================================//
+/*----------------------------------------------------------------------------*/
+/* global function prototypes                                                 */
+/*----------------------------------------------------------------------------*/
 
-//------------------------------------------------------------------------------
-// const defines
-//------------------------------------------------------------------------------
 
-//------------------------------------------------------------------------------
-// local types
-//------------------------------------------------------------------------------
+/*============================================================================*/
+/*            P R I V A T E   D E F I N I T I O N S                           */
+/*============================================================================*/
+
+/*----------------------------------------------------------------------------*/
+/* const defines                                                              */
+/*----------------------------------------------------------------------------*/
+
+/*----------------------------------------------------------------------------*/
+/* local types                                                                */
+/*----------------------------------------------------------------------------*/
 
 /**
  * \brief Status of the logbook channel
  */
 typedef enum {
-    kChanStatusInvalid   = 0x00,    ///< Invalid channel status
-    kChanStatusBusy      = 0x01,    ///< Channel is currently busy
-    kChanStatusFree      = 0x02,    ///< Channel is free for transmission
+    kChanStatusInvalid   = 0x00,    /**< Invalid channel status */
+    kChanStatusBusy      = 0x01,    /**< Channel is currently busy */
+    kChanStatusFree      = 0x02,    /**< Channel is free for transmission */
 } tLogChanStatus;
 
-//------------------------------------------------------------------------------
-// local vars
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
+/* local vars                                                                 */
+/*----------------------------------------------------------------------------*/
 
 static struct eLogInstance          logInstance_l[kNumLogInstCount];
 
-//------------------------------------------------------------------------------
-// local function prototypes
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
+/* local function prototypes                                                  */
+/*----------------------------------------------------------------------------*/
 static BOOL log_initTransmitBuffer(tLogChanNum chanId_p,
         tTbufNumLayout txBuffId_p);
 static void log_handleTxFrame(tLogInstance pInstance_p);
@@ -112,24 +112,24 @@ static BOOL log_incrTimeout(UINT8* pBuffer_p, UINT16 bufSize_p,
 static void log_changeLocalSeqNr(tSeqNrValue* pSeqNr_p);
 static tLogChanStatus log_checkChannelStatus(tLogInstance pInstance_p);
 
-//============================================================================//
-//            P U B L I C   F U N C T I O N S                                 //
-//============================================================================//
+/*============================================================================*/
+/*            P U B L I C   F U N C T I O N S                                 */
+/*============================================================================*/
 
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
 /**
 \brief    Initialize the logbook channel module
 
 \ingroup module_log
 */
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
 void log_init(void)
 {
     PSI_MEMSET(&logInstance_l, 0 , sizeof(struct eLogInstance) * kNumLogInstCount);
 }
 
 
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
 /**
 \brief    Create a logbook channel instance
 
@@ -145,7 +145,7 @@ logging data to the POWERLINK processor.
 
 \ingroup module_log
 */
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
 tLogInstance log_create(tLogChanNum chanId_p, tLogInitParam* pInitParam_p)
 {
     tLogInstance pInstance = NULL;
@@ -165,16 +165,16 @@ tLogInstance log_create(tLogChanNum chanId_p, tLogInitParam* pInitParam_p)
         {
             if(log_initTransmitBuffer(chanId_p, pInitParam_p->buffIdTx_m) != FALSE)
             {
-                // Save channel Id
+                /* Save channel Id */
                 logInstance_l[chanId_p].chanId_m = chanId_p;
 
-                // Save id of producing and consuming buffers
+                /* Save id of producing and consuming buffers */
                 logInstance_l[chanId_p].idTxBuff_m = pInitParam_p->buffIdTx_m;
 
-                // Set sequence number init value
+                /* Set sequence number init value */
                 logInstance_l[chanId_p].currTxSeqNr_m = kSeqNrValueSecond;
 
-                // Set valid instance id
+                /* Set valid instance id */
                 pInstance = &logInstance_l[chanId_p];
             }
         }
@@ -183,7 +183,7 @@ tLogInstance log_create(tLogChanNum chanId_p, tLogInitParam* pInitParam_p)
     return pInstance;
 }
 
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
 /**
 \brief    Destroy an logbook channel
 
@@ -191,7 +191,7 @@ tLogInstance log_create(tLogChanNum chanId_p, tLogInitParam* pInitParam_p)
 
 \ingroup module_log
 */
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
 void log_destroy(tLogInstance pInstance_p)
 {
     if(pInstance_p != NULL)
@@ -202,7 +202,7 @@ void log_destroy(tLogInstance pInstance_p)
     }
 }
 
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
 /**
 \brief    Returns the address of the current logbook buffer
 
@@ -215,7 +215,7 @@ void log_destroy(tLogInstance pInstance_p)
 
 \ingroup module_log
 */
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
 BOOL log_getCurrentLogBuffer(tLogInstance pInstance_p, tLogFormat ** ppLogData_p)
 {
     BOOL fReturn = FALSE;
@@ -232,7 +232,7 @@ BOOL log_getCurrentLogBuffer(tLogInstance pInstance_p, tLogFormat ** ppLogData_p
     return fReturn;
 }
 
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
 /**
 \brief    Post a frame for transmission over the logbook channel
 
@@ -246,7 +246,7 @@ BOOL log_getCurrentLogBuffer(tLogInstance pInstance_p, tLogFormat ** ppLogData_p
 
 \ingroup module_log
 */
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
 tLogTxStatus log_postLogEntry(tLogInstance pInstance_p, tLogFormat* pLogData_p)
 {
     tLogTxStatus chanState = kLogTxStatusError;
@@ -258,20 +258,20 @@ tLogTxStatus log_postLogEntry(tLogInstance pInstance_p, tLogFormat* pLogData_p)
     }
     else
     {
-        // Check if buffer is free for filling
+        /* Check if buffer is free for filling */
         if(pInstance_p->logTxBuffer_m.isLocked_m == FALSE)
         {
-            // Set sequence number in next tx buffer
+            /* Set sequence number in next tx buffer */
             ami_setUint8Le((UINT8*)&pInstance_p->logTxBuffer_m.pLogTxPayl_m->seqNr_m,
                     pInstance_p->currTxSeqNr_m);
 
-            // Lock buffer for transmission
+            /* Lock buffer for transmission */
             pInstance_p->logTxBuffer_m.isLocked_m = TRUE;
 
-            // Enable transmit timer
+            /* Enable transmit timer */
             timeout_startTimer(pInstance_p->pTimeoutInst_m);
 
-            // Acknowledge producing transmit buffer
+            /* Acknowledge producing transmit buffer */
             stream_ackBuffer(pInstance_p->idTxBuff_m);
 
             chanState = kLogTxStatusSuccessful;
@@ -285,7 +285,7 @@ tLogTxStatus log_postLogEntry(tLogInstance pInstance_p, tLogFormat* pLogData_p)
     return chanState;
 }
 
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
 /**
 \brief    Process the logbook module
 
@@ -297,22 +297,22 @@ tLogTxStatus log_postLogEntry(tLogInstance pInstance_p, tLogFormat* pLogData_p)
 
 \ingroup module_log
 */
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
 BOOL log_process(tLogInstance pInstance_p)
 {
-    // Process transmit frames
+    /* Process transmit frames */
     log_handleTxFrame(pInstance_p);
 
     return TRUE;
 }
 
-//============================================================================//
-//            P R I V A T E   F U N C T I O N S                               //
-//============================================================================//
-/// \name Private Functions
-/// \{
+/*============================================================================*/
+/*            P R I V A T E   F U N C T I O N S                               */
+/*============================================================================*/
+/* \name Private Functions */
+/* \{ */
 
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
 /**
 \brief    Initialize the logbook transmit buffer
 
@@ -325,7 +325,7 @@ BOOL log_process(tLogInstance pInstance_p)
 
 \ingroup module_log
 */
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
 static BOOL log_initTransmitBuffer(tLogChanNum chanId_p,
                                    tTbufNumLayout txBuffId_p)
 {
@@ -341,11 +341,11 @@ static BOOL log_initTransmitBuffer(tLogChanNum chanId_p,
             if(stream_registerAction(kStreamActionPost, txBuffId_p, log_incrTimeout,
                                      (void *)&logInstance_l[chanId_p]) != FALSE)
             {
-                // Remember buffer address for later usage
+                /* Remember buffer address for later usage */
                 logInstance_l[chanId_p].logTxBuffer_m.pLogTxPayl_m =
                         (tTbufLogStructure *)pDescLogTrans->pBuffBase_m;
 
-                // Initialize logbook transmit timeout instance
+                /* Initialize logbook transmit timeout instance */
                 logInstance_l[chanId_p].pTimeoutInst_m = timeout_create(
                                         LOG_TX_TIMEOUT_CYCLE_COUNT);
                 if(logInstance_l[chanId_p].pTimeoutInst_m != NULL)
@@ -371,7 +371,7 @@ static BOOL log_initTransmitBuffer(tLogChanNum chanId_p,
     return fReturn;
 }
 
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
 /**
 \brief    Process logbook transmit frames
 
@@ -379,7 +379,7 @@ static BOOL log_initTransmitBuffer(tLogChanNum chanId_p,
 
 \ingroup module_log
 */
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
 static void log_handleTxFrame(tLogInstance pInstance_p)
 {
     tLogChanStatus  txChanState;
@@ -387,36 +387,36 @@ static void log_handleTxFrame(tLogInstance pInstance_p)
 
     if(pInstance_p->logTxBuffer_m.isLocked_m != FALSE)
     {
-        // Check if channel is ready for transmission
+        /* Check if channel is ready for transmission */
         txChanState = log_checkChannelStatus(pInstance_p);
         if(txChanState == kChanStatusFree)
         {
-            // Ongoing message is acknowledged
+            /* Ongoing message is acknowledged */
             pInstance_p->logTxBuffer_m.isLocked_m = FALSE;
 
-            // Increment local sequence number
+            /* Increment local sequence number */
             log_changeLocalSeqNr(&pInstance_p->currTxSeqNr_m);
 
-            // Message was acknowledged -> Stop timer if running!
+            /* Message was acknowledged -> Stop timer if running! */
             timeout_stopTimer(pInstance_p->pTimeoutInst_m);
         }
         else
         {
-            // Check if timeout counter is expired
+            /* Check if timeout counter is expired */
             timerState = timeout_checkExpire(pInstance_p->pTimeoutInst_m);
             if(timerState == kTimerStateExpired)
             {
-                // Timeout occurred -> Increment local sequence number!
+                /* Timeout occurred -> Increment local sequence number! */
                 log_changeLocalSeqNr(&pInstance_p->currTxSeqNr_m);
 
-                // Unlock channel anyway!
+                /* Unlock channel anyway! */
                 pInstance_p->logTxBuffer_m.isLocked_m = FALSE;
             }
         }
     }
 }
 
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
 /**
 \brief    Increment logbook transmit timeout
 
@@ -428,7 +428,7 @@ static void log_handleTxFrame(tLogInstance pInstance_p)
 
 \ingroup module_log
 */
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
 static BOOL log_incrTimeout(UINT8* pBuffer_p, UINT16 bufSize_p,
                             void* pUserArg_p)
 {
@@ -437,16 +437,16 @@ static BOOL log_incrTimeout(UINT8* pBuffer_p, UINT16 bufSize_p,
     UNUSED_PARAMETER(bufSize_p);
     UNUSED_PARAMETER(pBuffer_p);
 
-    // Get pointer to current instance
+    /* Get pointer to current instance */
     pInstance = (tLogInstance) pUserArg_p;
 
-    // Increment transmit timer cycle count
+    /* Increment transmit timer cycle count */
     timeout_incrementCounter(pInstance->pTimeoutInst_m);
 
     return TRUE;
 }
 
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
 /**
 \brief    Change local sequence number
 
@@ -454,7 +454,7 @@ static BOOL log_incrTimeout(UINT8* pBuffer_p, UINT16 bufSize_p,
 
 \ingroup module_log
 */
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
 static void log_changeLocalSeqNr(tSeqNrValue* pSeqNr_p)
 {
     if(*pSeqNr_p == kSeqNrValueFirst)
@@ -467,7 +467,7 @@ static void log_changeLocalSeqNr(tSeqNrValue* pSeqNr_p)
     }
 }
 
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
 /**
 \brief    Check if channel is ready for transmission
 
@@ -479,19 +479,19 @@ static void log_changeLocalSeqNr(tSeqNrValue* pSeqNr_p)
 
 \ingroup module_log
 */
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
 static tLogChanStatus log_checkChannelStatus(tLogInstance pInstance_p)
 {
     tLogChanStatus chanStatus = kChanStatusInvalid;
     tSeqNrValue  seqNr = kSeqNrValueInvalid;
 
-    // Get status of transmit channel
+    /* Get status of transmit channel */
     status_getLogTxChanFlag(pInstance_p->chanId_m, &seqNr);
 
-    // Check if old transmission is already finished!
+    /* Check if old transmission is already finished! */
     if(seqNr != pInstance_p->currTxSeqNr_m)
     {
-        // Message in progress -> retry later!
+        /* Message in progress -> retry later! */
         chanStatus = kChanStatusBusy;
     }
     else
@@ -502,6 +502,6 @@ static tLogChanStatus log_checkChannelStatus(tLogInstance pInstance_p)
     return chanStatus;
 }
 
-// \}
+/* \} */
 
-#endif // #if (((PSI_MODULE_INTEGRATION) & (PSI_MODULE_LOGBOOK)) != 0)
+#endif /* #if (((PSI_MODULE_INTEGRATION) & (PSI_MODULE_LOGBOOK)) != 0) */

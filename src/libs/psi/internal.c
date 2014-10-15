@@ -43,9 +43,9 @@ processes the synchronous and asynchronous task.
 * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
 
-//------------------------------------------------------------------------------
-// includes
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
+/* includes                                                                   */
+/*----------------------------------------------------------------------------*/
 
 #include <libpsi/psi.h>
 
@@ -57,65 +57,65 @@ processes the synchronous and asynchronous task.
 
 #include <libpsicommon/timeout.h>
 
-//============================================================================//
-//            G L O B A L   D E F I N I T I O N S                             //
-//============================================================================//
+/*============================================================================*/
+/*            G L O B A L   D E F I N I T I O N S                             */
+/*============================================================================*/
 
-//------------------------------------------------------------------------------
-// const defines
-//------------------------------------------------------------------------------
-
-
-//------------------------------------------------------------------------------
-// module global vars
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
+/* const defines                                                              */
+/*----------------------------------------------------------------------------*/
 
 
-//------------------------------------------------------------------------------
-// global function prototypes
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
+/* module global vars                                                         */
+/*----------------------------------------------------------------------------*/
 
 
-//============================================================================//
-//            P R I V A T E   D E F I N I T I O N S                           //
-//============================================================================//
+/*----------------------------------------------------------------------------*/
+/* global function prototypes                                                 */
+/*----------------------------------------------------------------------------*/
 
-//------------------------------------------------------------------------------
-// const defines
-//------------------------------------------------------------------------------
 
-#define ACK_REG_INITIAL_VALUE    0xFFFFFFFF     ///< Initial value of the ACK register
+/*============================================================================*/
+/*            P R I V A T E   D E F I N I T I O N S                           */
+/*============================================================================*/
 
-//------------------------------------------------------------------------------
-// local types
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
+/* const defines                                                              */
+/*----------------------------------------------------------------------------*/
+
+#define ACK_REG_INITIAL_VALUE    0xFFFFFFFF     /**< Initial value of the ACK register */
+
+/*----------------------------------------------------------------------------*/
+/* local types                                                                */
+/*----------------------------------------------------------------------------*/
 
 /**
 \brief Internal user instance type
 */
 typedef struct
 {
-    tTbufAckRegister*    pConsAckRegister_m;      ///< Pointer to the consumer ACK register
-    tTbufAckRegister*    pProdAckRegister_m;      ///< Pointer to the producer ACK register
+    tTbufAckRegister*    pConsAckRegister_m;      /**< Pointer to the consumer ACK register */
+    tTbufAckRegister*    pProdAckRegister_m;      /**< Pointer to the producer ACK register */
 } tInternalInstance;
 
-//------------------------------------------------------------------------------
-// local vars
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
+/* local vars                                                                 */
+/*----------------------------------------------------------------------------*/
 
 static tInternalInstance          intInstance_l;
 
-//------------------------------------------------------------------------------
-// local function prototypes
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
+/* local function prototypes                                                  */
+/*----------------------------------------------------------------------------*/
 static BOOL psi_initIntModules(tPsiInitParam* pInitParam_p);
 static tTbufAckRegister* psi_initAckRegister(tTbufNumLayout idAckReg_p);
 
-//============================================================================//
-//            P U B L I C   F U N C T I O N S                                 //
-//============================================================================//
+/*============================================================================*/
+/*            P U B L I C   F U N C T I O N S                                 */
+/*============================================================================*/
 
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
 /**
 \brief    Application interface initialization function
 
@@ -127,7 +127,7 @@ static tTbufAckRegister* psi_initAckRegister(tTbufNumLayout idAckReg_p);
 
 \ingroup module_internal
 */
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
 BOOL psi_init(tPsiInitParam* pInitParam_p)
 {
     BOOL fReturn = FALSE;
@@ -136,7 +136,7 @@ BOOL psi_init(tPsiInitParam* pInitParam_p)
 
     if(pInitParam_p == NULL)
     {
-        // Invalid input parameters provided
+        /* Invalid input parameters provided */
         error_setError(kPsiModuleInternal, kPsiInitError);
     }
     else
@@ -145,19 +145,19 @@ BOOL psi_init(tPsiInitParam* pInitParam_p)
            pInitParam_p->idProdAck_m >= kTbufCount ||
            pInitParam_p->idConsAck_m == pInitParam_p->idProdAck_m )
         {
-            // Invalid input parameters provided
+            /* Invalid input parameters provided */
             error_setError(kPsiModuleInternal, kPsiInitError);
         }
         else
         {
-            // Initialize internal library modules
+            /* Initialize internal library modules */
             if(psi_initIntModules(pInitParam_p))
             {
-                // Initialize consumer acknowledge register
+                /* Initialize consumer acknowledge register */
                 intInstance_l.pConsAckRegister_m = psi_initAckRegister(pInitParam_p->idConsAck_m);
                 if(intInstance_l.pConsAckRegister_m != NULL)
                 {
-                    // Initialize producer acknowledge register
+                    /* Initialize producer acknowledge register */
                     intInstance_l.pProdAckRegister_m = psi_initAckRegister(pInitParam_p->idProdAck_m);
                     if(intInstance_l.pProdAckRegister_m != NULL)
                     {
@@ -165,19 +165,19 @@ BOOL psi_init(tPsiInitParam* pInitParam_p)
                     }
                     else
                     {
-                        // Producer acknowledge register initialization failed
+                        /* Producer acknowledge register initialization failed */
                         error_setError(kPsiModuleInternal, kPsiInitError);
                     }
                 }
                 else
                 {
-                    // Consumer acknowledge register initialization failed
+                    /* Consumer acknowledge register initialization failed */
                     error_setError(kPsiModuleInternal, kPsiInitError);
                 }
             }
             else
             {
-                // Initializing internal modules failed
+                /* Initializing internal modules failed */
                 error_setError(kPsiModuleInternal, kPsiInitError);
             }
         }
@@ -186,23 +186,23 @@ BOOL psi_init(tPsiInitParam* pInitParam_p)
     return fReturn;
 }
 
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
 /**
 \brief    Close the slim interface
 
 \ingroup module_internal
 */
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
 void psi_exit(void)
 {
-    // Destroy initialized modules
+    /* Destroy initialized modules */
     stream_exit();
 
-    // Destroy error module
+    /* Destroy error module */
     error_exit();
 }
 
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
 /**
 \brief    Process slim interface synchronous task
 
@@ -212,7 +212,7 @@ void psi_exit(void)
 
 \ingroup module_internal
 */
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
 BOOL psi_processSync(void)
 {
     BOOL fReturn = FALSE;
@@ -229,7 +229,7 @@ BOOL psi_processSync(void)
     return fReturn;
 }
 
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
 /**
 \brief    Process slim interface asynchronous task
 
@@ -239,24 +239,24 @@ BOOL psi_processSync(void)
 
 \ingroup module_internal
 */
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
 BOOL psi_processAsync(void)
 {
 #if(((PSI_MODULE_INTEGRATION) & (PSI_MODULE_CC)) != 0)
-    // Process configuration channel objects
+    /* Process configuration channel objects */
     cc_process();
 #endif
 
     return TRUE;
 }
 
-//============================================================================//
-//            P R I V A T E   F U N C T I O N S                               //
-//============================================================================//
-/// \name Private Functions
-/// \{
+/*============================================================================*/
+/*            P R I V A T E   F U N C T I O N S                               */
+/*============================================================================*/
+/* \name Private Functions */
+/* \{ */
 
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
 /**
 \brief    Initialize all internal modules
 
@@ -268,29 +268,29 @@ BOOL psi_processAsync(void)
 
 \ingroup module_internal
 */
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
 static BOOL psi_initIntModules(tPsiInitParam* pInitParam_p)
 {
     BOOL fReturn = FALSE;
     tStreamInitParam streamInitParam;
 
 #if(((PSI_MODULE_INTEGRATION) & (PSI_MODULE_SSDO)) != 0)
-    // Initialize the SSDO module
+    /* Initialize the SSDO module */
     ssdo_init();
 #endif
 
 #if(((PSI_MODULE_INTEGRATION) & (PSI_MODULE_LOGBOOK)) != 0)
-    // Initialize the logbook module
+    /* Initialize the logbook module */
     log_init();
 #endif
 
-    // Initialize the timeout module
+    /* Initialize the timeout module */
     timeout_init();
 
-    // Initialize the error module
+    /* Initialize the error module */
     error_init(pInitParam_p->pfnErrorHandler_m);
 
-    // Initialize stream module
+    /* Initialize stream module */
     streamInitParam.pBuffDescList_m = pInitParam_p->pBuffDescList_m;
     streamInitParam.pfnStreamHandler_m = pInitParam_p->pfnStreamHandler_m;
     streamInitParam.idConsAck_m = pInitParam_p->idConsAck_m;
@@ -304,7 +304,7 @@ static BOOL psi_initIntModules(tPsiInitParam* pInitParam_p)
     return fReturn;
 }
 
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
 /**
 \brief    Initialize the acknowledge registers
 
@@ -316,7 +316,7 @@ static BOOL psi_initIntModules(tPsiInitParam* pInitParam_p)
 
 \ingroup module_internal
 */
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
 static tTbufAckRegister* psi_initAckRegister(tTbufNumLayout idAckReg_p)
 {
     tBuffDescriptor* pDescAckReg;
@@ -327,10 +327,10 @@ static tTbufAckRegister* psi_initAckRegister(tTbufNumLayout idAckReg_p)
     {
         if(pDescAckReg->buffSize_m == sizeof(tTbufAckRegister))
         {
-            // Set ACK register address
+            /* Set ACK register address */
             pAckRegBase = (tTbufAckRegister*)pDescAckReg->pBuffBase_m;
 
-            // Set register to always ack all buffers (Needed for streamed access)
+            /* Set register to always ack all buffers (Needed for streamed access) */
             *pAckRegBase = ACK_REG_INITIAL_VALUE;
         }
     }
@@ -338,6 +338,4 @@ static tTbufAckRegister* psi_initAckRegister(tTbufNumLayout idAckReg_p)
     return pAckRegBase;
 }
 
-/// \}
-
-
+/* \} */

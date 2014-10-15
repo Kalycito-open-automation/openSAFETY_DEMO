@@ -51,7 +51,7 @@ Provides the interface from the SHNF to the slim interface library.
 #include <libpsi/psi.h>
 
 #include <common/serial.h>       /* Platform specific functions for the serial */
-#include <common/syncir.h>      /* Platform specific functions for the synchronous interrupt */
+#include <common/syncir.h>       /* Platform specific functions for the synchronous interrupt */
 #include <common/benchmark.h>    /* Debug header for performance measurements */
 
 #include <common/tbufparams.h>

@@ -39,14 +39,14 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef _INC_apptarget_H_
 #define _INC_apptarget_H_
 
-//------------------------------------------------------------------------------
-// includes
-//------------------------------------------------------------------------------
-#include <string.h>    // for memcpy() memset()
+/*----------------------------------------------------------------------------*/
+/* includes                                                                   */
+/*----------------------------------------------------------------------------*/
+#include <string.h>    /* for memcpy() memset() */
 
-//------------------------------------------------------------------------------
-// const defines
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
+/* const defines                                                              */
+/*----------------------------------------------------------------------------*/
 
 #if defined(__GNUC__)
 
@@ -98,25 +98,25 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #elif defined( _MSC_VER )
 
-// types defined in WINDEF.H, included by <windows.h>
+/* types defined in WINDEF.H, included by <windows.h> */
 #include <windows.h>
 
 #else
     #error "Please define the datatypes for your target and compiler here!"
 #endif
 
-// Guard standard library functions
+/* Guard standard library functions */
 #define PSI_MEMSET(ptr, bVal, bCnt)  memset(ptr, bVal, bCnt)
 #define PSI_MEMCPY(ptr, bVal, bSize) memcpy(ptr, bVal, bSize)
 
-// definitions for DLL export
+/* definitions for DLL export */
 #if _WIN32
     #define DLLEXPORT extern __declspec(dllexport)
 #else
     #define DLLEXPORT extern
 #endif
 
-// define macro for packed structures
+/* define macro for packed structures */
 #ifdef _MSC_VER
     #pragma pack( push, packing )
     #pragma pack( 1 )
@@ -125,15 +125,15 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     #define PACK_STRUCT            __attribute__((packed))
 #endif
 
-//------------------------------------------------------------------------------
-// typedef
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
+/* typedef                                                                    */
+/*----------------------------------------------------------------------------*/
 
 
 
-//------------------------------------------------------------------------------
-// function prototypes
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
+/* function prototypes                                                        */
+/*----------------------------------------------------------------------------*/
 
 
 #endif /* _INC_apptarget_H_ */

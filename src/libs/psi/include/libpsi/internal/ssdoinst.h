@@ -39,48 +39,48 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef _INC_libpsi_internal_ssdoinst_H_
 #define _INC_libpsi_internal_ssdoinst_H_
 
-//------------------------------------------------------------------------------
-// includes
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
+/* includes                                                                   */
+/*----------------------------------------------------------------------------*/
 
 #include <libpsicommon/ssdo.h>
 #include <libpsicommon/timeout.h>
 
 #include <libpsi/ssdo.h>
 
-//------------------------------------------------------------------------------
-// const defines
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
+/* const defines                                                              */
+/*----------------------------------------------------------------------------*/
 
-//------------------------------------------------------------------------------
-// typedef
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
+/* typedef                                                                    */
+/*----------------------------------------------------------------------------*/
 
 typedef struct {
-    UINT8                   isLocked_m;        ///< Is buffer free for filling
-    tTbufSsdoTxStructure*   pSsdoTxPayl_m;    ///< Pointer to transmit buffer
+    UINT8                   isLocked_m;        /**< Is buffer free for filling */
+    tTbufSsdoTxStructure*   pSsdoTxPayl_m;    /**< Pointer to transmit buffer */
 } tTbufSsdoTxBuffer;
 
 /**
  * \brief Parameter type of the transmit buffer
  */
 typedef struct {
-    tTbufNumLayout        idTxBuff_m;           ///< Id of the transmit buffer
-    tTbufSsdoTxBuffer     ssdoTxBuffer_m;       ///< SSDO transmit buffer copy
-    tSeqNrValue           currTxSeqNr_m;        ///< Current transmit sequence number
-    UINT8                 currTxBuffer_m;       ///< Current active transmit buffer
-    tTimeoutInstance      pTimeoutInst_m;       ///< Timer instance for SSDO transmissions
+    tTbufNumLayout        idTxBuff_m;           /**< Id of the transmit buffer */
+    tTbufSsdoTxBuffer     ssdoTxBuffer_m;       /**< SSDO transmit buffer copy */
+    tSeqNrValue           currTxSeqNr_m;        /**< Current transmit sequence number */
+    UINT8                 currTxBuffer_m;       /**< Current active transmit buffer */
+    tTimeoutInstance      pTimeoutInst_m;       /**< Timer instance for SSDO transmissions */
 } tSsdoTxChannel;
 
 /**
  * \brief Parameter type of the receive buffer
  */
 typedef struct {
-    tTbufNumLayout         idRxBuff_m;          ///< Id of the receive buffer
-    tSsdoRxHandler         pfnRxHandler_m;      ///< SSDO module receive handler
-    tTbufSsdoRxStructure*  pSsdoRxBuffer_m;     ///< Pointer to receive buffer
-    tSeqNrValue            currRxSeqNr_m;       ///< Current receive sequence number
-    UINT8                  fRxFrameIncoming_m;  ///< Receive buffer incoming flag
+    tTbufNumLayout         idRxBuff_m;          /**< Id of the receive buffer */
+    tSsdoRxHandler         pfnRxHandler_m;      /**< SSDO module receive handler */
+    tTbufSsdoRxStructure*  pSsdoRxBuffer_m;     /**< Pointer to receive buffer */
+    tSeqNrValue            currRxSeqNr_m;       /**< Current receive sequence number */
+    UINT8                  fRxFrameIncoming_m;  /**< Receive buffer incoming flag */
 } tSsdoRxChannel;
 
 /**
@@ -90,15 +90,13 @@ The SSDO instance holds configuration information of each SSDO channel.
 */
 struct eSsdoInstance
 {
-    tSsdoChanNum       chanId_m;           ///< Id of the SSDO channel
-    tSsdoTxChannel     txBuffParam_m;      ///< Parameters of the transmit channel
-    tSsdoRxChannel     rxBuffParam_m;      ///< Parameters of the receive channel
+    tSsdoChanNum       chanId_m;           /**< Id of the SSDO channel */
+    tSsdoTxChannel     txBuffParam_m;      /**< Parameters of the transmit channel */
+    tSsdoRxChannel     rxBuffParam_m;      /**< Parameters of the receive channel */
 };
 
-//------------------------------------------------------------------------------
-// function prototypes
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
+/* function prototypes                                                        */
+/*----------------------------------------------------------------------------*/
 
 #endif /* _INC_libpsi_internal_ssdoinst_H_ */
-
-

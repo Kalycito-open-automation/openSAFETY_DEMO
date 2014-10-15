@@ -39,19 +39,19 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef _INC_psicommon_timeout_H_
 #define _INC_psicommon_timeout_H_
 
-//------------------------------------------------------------------------------
-// includes
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
+/* includes                                                                   */
+/*----------------------------------------------------------------------------*/
 
 #include <libpsicommon/global.h>
 
-//------------------------------------------------------------------------------
-// const defines
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
+/* const defines                                                              */
+/*----------------------------------------------------------------------------*/
 
-//------------------------------------------------------------------------------
-// typedef
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
+/* typedef                                                                    */
+/*----------------------------------------------------------------------------*/
 
 /**
  * \brief Timer module instance type
@@ -62,15 +62,15 @@ typedef struct eTimeoutInstance *tTimeoutInstance;
  * \brief Current state of the timer
  */
 typedef enum {
-    kTimerStateInvalid   = 0x00,    ///< Invalid timer state
-    kTimerStateRunning   = 0x01,    ///< Timer is currently running
-    kTimerStateExpired   = 0x02,    ///< Timer is expired
-    kTimerStateStopped   = 0x03,    ///< Timer is currently stopped
+    kTimerStateInvalid   = 0x00,    /**< Invalid timer state */
+    kTimerStateRunning   = 0x01,    /**< Timer is currently running */
+    kTimerStateExpired   = 0x02,    /**< Timer is expired */
+    kTimerStateStopped   = 0x03,    /**< Timer is currently stopped */
 } tTimerStatus;
 
-//------------------------------------------------------------------------------
-// function prototypes
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
+/* function prototypes                                                        */
+/*----------------------------------------------------------------------------*/
 DLLEXPORT void timeout_init(void);
 DLLEXPORT tTimeoutInstance timeout_create(UINT16 cycleLimit_p);
 DLLEXPORT void timeout_destroy(tTimeoutInstance pInstance_p);

@@ -38,30 +38,30 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef _INC_libpsi_logbook_H_
 #define _INC_libpsi_logbook_H_
 
-//------------------------------------------------------------------------------
-// includes
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
+/* includes                                                                   */
+/*----------------------------------------------------------------------------*/
 
 #include <libpsi/apglobal.h>
 
 #include <libpsicommon/logbook.h>
 
-//------------------------------------------------------------------------------
-// const defines
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
+/* const defines                                                              */
+/*----------------------------------------------------------------------------*/
 
 
-//------------------------------------------------------------------------------
-// typedef
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
+/* typedef                                                                    */
+/*----------------------------------------------------------------------------*/
 
 /**
  * \brief State of the transmit channel
  */
 typedef enum {
-    kLogTxStatusError       = 0x00,   ///< Error while posting to the transmit channel
-    kLogTxStatusSuccessful  = 0x01,   ///< Post to transmit channel successful
-    kLogTxStatusBusy        = 0x02,   ///< Transmit channel is currently busy
+    kLogTxStatusError       = 0x00,   /**< Error while posting to the transmit channel */
+    kLogTxStatusSuccessful  = 0x01,   /**< Post to transmit channel successful */
+    kLogTxStatusBusy        = 0x02,   /**< Transmit channel is currently busy */
 } tLogTxStatus;
 
 typedef struct eLogInstance *tLogInstance;
@@ -70,13 +70,13 @@ typedef struct eLogInstance *tLogInstance;
  * \brief  Logbook module initialization structure
  */
 typedef struct {
-    tTbufNumLayout         buffIdTx_m;      ///< Id of the transmit buffer
+    tTbufNumLayout         buffIdTx_m;      /**< Id of the transmit buffer */
 } tLogInitParam;
 
 
-//------------------------------------------------------------------------------
-// function prototypes
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
+/* function prototypes                                                        */
+/*----------------------------------------------------------------------------*/
 DLLEXPORT tLogInstance log_create(tLogChanNum chanId_m, tLogInitParam* pInitParam_p);
 DLLEXPORT void log_destroy(tLogInstance  pInstance_p);
 

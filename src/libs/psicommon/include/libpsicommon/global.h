@@ -38,9 +38,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef _INC_psicommon_global_H_
 #define _INC_psicommon_global_H_
 
-//------------------------------------------------------------------------------
-// includes
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
+/* includes                                                                   */
+/*----------------------------------------------------------------------------*/
 #include <ipcore/tbuf-cfg.h>
 
 #ifdef PSI_BUILD_PCP
@@ -51,34 +51,34 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
   #include <libpsicommon/ami.h>
 #endif
 
-//------------------------------------------------------------------------------
-// const defines
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
+/* const defines                                                              */
+/*----------------------------------------------------------------------------*/
 
-// Create module defines
-#define PSI_MODULE_STATUS      0x00000001L    ///< Status module
-#define PSI_MODULE_CC          0x00000002L    ///< Configuration channel module
-#define PSI_MODULE_PDO         0x00000004L    ///< PDO module
-#define PSI_MODULE_SSDO        0x00000008L    ///< SSDO module
-#define PSI_MODULE_LOGBOOK     0x00000010L    ///< Logger module
+/* Create module defines */
+#define PSI_MODULE_STATUS      0x00000001L    /**< Status module */
+#define PSI_MODULE_CC          0x00000002L    /**< Configuration channel module */
+#define PSI_MODULE_PDO         0x00000004L    /**< PDO module */
+#define PSI_MODULE_SSDO        0x00000008L    /**< SSDO module */
+#define PSI_MODULE_LOGBOOK     0x00000010L    /**< Logger module */
 
-// Alignment macros
-#define ALIGN16(ptr)        (((UINT16)(ptr) + 1U) & 0xFFFFFFFEU)   ///< aligns the pointer to UINT16 (2 byte)
-#define ALIGN32(ptr)        (((UINT32)(ptr) + 3U) & 0xFFFFFFFCU)   ///< aligns the pointer to UINT32 (4 byte)
+/* Alignment macros */
+#define ALIGN16(ptr)        (((UINT16)(ptr) + 1U) & 0xFFFFFFFEU)   /**< aligns the pointer to UINT16 (2 byte) */
+#define ALIGN32(ptr)        (((UINT32)(ptr) + 3U) & 0xFFFFFFFCU)   /**< aligns the pointer to UINT32 (4 byte) */
 
-#define UNALIGNED16(ptr)    ((UINT16)(ptr) & 1U)    ///< checks if the pointer is UINT16-aligned
-#define UNALIGNED32(ptr)    ((UINT32)(ptr) & 3U)    ///< checks if the pointer is UINT32-aligned
+#define UNALIGNED16(ptr)    ((UINT16)(ptr) & 1U)    /**< checks if the pointer is UINT16-aligned */
+#define UNALIGNED32(ptr)    ((UINT32)(ptr) & 3U)    /**< checks if the pointer is UINT32-aligned */
 
-// Check if a bit is set
+/* Check if a bit is set */
 #define CHECK_BIT(var,pos) ((var) & (1<<(pos)))
 
 #ifndef UNUSED_PARAMETER
   #define UNUSED_PARAMETER(par)   (void)par
 #endif
 
-//------------------------------------------------------------------------------
-// Boolean values
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
+/* Boolean values                                                             */
+/*----------------------------------------------------------------------------*/
 
 #ifndef TRUE
   #define TRUE  0xFF
@@ -89,26 +89,26 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endif
 
 
-//------------------------------------------------------------------------------
-// typedef
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
+/* typedef                                                                    */
+/*----------------------------------------------------------------------------*/
 
 /**
  * \brief Asynchronous frame handling sequence number type
  */
 typedef enum {
-    kSeqNrValueInvalid    = 0x00,   ///< Invalid sequence number (Other values are also invalid)
-    kSeqNrValueFirst      = 0x56,   ///< Sequence number first packet arriving
-    kSeqNrValueSecond     = 0xAA    ///< Sequence number second packet arriving
+    kSeqNrValueInvalid    = 0x00,   /**< Invalid sequence number (Other values are also invalid) */
+    kSeqNrValueFirst      = 0x56,   /**< Sequence number first packet arriving */
+    kSeqNrValueSecond     = 0xAA    /**< Sequence number second packet arriving */
 } tSeqNrValue;
 
 /**
  * \brief Descriptor element of descriptor list
  */
 typedef struct {
-    UINT32      buffOffset_m;       ///< Offset of the triple buffer
-    UINT16      buffSize_m;         ///< Size of the buffer
-    INT8        isProducer_m;      ///< Descriptor is a producing buffer (app side)
+    UINT32      buffOffset_m;       /**< Offset of the triple buffer */
+    UINT16      buffSize_m;         /**< Size of the buffer */
+    INT8        isProducer_m;       /**< Descriptor is a producing buffer (app side) */
 } tTbufDescriptor;
 
 /**
@@ -267,11 +267,8 @@ typedef enum {
  */
 typedef void (* tPsiCritSec) ( UINT8 fEnable_p );
 
-//------------------------------------------------------------------------------
-// function prototypes
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
+/* function prototypes                                                        */
+/*----------------------------------------------------------------------------*/
 
 #endif /* _INC_psicommon_global_H_ */
-
-
-

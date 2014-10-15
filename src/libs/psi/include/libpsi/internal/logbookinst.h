@@ -39,26 +39,26 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef _INC_libpsi_internal_logbookinst_H_
 #define _INC_libpsi_internal_logbookinst_H_
 
-//------------------------------------------------------------------------------
-// includes
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
+/* includes                                                                   */
+/*----------------------------------------------------------------------------*/
 
 #include <libpsicommon/logbook.h>
 #include <libpsicommon/timeout.h>
 
 #include <libpsi/logbook.h>
 
-//------------------------------------------------------------------------------
-// const defines
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
+/* const defines                                                              */
+/*----------------------------------------------------------------------------*/
 
-//------------------------------------------------------------------------------
-// typedef
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
+/* typedef                                                                    */
+/*----------------------------------------------------------------------------*/
 
 typedef struct {
-    UINT8                   isLocked_m;        ///< Is buffer free for filling
-    tTbufLogStructure*      pLogTxPayl_m;      ///< Pointer to transmit buffer
+    UINT8                   isLocked_m;        /**< Is buffer free for filling */
+    tTbufLogStructure*      pLogTxPayl_m;      /**< Pointer to transmit buffer */
 } tTbufLogBuffer;
 
 /**
@@ -68,18 +68,18 @@ The logbook instance holds configuration information of each logbook channel.
 */
 struct eLogInstance
 {
-    tLogChanNum           chanId_m;           ///< Id of the logbook channel
+    tLogChanNum           chanId_m;           /**< Id of the logbook channel */
 
-    tTbufNumLayout        idTxBuff_m;           ///< Id of the transmit buffer
-    tTbufLogBuffer        logTxBuffer_m;        ///< Logbook transmit buffer copy
-    tSeqNrValue           currTxSeqNr_m;        ///< Current transmit sequence number
-    UINT8                 currTxBuffer_m;       ///< Current active transmit buffer
-    tTimeoutInstance      pTimeoutInst_m;       ///< Timer instance for a logbook transmissions
+    tTbufNumLayout        idTxBuff_m;           /**< Id of the transmit buffer */
+    tTbufLogBuffer        logTxBuffer_m;        /**< Logbook transmit buffer copy */
+    tSeqNrValue           currTxSeqNr_m;        /**< Current transmit sequence number */
+    UINT8                 currTxBuffer_m;       /**< Current active transmit buffer */
+    tTimeoutInstance      pTimeoutInst_m;       /**< Timer instance for a logbook transmissions */
 };
 
-//------------------------------------------------------------------------------
-// function prototypes
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
+/* function prototypes                                                        */
+/*----------------------------------------------------------------------------*/
 
 #endif /* _INC_libpsi_internal_logbookinst_H_ */
 

@@ -38,9 +38,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef _INC_libpsi_psi_H_
 #define _INC_libpsi_psi_H_
 
-//------------------------------------------------------------------------------
-// includes
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
+/* includes                                                                   */
+/*----------------------------------------------------------------------------*/
 
 #include <libpsi/apglobal.h>
 
@@ -53,30 +53,30 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 
-//------------------------------------------------------------------------------
-// const defines
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
+/* const defines                                                              */
+/*----------------------------------------------------------------------------*/
 
 
-//------------------------------------------------------------------------------
-// typedef
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
+/* typedef                                                                    */
+/*----------------------------------------------------------------------------*/
 
 /**
  * \brief Application interface initialization parameters
  */
 typedef struct {
-    tBuffDescriptor*    pBuffDescList_m;      ///< Triple buffer descriptor list
-    tErrorHandler       pfnErrorHandler_m;    ///< Error handler callback function
-    tStreamHandler      pfnStreamHandler_m;   ///< Stream handler callback function
-    tTbufNumLayout      idConsAck_m;          ///< Id of the consumer acknowledge register
-    tTbufNumLayout      idProdAck_m;          ///< Id of the producer acknowledge register
-    tTbufNumLayout      idFirstProdBuffer_m;  ///< Id of the first producing buffer
+    tBuffDescriptor*    pBuffDescList_m;      /**< Triple buffer descriptor list */
+    tErrorHandler       pfnErrorHandler_m;    /**< Error handler callback function */
+    tStreamHandler      pfnStreamHandler_m;   /**< Stream handler callback function */
+    tTbufNumLayout      idConsAck_m;          /**< Id of the consumer acknowledge register */
+    tTbufNumLayout      idProdAck_m;          /**< Id of the producer acknowledge register */
+    tTbufNumLayout      idFirstProdBuffer_m;  /**< Id of the first producing buffer */
 } tPsiInitParam;
 
-//------------------------------------------------------------------------------
-// function prototypes
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
+/* function prototypes                                                        */
+/*----------------------------------------------------------------------------*/
 DLLEXPORT BOOL psi_init(tPsiInitParam* pInitParam_p);
 DLLEXPORT void psi_exit(void);
 

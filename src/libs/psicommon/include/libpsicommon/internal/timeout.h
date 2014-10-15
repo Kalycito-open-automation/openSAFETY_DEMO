@@ -39,37 +39,35 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef _INC_psicommon_int_timeout_H_
 #define _INC_psicommon_int_timeout_H_
 
-//------------------------------------------------------------------------------
-// includes
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
+/* includes                                                                   */
+/*----------------------------------------------------------------------------*/
 
 #include <libpsicommon/timeout.h>
 
-//------------------------------------------------------------------------------
-// const defines
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
+/* const defines                                                              */
+/*----------------------------------------------------------------------------*/
 
-#define TIMEOUT_MAX_INSTANCES       5       ///< Maximum number of timeout module instances
+#define TIMEOUT_MAX_INSTANCES       5       /**< Maximum number of timeout module instances */
 
-//------------------------------------------------------------------------------
-// typedef
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
+/* typedef                                                                    */
+/*----------------------------------------------------------------------------*/
 
 /**
 \brief Timeout module user instance
 */
 struct eTimeoutInstance
 {
-    UINT8     fInstUsed_m;              ///< Instance is already allocated
-    UINT8     fTimeoutEn_m;             ///< Transmit timeout enabled
-    UINT16    timeoutCycleCount_m;      ///< Async transmit cycle count
-    UINT16    cycleLimit_m;             ///< Limit of cycles to count
+    UINT8     fInstUsed_m;              /**< Instance is already allocated */
+    UINT8     fTimeoutEn_m;             /**< Transmit timeout enabled */
+    UINT16    timeoutCycleCount_m;      /**< Async transmit cycle count */
+    UINT16    cycleLimit_m;             /**< Limit of cycles to count */
 };
 
-//------------------------------------------------------------------------------
-// function prototypes
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
+/* function prototypes                                                        */
+/*----------------------------------------------------------------------------*/
 
 #endif /* _INC_psicommon_int_timeout_H_ */
-
-
