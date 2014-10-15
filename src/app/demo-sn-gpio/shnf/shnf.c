@@ -252,6 +252,8 @@ BOOLEAN shnf_process(void)
     BOOLEAN fReturn = FALSE;
     UINT32 consTime;
     SSC_t_PROCESS ssdoProcRet;
+    /* number of free management frames can be sent per call of the SSC_BuildTxFrames */
+    UINT8 freeMngtFrmsCount = 1U;
 
     switch(shnfInstance_l.ssdoRxStatus_m)
     {
@@ -259,6 +261,13 @@ BOOLEAN shnf_process(void)
         {
             if(hnf_processAsync())
             {
+                if(shnfInstance_l.shnfState_m == kShnfStateOperational)
+                {
+                    consTime = shnf_getConsecutiveTime();
+
+                    /* Guard timeout is checked in operational cyclically */
+                    SNMTS_TimerCheck(B_INSTNUM_ consTime, &freeMngtFrmsCount);
+                }
                 fReturn = TRUE;
             }
             break;
@@ -563,14 +572,10 @@ static void buildTxSpdoFrame(void)
 {
     UINT8 numFreeSpdoFrms = 1U; /* number of free SPDO frames can be sent per call of the SSC_BuildTxFrames */
     UINT32 consTime;
-    UINT8 b_numFreeMngtFrms = 1U; /* number of free management frames can be sent per call of the SSC_BuildTxFrames */
 
     if(shnfInstance_l.shnfState_m == kShnfStateOperational)
     {
         consTime = shnf_getConsecutiveTime();
-
-        /* Guard timeout is checked */
-        SNMTS_TimerCheck(B_INSTNUM_ consTime, &b_numFreeMngtFrms);
 
         /* SPDO frames are built */
         SPDO_BuildTxSpdo(B_INSTNUM_ consTime, &numFreeSpdoFrms);
