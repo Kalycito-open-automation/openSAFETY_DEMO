@@ -281,8 +281,6 @@ void SystemCoreClockUpdate (void)
   */
 static void SetSysClock(void)
 {
-  __IO uint32_t StartUpCounter = 0, HSEStatus = 0;
-
  #ifdef PLL_SOURCE_HSI
   /* At this stage the HSI is already enabled */
 
@@ -291,6 +289,7 @@ static void SetSysClock(void)
   RCC->CFGR |= (uint32_t)(RCC_CFGR_PLLSRC_HSI_Div2 | RCC_CFGR_PLLMULL16);
 
  #else /* PLL_SOURCE_HSE_BYPASS or PLL_SOURCE_HSE */
+  __IO uint32_t StartUpCounter = 0, HSEStatus = 0;
 
   /* Enable HSE */
   RCC->CR |= ((uint32_t)RCC_CR_HSEON);

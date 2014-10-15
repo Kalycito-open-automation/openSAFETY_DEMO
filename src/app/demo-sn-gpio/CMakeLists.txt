@@ -128,6 +128,11 @@ INCLUDE_DIRECTORIES(
                     ${DEMO_ARCH_INCS}
 )
 
+IF("${CMAKE_C_COMPILER_ID}" STREQUAL "GNU")
+    # Remove unknown pragma warning (This disables a warning on CTC_SKIP)
+    SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-unknown-pragmas")
+ENDIF()
+
 ########################################################################
 # Build Executable
 ########################################################################
