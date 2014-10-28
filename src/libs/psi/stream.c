@@ -319,11 +319,7 @@ BOOL stream_processSync(void)
             /* Transfer stream input/output data */
             if(streamInstance_l.pfnStreamHandler_m(&streamInstance_l.handlParam_m) != FALSE)
             {
-                /* Call all post filling actions */
-                if(stream_callActions(kStreamActionPost) != FALSE)
-                {
-                    fReturn = TRUE;
-                }
+                fReturn = TRUE;
             }
             else
             {
@@ -331,6 +327,33 @@ BOOL stream_processSync(void)
                 error_setError(kPsiModuleStream, kPsiStreamTransferError);
             }
         }
+    }
+
+    return fReturn;
+}
+
+/*----------------------------------------------------------------------------*/
+/**
+\brief   Process the stream module post transfer actions
+
+This procedure triggers all post actions of the libpsi. A post action
+are all tasks which are after the exchange of the input/output image.
+
+\return BOOL
+\retval TRUE      Successfully processed the post actions
+\retval FALSE     Unable to process post actions
+
+\ingroup module_stream
+*/
+/*----------------------------------------------------------------------------*/
+BOOL stream_processPostActions(void)
+{
+    BOOL fReturn = FALSE;
+
+    /* Call all post filling actions */
+    if(stream_callActions(kStreamActionPost) != FALSE)
+    {
+        fReturn = TRUE;
     }
 
     return fReturn;

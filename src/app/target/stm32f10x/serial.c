@@ -82,6 +82,7 @@ stm32f103rb.
 /*----------------------------------------------------------------------------*/
 /* local vars                                                                 */
 /*----------------------------------------------------------------------------*/
+static tSerialTransferFin pfnTransfFin_l = NULL;
 
 /*----------------------------------------------------------------------------*/
 /* local function prototypes                                                  */
@@ -102,7 +103,8 @@ static void initNvic(void);
 This function init's the peripherals of the AP like cache and the interrupt
 controller.
 
-\param pTransParam_p The transfer parameters (rx/tx base and size)
+\param pTransParam_p    The transfer parameters (rx/tx base and size)
+\param pfnTransfFin_p   Pointer to the transfer finished interrupt
 
 \retval TRUE    On success
 \retval FALSE   On error
@@ -110,7 +112,7 @@ controller.
 \ingroup module_serial
 */
 /*----------------------------------------------------------------------------*/
-BOOL serial_init(tHandlerParam * pTransParam_p)
+BOOL serial_init(tHandlerParam * pTransParam_p, tSerialTransferFin pfnTransfFin_p)
 {
     UINT8 fReturn = FALSE;
 
@@ -135,6 +137,9 @@ BOOL serial_init(tHandlerParam * pTransParam_p)
         /* Enable SPI DMA interface */
         SPI_I2S_DMACmd(SPI1, SPI_I2S_DMAReq_Tx | SPI_I2S_DMAReq_Rx, ENABLE);
 
+        /* Assign transfer finished interrupt callback function */
+        pfnTransfFin_l = pfnTransfFin_p;
+
         fReturn = TRUE;
     }
 
@@ -150,7 +155,7 @@ BOOL serial_init(tHandlerParam * pTransParam_p)
 /*----------------------------------------------------------------------------*/
 void serial_exit(void)
 {
-    /* TODO! */
+    pfnTransfFin_l =  NULL;
 }
 
 /*----------------------------------------------------------------------------*/
@@ -375,13 +380,19 @@ void DMA1_Channel2_IRQHandler(void)
         /* Set NSS high (not active!) */
         GPIOB->BSRR = GPIO_Pin_6;
 
+        /* Call transfer finished callback function */
+        if(pfnTransfFin_l != NULL)
+            pfnTransfFin_l(FALSE);
+
         /* Clear the interrupt flag */
         DMA_ClearFlag(DMA1_FLAG_TC2);
     }
     else if(DMA_GetITStatus(DMA1_IT_TE2) == SET)
-    {
-        /* Transfer error! */
-        /*TODO! handle this error? */
+    {   /* Transfer error! */
+        /* Call transfer finished callback function with error TRUE */
+        if(pfnTransfFin_l != NULL)
+            pfnTransfFin_l(TRUE);
+
         DMA_ClearFlag(DMA1_FLAG_TE2);
     }
 }
@@ -409,8 +420,10 @@ void DMA1_Channel3_IRQHandler(void)
     }
     else if(DMA_GetITStatus(DMA1_IT_TE3) == SET)
     {
-        /* Transfer error! */
-        /*TODO! handle this error? */
+        /* Call transfer finished callback function with error TRUE */
+        if(pfnTransfFin_l != NULL)
+            pfnTransfFin_l(TRUE);
+
         DMA_ClearFlag(DMA1_FLAG_TE3);
     }
 }

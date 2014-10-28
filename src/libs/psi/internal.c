@@ -221,9 +221,31 @@ BOOL psi_processSync(void)
     {
         fReturn = TRUE;
     }
-    else
+
+    return fReturn;
+}
+
+/*----------------------------------------------------------------------------*/
+/**
+\brief    Process slim interface post transfer actions
+
+Process all library actions which shall be triggered after a successful
+exchange of the input/output image.
+
+\return  BOOL
+\retval  TRUE      Post action executed successfully
+\retval  FALSE     Error in post action
+
+\ingroup module_internal
+*/
+/*----------------------------------------------------------------------------*/
+BOOL psi_processPostTransferActions(void)
+{
+    BOOL fReturn = FALSE;
+
+    if(stream_processPostActions() != FALSE)
     {
-        error_setError(kPsiModuleInternal, kPsiProcessSyncFailed);
+        fReturn = TRUE;
     }
 
     return fReturn;

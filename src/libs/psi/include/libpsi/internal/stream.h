@@ -97,6 +97,7 @@ BOOL stream_registerAction(tActionType actType_p, UINT8 buffId_p,
         tBuffAction pfnBuffAct_p, void * pUserArg_p);
 void stream_registerSyncCb(tBuffSyncCb pfnSyncCb_p);
 BOOL stream_processSync(void);
+BOOL stream_processPostActions(void);
 
 void stream_ackBuffer(UINT8 buffId_p);
 

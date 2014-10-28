@@ -81,6 +81,9 @@ DLLEXPORT BOOL psi_init(tPsiInitParam* pInitParam_p);
 DLLEXPORT void psi_exit(void);
 
 DLLEXPORT BOOL psi_processSync(void);
+
+DLLEXPORT BOOL psi_processPostTransferActions(void);
+
 DLLEXPORT BOOL psi_processAsync(void);
 
 #endif /* _INC_libpsi_psi_H_ */

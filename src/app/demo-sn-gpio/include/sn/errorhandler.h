@@ -64,9 +64,10 @@ typedef enum
     kErrorInvalidTxMemory                   = 0x05,     /**< There is no transmit memory left for sending */
 
     kErrorSyncProcessFailed                 = 0x20,     /**< Processing the synchronous task has failed */
-    kErrorSyncFramePostingFailed            = 0x21,
-    kErrorSyncFrameCopyFailed               = 0x22,
-    kErrorSyncFrameNoBuffer                 = 0x23,
+    kErrorSyncProcessActionFailed           = 0x21,     /**< Processing the post action has failed */
+    kErrorSyncFramePostingFailed            = 0x22,
+    kErrorSyncFrameCopyFailed               = 0x23,
+    kErrorSyncFrameNoBuffer                 = 0x24,
 
     kErrorAsyncProcessFailed                = 0x30,     /**< Processing the asynchronous task has failed */
     kErrorAsyncFramePostingFailed           = 0x31,
@@ -88,7 +89,9 @@ typedef enum
 
     kErrorSodStoreSizeMissmatch             = 0x60,
     kErrorSodStoreWriteError                = 0x61,
-    kErrorSodStoreCrcError                  = 0x62
+    kErrorSodStoreCrcError                  = 0x62,
+
+    kErrorSerialTransferFailed              = 0x70,     /**< Error during the serial transfer */
 } tErrorTypes;
 
 

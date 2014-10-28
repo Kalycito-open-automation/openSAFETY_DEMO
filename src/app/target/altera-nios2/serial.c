@@ -95,6 +95,7 @@ Altera Nios2.
 /*----------------------------------------------------------------------------*/
 /* local vars                                                                 */
 /*----------------------------------------------------------------------------*/
+static tSerialTransferFin pfnTransfFin_l = NULL;
 
 /*----------------------------------------------------------------------------*/
 /* local function prototypes                                                  */
@@ -112,6 +113,7 @@ This function init's the peripherals of the AP like cache and the interrupt
 controller.
 
 \param[in] pHandlParam_p    Pointer to the transfer parameters with 4 byte init
+\param[in] pfnTransfFin_p   Pointer to the transfer finished callback function
 
 \retval TRUE On successful init
 \retval FALSE On error
@@ -119,11 +121,12 @@ controller.
 \ingroup module_serial
 */
 /*----------------------------------------------------------------------------*/
-BOOL serial_init(tHandlerParam* pHandlParam_p)
+BOOL serial_init(tHandlerParam* pHandlParam_p, tSerialTransferFin pfnTransfFin_p)
 {
     UNUSED_PARAMETER(pHandlParam_p);
 
     /* No initialization needed for Nios2 (Done in ipcore configuration!) */
+    pfnTransfFin_l = pfnTransfFin_p;
 
     return TRUE;
 }
@@ -137,7 +140,7 @@ BOOL serial_init(tHandlerParam* pHandlParam_p)
 /*----------------------------------------------------------------------------*/
 void serial_exit(void)
 {
-    /* Nothing to clear */
+    pfnTransfFin_l = NULL;
 }
 
 /*----------------------------------------------------------------------------*/
@@ -181,6 +184,13 @@ BOOL serial_transfer(tHandlerParam* pHandlParam_p)
         {
             fReturn = TRUE;
         }
+    }
+
+    if(fReturn != FALSE)
+    {
+        /* Call the transfer finished callback function */
+        if(pfnTransfFin_l != NULL)
+            pfnTransfFin_l(FALSE);
     }
 
     return fReturn;

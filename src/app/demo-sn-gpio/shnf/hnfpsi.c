@@ -129,6 +129,7 @@ static BOOL processSync(UINT32 rpdoRelTimeLow_p,
         tTpdoMappedObj* pTpdoImage_p );
 
 static void syncHandler(void* pArg_p);
+static void serialTransferFinished(BOOL fError_p);
 
 static void errorHandler(tPsiErrorInfo* pErrorInfo_p);
 
@@ -496,7 +497,7 @@ static BOOL initPsi(void)
                 {
                     /* initialize serial interface*/
                     DEBUG_TRACE(DEBUG_LVL_ALWAYS,"\nInitialize serial device -> ");
-                    if(serial_init(&transferParam))
+                    if(serial_init(&transferParam, serialTransferFinished))
                     {
                         DEBUG_TRACE(DEBUG_LVL_ALWAYS, "SUCCESS!\n");
 
@@ -775,6 +776,38 @@ static void syncHandler(void* pArg_p)
 
 /*----------------------------------------------------------------------------*/
 /**
+\brief    Serial transfer finished callback function
+
+This function is called after a serial transfer from the PCP to the application.
+
+\param[in] fError_p       True if the transfer had an error
+
+\ingroup module_hnf
+*/
+/*----------------------------------------------------------------------------*/
+static void serialTransferFinished(BOOL fError_p)
+{
+    if(fError_p == FALSE)
+    {
+        BENCHMARK_MOD_01_SET(2);
+
+        /* Transfer finished -> Call all post action tasks */
+        if(psi_processPostTransferActions() == FALSE)
+        {
+            errh_postFatalError(kErrSourceHnf, kErrorSyncProcessFailed, 0);
+        }
+
+        BENCHMARK_MOD_01_RESET(2);
+    }
+    else
+    {
+        /* There was an error during serial transfer */
+        errh_postFatalError(kErrSourceHnf, kErrorSerialTransferFailed, 0);
+    }
+}
+
+/*----------------------------------------------------------------------------*/
+/**
 \brief    Error handler callback function
 
 \param pErrorInfo_p     Provides details about the occurred error
@@ -789,7 +822,7 @@ static void errorHandler(tPsiErrorInfo* pErrorInfo_p)
     MEMSET(&errInfo, 0, sizeof(tErrorDesc));
 
     errInfo.source_m = kErrSourceHnf;       /* Source is always the HNF in this case */
-    errInfo.fFailSafe_m = FALSE;
+    errInfo.fFailSafe_m = TRUE;
     errInfo.class_m = kErrLevelFatal;       /* All errors in the HNF are critical */
 
     if(pErrorInfo_p != NULL)

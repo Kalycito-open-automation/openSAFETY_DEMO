@@ -52,10 +52,15 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /* typedef                                                                    */
 /*----------------------------------------------------------------------------*/
 
+/**
+ * \brief Transfer finished interrupt type
+ */
+typedef void (*tSerialTransferFin)(BOOL fError_p);
+
 /*----------------------------------------------------------------------------*/
 /* function prototypes                                                        */
 /*----------------------------------------------------------------------------*/
-BOOL serial_init(tHandlerParam * pTransParam_p);
+BOOL serial_init(tHandlerParam * pTransParam_p, tSerialTransferFin pfnTransfFin_p);
 void serial_exit(void);
 
 BOOL serial_transfer(tHandlerParam* pHandlParam_p);

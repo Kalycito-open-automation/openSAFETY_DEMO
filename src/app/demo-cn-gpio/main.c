@@ -114,6 +114,8 @@ static BOOL psi_workInputOutput(UINT32 rpdoRelTimeLow_p,
         tTpdoMappedObj* pTpdoImage_p );
 
 static void psi_syncIntH(void* pArg_p);
+static void psi_serialTransferFinished(BOOL fError_p);
+
 static void psi_errorHandler(tPsiErrorInfo* pErrorInfo_p);
 
 #if(((PSI_MODULE_INTEGRATION) & (PSI_MODULE_CC)) != 0)
@@ -197,7 +199,7 @@ int main (void)
 
     /* Init the serial device */
     DEBUG_TRACE(DEBUG_LVL_ALWAYS,"\n\nInitialize the serial device...\n");
-    if(serial_init(&transferParam) == FALSE)
+    if(serial_init(&transferParam, psi_serialTransferFinished) == FALSE)
     {
         DEBUG_TRACE(DEBUG_LVL_ERROR," ... error!\n");
         goto Exit;
@@ -457,6 +459,41 @@ static void psi_syncIntH(void* pArg_p)
 
     BENCHMARK_MOD_01_RESET(0);
 
+}
+
+
+/*----------------------------------------------------------------------------*/
+/**
+\brief    Serial transfer finished callback function
+
+This function is called after a serial transfer from the PCP to the application.
+
+\param[in] fError_p       True if the transfer had an error
+
+\ingroup module_hnf
+*/
+/*----------------------------------------------------------------------------*/
+static void psi_serialTransferFinished(BOOL fError_p)
+{
+    if(fError_p == FALSE)
+    {
+        BENCHMARK_MOD_01_SET(2);
+
+        /* Transfer finished -> Call all post action tasks */
+        if(psi_processPostTransferActions() == FALSE)
+        {
+            DEBUG_TRACE(DEBUG_LVL_ERROR,"ERROR: Unable to process post actions!\n");
+            mainInstance_l.fShutdown_m = TRUE;
+        }
+
+        BENCHMARK_MOD_01_RESET(2);
+    }
+    else
+    {
+        /* There was an error during the serial transfer */
+        DEBUG_TRACE(DEBUG_LVL_ERROR,"ERROR: Serial transfer error!\n");
+        mainInstance_l.fShutdown_m = TRUE;
+    }
 }
 
 /*----------------------------------------------------------------------------*/
