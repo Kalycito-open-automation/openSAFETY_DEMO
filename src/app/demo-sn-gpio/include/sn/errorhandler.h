@@ -138,7 +138,7 @@ typedef struct
 typedef struct
 {
     BOOLEAN * pShutdown_m;      /**< Pointer to the shutdown flag */
-    BOOLEAN * pFailSafe_m;      /**< Pointer to the failsafe flag */
+    BOOLEAN * pEnterPreop_m;    /**< Pointer to the enter preop flag */
 } tErrHInitParam;
 
 /*----------------------------------------------------------------------------*/

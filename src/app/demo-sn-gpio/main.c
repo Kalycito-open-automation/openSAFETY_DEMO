@@ -92,7 +92,7 @@ stack and processes the background task.
 typedef struct
 {
     BOOLEAN fShutdown_m;                   /**< TRUE if the SN should perform a shutdown */
-    BOOLEAN fFailSafe_m;                   /**< TRUE if the SN should enter fail safe state */
+    BOOLEAN fEnterPreop_m;                 /**< TRUE if the SN should enter pre-operational state */
 
     BOOLEAN fEnterOperational_m;           /**< TRUE if the SN should enter operational state */
     SNMTS_t_SN_STATE_MAIN lastSnState_m;   /**< Consists of the last SN state */
@@ -124,7 +124,7 @@ static void checkConnectionValid(void);
 static BOOLEAN enterPreOperational(void);
 static BOOLEAN enterOperational(void);
 
-static BOOLEAN enterFailSafe(void);
+static BOOLEAN enterPreop(void);
 static void shutdown(void);
 
 
@@ -171,7 +171,7 @@ int main (void)
 
     /* Initialize the error handler */
     errhInitParam.pShutdown_m = &instance_l.fShutdown_m;
-    errhInitParam.pFailSafe_m = &instance_l.fFailSafe_m;
+    errhInitParam.pEnterPreop_m = &instance_l.fEnterPreop_m;
 
     if(errh_init(&errhInitParam))
     {
@@ -304,10 +304,10 @@ static BOOLEAN process(void)
             }
         }
 
-        /* Check if fail safe flag is active */
-        if(instance_l.fFailSafe_m)
+        /* Check if enter preop flag is active */
+        if(instance_l.fEnterPreop_m)
         {
-            if(enterFailSafe() == FALSE)
+            if(enterPreop() == FALSE)
             {
                 break;
             }
@@ -459,15 +459,15 @@ static BOOLEAN enterOperational(void)
 
 /*----------------------------------------------------------------------------*/
 /**
-\brief    Handle the switch to fail safe state
+\brief    Handle the switch to preop state
 
-\retval TRUE    Change to fail safe successful
+\retval TRUE    Change to preop successful
 \retval FALSE   Failed to change the state
 
 \ingroup module_main
 */
 /*----------------------------------------------------------------------------*/
-static BOOLEAN enterFailSafe(void)
+static BOOLEAN enterPreop(void)
 {
     BOOLEAN fReturn = FALSE;
     UINT32 consTime = 0;
@@ -477,7 +477,7 @@ static BOOLEAN enterFailSafe(void)
     /* Perform transition to pre operational */
     if(SNMTS_PerformTransPreOp(B_INSTNUM_ consTime))
     {
-        instance_l.fFailSafe_m = FALSE;
+        instance_l.fEnterPreop_m = FALSE;
 
         /* Transition to preop successful! */
         fReturn = TRUE;

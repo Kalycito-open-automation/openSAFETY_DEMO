@@ -81,6 +81,8 @@ static UINT32 lostErrors_l = 0;     /**< Is incremented when an error was not fo
 /* const defines                                                              */
 /*----------------------------------------------------------------------------*/
 
+#define ERR_LIFETIME_EXCEEDED     0x49        /**< unit_m is set to this value of the lifetime is exceeded */
+
 /*----------------------------------------------------------------------------*/
 /* local types                                                                */
 /*----------------------------------------------------------------------------*/
@@ -91,7 +93,7 @@ static UINT32 lostErrors_l = 0;     /**< Is incremented when an error was not fo
 typedef struct
 {
     BOOLEAN * pShutdown_m;      /**< Pointer to the shutdown flag */
-    BOOLEAN * pFailSafe_m;      /**< Pointer to the failsafe flag */
+    BOOLEAN * pEnterPreop_m;    /**< Pointer to the enter preop flag */
 } tErrHInstance;
 
 /*----------------------------------------------------------------------------*/
@@ -107,6 +109,7 @@ static char *errSource[] = { "Invalid", "EPS", "HNF", "SHNF", "SAPL", "Periph" }
 /*----------------------------------------------------------------------------*/
 /* local function prototypes                                                  */
 /*----------------------------------------------------------------------------*/
+static BOOLEAN enterPreopOnError(tErrorDesc * pErrDesc_p);
 
 /*============================================================================*/
 /*            P U B L I C   F U N C T I O N S                                 */
@@ -134,7 +137,7 @@ BOOLEAN errh_init(tErrHInitParam * pInitParam_p)
     if(pInitParam_p != NULL)
     {
         errHanInstance_l.pShutdown_m = pInitParam_p->pShutdown_m;
-        errHanInstance_l.pFailSafe_m = pInitParam_p->pFailSafe_m;
+        errHanInstance_l.pEnterPreop_m = pInitParam_p->pEnterPreop_m;
 
 
         fReturn = TRUE;
@@ -223,7 +226,7 @@ void errh_postFatalError(tErrSource source_p, tErrorTypes code_p, UINT32 addInfo
 {
     tErrorDesc errDesc;
 
-    errDesc.fFailSafe_m = FALSE;
+    errDesc.fFailSafe_m = TRUE;         /* All fatal errors indicate a shutdown */
     errDesc.source_m = source_p;
     errDesc.class_m = kErrLevelFatal;
     errDesc.unit_m = 0;
@@ -246,6 +249,7 @@ void errh_postError(tErrorDesc * pErrDesc_p)
 {
     if(pErrDesc_p != NULL)
     {
+#ifndef NDEBUG
         switch(pErrDesc_p->class_m)
         {
             case kErrLevelInfo:
@@ -278,23 +282,22 @@ void errh_postError(tErrorDesc * pErrDesc_p)
             default:
                 break;
         }
+#endif /* #ifndef NDEBUG */
 
         /* React on errors */
         if(pErrDesc_p->fFailSafe_m)
         {
-            /* Fail safe is indicated -> Enter fail safe state */
-            *errHanInstance_l.pFailSafe_m = TRUE;
-            DEBUG_TRACE(DEBUG_LVL_ALWAYS, "-> Enter FailSafe!\n");
+            /* On errors with failsafe set -> shutdown the firmware */
+            *errHanInstance_l.pShutdown_m = TRUE;
+            DEBUG_TRACE(DEBUG_LVL_ALWAYS, "\n-> Shutdown!\n");
         }
         else
         {
-            /* On fatal errors which are not fail safe -> Shutdown */
-            if(pErrDesc_p->class_m == kErrLevelFatal)
+            /* On some unique errors/infos we perform a switch to preop! */
+            if(enterPreopOnError(pErrDesc_p))
             {
-                /* On fatal errors shutdown the stack */
-                *errHanInstance_l.pShutdown_m = TRUE;
-                DEBUG_TRACE(DEBUG_LVL_ALWAYS, "\n-> Shutdown!\n");
-
+                *errHanInstance_l.pEnterPreop_m = TRUE;
+                DEBUG_TRACE(DEBUG_LVL_ALWAYS, "\n-> Enter Preop!\n");
             }
         }
 
@@ -310,5 +313,29 @@ void errh_postError(tErrorDesc * pErrDesc_p)
 /*============================================================================*/
 /* \name Private Functions */
 /* \{ */
+
+/*----------------------------------------------------------------------------*/
+/**
+\brief    Check if this error shall trigger a switch to preop
+
+\param[in] pErrDesc_p   Pointer to the error description
+
+\ingroup module_sapl
+*/
+/*----------------------------------------------------------------------------*/
+static BOOLEAN enterPreopOnError(tErrorDesc * pErrDesc_p)
+{
+    BOOLEAN fEnterPreop = FALSE;
+
+    if(pErrDesc_p->source_m == kErrSourceStack      &&
+       pErrDesc_p->class_m == kErrLevelInfo         &&
+       pErrDesc_p->unit_m == SNMTS_k_UNIT_ID        &&
+       pErrDesc_p->code_m == ERR_LIFETIME_EXCEEDED   )
+    {
+        fEnterPreop = TRUE;
+    }
+
+    return fEnterPreop;
+}
 
 /* \} */
