@@ -54,29 +54,22 @@ buffers which can be accessed by the application processor.
 
 #include <oplk/oplk.h>
 
+/* POWERLINK settings demo specific values */
+#include <powerlink.h>
+
+/* POWERLINK settings default values */
+#include <powerlinkdefault.h>
+
 #include <event.h>
 
 
 //------------------------------------------------------------------------------
 // defines
 //------------------------------------------------------------------------------
-#define NODEID      0x01         ///< Initial NodeId. Should be NOT 0xF0 (=MN) in case of CN
+#define NODEID          0x01                   ///< Initial NodeId. Should be NOT 0xF0 (=MN) in case of CN
+#define CYCLE_LEN       1000                   ///< length of the cycle [us]
 
-#define CYCLE_LEN   1000                                ///< length of the cycle [us]
-#define MAC_ADDR    0x00, 0x12, 0x34, 0x56, 0x78, 0x9A  ///< MAC address of the CN
-#define IP_ADDR     0xc0a86401                          ///< IP-Address 192.168.100.1 (Object: 0x1E40/0x02) (don't care the last byte!)
-#define SUBNET_MASK 0xFFFFFF00                          ///< Subnet mask 255.255.255.0 (Object: 0x1E40/0x03)
-#define DEF_GATEWAY 0xc0a864f0                          ///< Default gateway: 192.168.100.254 (Object: 0x1E40/0x05)
-
-#define CONFIG_ISOCHR_TX_MAX_PAYLOAD    max(40, sizeof(tTpdoMappedObj))
-#define CONFIG_ISOCHR_RX_MAX_PAYLOAD    1496
-#define CONFIG_IDENT_DEVICE_TYPE        -1              ///< Device type of the node
-#define CONFIG_IDENT_VENDOR_ID          0x00000000      ///< Vendor ID of the node
-#define CONFIG_IDENT_PRODUCT_CODE       0x00            ///< Product code of the node
-#define CONFIG_IDENT_REVISION           0x00010020      ///< Revision number of the node
-#define CONFIG_IDENT_SERIAL_NUMBER      0x00000000      ///< Serial number of the node
-
-#define MAC_ADDR_LAST_BYTE      5                       ///< Position of the last MAC address byte
+#define MAC_ADDR_LAST_BYTE          5          ///< Position of the last MAC address byte
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
