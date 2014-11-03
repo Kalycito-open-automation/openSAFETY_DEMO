@@ -212,6 +212,34 @@ void pdo_exit(void)
     // Free module internals
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief    Get the base address of the Tpdo image
+
+\return Base address of the Tpdo image
+
+\ingroup module_pdo
+*/
+//------------------------------------------------------------------------------
+tTpdoMappedObj * pdo_getTpdoImage(void)
+{
+    return &pdoInstance_l.pTpdoLayout_m->mappedObjList_m;
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief    Get the base address of the Rpdo image
+
+\return Base address of the Rpdo image
+
+\ingroup module_pdo
+*/
+//------------------------------------------------------------------------------
+tRpdoMappedObj * pdo_getRpdoImage(void)
+{
+    return &pdoInstance_l.pRpdoLayout_m->mappedObjList_m;
+}
+
 //============================================================================//
 //            P R I V A T E   F U N C T I O N S                               //
 //============================================================================//

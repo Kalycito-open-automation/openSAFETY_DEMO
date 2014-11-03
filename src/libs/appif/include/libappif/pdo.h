@@ -74,6 +74,9 @@ typedef struct {
 DLLEXPORT BOOL pdo_init(tAppIfPdoCb pfnPdoCb_p, tPdoInitParam* pPdoInitParam_p);
 DLLEXPORT void pdo_exit(void);
 
+DLLEXPORT tTpdoMappedObj * pdo_getTpdoImage(void);
+DLLEXPORT tRpdoMappedObj * pdo_getRpdoImage(void);
+
 #endif /* _INC_libappif_pdo_H_ */
 
 

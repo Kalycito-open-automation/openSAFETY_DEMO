@@ -109,6 +109,7 @@ static BOOL ssdo_initReceiveBuffer(tSsdoChanNum chanId_p,
 static BOOL ssdo_initTransmitBuffer(tSsdoChanNum chanId_p,
         tTbufNumLayout txBuffId_p);
 static BOOL ssdo_handleRxFrame(tSsdoInstance pInstance_p);
+static void ssdo_freeRxChannel(tSsdoInstance pInstance_p);
 static void ssdo_handleTxFrame(tSsdoInstance pInstance_p);
 static BOOL ssdo_receiveFrame(UINT8* pBuffer_p, UINT16 bufSize_p,
         void* pUserArg_p);
@@ -217,6 +218,38 @@ void ssdo_destroy(tSsdoInstance pInstance_p)
 
 //------------------------------------------------------------------------------
 /**
+\brief    Returns the address of the current active transmit buffers
+
+\param[in]  pInstance_p     SSDO module instance
+\param[out] ppPayload_p     Pointer to the result address of the payload
+\param[out]  pPaylLen_p      Pointer to the size of the buffer
+
+\return BOOL
+\retval TRUE    Success on getting the buffer
+\retval FALSE   Invalid parameter passed to function
+
+\ingroup module_ssdo
+*/
+//------------------------------------------------------------------------------
+BOOL ssdo_getCurrentTxBuffer(tSsdoInstance pInstance_p, UINT8 ** ppPayload_p, UINT16 * pPaylLen_p)
+{
+    BOOL fReturn = FALSE;
+
+    if(pInstance_p != NULL && ppPayload_p != NULL && pPaylLen_p != NULL)
+    {
+        if(pInstance_p->txBuffParam_m.ssdoTxBuffer_m.isLocked_m == FALSE)
+        {
+            *ppPayload_p = pInstance_p->txBuffParam_m.ssdoTxBuffer_m.pSsdoTxPayl_m->tssdoTransmitData_m;
+            *pPaylLen_p = TSSDO_TRANSMIT_DATA_SIZE;
+            fReturn = TRUE;
+        }
+    }
+
+    return fReturn;
+}
+
+//------------------------------------------------------------------------------
+/**
 \brief    Post a frame for transmission over the SSDO channel
 
 \param[in]  pInstance_p     SSDO module instance
@@ -254,10 +287,6 @@ tSsdoTxStatus ssdo_postPayload(tSsdoInstance pInstance_p, UINT8* pPayload_p,
             // Check if buffer is free for filling
             if(pInstance_p->txBuffParam_m.ssdoTxBuffer_m.isLocked_m == FALSE)
             {
-                // Fill buffer
-                APPIF_MEMCPY(pInstance_p->txBuffParam_m.ssdoTxBuffer_m.pSsdoTxPayl_m->tssdoTransmitData_m,
-                        pPayload_p, paylSize_p);
-
                 // Set transmit size
                 ami_setUint16Le((UINT8*)&pInstance_p->txBuffParam_m.ssdoTxBuffer_m.pSsdoTxPayl_m->paylSize_m, paylSize_p);
 
@@ -313,6 +342,20 @@ BOOL ssdo_process(tSsdoInstance pInstance_p)
     }
 
     return fReturn;
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief    This function finishes a receive message and frees the channel
+
+\param[in]  pInstance_p     SSDO module instance
+
+\ingroup module_ssdo
+*/
+//------------------------------------------------------------------------------
+void ssdo_receiveMsgFinished(tSsdoInstance pInstance_p)
+{
+    ssdo_freeRxChannel(pInstance_p);
 }
 
 //============================================================================//
@@ -452,18 +495,16 @@ static BOOL ssdo_handleRxFrame(tSsdoInstance pInstance_p)
         // Call SSDO user handler
         if(pInstance_p->rxBuffParam_m.pfnRxHandler_m(pRxBuffer, rxBuffSize))
         {
+            // Return true but don't free the channel! Frame will be retried later
             fReturn = TRUE;
         }
         else
         {
             error_setError(kAppIfModuleSsdo, kAppIfSsdoProcessingFailed);
+
+            // Error occurred -> Free channel anyway!
+            ssdo_freeRxChannel(pInstance_p);
         }
-
-        // Access finished -> Unblock channel by writing current sequence number to status field!
-        status_setSsdoRxChanFlag(pInstance_p->chanId_m,
-                pInstance_p->rxBuffParam_m.currRxSeqNr_m);
-
-        pInstance_p->rxBuffParam_m.fRxFrameIncoming_m = FALSE;
     }
     else
     {
@@ -472,6 +513,24 @@ static BOOL ssdo_handleRxFrame(tSsdoInstance pInstance_p)
     }
 
     return fReturn;
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief    Free the receive channel to enable transmission of the next frame
+
+\param[in]  pInstance_p     SSDO module instance
+
+\ingroup module_ssdo
+*/
+//------------------------------------------------------------------------------
+static void ssdo_freeRxChannel(tSsdoInstance pInstance_p)
+{
+    // Access finished -> Unblock channel by writing current sequence number to status field!
+    status_setSsdoRxChanFlag(pInstance_p->chanId_m,
+            pInstance_p->rxBuffParam_m.currRxSeqNr_m);
+
+    pInstance_p->rxBuffParam_m.fRxFrameIncoming_m = FALSE;
 }
 
 //------------------------------------------------------------------------------

@@ -87,8 +87,10 @@ typedef struct {
 //------------------------------------------------------------------------------
 DLLEXPORT tSsdoInstance ssdo_create(tSsdoChanNum chanId_m, tSsdoInitParam* pInitParam_p);
 DLLEXPORT void ssdo_destroy(tSsdoInstance  pInstance_p);
+DLLEXPORT BOOL ssdo_getCurrentTxBuffer(tSsdoInstance pInstance_p, UINT8 ** ppPayload_p, UINT16 * pPaylLen_p);
 DLLEXPORT tSsdoTxStatus ssdo_postPayload(tSsdoInstance pInstance_p, UINT8* pPayload_p,
                                            UINT16 paylSize_p);
+DLLEXPORT void ssdo_receiveMsgFinished(tSsdoInstance pInstance_p);
 
 #endif /* _INC_libappif_ssdo_H_ */
 
