@@ -1,11 +1,11 @@
 /**
 ********************************************************************************
-\file   apptarget/benchmark.h
+\file   sn/nvs.h
 
-\brief  Header file for debugging. Enables setting of benchmark pins
+\brief  Interface to the non volatile storage
 
-This header is used to set benchmark pins in order to enable timint
-measurements on the ap processor.
+This file implements the interface to the non volatile memory which is different
+for every target platform.
 
 *******************************************************************************/
 
@@ -36,37 +36,18 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
 
-#ifndef _INC_apptarget_benchmark_H_
-#define _INC_apptarget_benchmark_H_
+#ifndef _INC_sn_nvs_H_
+#define _INC_sn_nvs_H_
 
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
 #include <apptarget/target.h>
 
-
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
-#include "system.h"
 
-#ifdef APP_0_BENCHMARK_PIO_BASE
-    #include "altera_avalon_pio_regs.h"       // PIO access
-
-    #if APP_0_BENCHMARK_PIO_BIT_MODIFYING_OUTPUT_REGISTER == 0
-        #error Please enable individual bit setting/clearing of output register for benchmark_pio module in SOPC Builder
-    #endif
-    #define BENCHMARK_SET(x)    IOWR_ALTERA_AVALON_PIO_SET_BITS(APP_0_BENCHMARK_PIO_BASE, \
-                                (1 << (x)))
-    #define BENCHMARK_RESET(x)  IOWR_ALTERA_AVALON_PIO_CLEAR_BITS(APP_0_BENCHMARK_PIO_BASE, \
-                                (1 << (x)))
-    #define BENCHMARK_TOGGLE(x) IOWR_ALTERA_AVALON_PIO_DATA(APP_0_BENCHMARK_PIO_BASE, \
-                                ((IORD_ALTERA_AVALON_PIO_DATA(APP_0_BENCHMARK_PIO_BASE)) \
-                                ^ (1 << (x))))
-#else
-    #undef BENCHMARK_MODULES
-    #define BENCHMARK_MODULES           0x00000000
-#endif
 
 //------------------------------------------------------------------------------
 // typedef
@@ -75,6 +56,16 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // function prototypes
 //------------------------------------------------------------------------------
+UINT8 nvs_init(void);
+void nvs_close(void);
 
-#endif /* _INC_apptarget_benchmark_H_ */
+UINT8 nvs_readUint32(UINT32 offset_p, UINT32 ** ppReadData_p);
+UINT8 nvs_write(UINT32 offset_p, UINT8 * pData_p, UINT32 length_p);
+
+UINT8 nvs_erase(UINT32 offset_p);
+
+UINT8* nvs_getAddress(UINT32 offset_p);
+
+#endif /* _INC_sn_nvs_H_ */
+
 

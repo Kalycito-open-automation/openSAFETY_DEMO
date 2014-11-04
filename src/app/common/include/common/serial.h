@@ -1,11 +1,11 @@
 /**
 ********************************************************************************
-\file   apptarget/benchmark.h
+\file   common/serial.h
 
-\brief  Header file for debugging. Enables setting of benchmark pins
+\brief  Interface to the target specific serial handler
 
-This header is used to set benchmark pins in order to enable timint
-measurements on the ap processor.
+Implements the interface to the serial which provides the connection to the
+communication processor.
 
 *******************************************************************************/
 
@@ -36,37 +36,17 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
 
-#ifndef _INC_apptarget_benchmark_H_
-#define _INC_apptarget_benchmark_H_
+#ifndef _INC_common_serial_H_
+#define _INC_common_serial_H_
 
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <apptarget/target.h>
-
+#include <libpsi/psi.h>
 
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
-#include "system.h"
-
-#ifdef APP_0_BENCHMARK_PIO_BASE
-    #include "altera_avalon_pio_regs.h"       // PIO access
-
-    #if APP_0_BENCHMARK_PIO_BIT_MODIFYING_OUTPUT_REGISTER == 0
-        #error Please enable individual bit setting/clearing of output register for benchmark_pio module in SOPC Builder
-    #endif
-    #define BENCHMARK_SET(x)    IOWR_ALTERA_AVALON_PIO_SET_BITS(APP_0_BENCHMARK_PIO_BASE, \
-                                (1 << (x)))
-    #define BENCHMARK_RESET(x)  IOWR_ALTERA_AVALON_PIO_CLEAR_BITS(APP_0_BENCHMARK_PIO_BASE, \
-                                (1 << (x)))
-    #define BENCHMARK_TOGGLE(x) IOWR_ALTERA_AVALON_PIO_DATA(APP_0_BENCHMARK_PIO_BASE, \
-                                ((IORD_ALTERA_AVALON_PIO_DATA(APP_0_BENCHMARK_PIO_BASE)) \
-                                ^ (1 << (x))))
-#else
-    #undef BENCHMARK_MODULES
-    #define BENCHMARK_MODULES           0x00000000
-#endif
 
 //------------------------------------------------------------------------------
 // typedef
@@ -75,6 +55,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // function prototypes
 //------------------------------------------------------------------------------
+BOOL serial_init(tHandlerParam * pTransParam_p);
+void serial_exit(void);
 
-#endif /* _INC_apptarget_benchmark_H_ */
+BOOL serial_transfer(tHandlerParam* pHandlParam_p);
+
+#endif /* _INC_common_serial_H_ */
 

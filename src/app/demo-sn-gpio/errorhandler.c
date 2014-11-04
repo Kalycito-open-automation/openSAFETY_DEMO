@@ -100,7 +100,7 @@ typedef struct
 
 static tErrHInstance errHanInstance_l;
 
-#ifdef _DEBUG
+#ifndef NDEBUG
 static char *errSource[] = { "Invalid", "EPS", "HNF", "SHNF", "SAPL", "Periph" };
 #endif
 

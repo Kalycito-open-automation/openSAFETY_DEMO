@@ -41,15 +41,13 @@ SET(ALT_BUILD_DIR ${PROJECT_BINARY_DIR}/${ALT_BUILD_DIR_NAME})
 ########################################################################
 SET( ALT_LIB_SRCS ${LIB_SRCS} )
 
-SET( ALT_LIB_INCS ${LIB_INCS}
-                  ${ALT_TARGET_DIR}/include
-)
+SET( ALT_LIB_INCS ${LIB_INCS} )
 
 ########################################################################
 # Library Makefile
 ########################################################################
 
-SET( LIB_CFLAGS "${CFLAGS} -D${DBG_MODE} -DDEF_DEBUG_LVL=${DEF_DEBUG_LVL}" )
+SET( LIB_CFLAGS "${CMAKE_C_FLAGS} -D${DBG_MODE} -DDEF_DEBUG_LVL=${DEF_DEBUG_LVL}" )
 
 SET( ALT_LIB_GEN_ARGS
                      "--bsp-dir ${ALT_APP_BSP_DIR}"

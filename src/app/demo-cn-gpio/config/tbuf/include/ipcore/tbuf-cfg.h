@@ -3,7 +3,7 @@
 // This file is generated automatically depending on the ipcore settings!
 // Hence, it is highly recommended to avoid manual modifications!
 //
-// timestamp = 2013-12-18 14:03:02
+// timestamp = 2014-10-08 15:13:40
 //-------------------------------------------------------------------------
 
 #ifndef _INC_tbuf_cfg_H_
@@ -37,12 +37,16 @@
 #define TBUF_SIZE5 4
 #define TBUF_PORTA_ISPRODUCER5 1
 
-#define TBUF_OFFSET_PROACK 56
+#define TBUF_OFFSET6 56
+#define TBUF_SIZE6 12
+#define TBUF_PORTA_ISPRODUCER6 1
+
+#define TBUF_OFFSET_PROACK 68
 #define TBUF_SIZE_PROACK 4
 #define TBUF_PORTA_ISPRODUCER_PROACK -1
 
 #define TBUF_NUM_CON 3
-#define TBUF_NUM_PRO 3
+#define TBUF_NUM_PRO 4
 
 #define TBUF_INIT_VEC { \
                         { TBUF_OFFSET_CONACK, TBUF_SIZE_CONACK, TBUF_PORTA_ISPRODUCER_CONACK },  \
@@ -52,6 +56,7 @@
                         { TBUF_OFFSET3, TBUF_SIZE3, TBUF_PORTA_ISPRODUCER3 },  \
                         { TBUF_OFFSET4, TBUF_SIZE4, TBUF_PORTA_ISPRODUCER4 },  \
                         { TBUF_OFFSET5, TBUF_SIZE5, TBUF_PORTA_ISPRODUCER5 },  \
+                        { TBUF_OFFSET6, TBUF_SIZE6, TBUF_PORTA_ISPRODUCER6 },  \
                         { TBUF_OFFSET_PROACK, TBUF_SIZE_PROACK, TBUF_PORTA_ISPRODUCER_PROACK } \
                       }
 

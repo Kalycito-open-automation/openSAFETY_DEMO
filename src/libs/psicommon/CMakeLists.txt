@@ -52,15 +52,14 @@ SET ( LIB_SRCS
 SET ( LIB_INCS
     ${PROJECT_SOURCE_DIR}/include
     ${DEMO_CONFIG_DIR}/tbuf/include
+    ${TARGET_DIR}/include
 )
 
-IF((CMAKE_SYSTEM_NAME STREQUAL "Generic") AND (CMAKE_SYSTEM_PROCESSOR STREQUAL "Nios2"))
+IF((CMAKE_SYSTEM_NAME STREQUAL "Generic") AND (CMAKE_SYSTEM_PROCESSOR STREQUAL "nios2"))
     INCLUDE (nios2.cmake)
 ENDIF()
 
-INCLUDE_DIRECTORIES ( ${LIB_INCS} 
-                      ${TARGET_DIR}/include
-)
+INCLUDE_DIRECTORIES ( ${LIB_INCS} )
 
 ########################################################################
 # Build library

@@ -1,11 +1,11 @@
 /**
 ********************************************************************************
-\file   platform.c
+\file   serial.c
 
-\brief  Application interface target handling
+\brief  Implements the driver for the serial device
 
-Defines the platform specific functions of the slim interface example
-implementation.
+Defines the platform specific functions for the serial for target
+Altera Nios2.
 
 *******************************************************************************/
 
@@ -45,10 +45,17 @@ implementation.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <common/platform.h>
+#include <common/serial.h>
+
+#include <system.h>
+#include <string.h>
+#include <stdio.h>
 
 #include <alt_types.h>
-#include <sys/alt_cache.h>
+#include <altera_avalon_pio_regs.h>
+
+// Include custom SPI driver
+#include <avalon_spi/avalon_spi.h>
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
@@ -57,6 +64,11 @@ implementation.
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
+
+// SPI master
+#ifdef SPI_MASTER_BASE
+  #define SPI_MASTER_BASE_ADDRESS SPI_MASTER_BASE
+#endif
 
 //------------------------------------------------------------------------------
 // module global vars
@@ -94,30 +106,84 @@ implementation.
 
 //------------------------------------------------------------------------------
 /**
-\brief  Initialize the peripherals of the target
+\brief  Initialize the serial
 
 This function init's the peripherals of the AP like cache and the interrupt
 controller.
 
-\ingroup module_platform
+\param[in] pHandlParam_p    Pointer to the transfer parameters with 4 byte init
+
+\retval TRUE On successful init
+\retval FALSE On error
+
+\ingroup module_serial
 */
 //------------------------------------------------------------------------------
-void platform_init(void)
+BOOL serial_init(tHandlerParam* pHandlParam_p)
 {
-    alt_icache_flush_all();
-    alt_dcache_flush_all();
+    UNUSED_PARAMETER(pHandlParam_p);
+
+    /* No initialization needed for Nios2 (Done in ipcore configuration!) */
+
+    return TRUE;
 }
 
 //------------------------------------------------------------------------------
 /**
-\brief  Close all peripherals of the target
+\brief  Close the serial
 
-\ingroup module_platform
+\ingroup module_serial
 */
 //------------------------------------------------------------------------------
-void platform_exit(void)
+void serial_exit(void)
 {
+    /* Nothing to clear */
+}
 
+//------------------------------------------------------------------------------
+/**
+\brief  Start a SPI transfer
+
+serial_transfer() sends an SPI command to the SPI master by using the
+avalon_spi driver
+
+\param[in] pHandlParam_p       The parameters of the SPI command handler without init
+
+\retval TRUE        On success
+\retval FALSE       SPI send or receive failed
+
+\ingroup module_serial
+*/
+//------------------------------------------------------------------------------
+BOOL serial_transfer(tHandlerParam* pHandlParam_p)
+{
+    BOOL fReturn = FALSE;
+    int spiRet;
+    tDescriptor   initDesc = { NULL, 4, NULL, 4 };
+
+    // Perform four byte initial SPI access
+    spiRet = avalon_spi_tf(
+            SPI_MASTER_BASE_ADDRESS,
+            0,
+            &initDesc,
+            AVALON_SPI_HOLD_SS
+            );
+    if(spiRet == 0)
+    {
+        // Transfer the actual input and output image
+        spiRet = avalon_spi_tf(
+                SPI_MASTER_BASE_ADDRESS,
+                0,
+                (tDescriptor *)&pHandlParam_p->consDesc_m,
+                0
+                );
+        if(spiRet == 0)
+        {
+            fReturn = TRUE;
+        }
+    }
+
+    return fReturn;
 }
 
 //============================================================================//
@@ -125,6 +191,7 @@ void platform_exit(void)
 //============================================================================//
 /// \name Private Functions
 /// \{
+
 
 /// \}
 

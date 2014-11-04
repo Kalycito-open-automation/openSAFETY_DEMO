@@ -1,11 +1,11 @@
 /**
 ********************************************************************************
-\file   apptarget/benchmark.h
+\file   sn/timer.h
 
-\brief  Header file for debugging. Enables setting of benchmark pins
+\brief  Provides the interface to the target specific system timer
 
-This header is used to set benchmark pins in order to enable timint
-measurements on the ap processor.
+This file provides the interface to the target specific timer module
+which is implemented different for every platform.
 
 *******************************************************************************/
 
@@ -36,45 +36,43 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
 
-#ifndef _INC_apptarget_benchmark_H_
-#define _INC_apptarget_benchmark_H_
+#ifndef _INC_sn_timer_H_
+#define _INC_sn_timer_H_
 
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
 #include <apptarget/target.h>
 
-
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
-#include "system.h"
 
-#ifdef APP_0_BENCHMARK_PIO_BASE
-    #include "altera_avalon_pio_regs.h"       // PIO access
-
-    #if APP_0_BENCHMARK_PIO_BIT_MODIFYING_OUTPUT_REGISTER == 0
-        #error Please enable individual bit setting/clearing of output register for benchmark_pio module in SOPC Builder
-    #endif
-    #define BENCHMARK_SET(x)    IOWR_ALTERA_AVALON_PIO_SET_BITS(APP_0_BENCHMARK_PIO_BASE, \
-                                (1 << (x)))
-    #define BENCHMARK_RESET(x)  IOWR_ALTERA_AVALON_PIO_CLEAR_BITS(APP_0_BENCHMARK_PIO_BASE, \
-                                (1 << (x)))
-    #define BENCHMARK_TOGGLE(x) IOWR_ALTERA_AVALON_PIO_DATA(APP_0_BENCHMARK_PIO_BASE, \
-                                ((IORD_ALTERA_AVALON_PIO_DATA(APP_0_BENCHMARK_PIO_BASE)) \
-                                ^ (1 << (x))))
-#else
-    #undef BENCHMARK_MODULES
-    #define BENCHMARK_MODULES           0x00000000
-#endif
 
 //------------------------------------------------------------------------------
 // typedef
 //------------------------------------------------------------------------------
 
+/**
+ * \brief Base values of the timer
+ */
+typedef enum
+{
+    kTimerBase1us        = 0,
+    kTimerBase10us       = 1,
+    kTimerBase100us      = 2,
+    kTimerBase1ms        = 3,
+} tTimerBase;
+
 //------------------------------------------------------------------------------
 // function prototypes
 //------------------------------------------------------------------------------
+UINT8 timer_init(void);
+void timer_close(void);
 
-#endif /* _INC_apptarget_benchmark_H_ */
+UINT32 timer_getTickCount(void);
+UINT8 timer_setBase(tTimerBase base_p);
+
+#endif /* _INC_sn_timer_H_ */
+
 

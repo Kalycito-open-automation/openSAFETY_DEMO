@@ -1,11 +1,11 @@
 /**
 ********************************************************************************
-\file   apptarget/platform.h
+\file   common/tbufparams.h
 
-\brief  Application interface system components implementation
+\brief  Implements helper functions for tbuf parameter handling
 
-Defines the platform specific functions of the slim interface example
-implementation.
+This helper functions generate buffer lists which can be used in the libpsi
+or by the serial interface.
 
 *******************************************************************************/
 
@@ -36,64 +36,30 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
 
-#ifndef _INC_platform_H_
-#define _INC_platform_H_
+#ifndef _INC_common_tbufparams_H_
+#define _INC_common_tbufparams_H_
 
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
 #include <libpsi/psi.h>
 
-#include <system.h>
-#include <string.h>
-#include <stdio.h>
-
-
-
-
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
+#define TBUF_INIT_SIZE      (UINT8)4       /**< Number of bytes for stream initialization needed by PSI SPI core */
 
-// SYNC IRQ dependencies
-#if APP_0_SYNC_IRQ_BASE
-  #define SYNC_IRQ_NUM                    0     ///< Id of the synchronous interrupt (Workaround: Parameter is not forwarded to system.h when CPU is in a subsystem)
-  #define SYNC_IRQ_BASE                   APP_0_SYNC_IRQ_BASE
-  #define APP_INTERRUPT_CONTROLLER_ID     0     ///< Id of the Nios ISR controller (Workaround: Parameter is not forwarded to system.h when CPU is in a subsystem)
-#endif
-
-// SPI master
-#ifdef SPI_MASTER_BASE
-  #define SPI_MASTER_BASE_ADDRESS SPI_MASTER_BASE
-#endif
-
+#define TBUF_IMAGE_SIZE     ( TBUF_OFFSET_PROACK + TBUF_SIZE_PROACK + (TBUF_INIT_SIZE*2) )   /**< Size of the triple buffer image */
 
 //------------------------------------------------------------------------------
 // typedef
 //------------------------------------------------------------------------------
 
-/**
- * \brief Synchronous interrupt callback function
- */
-#ifndef ALT_ENHANCED_INTERRUPT_API_PRESENT
-    typedef void (*tPlatformSyncIrq)(void *, void *);
-#else
-    typedef void (*tPlatformSyncIrq)(void *);
-#endif
-
 //------------------------------------------------------------------------------
 // function prototypes
 //------------------------------------------------------------------------------
-void platform_init(void);
-void platform_exit(void);
+BOOL tbufp_genDescList(UINT8 * pTbufBase_m, UINT16 tbufCount_m, tBuffDescriptor* pBuffDescList_p);
+BOOL tbufp_genTransferParams(UINT8 * pTbufBase_m, tHandlerParam * p_transParam);
 
-void platform_enterCriticalSection(UINT8 fEnable_p);
-BOOL platform_initSyncInterrupt(tPlatformSyncIrq pfnSyncIrq_p);
-void platform_ackSyncIrq(void);
-void platform_enableSyncInterrupt(void);
-void platform_disableSyncInterrupt(void);
-
-BOOL platform_spiCommand(tHandlerParam* pHandlParam_p);
-
-#endif /* _INC_platform_H_ */
+#endif /* _INC_common_tbufparams_H_ */
 

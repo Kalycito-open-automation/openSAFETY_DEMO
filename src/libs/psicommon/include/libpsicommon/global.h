@@ -77,17 +77,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endif
 
 //------------------------------------------------------------------------------
-// Simple return values
-//------------------------------------------------------------------------------
-#ifndef ERROR
-  #define    ERROR    -1
-#endif
-
-#ifndef OK
-  #define    OK        0
-#endif
-
-//------------------------------------------------------------------------------
 // Boolean values
 //------------------------------------------------------------------------------
 
@@ -119,7 +108,7 @@ typedef enum {
 typedef struct {
     UINT32      buffOffset_m;       ///< Offset of the triple buffer
     UINT16      buffSize_m;         ///< Size of the buffer
-    UINT8       isConsumer_m;       ///< Descriptor is a consuming buffer
+    INT8        isProducer_m;      ///< Descriptor is a producing buffer (app side)
 } tTbufDescriptor;
 
 /**

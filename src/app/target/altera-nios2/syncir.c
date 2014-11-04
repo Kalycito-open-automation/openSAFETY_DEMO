@@ -1,13 +1,12 @@
 /**
 ********************************************************************************
-\file   nvs.c
+\file   syncir.c
 
-\brief  Target specific functions to access the non volatile storage.
+\brief  Implements the driver for the synchronous interrupt
 
-This module implements the hardware near target specific functions of the
-flash memory for Altera Nios2.
+Defines the platform specific functions for the synchronous interrupt for target
+Altera Nios2.
 
-\ingroup module_nvs
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
@@ -46,10 +45,16 @@ flash memory for Altera Nios2.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <apptarget/nvs.h>
+#include <common/syncir.h>
 
 #include <system.h>
-#include "sys/alt_flash.h"
+#include <string.h>
+#include <stdio.h>
+
+#include <alt_types.h>
+#include <sys/alt_irq.h>
+#include <altera_avalon_pio_regs.h>
+
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
@@ -58,17 +63,23 @@ flash memory for Altera Nios2.
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
-#define FLASH_DEV_NAME    CFI_FLASH_NAME
 
-#define FLASH_BASE        CFI_FLASH_BASE
+// SYNC IRQ dependencies
+#if APP_0_SYNC_IRQ_BASE
+  #define SYNC_IRQ_NUM                    0     ///< Id of the synchronous interrupt (Workaround: Parameter is not forwarded to system.h when CPU is in a subsystem)
+  #define SYNC_IRQ_BASE                   APP_0_SYNC_IRQ_BASE
+  #define APP_INTERRUPT_CONTROLLER_ID     0     ///< Id of the Nios ISR controller (Workaround: Parameter is not forwarded to system.h when CPU is in a subsystem)
+#endif
 
 //------------------------------------------------------------------------------
 // module global vars
 //------------------------------------------------------------------------------
 
+
 //------------------------------------------------------------------------------
 // global function prototypes
 //------------------------------------------------------------------------------
+
 
 //============================================================================//
 //            P R I V A T E   D E F I N I T I O N S                           //
@@ -85,12 +96,20 @@ flash memory for Altera Nios2.
 //------------------------------------------------------------------------------
 // local vars
 //------------------------------------------------------------------------------
-static alt_flash_fd* pFlashDesc_l = (alt_flash_fd*)0;
+
+/**
+ * \brief Platform module instance type
+ */
+typedef struct {
+    alt_irq_context irqContext_m;
+} tPlatformInstance;
+
 
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-static INT16 getBlockByOffset(UINT32 offset_p);
+
+static tPlatformInstance platformInstance_l;
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
@@ -98,139 +117,125 @@ static INT16 getBlockByOffset(UINT32 offset_p);
 
 //------------------------------------------------------------------------------
 /**
-\brief    Initialize the non volatile storage
+\brief  initialize synchronous interrupt
 
-\return 0 on success; 1 on error
+syncir_init() initializes the synchronous interrupt. The timing parameters
+will be initialized, the interrupt handler will be connected to the ISR.
 
-\ingroup module_nvs
+\param[in] pfnSyncIrq_p       The callback of the sync interrupt
+
+\return BOOL
+\retval TRUE        Synchronous interrupt initialization successful
+\retval FALSE       Error while initializing the synchronous interrupt
+
+\ingroup module_syncir
 */
 //------------------------------------------------------------------------------
-UINT8 nvs_init(void)
+BOOL syncir_init(tPlatformSyncIrq pfnSyncIrq_p)
 {
-    UINT8 ret = 1;
+    BOOL fReturn = FALSE, regRet = FALSE;
 
-    pFlashDesc_l = alt_flash_open_dev(FLASH_DEV_NAME);
-    if(pFlashDesc_l != (alt_flash_fd*)0)
+    /* register interrupt handler */
+#ifdef ALT_ENHANCED_INTERRUPT_API_PRESENT
+    if (alt_ic_isr_register(APP_INTERRUPT_CONTROLLER_ID, SYNC_IRQ_NUM, pfnSyncIrq_p, NULL, 0) == 0)
     {
-        ret = 0;
+        regRet = TRUE;
+    }
+#else
+    if (alt_irq_register(SYNC_IRQ_NUM, NULL, pfnSyncIrq_p) == 0)
+    {
+        regRet = TRUE;
+    }
+#endif
+
+    if(regRet != FALSE)
+    {
+        /* enable interrupt from PCP to AP */
+        alt_ic_irq_enable(APP_INTERRUPT_CONTROLLER_ID, SYNC_IRQ_NUM);      // enable specific IRQ Number
+        IOWR_ALTERA_AVALON_PIO_IRQ_MASK(SYNC_IRQ_BASE, 0x01);
+
+        fReturn = TRUE;
     }
 
-    return ret;
+    return fReturn;
 }
 
 //------------------------------------------------------------------------------
 /**
-\brief    Close the non volatile storage
+\brief  Close the synchronous interrupt
 
-\ingroup module_nvs
+\ingroup module_syncir
 */
 //------------------------------------------------------------------------------
-void nvs_close(void)
+void syncir_exit(void)
 {
-    /* Close the open flash device */
-    alt_flash_close_dev(pFlashDesc_l);
+
 }
 
 //------------------------------------------------------------------------------
 /**
-\brief    Write data to the non volatile storage
+\brief  Acknowledge synchronous interrupt
 
-\param offset_p  The offset of the data in the storage
-\param pData_p   Pointer to the data to write
-\param length_p  The length of the data to write
-
-\return 0 on success; 1 on error
-
-\ingroup module_nvs
+\ingroup module_syncir
 */
 //------------------------------------------------------------------------------
-UINT8 nvs_write(UINT32 offset_p, UINT8 * pData_p, UINT32 length_p)
+void syncir_acknowledge(void)
 {
-    UINT8 ret = 1;
-    int blockOffset;
+    IOWR_ALTERA_AVALON_PIO_EDGE_CAP(SYNC_IRQ_BASE, 0x01);
+}
 
-    if(pData_p != (UINT8*)0 && length_p > 0)
+//------------------------------------------------------------------------------
+/**
+\brief  Enable synchronous interrupt
+
+syncir_enable() enables the synchronous interrupt.
+
+\ingroup module_syncir
+*/
+//------------------------------------------------------------------------------
+void syncir_enable(void)
+{
+    alt_ic_irq_enable(0, SYNC_IRQ_NUM);  // enable specific IRQ Number
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief  Disable synchronous interrupt
+
+syncir_disable() disable the synchronous interrupt.
+
+\ingroup module_syncir
+*/
+//------------------------------------------------------------------------------
+void syncir_disable(void)
+{
+    alt_ic_irq_disable(0, SYNC_IRQ_NUM);  // disable specific IRQ Number
+}
+
+
+//------------------------------------------------------------------------------
+/**
+\brief Enter/leave the critical section
+
+This function enables/disables the interrupts of the AP processor
+
+\param[in]  fEnable_p       TRUE = enable interrupts; FALSE = disable interrupts
+
+\ingroup module_syncir
+*/
+//------------------------------------------------------------------------------
+void syncir_enterCriticalSection(UINT8 fEnable_p)
+{
+
+    if(fEnable_p)
     {
-        blockOffset = getBlockByOffset(offset_p);
-
-        if(alt_write_flash_block(pFlashDesc_l, blockOffset, offset_p, pData_p, length_p) == 0)
-        {
-            ret = 0;
-        }
+        alt_irq_enable_all(platformInstance_l.irqContext_m);
     }
-
-    return ret;
-}
-
-//------------------------------------------------------------------------------
-/**
-\brief    Read data from the non volatile storage
-
-\param offset_p  The offset of the data in the storage
-\param pData_p   Pointer to the data to write
-\param length_p  The length of the data to write
-
-\return 0 on success; 1 on error
-
-\ingroup module_nvs
-*/
-//------------------------------------------------------------------------------
-UINT8 nvs_read(UINT32 offset_p, UINT8 * pReadData_p, UINT32 length_p)
-{
-    UINT8 ret = 1;
-
-    if(pReadData_p != (UINT8*)0 && length_p > 0)
+    else
     {
-        if(alt_read_flash(pFlashDesc_l, offset_p, pReadData_p, length_p) == 0)
-        {
-            ret = 0;
-        }
+        platformInstance_l.irqContext_m = alt_irq_disable_all();
     }
-
-    return ret;
 }
-
-//------------------------------------------------------------------------------
-/**
-\brief    Erase the sector behind the offset
-
-\param offset_p  The offset of the sector to erase
-
-\return 0 on success; 1 on error
-
-\ingroup module_nvs
-*/
-//------------------------------------------------------------------------------
-UINT8 nvs_erase(UINT32 offset_p)
-{
-    UINT8 ret = 1;
-
-    if(alt_erase_flash_block(pFlashDesc_l, offset_p, 0) == 0)
-    {
-        ret = 0;
-    }
-
-    return ret;
-}
-
-//------------------------------------------------------------------------------
-/**
-\brief    Get the base address of the NVS memory offset
-
-This functions enables to bypass the nvs_read function and to access the data
-directly. This can be done on parallel flashes where no command is needed
-to read data from the flash.
-
-\return Pointer to the offset address
-
-\ingroup module_nvs
-*/
-//------------------------------------------------------------------------------
-UINT8* nvs_getAddress(UINT32 offset_p)
-{
-    return (UINT8*)(FLASH_BASE + offset_p);
-}
-
 
 //============================================================================//
 //            P R I V A T E   F U N C T I O N S                               //
@@ -238,54 +243,6 @@ UINT8* nvs_getAddress(UINT32 offset_p)
 /// \name Private Functions
 /// \{
 
-//------------------------------------------------------------------------------
-/**
-\brief    Get the flash block index by offset
-
-\param offset_p  The global flash offset
-
-\return The id of the block the offset is in
-
-\ingroup module_nvs
-*/
-//------------------------------------------------------------------------------
-static INT16 getBlockByOffset(UINT32 offset_p)
-{
-    UINT16 i, j;
-    flash_region* pFirstReg = (flash_region*)0;
-    flash_region* pCurrReg = (flash_region*)0;
-    int regionCount = 0;
-    INT16 isInBlock = -1;
-
-    if(alt_get_flash_info(pFlashDesc_l, &pFirstReg, &regionCount) == 0)
-    {
-        /* Iterate over all regions */
-        for(i=0; i<(UINT16)regionCount; i++)
-        {
-            pCurrReg = &pFirstReg[i];
-
-            if(offset_p > (UINT32)pCurrReg->offset)
-                continue;
-
-            /* Iterate over all blocks */
-            for(j=0; j<(UINT16)pCurrReg->number_of_blocks; j++)
-            {
-                /* Check if the provided block is in the region */
-                if(offset_p <= ((UINT32)pCurrReg->block_size * (j+1)))
-                {
-                    isInBlock = j;
-                    break;
-                }
-            }
-
-            /* If already found -> return */
-            if(isInBlock != -1)
-                break;
-
-        }
-    }
-
-    return isInBlock;
-}
 
 /// \}
+

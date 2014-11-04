@@ -50,11 +50,16 @@ sends/receives exemplary data from and to the PCP.
 
 #include <libpsi/psi.h>         // Header for the psi library
 
-#include <common/debug.h>
+#include <common/platform.h>      // Interface header to the platform specific functions
+#include <common/serial.h>        // Interface header to the platform specific serial device
+#include <common/syncir.h>        // Interface header to initialize the synchronous interrupt
 
-#include <apptarget/platform.h>     // Platform specific functions
-#include <apptarget/app-gpio.h>     // Application of this demo
-#include <apptarget/benchmark.h>    // Debug header for performance measurements
+#include <common/benchmark.h>     // Debug header for performance measurements
+#include <common/debug.h>
+#include <common/tbufparams.h>
+
+#include <cn/app-gpio.h>          // Interface header to the application of this demo
+
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
@@ -63,7 +68,6 @@ sends/receives exemplary data from and to the PCP.
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
-#define TBUF_IMAGE_SIZE     ( TBUF_OFFSET_PROACK + TBUF_SIZE_PROACK )   ///< Size of the triple buffer image
 
 //------------------------------------------------------------------------------
 // module global vars
@@ -88,9 +92,9 @@ sends/receives exemplary data from and to the PCP.
 //------------------------------------------------------------------------------
 
 typedef struct {
-    UINT8 tbufMemLayout_m[TBUF_IMAGE_SIZE];    ///< Local copy of the triple buffer memory
-    UINT8 fShutdown_m;                         ///< Indicates CN shutdown
-    UINT8 fCcWriteObjTestEnable_m;             ///< Enable periodic writing of a cc object
+    volatile UINT8 tbufMemLayout_m[TBUF_IMAGE_SIZE];    ///< Local copy of the triple buffer memory
+    UINT8 fShutdown_m;                                  ///< Indicates CN shutdown
+    UINT8 fCcWriteObjTestEnable_m;                      ///< Enable periodic writing of a cc object
 } tMainInstance;
 
 //------------------------------------------------------------------------------
@@ -104,18 +108,12 @@ static tMainInstance mainInstance_l;            ///< Instance of main module
 //------------------------------------------------------------------------------
 static BOOL psi_initModules(void);
 static void psi_exitModules(void);
-static void psi_genDescList(tBuffDescriptor* pBuffDescList_p, UINT8 buffCount_p);
 static BOOL psi_appCbSync(tPsiTimeStamp* pTimeStamp_p );
 static BOOL psi_workInputOutput(UINT32 rpdoRelTimeLow_p,
         tRpdoMappedObj* pRpdoImage_p,
         tTpdoMappedObj* pTpdoImage_p );
 
-#if defined(__NIOS2__) && !defined(ALT_ENHANCED_INTERRUPT_API_PRESENT)
-    static void psi_syncIntH(void* pArg_p, void* dwInt_p);
-#else
-    static void psi_syncIntH(void* pArg_p);
-#endif
-
+static void psi_syncIntH(void* pArg_p);
 static void psi_errorHandler(tPsiErrorInfo* pErrorInfo_p);
 
 #if(((PSI_MODULE_INTEGRATION) & (PSI_MODULE_CC)) != 0)
@@ -144,15 +142,22 @@ APs state machine will be updated and input/output ports will be processed.
 int main (void)
 {
     tPsiInitParam     initParam;
-    tBuffDescriptor     buffDescList[kTbufCount];
+    tBuffDescriptor   buffDescList[kTbufCount];
+    tHandlerParam     transferParam;
 
     PSI_MEMSET(&mainInstance_l, 0, sizeof(mainInstance_l));
     PSI_MEMSET(&buffDescList, 0, sizeof(buffDescList));
+    PSI_MEMSET(&transferParam, 0, sizeof(tHandlerParam));
 
+    // Init the target platform
     platform_init();
 
     // Generate buffer descriptor list
-    psi_genDescList(&buffDescList[0], kTbufCount);
+    if(tbufp_genDescList((UINT8 *)&mainInstance_l.tbufMemLayout_m[0], kTbufCount, &buffDescList[0]))
+    {
+        DEBUG_TRACE(DEBUG_LVL_ERROR," ERROR: Unable to generate tbuf descriptor list!\n");
+        goto Exit;
+    }
 
     // Enable test of configuration channel
     mainInstance_l.fCcWriteObjTestEnable_m = TRUE;
@@ -161,7 +166,7 @@ int main (void)
     DEBUG_TRACE(DEBUG_LVL_ALWAYS,"\n\nInitialize slim interface internals...\n");
 
     initParam.pBuffDescList_m = &buffDescList[0];
-    initParam.pfnStreamHandler_m = platform_spiCommand;
+    initParam.pfnStreamHandler_m = serial_transfer;
     initParam.pfnErrorHandler_m = psi_errorHandler;
     initParam.idConsAck_m = kTbufAckRegisterCons;
     initParam.idProdAck_m = kTbufAckRegisterProd;
@@ -183,19 +188,38 @@ int main (void)
     }
     DEBUG_TRACE(DEBUG_LVL_ALWAYS,"... ok!\n");
 
-    /* initialize PCP interrupt handler*/
-    DEBUG_TRACE(DEBUG_LVL_ALWAYS,"\n\nInitialize synchronous interrupt...\n");
-    if(platform_initSyncInterrupt(psi_syncIntH) == FALSE)
+    /* Setup consumer/producer transfer parameters with initialization fields */
+    if(tbufp_genTransferParams((UINT8 *)&mainInstance_l.tbufMemLayout_m[0], &transferParam))
+    {
+        DEBUG_TRACE(DEBUG_LVL_ERROR,"ERROR: Unable to generate transfer parameters!\n");
+        goto Exit;
+    }
+
+    /* Init the serial device */
+    DEBUG_TRACE(DEBUG_LVL_ALWAYS,"\n\nInitialize the serial device...\n");
+    if(serial_init(&transferParam) == FALSE)
     {
         DEBUG_TRACE(DEBUG_LVL_ERROR," ... error!\n");
         goto Exit;
     }
     DEBUG_TRACE(DEBUG_LVL_ALWAYS,"... ok!\n");
 
-    /* Start periodic main loop */
-    DEBUG_TRACE(DEBUG_LVL_ALWAYS,"\n\nApplication interface is running...\n");
 
-    /* main program loop */
+    /* initialize PCP interrupt handler*/
+    DEBUG_TRACE(DEBUG_LVL_ALWAYS,"\n\nInitialize synchronous interrupt...\n");
+    if(syncir_init(psi_syncIntH) == FALSE)
+    {
+        DEBUG_TRACE(DEBUG_LVL_ERROR," ... error!\n");
+        goto Exit;
+    }
+    DEBUG_TRACE(DEBUG_LVL_ALWAYS,"... ok!\n");
+
+    /* Now enable the synchronous interrupt */
+    syncir_enable();
+
+    /* Start periodic main loop */
+    DEBUG_TRACE(DEBUG_LVL_ALWAYS,"\n\nStart processing...\n");
+
     while (TRUE)
     {
         if(psi_processAsync() == FALSE)
@@ -286,7 +310,7 @@ static BOOL psi_initModules(void)
     // Initialize configuration channel (CC)
     ccInitParam.iccId_m = kTbufNumInputConfChan;
     ccInitParam.occId_m = kTbufNumOutputConfChan;
-    ccInitParam.pfnCritSec_p = platform_enterCriticalSection;
+    ccInitParam.pfnCritSec_p = syncir_enterCriticalSection;
 
     if(cc_init(&ccInitParam) == FALSE)
     {
@@ -323,32 +347,6 @@ static void psi_exitModules(void)
 #endif
 
 }
-
-//------------------------------------------------------------------------------
-/**
-\brief    Generate a list of buffer descriptors for the useage inside the library
-
-\param[out] pBuffDescList_p     Buffer descriptor list in library format
-\param[in]  buffCount_p         Count of buffer descriptors
-
-\ingroup module_main
-*/
-//------------------------------------------------------------------------------
-static void psi_genDescList(tBuffDescriptor* pBuffDescList_p, UINT8 buffCount_p)
-{
-    UINT8 i;
-    tBuffDescriptor* pBuffDec = pBuffDescList_p;
-    tTbufDescriptor tbufDescList[kTbufCount] = TBUF_INIT_VEC;
-
-    // Generate a descriptor list which can be used in the library
-    for(i=0; i < buffCount_p; i++, pBuffDec++)
-    {
-        pBuffDec->pBuffBase_m = (UINT8 *)((UINT32)&mainInstance_l.tbufMemLayout_m + (UINT32)tbufDescList[i].buffOffset_m);
-        pBuffDec->buffSize_m = tbufDescList[i].buffSize_m;
-    }
-
-}
-
 
 //------------------------------------------------------------------------------
 /**
@@ -456,7 +454,7 @@ static void psi_syncIntH(void* pArg_p)
         mainInstance_l.fShutdown_m = TRUE;
     }
 
-    platform_ackSyncIrq();
+    syncir_acknowledge();
 
     BENCHMARK_MOD_01_RESET(0);
 
@@ -473,10 +471,14 @@ static void psi_syncIntH(void* pArg_p)
 //------------------------------------------------------------------------------
 static void psi_errorHandler(tPsiErrorInfo* pErrorInfo_p)
 {
-        // Print error message
-        DEBUG_TRACE(DEBUG_LVL_ERROR,"ERROR: Module origin: 0x%0x, Error Code: 0x%0x\n",
-                        pErrorInfo_p->srcModule_m,
-                        pErrorInfo_p->errCode_m);
+#ifdef NDEBUG
+    UNUSED_PARAMETER(pErrorInfo_p);
+#else
+    // Print error message
+    DEBUG_TRACE(DEBUG_LVL_ERROR,"ERROR: Module origin: 0x%0x, Error Code: 0x%0x\n",
+                    pErrorInfo_p->srcModule_m,
+                    pErrorInfo_p->errCode_m);
+#endif // #ifdef NDEBUG
 }
 
 #if(((PSI_MODULE_INTEGRATION) & (PSI_MODULE_CC)) != 0)

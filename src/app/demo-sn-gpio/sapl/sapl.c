@@ -72,6 +72,13 @@ This module manages the application near firmware parts.
 /* module global vars                                                         */
 /*----------------------------------------------------------------------------*/
 
+/**
+ * @var SHNF_aaulConnValidBit
+ * @brief This variable contains the connection valid bit of the SPDOs.
+ *
+ * It is a bit field which contains one bit each RxSPDO. It is to be hosted by the SHNF.
+ */
+extern UINT32 SHNF_aaulConnValidBit[EPLS_cfg_MAX_INSTANCES][(SPDO_cfg_MAX_NO_RX_SPDO + 31) / 32];
 
 /*----------------------------------------------------------------------------*/
 /* global function prototypes                                                 */
@@ -85,8 +92,6 @@ This module manages the application near firmware parts.
 /*----------------------------------------------------------------------------*/
 /* const defines                                                              */
 /*----------------------------------------------------------------------------*/
-#define NVS_SOD_IMAGE_OFFSET        0x200000UL       /**< Offset of the stored SOD in the NVS */
-
 #define SAPL_TASK_PROCESS_PARAM_SET_PARSE_BIT         0x00
 #define SAPL_TASK_PROCESS_PARAM_SET_PARSE_MASK        0x01
 
@@ -102,7 +107,7 @@ This module manages the application near firmware parts.
 /*----------------------------------------------------------------------------*/
 
 /**
- * \brief Details of the incomming parameter set
+ * \brief Details of the incoming parameter set
  */
 typedef struct
 {
@@ -163,7 +168,7 @@ BOOLEAN sapl_init(BOOLEAN * pEnterOperational_p)
             if(paramcrc_init())
             {
                 /* Initialize the SOD storage module */
-                if(sodstore_init(NVS_SOD_IMAGE_OFFSET))
+                if(sodstore_init())
                 {
                     fReturn = TRUE;
                 }
@@ -324,6 +329,31 @@ BOOLEAN sapl_restoreSod(void)
     }
 
     return fReturn;
+}
+
+/*----------------------------------------------------------------------------*/
+/**
+\brief    Check if the connection valid bit is set for this RxSpdo
+
+\param[in] spdoId_p       Id if the RxSpdo
+
+\retval TRUE    Connection valid bit is set
+\retval FALSE   Connection is not valid
+
+\ingroup module_sapl
+*/
+/*----------------------------------------------------------------------------*/
+BOOLEAN sapl_getConnValidInst0(UINT16 spdoId_p)
+{
+    BOOLEAN conValid = FALSE;
+
+    if(spdoId_p < SPDO_cfg_MAX_NO_RX_SPDO)
+    {
+        if((SHNF_aaulConnValidBit[0][spdoId_p] & (UINT32)0x00000001) != FALSE)
+            conValid = TRUE;
+    }
+
+    return conValid;
 }
 
 /**

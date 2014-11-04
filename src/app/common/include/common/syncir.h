@@ -1,10 +1,11 @@
 /**
 ********************************************************************************
-\file   apptarget/timer.h
+\file   common/syncir.h
 
-\brief  Target specific header file of the system timer
+\brief  Interface to the target specific sync ISR handler
 
-This file implements the system timer for platform altera nios2.
+Interface to the driver for the synchronous interrupt for initialization
+handling and creating of a critical section.
 
 *******************************************************************************/
 
@@ -35,43 +36,38 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
 
-#ifndef _INC_appttimer_H_
-#define _INC_appttimer_H_
+#ifndef _INC_common_syncir_H_
+#define _INC_common_syncir_H_
 
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <apptarget/target.h>
+#include <libpsi/psi.h>
 
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
-
 
 //------------------------------------------------------------------------------
 // typedef
 //------------------------------------------------------------------------------
 
 /**
- * \brief Base values of the timer
+ * \brief Synchronous interrupt callback function
  */
-typedef enum
-{
-    kTimerBase1us        = 0,
-    kTimerBase10us       = 1,
-    kTimerBase100us      = 2,
-    kTimerBase1ms        = 3,
-} tTimerBase;
+typedef void (*tPlatformSyncIrq)(void *);
 
 //------------------------------------------------------------------------------
 // function prototypes
 //------------------------------------------------------------------------------
-UINT8 timer_init(void);
-void timer_close(void);
+BOOL syncir_init(tPlatformSyncIrq pfnSyncIrq_p);
+void syncir_exit(void);
 
-UINT32 timer_getTickCount(void);
-UINT8 timer_setBase(tTimerBase base_p);
+void syncir_acknowledge(void);
+void syncir_enable(void);
+void syncir_disable(void);
 
-#endif /* _INC_appttimer_H_ */
+void syncir_enterCriticalSection(UINT8 fEnable_p);
 
+#endif /* _INC_common_syncir_H_ */
 

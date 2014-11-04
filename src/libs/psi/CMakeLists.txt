@@ -53,19 +53,18 @@ SET ( LIB_SRCS
 ########################################################################
 # Set include paths
 ########################################################################
-SET ( LIB_INCS
-    ${PROJECT_SOURCE_DIR}/include
-    ${psicommon${CURR_APPLICATION}_SOURCE_DIR}/include
-    ${DEMO_CONFIG_DIR}/tbuf/include
+SET(LIB_INCS
+            ${PROJECT_SOURCE_DIR}/include
+            ${psicommon${CURR_APPLICATION}_SOURCE_DIR}/include
+            ${DEMO_CONFIG_DIR}/tbuf/include
+            ${TARGET_DIR}/include
 )
 
-IF((CMAKE_SYSTEM_NAME STREQUAL "Generic") AND (CMAKE_SYSTEM_PROCESSOR STREQUAL "Nios2"))
+IF((CMAKE_SYSTEM_NAME STREQUAL "Generic") AND (CMAKE_SYSTEM_PROCESSOR STREQUAL "nios2"))
     INCLUDE (nios2.cmake)
 ENDIF()
 
-INCLUDE_DIRECTORIES ( ${LIB_INCS} 
-                      ${TARGET_DIR}/include
-)
+INCLUDE_DIRECTORIES ( ${LIB_INCS} )
 
 ########################################################################
 # Build library
@@ -73,11 +72,11 @@ INCLUDE_DIRECTORIES ( ${LIB_INCS}
 IF(GEN_LIB_TARGET)
     ADD_LIBRARY ( psi ${LIB_TYPE} ${LIB_SRCS} )
 
-    TARGET_LINK_LIBRARIES ( psi "psicommon" )
-    ADD_DEPENDENCIES ( psi "psicommon" )
+    TARGET_LINK_LIBRARIES ( psi "psicommon${CURR_APPLICATION}" )
+    ADD_DEPENDENCIES ( psi "psicommon${CURR_APPLICATION}" )
 
     IF ( ( WIN32 OR CYGWIN ) AND ( ${LIB_TYPE} STREQUAL "SHARED" ) )
-        EnsureLibraries(psi "psicommon" )
+        EnsureLibraries(psi "psicommon${CURR_APPLICATION}" )
     ENDIF ( ( WIN32 OR CYGWIN ) AND ( ${LIB_TYPE} STREQUAL "SHARED" ) )
 ENDIF()
 

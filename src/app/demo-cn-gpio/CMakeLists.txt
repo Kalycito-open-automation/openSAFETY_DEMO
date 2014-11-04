@@ -30,6 +30,9 @@
 
 CMAKE_MINIMUM_REQUIRED (VERSION 2.8)
 
+# Generate a target for this library in the CMake Makefile
+SET(GEN_LIB_TARGET ON)
+
 PROJECT( demo-${CFG_DEMO_TYPE} C)
 
 SET(COMMON_SOURCE_DIR ${PROJECT_SOURCE_DIR}/../common)
@@ -39,21 +42,38 @@ SET(COMMON_SOURCE_DIR ${PROJECT_SOURCE_DIR}/../common)
 ########################################################################
 SET ( DEMO_SRCS
     ${PROJECT_SOURCE_DIR}/main.c
+    ${APP_COMMON_DIR}/tbufparams.c
 )
 
 ########################################################################
 # Set include paths
 ########################################################################
 SET ( DEMO_INCS
-    ${PROJECT_SOURCE_DIR}
+    ${PROJECT_SOURCE_DIR}/include
     ${COMMON_SOURCE_DIR}/include
     ${psi_SOURCE_DIR}/include
     ${psicommonapp_SOURCE_DIR}/include
     ${DEMO_CONFIG_DIR}/tbuf/include
+    ${TARGET_DIR}/include
 )
 
-IF((CMAKE_SYSTEM_NAME STREQUAL "Generic") AND (CMAKE_SYSTEM_PROCESSOR STREQUAL "Nios2"))
+IF((CMAKE_SYSTEM_NAME STREQUAL "Generic") AND (CMAKE_SYSTEM_PROCESSOR STREQUAL "nios2"))
     INCLUDE(nios2.cmake)
+ENDIF()
+
+INCLUDE_DIRECTORIES(
+                    ${DEMO_INCS}
+                    ${DEMO_ARCH_INCS}
+)
+
+########################################################################
+# Build Executable
+########################################################################
+IF(GEN_LIB_TARGET)
+    ADD_EXECUTABLE(${PROJECT_NAME}.elf ${DEMO_SRCS} ${DEMO_ARCH_SRCS})
+
+    SET_PROPERTY(TARGET ${PROJECT_NAME}.elf PROPERTY LINK_FLAGS ${DEMO_ARCH_LINKER_FLAGS})
+    TARGET_LINK_LIBRARIES(${PROJECT_NAME}.elf "psi" "psicommonapp")
 ENDIF()
 
 ################################################################################

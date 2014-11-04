@@ -158,8 +158,8 @@ UINT32 SHNF_aaulConnValidBit[EPLS_cfg_MAX_INSTANCES][(SPDO_cfg_MAX_NO_RX_SPDO + 
 /* local function prototypes                                                  */
 /*----------------------------------------------------------------------------*/
 static void buildTxSpdoFrame(void);
-static BOOLEAN shnf_processRxSsdoSnmtFrame(UINT8* pPayload_p, UINT16 paylLen_p);
-static void shnf_processRxSpdoFrame(UINT8* pPayload_p, UINT16 paylLen_p);
+static BOOLEAN processRxSsdoSnmtFrame(UINT8* pPayload_p, UINT16 paylLen_p);
+static void processRxSpdoFrame(UINT8* pPayload_p, UINT16 paylLen_p);
 
 static UINT16 getFrameLength(const UINT8 * pPaylLen_p);
 static BOOLEAN prepareTransmitFrame(UINT8 * pTargBuffer_p, UINT16 targBuffLen_p,
@@ -195,8 +195,8 @@ BOOLEAN shnf_init(void)
     shnfInstance_l.shnfState_m = kShnfStateInitializing;
     shnfInstance_l.ssdoRxStatus_m = kSsdoRxStatusReady;
 
-    hnfInitParam.asyncRcvChan0Handler_m = shnf_processRxSsdoSnmtFrame;
-    hnfInitParam.syncRcvHandler_m = shnf_processRxSpdoFrame;
+    hnfInitParam.asyncRcvChan0Handler_m = processRxSsdoSnmtFrame;
+    hnfInitParam.syncRcvHandler_m = processRxSpdoFrame;
     hnfInitParam.syncTxBuild_m = buildTxSpdoFrame;
 
     /* Initialize the slim interface HNF */
@@ -593,7 +593,7 @@ static void buildTxSpdoFrame(void)
 \ingroup module_shnf
 */
 /*----------------------------------------------------------------------------*/
-static BOOLEAN shnf_processRxSsdoSnmtFrame(UINT8* pPayload_p, UINT16 paylLen_p)
+static BOOLEAN processRxSsdoSnmtFrame(UINT8* pPayload_p, UINT16 paylLen_p)
 {
     BOOLEAN fReturn = FALSE;
     UINT32 consTime;
@@ -635,7 +635,7 @@ static BOOLEAN shnf_processRxSsdoSnmtFrame(UINT8* pPayload_p, UINT16 paylLen_p)
 \ingroup module_shnf
 */
 /*----------------------------------------------------------------------------*/
-static void shnf_processRxSpdoFrame(UINT8* pPayload_p, UINT16 paylLen_p)
+static void processRxSpdoFrame(UINT8* pPayload_p, UINT16 paylLen_p)
 {
     UINT32 consTime = 0;
     const UINT8 * pLenField = NULL;

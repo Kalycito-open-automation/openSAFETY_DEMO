@@ -50,8 +50,11 @@ Provides the interface from the SHNF to the slim interface library.
 
 #include <libpsi/psi.h>
 
-#include <apptarget/platform.h>     /* Platform specific functions */
-#include <apptarget/benchmark.h>    /* Debug header for performance measurements */
+#include <common/serial.h>       /* Platform specific functions for the serial */
+#include <common/syncir.h>      /* Platform specific functions for the synchronous interrupt */
+#include <common/benchmark.h>    /* Debug header for performance measurements */
+
+#include <common/tbufparams.h>
 
 /*============================================================================*/
 /*            G L O B A L   D E F I N I T I O N S                             */
@@ -60,7 +63,6 @@ Provides the interface from the SHNF to the slim interface library.
 /*----------------------------------------------------------------------------*/
 /* const defines                                                              */
 /*----------------------------------------------------------------------------*/
-#define TBUF_IMAGE_SIZE     ( TBUF_OFFSET_PROACK + TBUF_SIZE_PROACK )   /**< Size of the triple buffer image */
 
 /*----------------------------------------------------------------------------*/
 /* module global vars                                                         */
@@ -93,8 +95,11 @@ typedef struct
     UINT16 buffSize_m;      /**< Size of the buffer */
 } tBuffer;
 
+/**
+ * \brief The instance structure of the hnf for the PSI interface
+ */
 typedef struct {
-    UINT8 tbufMemLayout_m[TBUF_IMAGE_SIZE];                 /**< Local copy of the triple buffer memory */
+    volatile UINT8 tbufMemLayout_m[TBUF_IMAGE_SIZE];        /**< Local copy of the triple buffer memory */
     UINT8 fCcWriteObjTestEnable_m;                          /**< Enable periodic writing of a cc object */
     tSsdoInstance apSsdoInstance_m[kNumSsdoInstCount];      /**< SSDO channel instance handler array */
     tSsdoRxHandler apfnSsdoRxHandler[kNumSsdoInstCount];    /**< Array of SSDO channel receive callbacks */
@@ -118,17 +123,12 @@ static tHnfPsiInstance hnfPsiInstance_l SAFE_INIT_SEKTOR;            /**< Instan
 static BOOL initPsi(void);
 static BOOL initModules(void);
 static void exitModules(void);
-static void genDescList(tBuffDescriptor* pBuffDescList_p, UINT8 buffCount_p);
 static BOOL appCbSync(tPsiTimeStamp* pTimeStamp_p );
 static BOOL processSync(UINT32 rpdoRelTimeLow_p,
         tRpdoMappedObj* pRpdoImage_p,
         tTpdoMappedObj* pTpdoImage_p );
 
-#if defined(__NIOS2__) && !defined(ALT_ENHANCED_INTERRUPT_API_PRESENT)
-    static void syncHandler(void* pArg_p, void* dwInt_p);
-#else
-    static void syncHandler(void* pArg_p);
-#endif
+static void syncHandler(void* pArg_p);
 
 static void errorHandler(tPsiErrorInfo* pErrorInfo_p);
 
@@ -176,9 +176,6 @@ BOOLEAN hnf_init(tHnfInit * pHnfInit_p)
             /* Init array of SSDO channel receive handler */
             hnfPsiInstance_l.apfnSsdoRxHandler[kNumSsdoChan0] = processRxAsyncChannel0;
 
-            /* Initialize target specific functions */
-            platform_init();
-
             /* Initialize the slim interface internals */
             if(initPsi())
             {
@@ -212,6 +209,10 @@ void hnf_exit(void)
     exitModules();
 
     psi_exit();
+
+    /* Cleanup target specific functions */
+    serial_exit();
+    syncir_exit();
 
     MEMSET(&hnfPsiInstance_l, 0, sizeof(tHnfPsiInstance));
 
@@ -453,61 +454,83 @@ BOOLEAN hnf_getSyncTxBuffer(UINT8 ** ppTxBuffer_p, UINT16 * pBuffLen_p)
 static BOOL initPsi(void)
 {
     BOOL fReturn = FALSE;
-    tPsiInitParam     initParam;
-    tBuffDescriptor     buffDescList[kTbufCount];
+    tPsiInitParam initParam;
+    tBuffDescriptor buffDescList[kTbufCount];
+    tHandlerParam transferParam;
 
+    PSI_MEMSET(&transferParam, 0, sizeof(tHandlerParam));
     PSI_MEMSET(&buffDescList, 0, sizeof(buffDescList));
 
     /* Generate buffer descriptor list */
-    genDescList(&buffDescList[0], kTbufCount);
-
-    /* Enable test of configuration channel */
-    hnfPsiInstance_l.fCcWriteObjTestEnable_m = TRUE;
-
-    /* initialize and start the slim interface internals */
-    DEBUG_TRACE(DEBUG_LVL_ALWAYS,"\nInitialize psi internals -> ");
-
-    initParam.pBuffDescList_m = &buffDescList[0];
-    initParam.pfnStreamHandler_m = platform_spiCommand;
-    initParam.pfnErrorHandler_m = errorHandler;
-    initParam.idConsAck_m = kTbufAckRegisterCons;
-    initParam.idProdAck_m = kTbufAckRegisterProd;
-    initParam.idFirstProdBuffer_m = TBUF_NUM_CON + 1;   /* Add one buffer for the consumer ACK register */
-
-    if(psi_init(&initParam))
+    if(tbufp_genDescList((UINT8*)&hnfPsiInstance_l.tbufMemLayout_m[0], kTbufCount, &buffDescList[0]))
     {
-        DEBUG_TRACE(DEBUG_LVL_ALWAYS, "SUCCESS!\n");
+        /* Enable test of configuration channel */
+        hnfPsiInstance_l.fCcWriteObjTestEnable_m = TRUE;
 
-        /* initialize and start the slim interface modules */
-        DEBUG_TRACE(DEBUG_LVL_ALWAYS,"\nInitialize psi modules -> ");
-        if(initModules())
+        /* initialize and start the slim interface internals */
+        DEBUG_TRACE(DEBUG_LVL_ALWAYS,"\nInitialize psi internals -> ");
+
+        initParam.pBuffDescList_m = &buffDescList[0];
+        initParam.pfnStreamHandler_m = serial_transfer;
+        initParam.pfnErrorHandler_m = errorHandler;
+        initParam.idConsAck_m = kTbufAckRegisterCons;
+        initParam.idProdAck_m = kTbufAckRegisterProd;
+        initParam.idFirstProdBuffer_m = TBUF_NUM_CON + 1;   /* Add one buffer for the consumer ACK register */
+
+        if(psi_init(&initParam))
         {
             DEBUG_TRACE(DEBUG_LVL_ALWAYS, "SUCCESS!\n");
 
-            /* Set the base address of the PDO image */
-            hnfPsiInstance_l.spdo0TxBuffer_m.pBuffer_m = (UINT8 *)pdo_getTpdoImage();
-            hnfPsiInstance_l.spdo0TxBuffer_m.buffSize_m = TX_SPDO_SIZE;
-
-            /* initialize PCP interrupt handler*/
-            DEBUG_TRACE(DEBUG_LVL_ALWAYS,"\nInitialize sync interrupt -> ");
-            if(platform_initSyncInterrupt(syncHandler))
+            /* initialize and start the slim interface modules */
+            DEBUG_TRACE(DEBUG_LVL_ALWAYS,"\nInitialize psi modules -> ");
+            if(initModules())
             {
                 DEBUG_TRACE(DEBUG_LVL_ALWAYS, "SUCCESS!\n");
-                fReturn = TRUE;
+
+                /* Set the base address of the PDO image */
+                hnfPsiInstance_l.spdo0TxBuffer_m.pBuffer_m = (UINT8 *)pdo_getTpdoImage();
+                hnfPsiInstance_l.spdo0TxBuffer_m.buffSize_m = TX_SPDO_SIZE;
+
+                /* Setup consumer/producer transfer parameters with initialization fields */
+                if(tbufp_genTransferParams((UINT8*)&hnfPsiInstance_l.tbufMemLayout_m[0], &transferParam))
+                {
+                    /* initialize serial interface*/
+                    DEBUG_TRACE(DEBUG_LVL_ALWAYS,"\nInitialize serial device -> ");
+                    if(serial_init(&transferParam))
+                    {
+                        DEBUG_TRACE(DEBUG_LVL_ALWAYS, "SUCCESS!\n");
+
+                        /* initialize PCP interrupt handler*/
+                        DEBUG_TRACE(DEBUG_LVL_ALWAYS,"\nInitialize sync interrupt -> ");
+                        if(syncir_init(syncHandler))
+                        {
+                            DEBUG_TRACE(DEBUG_LVL_ALWAYS, "SUCCESS!\n");
+
+                            /* Now enable the synchronous interrupt */
+                            syncir_enable();
+
+                            fReturn = TRUE;
+                        }
+                        else
+                        {
+                            DEBUG_TRACE(DEBUG_LVL_ALWAYS, "ERROR!\n");
+                        }
+                    }
+                    else
+                    {   /* platform_initSyncInterrupt() failed! */
+                        DEBUG_TRACE(DEBUG_LVL_ALWAYS, "ERROR!\n");
+                    }
+                }
             }
             else
-            {   /* platform_initSyncInterrupt() failed! */
+            {   /* Error on libpsi module initialization! Error reported via errorHandler() */
                 DEBUG_TRACE(DEBUG_LVL_ALWAYS, "ERROR!\n");
             }
         }
         else
-        {   /* Error on libpsi module initialization! Error reported via errorHandler() */
+        {   /* Error on libpsi initialization! Error reported via errorHandler() */
             DEBUG_TRACE(DEBUG_LVL_ALWAYS, "ERROR!\n");
         }
-    }
-    else
-    {   /* Error on libpsi initialization! Error reported via errorHandler() */
-        DEBUG_TRACE(DEBUG_LVL_ALWAYS, "ERROR!\n");
     }
 
     return fReturn;
@@ -601,7 +624,7 @@ static BOOL initModules(void)
     /* Initialize configuration channel (CC) */
     ccInitParam.iccId_m = kTbufNumInputConfChan;
     ccInitParam.occId_m = kTbufNumOutputConfChan;
-    ccInitParam.pfnCritSec_p = platform_enterCriticalSection;
+    ccInitParam.pfnCritSec_p = syncir_enterCriticalSection;
 
     if(cc_init(&ccInitParam) == FALSE)
     {
@@ -653,32 +676,6 @@ static void exitModules(void)
         log_destroy(hnfPsiInstance_l.apLogInstance_m[j]);
 #endif
 }
-
-/*----------------------------------------------------------------------------*/
-/**
-\brief    Generate a list of buffer descriptors for the useage inside the library
-
-\param[out] pBuffDescList_p     Buffer descriptor list in library format
-\param[in]  buffCount_p         Count of buffer descriptors
-
-\ingroup module_hnf
-*/
-/*----------------------------------------------------------------------------*/
-static void genDescList(tBuffDescriptor* pBuffDescList_p, UINT8 buffCount_p)
-{
-    UINT8 i;
-    tBuffDescriptor* pBuffDec = pBuffDescList_p;
-    tTbufDescriptor tbufDescList[] = TBUF_INIT_VEC;
-
-    /* Generate a descriptor list which can be used in the library */
-    for(i=0; i < buffCount_p; i++, pBuffDec++)
-    {
-        pBuffDec->pBuffBase_m = (UINT8 *)((UINT32)&hnfPsiInstance_l.tbufMemLayout_m + (UINT32)tbufDescList[i].buffOffset_m);
-        pBuffDec->buffSize_m = tbufDescList[i].buffSize_m;
-    }
-
-}
-
 
 /*----------------------------------------------------------------------------*/
 /**
@@ -759,11 +756,7 @@ static BOOL processSync(UINT32 rpdoRelTimeLow_p,
 \ingroup module_hnf
 */
 /*----------------------------------------------------------------------------*/
-#if defined(__NIOS2__) && !defined(ALT_ENHANCED_INTERRUPT_API_PRESENT)
-static void syncHandler(void* pArg_p, void* dwInt_p)
-#else
 static void syncHandler(void* pArg_p)
-#endif
 {
     UNUSED_PARAMETER(pArg_p);
 
@@ -775,10 +768,9 @@ static void syncHandler(void* pArg_p)
         errh_postFatalError(kErrSourceHnf, kErrorSyncProcessFailed, 0);
     }
 
-    platform_ackSyncIrq();
+    syncir_acknowledge();
 
     BENCHMARK_MOD_01_RESET(0);
-
 }
 
 /*----------------------------------------------------------------------------*/

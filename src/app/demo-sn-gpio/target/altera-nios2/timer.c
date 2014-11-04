@@ -46,7 +46,7 @@ system timer for Altera Nios2.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <apptarget/timer.h>
+#include <sn/timer.h>
 
 #include <system.h>
 #include <io.h>

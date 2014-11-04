@@ -30,6 +30,9 @@
 
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 
+# Generate a target for this library in the CMake Makefile
+SET(GEN_LIB_TARGET ON)
+
 PROJECT(demo-${CFG_DEMO_TYPE} C)
 
 ########################################################################
@@ -42,6 +45,7 @@ SET(SHNF_DIR ${PROJECT_SOURCE_DIR}/shnf)
 SET(SAPL_DIR ${PROJECT_SOURCE_DIR}/sapl)
 
 SET(COMMON_SOURCE_DIR ${PROJECT_SOURCE_DIR}/../common)
+SET(SN_TARGET_SOURCE_DIR ${PROJECT_SOURCE_DIR}/target)
 
 ########################################################################
 # Define the CN unique id
@@ -74,10 +78,19 @@ SET(LIBOSCHECKSUM_SRCS
     ${OSCHECKSUM_BASE_DIR}/crc_protocol.c
 )
 
-SET(DEMO_SRCS
+SET(SN_SRCS
     ${PROJECT_SOURCE_DIR}/main.c
+    ${APP_COMMON_DIR}/tbufparams.c
     ${PROJECT_SOURCE_DIR}/errorhandler.c
     ${DEMO_CONFIG_DIR}/sn/sod.c
+)
+
+SET(DEMO_SRCS
+                ${SN_SRCS}
+                ${SHNF_SRCS}
+                ${SAPL_SRCS}
+                ${OSFT_SN_SRCS}
+                ${LIBOSCHECKSUM_SRCS}
 )
 
 ########################################################################
@@ -95,10 +108,28 @@ SET(DEMO_INCS
     ${DEMO_CONFIG_DIR}/pcp
     ${SN_BASE_DIR}
     ${OSCHECKSUM_BASE_DIR}/include
+    ${TARGET_DIR}/include
+    ${SN_TARGET_SOURCE_DIR}/include
 )
 
-IF((CMAKE_SYSTEM_NAME STREQUAL "Generic") AND (CMAKE_SYSTEM_PROCESSOR STREQUAL "Nios2"))
+IF((CMAKE_SYSTEM_NAME STREQUAL "Generic") AND (CMAKE_SYSTEM_PROCESSOR STREQUAL "nios2"))
     INCLUDE(nios2.cmake)
+INCLUDE_DIRECTORIES(
+                    ${DEMO_INCS}
+                    ${DEMO_ARCH_INCS}
+)
+
+########################################################################
+# Build Executable
+########################################################################
+IF(GEN_LIB_TARGET)
+    ADD_EXECUTABLE(${PROJECT_NAME}.elf ${DEMO_SRCS} ${DEMO_ARCH_SRCS})
+
+    SET_PROPERTY(TARGET ${PROJECT_NAME}.elf PROPERTY LINK_FLAGS ${DEMO_ARCH_LINKER_FLAGS})
+    TARGET_LINK_LIBRARIES(${PROJECT_NAME}.elf "psi" "psicommonapp")
+
+    # Call target post actions (Target specific!)
+    AppPostAction(${PROJECT_NAME}.elf)
 ENDIF()
 
 ################################################################################

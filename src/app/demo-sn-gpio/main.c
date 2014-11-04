@@ -48,6 +48,9 @@ stack and processes the background task.
 /*----------------------------------------------------------------------------*/
 
 #include <sn/global.h>
+#include <sn/gpio.h>
+
+#include <common/platform.h>
 
 #include <shnf/shnf.h>
 #include <sapl/sapl.h>
@@ -101,7 +104,7 @@ typedef struct
 
 static tMainInstance instance_l SAFE_INIT_SEKTOR;
 
-#ifdef _DEBUG
+#ifndef NDEBUG
 static char *strSnStates[] = { "SNMTS_k_ST_INITIALIZATION",
                                "SNMTS_k_ST_PRE_OPERATIONAL",
                                "SNMTS_k_ST_OPERATIONAL"};
@@ -113,9 +116,11 @@ static char *strSnStates[] = { "SNMTS_k_ST_INITIALIZATION",
 static BOOLEAN initOpenSafety(void);
 
 static BOOLEAN process(void);
-#ifdef _DEBUG
+#ifndef NDEBUG
 static void printSNState(void);
 #endif
+static void checkConnectionValid(void);
+
 static BOOLEAN enterPreOperational(void);
 static BOOLEAN enterOperational(void);
 
@@ -150,6 +155,12 @@ int main (void)
 
     MEMSET(&errhInitParam, 0, sizeof(tErrHInitParam));
     MEMSET(&instance_l, 0, sizeof(tMainInstance));
+
+    /* Initialize target specific functions */
+    platform_init();
+
+    /* Initialize target specific gpio pins */
+    gpio_init();
 
     DEBUG_TRACE(DEBUG_LVL_ALWAYS, "\n\n********************************************************************\n");
     DEBUG_TRACE(DEBUG_LVL_ALWAYS, "\n\topenSAFETY SafetyNode Demo \n\n ");
@@ -278,9 +289,11 @@ static BOOLEAN process(void)
             break;
         }
 
-#ifdef _DEBUG
+#ifndef NDEBUG
         printSNState();
 #endif
+
+        checkConnectionValid();
 
         /* Check if operational flag is active */
         if(instance_l.fEnterOperational_m)
@@ -310,7 +323,7 @@ static BOOLEAN process(void)
     return fReturn;
 }
 
-#ifdef _DEBUG
+#ifndef NDEBUG
 /*----------------------------------------------------------------------------*/
 /**
 \brief    Print the current state of the SN
@@ -351,6 +364,29 @@ static void printSNState(void)
 
 /*----------------------------------------------------------------------------*/
 /**
+\brief    Poll the connection valid bit and forward the value to the hardware
+
+\ingroup module_main
+*/
+/*----------------------------------------------------------------------------*/
+static void checkConnectionValid(void)
+{
+    UINT16 i;
+    BOOLEAN conValidBit = FALSE;
+
+    /* Iterate over all SPDOs */
+    for(i=0; i<SPDO_cfg_MAX_NO_RX_SPDO; i++)
+    {
+        /* Get connection valid bit of current SPDO */
+        conValidBit = sapl_getConnValidInst0(i);
+
+        /* Set gpio according to the new value */
+        gpio_changeConValid(i, conValidBit);
+    }
+}
+
+/*----------------------------------------------------------------------------*/
+/**
 \brief    Perform state change to pre operational state
 
 \retval TRUE    Change to pre operational successful
@@ -372,7 +408,7 @@ static BOOLEAN enterPreOperational(void)
         /* Forward new state to SHNF */
         shnf_changeState(kShnfStatePreOperational);
 
-#ifdef _DEBUG
+#ifndef NDEBUG
         printSNState();
 #endif
 
@@ -470,6 +506,9 @@ static void shutdown(void)
     sapl_exit();
 
     errh_exit();
+
+    gpio_close();
+    platform_exit();
 }
 
 /* \} */

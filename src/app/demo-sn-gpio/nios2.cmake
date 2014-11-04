@@ -28,6 +28,9 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ################################################################################
 
+UNSET(GEN_LIB_TARGET)
+SET(GEN_LIB_TARGET OFF)
+
 ##########################################################################
 # Set build directory for the Altera Makefile
 SET(ALT_BUILD_DIR ${PROJECT_BINARY_DIR}/${ALT_BUILD_DIR_NAME})
@@ -38,6 +41,8 @@ SET(ALT_APP_INSTANCE_ID "1" CACHE STRING "Instance ID of the application")
 
 ##########################################################################
 # Set build parameters
+SET(ALT_SN_TARGET_DIR ${SN_TARGET_SOURCE_DIR}/altera-nios2)
+
 SET(NIOS2_QSYS_SUB app_0)
 SET(NIOS2_QSYS_SUB_CPU cpu_1)
 
@@ -55,28 +60,27 @@ FILE(COPY ${ALT_MISC_DIR}/scripts/${NIOS2_LS_TCL_NAME} DESTINATION ${ALT_BUILD_D
 ########################################################################
 # Adapt source file lists and includes
 ########################################################################
-SET(ALT_TARGET_SRCS ${ALT_TARGET_DIR}/platform.c
-                    ${ALT_TARGET_DIR}/app-gpio.c
-                    ${ALT_TARGET_DIR}/timer.c
-                    ${ALT_TARGET_DIR}/nvs.c
+SET(ALT_TARGET_SRCS ${TARGET_DIR}/platform.c
+                    ${TARGET_DIR}/serial.c
+                    ${TARGET_DIR}/syncir.c
+                    #${TARGET_DIR}/app-gpio.c   # No application implemented yet!
+                    ${ALT_SN_TARGET_DIR}/timer.c
+                    ${ALT_SN_TARGET_DIR}/nvs.c
+                    ${ALT_SN_TARGET_DIR}/gpio.c
                     ${ALT_DRIVERS_DIR}/avalon_spi/avalon_spi.c
-   )
+)
 
 SET(ALT_DEMO_SRCS ${DEMO_SRCS}
-                  ${SHNF_SRCS}
-                  ${SAPL_SRCS}
-                  ${OSFT_SN_SRCS}
-                  ${LIBOSCHECKSUM_SRCS}
                   ${ALT_TARGET_SRCS}
-   )
+)
 
 SET(ALT_DEMO_INCS ${DEMO_INCS}
                   ${ALT_APP_BSP_DIR}
                   ${ALT_APP_BSP_DIR}/HAL/inc
                   ${ALT_APP_BSP_DIR}/drivers/inc
                   ${ALT_DRIVERS_DIR}/avalon_spi/include
-                  ${ALT_TARGET_DIR}/include
-   )
+
+)
 
 ########################################################################
 # Board Support Package
@@ -116,7 +120,7 @@ MESSAGE ( STATUS  "Generate board support package: ${GEN_BSP_STDOUT}" )
 # Application Makefile
 ########################################################################
 
-SET( APP_CFLAGS "${CFLAGS} -D${DBG_MODE} -DDEF_DEBUG_LVL=${DEF_DEBUG_LVL} -DBENCHMARK_MODULES=0xEE800043L" )
+SET( APP_CFLAGS "${CMAKE_C_FLAGS} -D${DBG_MODE} -DDEF_DEBUG_LVL=${DEF_DEBUG_LVL} -DBENCHMARK_MODULES=0xEE800043L" )
 
 SET( ALT_LIB_GEN_ARGS
                       "--bsp-dir ${ALT_APP_BSP_DIR}"
@@ -169,7 +173,7 @@ ConnectCMakeAlteraExeTargets(${PROJECT_NAME} ${ALT_BUILD_DIR})
 ########################################################################
 # Eclipse project files
 ########################################################################
-GenEclipseFileList("${DEMO_SRCS}" "" PART_ECLIPSE_FILE_LIST)
+GenEclipseFileList("${SN_SRCS}" "" PART_ECLIPSE_FILE_LIST)
 SET(ECLIPSE_FILE_LIST "${ECLIPSE_FILE_LIST} ${PART_ECLIPSE_FILE_LIST}")
 
 GenEclipseFileList("${SHNF_SRCS}" "shnf" PART_ECLIPSE_FILE_LIST)

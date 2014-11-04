@@ -1,13 +1,13 @@
 /**
 ********************************************************************************
-\file   app-gpio.c
+\file   nvs.c
 
-\brief  Implements a GPIO application for target altera nios2
+\brief  Target specific functions to access the non volatile storage.
 
-This application simply reads inputs and outputs from common GPIO pins and
-forwards it to the user application.
+This module implements the hardware near target specific functions of the
+flash memory for Altera Nios2.
 
-\ingroup module_app
+\ingroup module_nvs
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
@@ -46,10 +46,10 @@ forwards it to the user application.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <cn/app-gpio.h>
+#include <sn/nvs.h>
 
-#include "altera_avalon_pio_regs.h"
 #include <system.h>
+#include "sys/alt_flash.h"
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
@@ -58,23 +58,18 @@ forwards it to the user application.
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
-#ifdef LEDR_PIO_BASE
-    #define OUTPORT_AP_BASE_ADDRESS LEDR_PIO_BASE
-#endif
+#define FLASH_IMAGE_OFFSET        0x200000UL       /**< Offset of the stored SOD in the NVS */
 
-#ifdef KEY_PIO_BASE
-    #define INPORT_AP_BASE_ADDRESS KEY_PIO_BASE
-#endif
+#define FLASH_DEV_NAME            CFI_FLASH_NAME   /**< Name of the flash controller */
+#define FLASH_BASE                CFI_FLASH_BASE   /**< Base address of the flash controller */
 
 //------------------------------------------------------------------------------
 // module global vars
 //------------------------------------------------------------------------------
 
-
 //------------------------------------------------------------------------------
 // global function prototypes
 //------------------------------------------------------------------------------
-
 
 //============================================================================//
 //            P R I V A T E   D E F I N I T I O N S                           //
@@ -91,10 +86,13 @@ forwards it to the user application.
 //------------------------------------------------------------------------------
 // local vars
 //------------------------------------------------------------------------------
+static UINT32 imageBaseAddr_l = 0;
+static alt_flash_fd* pFlashDesc_l = (alt_flash_fd*)0;
 
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
+static INT16 getBlockByOffset(UINT32 offset_p);
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
@@ -102,69 +100,143 @@ forwards it to the user application.
 
 //------------------------------------------------------------------------------
 /**
-\brief  Initialize the GPIO application
+\brief    Initialize the non volatile storage
 
-\ingroup module_app
+\return 0 on success; 1 on error
+
+\ingroup module_nvs
 */
 //------------------------------------------------------------------------------
-void app_init(void)
+UINT8 nvs_init(void)
 {
+    UINT8 ret = 1;
 
+    /* Set base address of flash image */
+    imageBaseAddr_l = (UINT32)(FLASH_BASE + FLASH_IMAGE_OFFSET);
+
+    pFlashDesc_l = alt_flash_open_dev(FLASH_DEV_NAME);
+    if(pFlashDesc_l != (alt_flash_fd*)0)
+    {
+        ret = 0;
+    }
+
+    return ret;
 }
 
 //------------------------------------------------------------------------------
 /**
-\brief  Cleanup the GPIO application
+\brief    Close the non volatile storage
 
-\ingroup module_app
+\ingroup module_nvs
 */
 //------------------------------------------------------------------------------
-void app_exit(void)
+void nvs_close(void)
 {
-
-}
-
-
-//------------------------------------------------------------------------------
-/**
-\brief  Write a value to the output port
-
-This function writes a value to the output port of the AP
-
-\param[in] value_p       the value to write
-
-\ingroup module_app
-*/
-//------------------------------------------------------------------------------
-void app_writeOutputPort(UINT32 value_p)
-{
-#ifdef OUTPORT_AP_BASE_ADDRESS
-    IOWR_ALTERA_AVALON_PIO_DATA(OUTPORT_AP_BASE_ADDRESS, (UINT16)value_p);
-#endif
+    /* Close the open flash device */
+    alt_flash_close_dev(pFlashDesc_l);
 }
 
 //------------------------------------------------------------------------------
 /**
-\brief  Read a value from the input port
+\brief    Write data to the non volatile storage
 
-This function reads a value from the input port of the AP
+\param offset_p  The offset of the data in the storage
+\param pData_p   Pointer to the data to write
+\param length_p  The length of the data to write
 
-\return  UINT32
-\retval  value              the value of the input port
+\return 0 on success; 1 on error
 
-\ingroup module_app
+\ingroup module_nvs
 */
 //------------------------------------------------------------------------------
-UINT8 app_readInputPort(void)
+UINT8 nvs_write(UINT32 offset_p, UINT8 * pData_p, UINT32 length_p)
 {
-    UINT8 val = 0;
+    UINT8 ret = 1;
+    int blockOffset;
+    UINT32 address = imageBaseAddr_l + offset_p;
 
-#ifdef INPORT_AP_BASE_ADDRESS
-    val = IORD_ALTERA_AVALON_PIO_DATA(INPORT_AP_BASE_ADDRESS);
-#endif
+    if(pData_p != (UINT8*)0 && length_p > 0)
+    {
+        blockOffset = getBlockByOffset(address);
 
-    return val;
+        if(alt_write_flash_block(pFlashDesc_l, blockOffset, address, pData_p, length_p) == 0)
+        {
+            ret = 0;
+        }
+    }
+
+    return ret;
 }
+
+//------------------------------------------------------------------------------
+/**
+\brief    Read an Uint32 from the non volatile storage
+
+\param offset_p       The offset of the data in the storage
+\param ppReadData_p   Pointer to the resulting read data
+
+\return 0 on success; 1 on error
+
+\ingroup module_nvs
+*/
+//------------------------------------------------------------------------------
+UINT8 nvs_readUint32(UINT32 offset_p, UINT32 ** ppReadData_p)
+{
+    UINT8 ret = 1;
+    UINT32 address = 0;
+
+    if(ppReadData_p != (UINT8*)0)
+    {
+        *ppReadData_p = (UINT32*)(imageBaseAddr_l + offset_p);
+
+        ret = 0;
+    }
+
+    return ret;
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief    Erase the sector behind the offset
+
+\param offset_p  The offset of the sector to erase
+
+\return 0 on success; 1 on error
+
+\ingroup module_nvs
+*/
+//------------------------------------------------------------------------------
+UINT8 nvs_erase(UINT32 offset_p)
+{
+    UINT8 ret = 1;
+    UINT32 address = imageBaseAddr_l + offset_p;
+
+    if(alt_erase_flash_block(pFlashDesc_l, address, 0) == 0)
+    {
+        ret = 0;
+    }
+
+    return ret;
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief    Get the base address of the NVS memory offset
+
+This functions enables to bypass the nvs_read function and to access the data
+directly. This can be done on parallel flashes where no command is needed
+to read data from the flash.
+
+\return Pointer to the offset address
+
+\ingroup module_nvs
+*/
+//------------------------------------------------------------------------------
+UINT8* nvs_getAddress(UINT32 offset_p)
+{
+    return (UINT8*)(imageBaseAddr_l + offset_p);
+}
+
 
 //============================================================================//
 //            P R I V A T E   F U N C T I O N S                               //
@@ -172,6 +244,54 @@ UINT8 app_readInputPort(void)
 /// \name Private Functions
 /// \{
 
+//------------------------------------------------------------------------------
+/**
+\brief    Get the flash block index by offset
+
+\param offset_p  The global flash offset
+
+\return The id of the block the offset is in
+
+\ingroup module_nvs
+*/
+//------------------------------------------------------------------------------
+static INT16 getBlockByOffset(UINT32 offset_p)
+{
+    UINT16 i, j;
+    flash_region* pFirstReg = (flash_region*)0;
+    flash_region* pCurrReg = (flash_region*)0;
+    int regionCount = 0;
+    INT16 isInBlock = -1;
+
+    if(alt_get_flash_info(pFlashDesc_l, &pFirstReg, &regionCount) == 0)
+    {
+        /* Iterate over all regions */
+        for(i=0; i<(UINT16)regionCount; i++)
+        {
+            pCurrReg = &pFirstReg[i];
+
+            if(offset_p > (UINT32)pCurrReg->offset)
+                continue;
+
+            /* Iterate over all blocks */
+            for(j=0; j<(UINT16)pCurrReg->number_of_blocks; j++)
+            {
+                /* Check if the provided block is in the region */
+                if(offset_p <= ((UINT32)pCurrReg->block_size * (j+1)))
+                {
+                    isInBlock = j;
+                    break;
+                }
+            }
+
+            /* If already found -> return */
+            if(isInBlock != -1)
+                break;
+
+        }
+    }
+
+    return isInBlock;
+}
 
 /// \}
-

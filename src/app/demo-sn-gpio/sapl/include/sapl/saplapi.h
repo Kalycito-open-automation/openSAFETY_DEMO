@@ -1,16 +1,13 @@
 /**
 ********************************************************************************
-\file   apptarget/app-gpio.h
+\file   sapl/saplapi.h
 
-\brief  Implements a GPIO application for target altera nios2
-
-This application simply reads inputs and outputs from common GPIO pins and
-forwards it to the user application.
+\brief  Provides access to SAPL functions which can be used by the user application
 
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -36,40 +33,35 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
 
-#ifndef _INC_app_gpio_H_
-#define _INC_app_gpio_H_
+#ifndef _INC_saplapi_H_
+#define _INC_saplapi_H_
 
-//------------------------------------------------------------------------------
-// includes
-//------------------------------------------------------------------------------
-#include <apptarget/target.h>
+/*----------------------------------------------------------------------------*/
+/* includes                                                                   */
+/*----------------------------------------------------------------------------*/
+#include <sn/global.h>
 
-#include <system.h>
+/*----------------------------------------------------------------------------*/
+/* const defines                                                              */
+/*----------------------------------------------------------------------------*/
 
-//------------------------------------------------------------------------------
-// const defines
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
+/* typedef                                                                    */
+/*----------------------------------------------------------------------------*/
 
-#ifdef LEDR_PIO_BASE
-    #define OUTPORT_AP_BASE_ADDRESS LEDR_PIO_BASE
+/*----------------------------------------------------------------------------*/
+/* function prototypes                                                        */
+/*----------------------------------------------------------------------------*/
+
+#ifdef __cplusplus
+    extern "C" {
 #endif
 
-#ifdef KEY_PIO_BASE
-    #define INPORT_AP_BASE_ADDRESS KEY_PIO_BASE
+BOOLEAN sapl_getConnValidInst0(UINT16 spdoId_p);
+
+#ifdef __cplusplus
+    }
 #endif
 
-//------------------------------------------------------------------------------
-// typedef
-//------------------------------------------------------------------------------
 
-//------------------------------------------------------------------------------
-// function prototypes
-//------------------------------------------------------------------------------
-void app_init(void);
-void app_exit(void);
-
-void app_writeOutputPort(UINT32 value_p);
-UINT8 app_readInputPort();
-
-#endif /* _INC_app_gpio_H_ */
-
+#endif /* _INC_saplapi_H_ */

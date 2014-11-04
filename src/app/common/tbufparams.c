@@ -1,13 +1,13 @@
 /**
 ********************************************************************************
-\file   constime.c
+\file   tbufparams.c
 
-\brief  This module provides the consecutive timebase
+\brief  Implements helper functions for tbuf parameter handling
 
-This module provides the consecutive timebase. It acts as an interface to the
-target specific module of the hardware timer.
+This helper functions generate buffer lists which can be used in the libpsi
+or by the serial interface.
 
-\ingroup module_constime
+\ingroup module_tbufp
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
@@ -46,12 +46,8 @@ target specific module of the hardware timer.
 /*----------------------------------------------------------------------------*/
 /* includes                                                                   */
 /*----------------------------------------------------------------------------*/
-#include <shnf/constime.h>
 
-#include <sapl/sapl.h>
-#include <sn/timer.h>
-
-#include <SODapi.h>
+#include <common/tbufparams.h>
 
 /*============================================================================*/
 /*            G L O B A L   D E F I N I T I O N S                             */
@@ -65,9 +61,11 @@ target specific module of the hardware timer.
 /* module global vars                                                         */
 /*----------------------------------------------------------------------------*/
 
+
 /*----------------------------------------------------------------------------*/
 /* global function prototypes                                                 */
 /*----------------------------------------------------------------------------*/
+
 
 /*============================================================================*/
 /*            P R I V A T E   D E F I N I T I O N S                           */
@@ -88,137 +86,89 @@ target specific module of the hardware timer.
 /*----------------------------------------------------------------------------*/
 /* local function prototypes                                                  */
 /*----------------------------------------------------------------------------*/
+static UINT32 getInitOffset(INT8 isProducer_p, BOOL isFirstAck_p);
 
 /*============================================================================*/
 /*            P U B L I C   F U N C T I O N S                                 */
 /*============================================================================*/
 
+
 /*----------------------------------------------------------------------------*/
 /**
-\brief    Initialize the consecutive time
+\brief    Generate a list of buffer descriptors for the useage inside the library
 
-\retval TRUE    CT initialization successful
-\retval FALSE   Error during CT initialization
+\param[in]  pTbufBase_m      Base address of the triple buffer image
+\param[in]  tbufCount_m      Count of buffers in the image
+\param[out] pBuffDescList_p     Buffer descriptor list in library format
 
-\ingroup module_constime
+\return TRUE on success; FALSE on error
+
+\ingroup module_tbufp
 */
 /*----------------------------------------------------------------------------*/
-BOOLEAN constime_init(void)
+BOOL tbufp_genDescList(UINT8 * pTbufBase_m, UINT16 tbufCount_m, tBuffDescriptor* pBuffDescList_p)
 {
-    BOOLEAN fReturn = FALSE;
+    UINT8 i;
+    BOOL retVal = FALSE;
+    tBuffDescriptor* pBuffDec = pBuffDescList_p;
+    tTbufDescriptor tbufDescList[] = TBUF_INIT_VEC;
+    UINT32 offset = 0;
+    BOOL isFirstAck = TRUE;
 
-    if(timer_init() == 0)
+    if(pTbufBase_m != NULL && pBuffDescList_p != NULL)
     {
-        fReturn = TRUE;
-    }
-
-    return fReturn;
-}
-
-/*----------------------------------------------------------------------------*/
-/**
-\brief    Disable the consecutive time
-
-\ingroup module_constime
-*/
-/*----------------------------------------------------------------------------*/
-void constime_exit(void)
-{
-    timer_close();
-}
-
-/*----------------------------------------------------------------------------*/
-/**
-\brief    Get the current consecutive time
-
-\return The current consecutive time
-
-\ingroup module_constime
-*/
-/*----------------------------------------------------------------------------*/
-UINT32 constime_getTime(void)
-{
-    return timer_getTickCount();
-}
-
-
-/*
- * This function is called after the write access to object
- * 0x1200, subindex 0x3. It is used to configure the hardware
- * timer with the new timebase.
- *
- * \param B_INSTNUM    instance number
- * \param e_srvc       type of service, see {SOD_t_SERVICE}
- *                     (not checked, only called with enum
- *                     value in CallBeforeReadClbk() or
- *                     CallBeforeWriteClbk() or
- *                     CallAfterWriteClbk())
- *                     valid range: SOD_t_SERVICE
- * \param ps_obj       pointer to a SOD entry, see
- *                     {SOD_t_OBJECT} (pointer not checked,
- *                     only called with reference to struct
- *                     in SOD_Read() or SOD_Write())
- *                     valid range: pointer to a SOD_t_OBJECT
- * \param pv_data      pointer to data to be written, in case
- *                     of SOD_k_SRV_BEFORE_WRITE, otherwise
- *                     NULL (pointer not checked)
- *                     valid range: pointer to data to be
- *                     written, in case of
- *                     SOD_k_SRV_BEFORE_WRITE, otherwise NULL
- * \param dw_offset    start offset in bytes of the segment
- *                     within the data block (not used)
- * \param dw_size      size in bytes of the segment (not used)
- * \param pe_abortCode abort code has to be set for the SSDO if
- *                     the return value is FALSE.
- *                     (pointer not checked, only called with
- *                     reference to variable)
- *                     valid range: pointer to the
- *                     SOD_t_ABORT_CODES
- *
- * \return - TRUE  - success
- *         - FALSE - failure
- */
-BOOLEAN SHNF_SOD_ConsTimeBase_CLBK(BYTE_B_INSTNUM_ SOD_t_SERVICE e_srvc,
-                                   const SOD_t_OBJECT *ps_obj,
-                                   const void *pv_data,
-                                   UINT32 dw_offset, UINT32 dw_size,
-                                   SOD_t_ABORT_CODES *pe_abortCode)
-{
-    BOOLEAN fReturn = FALSE;
-    tTimerBase timeBase;
-
-    /* The parameter set is handled in the process function in the background.
-     * Therefore these function parameters are not used!
-     */
-    UNUSED_PARAMETER(e_srvc);
-    UNUSED_PARAMETER(dw_offset);
-    UNUSED_PARAMETER(pv_data);
-    UNUSED_PARAMETER(dw_size);
-
-    /* Check used parameters sanity */
-    if( ps_obj == NULL              ||
-        ps_obj->pv_objData == NULL  ||
-        pe_abortCode == NULL         )
-    {
-        errh_postFatalError(kErrSourceSapl, kErrorInvalidParameter, 0);
-
-        if(pe_abortCode != NULL)
+        /* Generate a descriptor list which can be used in the library */
+        for(i=0; i < tbufCount_m; i++, pBuffDec++)
         {
-            *pe_abortCode = SOD_ABT_GENERAL_ERROR;
+            offset = getInitOffset(tbufDescList[i].isProducer_m, isFirstAck);
+
+            isFirstAck = FALSE;
+
+            pBuffDec->pBuffBase_m = (UINT8 *)((UINT32)pTbufBase_m + (UINT32)tbufDescList[i].buffOffset_m + offset);
+            pBuffDec->buffSize_m = tbufDescList[i].buffSize_m;
         }
-    }
-    else
-    {
-        /* Store parameter set details in global structure */
-        timeBase = (tTimerBase)(*(INT8*)ps_obj->pv_objData);
-        if(timer_setBase(timeBase) == 0)
-        {
-            *pe_abortCode   = SOD_ABT_NO_ERROR;
-            fReturn = TRUE;
-        }
+
+        retVal = TRUE;
     }
 
-    return fReturn;
+    return retVal;
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief    Generate the transfer parameters with initialization offsets
+
+\param[in]  pTbufBase_m      Base address of the triple buffer image
+\param[out] p_transParam     Pointer to the transfer parameters
+
+\return TRUE on success; FALSE on error
+
+\ingroup module_tbufp
+*/
+//------------------------------------------------------------------------------
+BOOL tbufp_genTransferParams(UINT8 * pTbufBase_m, tHandlerParam * p_transParam)
+{
+    tTbufDescriptor tbufDescList[] = TBUF_INIT_VEC;
+    BOOL retVal = FALSE;
+
+    if(pTbufBase_m != NULL && p_transParam != NULL)
+    {
+        /* Setup consumer parameters */
+        p_transParam->consDesc_m.pBuffBase_m = pTbufBase_m;
+        p_transParam->consDesc_m.buffSize_m = tbufDescList[TBUF_NUM_CON].buffOffset_m +
+                                              tbufDescList[TBUF_NUM_CON].buffSize_m +
+                                              (UINT32)TBUF_INIT_SIZE;
+
+        /* Setup producer parameters */
+        p_transParam->prodDesc_m.pBuffBase_m = (UINT8 *)((UINT32)pTbufBase_m +
+                                                         (UINT32)tbufDescList[TBUF_NUM_CON+1].buffOffset_m +
+                                                         (UINT32)TBUF_INIT_SIZE);
+        p_transParam->prodDesc_m.buffSize_m = (UINT32)TBUF_IMAGE_SIZE - p_transParam->consDesc_m.buffSize_m;
+
+        retVal = TRUE;
+    }
+
+    return retVal;
 }
 
 /*============================================================================*/
@@ -226,5 +176,49 @@ BOOLEAN SHNF_SOD_ConsTimeBase_CLBK(BYTE_B_INSTNUM_ SOD_t_SERVICE e_srvc,
 /*============================================================================*/
 /* \name Private Functions */
 /* \{ */
+
+//------------------------------------------------------------------------------
+/**
+\brief    Determine the SPI initialization offset
+
+The SPI protocol always needs 4 byte initialization data. This function
+details if this buffer needs 4 byte offset (app consuming buffers) or
+8 byte offset. (app producing)
+
+\param[in] isConsumer    Is this buffer a consuming buffer
+\param[in] isFirstAck    Is this buffer the first ACK register
+
+\return The offset of this buffer
+
+\ingroup module_tbufp
+*/
+//------------------------------------------------------------------------------
+static UINT32 getInitOffset(INT8 isProducer_p, BOOL isFirstAck_p)
+{
+    UINT32 offset = 0;
+
+    if(isProducer_p  == (INT8)-1)
+    {
+        /* This buffer is an acknowledge register */
+        if(isFirstAck_p)
+        {
+            offset = (UINT32)TBUF_INIT_SIZE;
+        }
+        else
+        {
+            offset = (UINT32)TBUF_INIT_SIZE * 2;
+        }
+    }
+    else if(isProducer_p == 1)
+    {
+        offset = (UINT32)TBUF_INIT_SIZE * 2;
+    }
+    else if(isProducer_p == 0)
+    {
+        offset = (UINT32)TBUF_INIT_SIZE;
+    }
+
+    return offset;
+}
 
 /* \} */

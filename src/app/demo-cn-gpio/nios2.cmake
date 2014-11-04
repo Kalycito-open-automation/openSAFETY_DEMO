@@ -28,6 +28,9 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ################################################################################
 
+UNSET(GEN_LIB_TARGET)
+SET(GEN_LIB_TARGET OFF)
+
 ##########################################################################
 # Set build directory for the Altera Makefile
 SET(ALT_BUILD_DIR ${PROJECT_BINARY_DIR}/${ALT_BUILD_DIR_NAME})
@@ -50,8 +53,10 @@ SET(ALT_FLASH_OVERRIDE ${ALT_MISC_DIR}/scripts/nios2-flash-override.txt)
 # Adapt source file lists and includes
 ########################################################################
 SET( ALT_DEMO_SRCS ${DEMO_SRCS}
-                   ${ALT_TARGET_DIR}/platform.c
-                   ${ALT_TARGET_DIR}/app-gpio.c
+                   ${TARGET_DIR}/platform.c
+                   ${TARGET_DIR}/serial.c
+                   ${TARGET_DIR}/syncir.c
+                   ${TARGET_DIR}/app-gpio.c
                    ${ALT_DRIVERS_DIR}/avalon_spi/avalon_spi.c
 )
 
@@ -60,7 +65,6 @@ SET( ALT_DEMO_INCS ${DEMO_INCS}
                    ${ALT_APP_BSP_DIR}/HAL/inc
                    ${ALT_APP_BSP_DIR}/drivers/inc
                    ${ALT_DRIVERS_DIR}/avalon_spi/include
-                   ${ALT_TARGET_DIR}/include
 )
 
 ########################################################################
@@ -97,7 +101,7 @@ MESSAGE ( STATUS  "Generate board support package: ${GEN_BSP_STDOUT}" )
 # Application Makefile
 ########################################################################
 
-SET( APP_CFLAGS "${CFLAGS} -D${DBG_MODE} -DDEF_DEBUG_LVL=${DEF_DEBUG_LVL}" )
+SET( APP_CFLAGS "${CMAKE_C_FLAGS} -D${DBG_MODE} -DDEF_DEBUG_LVL=${DEF_DEBUG_LVL}" )
 
 SET( ALT_LIB_GEN_ARGS
                       "--bsp-dir ${ALT_APP_BSP_DIR}"

@@ -65,8 +65,9 @@ typedef enum {
     kTbufNumStatusIn         = 0x04,     ///< ID of the status input triple buffer
     kTbufNumInputConfChan    = 0x05,     ///< ID of the input configuration channel triple buffer
     kTbufNumTpdoImage        = 0x06,     ///< ID of the TPDO triple buffer image
-    kTbufAckRegisterProd     = 0x07,     ///< ID of the producer acknowledge register
-    kTbufCount               = 0x08,     ///< Total count of triple buffers
+    kTbufDummyBuffer         = 0x07,     ///< Dummy buffer (Needed for serials with DMA)
+    kTbufAckRegisterProd     = 0x08,     ///< ID of the producer acknowledge register
+    kTbufCount               = 0x09,     ///< Total count of triple buffers
 } tTbufNumLayout;
 
 //------------------------------------------------------------------------------

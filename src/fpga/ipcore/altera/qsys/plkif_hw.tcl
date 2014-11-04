@@ -78,7 +78,7 @@ set ID_CON_PAR 1
 set ID_CON_AVALON 2
 
 # Assemble settings list
-set gTbufDemoPro { { 4 12 4 } \
+set gTbufDemoPro { { 4 12 4 12} \
                    { 4 32 36 12 } \
                    { 4 }      \
 };

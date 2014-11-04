@@ -67,7 +67,7 @@ typedef enum
     extern "C" {
 #endif
 
-BOOLEAN sodstore_init(UINT32 sodImgOffset_p);
+BOOLEAN sodstore_init(void);
 void sodstore_close(void);
 
 tProcStoreRet sodstore_process(UINT8* pParamSetBase_p, UINT32 paramSetLen_p);

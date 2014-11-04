@@ -32,7 +32,7 @@
 # Name of the target platform
 SET( CMAKE_SYSTEM Altera-Nios2 )
 SET( CMAKE_SYSTEM_NAME Generic )
-SET( CMAKE_SYSTEM_PROCESSOR Nios2 )
+SET( CMAKE_SYSTEM_PROCESSOR nios2 )
 
 # specify the cross compiler
 SET( CMAKE_C_COMPILER nios2-elf-gcc )

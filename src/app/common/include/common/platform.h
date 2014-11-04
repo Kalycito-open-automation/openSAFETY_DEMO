@@ -1,10 +1,11 @@
 /**
 ********************************************************************************
-\file   apptarget/nvs.h
+\file   common/platform.h
 
-\brief  Interface to the non volatile storage
+\brief  Application interface system components implementation
 
-This file implements the interface to the non volatile memory.
+Defines the platform specific functions of the slim interface example
+implementation.
 
 *******************************************************************************/
 
@@ -35,18 +36,17 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
 
-#ifndef _INC_app_nvs_H_
-#define _INC_app_nvs_H_
+#ifndef _INC_common_platform_H_
+#define _INC_common_platform_H_
 
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <apptarget/target.h>
+#include <libpsi/psi.h>
 
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
-
 
 //------------------------------------------------------------------------------
 // typedef
@@ -55,16 +55,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // function prototypes
 //------------------------------------------------------------------------------
-UINT8 nvs_init(void);
-void nvs_close(void);
+void platform_init(void);
+void platform_exit(void);
 
-UINT8 nvs_read(UINT32 offset_p, UINT8 * pReadData_p, UINT32 length_p);
-UINT8 nvs_write(UINT32 offset_p, UINT8 * pData_p, UINT32 length_p);
-
-UINT8 nvs_erase(UINT32 offset_p);
-
-UINT8* nvs_getAddress(UINT32 offset_p);
-
-#endif /* _INC_app_nvs_H_ */
-
+#endif /* _INC_common_platform_H_ */
 

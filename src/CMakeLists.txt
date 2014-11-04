@@ -108,14 +108,14 @@ IF(CMAKE_SYSTEM_NAME STREQUAL "Linux")
     INCLUDE(configure-linux)
 ELSEIF(CMAKE_SYSTEM_NAME STREQUAL "Windows")
     INCLUDE(configure-windows)
-ELSEIF((CMAKE_SYSTEM_NAME STREQUAL "Generic") AND (CMAKE_SYSTEM_PROCESSOR STREQUAL "Nios2"))
+ELSEIF((CMAKE_SYSTEM_NAME STREQUAL "Generic") AND (CMAKE_SYSTEM_PROCESSOR STREQUAL "nios2"))
     INCLUDE(configure-nios2)
 ENDIF()
 
 #####################################################################
 # Set compiler specific definitions
 IF("${CMAKE_C_COMPILER_ID}" STREQUAL "GNU")
-    SET(CFLAGS "-Wall -Wextra -pedantic -std=c99")
+    SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra -pedantic -std=c99")
 ENDIF()
 
 #####################################################################
@@ -139,8 +139,8 @@ IF((CMAKE_SYSTEM_NAME STREQUAL "Generic"))
     ENDIF()
 ELSE()
     # Target platform is the local machine (Windows or Linux)
-    ADD_SUBDIRECTORY ("${PROJECT_SOURCE_DIR}/libs/psicommon" )
-    ADD_SUBDIRECTORY ("${PROJECT_SOURCE_DIR}/libs/psi" )
+    ADD_SUBDIRECTORY("${PROJECT_SOURCE_DIR}/libs/psicommon")
+    ADD_SUBDIRECTORY("${PROJECT_SOURCE_DIR}/libs/psi")
 ENDIF()
 
 #######################
