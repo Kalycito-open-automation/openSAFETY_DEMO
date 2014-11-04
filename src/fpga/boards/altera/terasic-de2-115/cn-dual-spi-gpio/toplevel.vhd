@@ -86,6 +86,15 @@ entity toplevel is
         SDRAM_BA            : out  std_logic_vector(1 downto 0);
         SDRAM_DQM           : out  std_logic_vector(3 downto 0);
         SDRAM_DQ            : inout  std_logic_vector(31 downto 0);
+        -- FLASH 8Mx8
+        CFI_FLASH_ADDR      : out std_logic_vector(22 downto 0);
+        CFI_FLASH_DATA      : inout std_logic_vector(7 downto 0);
+        CFI_FLASH_WE_n      : out std_logic;        --write
+        CFI_FLASH_CE_n      : out std_logic;        --select
+        CFI_FLASH_OE_n      : out std_logic;        --read
+        CFI_FLASH_RESET_n   : out std_logic;
+        CFI_FLASH_WP_n      : out std_logic;
+        CFI_FLASH_RY        : in std_logic;
         -- SPI
         SPI_CLK             : in std_logic;
         SPI_MOSI            : in std_logic;
@@ -199,7 +208,13 @@ architecture rtl of toplevel is
             app_0_sdram_0_dq                        : inout std_logic_vector(31 downto 0) := (others => 'X');
             app_0_sdram_0_dqm                       : out   std_logic_vector(3 downto 0);
             app_0_sdram_0_ras_n                     : out   std_logic;
-            app_0_sdram_0_we_n                      : out   std_logic
+            app_0_sdram_0_we_n                      : out   std_logic;
+            -- FLASH 8x8M
+            cfi_flash_out_cfi_flash_tcm_address_out      : out   std_logic_vector(22 downto 0);
+            cfi_flash_out_cfi_flash_tcm_data_out         : inout std_logic_vector(7 downto 0);
+            cfi_flash_out_cfi_flash_tcm_write_n_out      : out   std_logic;
+            cfi_flash_out_cfi_flash_tcm_chipselect_n_out : out   std_logic;
+            cfi_flash_out_cfi_flash_tcm_read_n_out       : out   std_logic
         );
     end component cnDualSpiGpio;
 
@@ -240,6 +255,9 @@ begin
     LEDG        <= "000000" & plk_status_error;
 
     SYNC_IRQ    <= timer_out(1);
+
+    CFI_FLASH_RESET_n <= '1';
+    CFI_FLASH_WP_n    <= '1';
 
     inst: cnDualSpiGpio
         port map (
@@ -309,7 +327,13 @@ begin
             app_0_sdram_0_dq                                => SDRAM_DQ,
             app_0_sdram_0_dqm                               => SDRAM_DQM,
             app_0_sdram_0_ras_n                             => SDRAM_RAS_n,
-            app_0_sdram_0_we_n                              => SDRAM_WE_n
+            app_0_sdram_0_we_n                              => SDRAM_WE_n,
+            -- FLASH 8x8M
+            cfi_flash_out_cfi_flash_tcm_address_out         => CFI_FLASH_ADDR,
+            cfi_flash_out_cfi_flash_tcm_data_out            => CFI_FLASH_DATA,
+            cfi_flash_out_cfi_flash_tcm_write_n_out         => CFI_FLASH_WE_n,
+            cfi_flash_out_cfi_flash_tcm_chipselect_n_out    => CFI_FLASH_CE_n,
+            cfi_flash_out_cfi_flash_tcm_read_n_out          => CFI_FLASH_OE_n
         );
 
     -- Pll Instance

@@ -47,9 +47,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // const defines
 //------------------------------------------------------------------------------
 
-#define CONFIG_IDENT_DEVICE_TYPE        -1              ///< Device type of the node
+#define CONFIG_IDENT_DEVICE_TYPE        0x00000000      ///< Device type of the node
 #define CONFIG_IDENT_VENDOR_ID          0x00000000      ///< Vendor ID of the node
-#define CONFIG_IDENT_PRODUCT_CODE       0x00            ///< Product code of the node
+#define CONFIG_IDENT_PRODUCT_CODE       0x00000001      ///< Product code of the node
 #define CONFIG_IDENT_REVISION           0x00010020      ///< Revision number of the node
 #define CONFIG_IDENT_SERIAL_NUMBER      0x00000000      ///< Serial number of the node
 

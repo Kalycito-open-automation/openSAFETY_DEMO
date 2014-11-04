@@ -1,0 +1,164 @@
+/**
+********************************************************************************
+\file   sn/errorhandler.h
+
+\brief  Error handler of the SN firmware
+
+*******************************************************************************/
+
+/*------------------------------------------------------------------------------
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+    * Redistributions of source code must retain the above copyright
+      notice, this list of conditions and the following disclaimer.
+    * Redistributions in binary form must reproduce the above copyright
+      notice, this list of conditions and the following disclaimer in the
+      documentation and/or other materials provided with the distribution.
+    * Neither the name of the copyright holders nor the
+      names of its contributors may be used to endorse or promote products
+      derived from this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL COPYRIGHT HOLDERS BE LIABLE FOR ANY
+DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+------------------------------------------------------------------------------*/
+
+#ifndef _INC_sn_errorhandler_H_
+#define _INC_sn_errorhandler_H_
+
+/*----------------------------------------------------------------------------*/
+/* includes                                                                   */
+/*----------------------------------------------------------------------------*/
+#include <sn/global.h>
+
+
+/*----------------------------------------------------------------------------*/
+/* const defines                                                              */
+/*----------------------------------------------------------------------------*/
+
+
+/*----------------------------------------------------------------------------*/
+/* typedef                                                                    */
+/*----------------------------------------------------------------------------*/
+
+/**
+ * \brief Error types of the firmware
+ */
+typedef enum
+{
+    kErrorInvalid                           = 0x00,     /**< Zero is no error! */
+    kErrorInvalidParameter                  = 0x01,     /**< An invalid parameter is passed to a function */
+    kErrorInvalidState                      = 0x02,     /**< A state machine has reached an invalid state */
+    kErrorInvalidFrameType                  = 0x03,     /**< This type of frame is not an openSAFETY frame */
+    kErrorCallbackNotInitialized            = 0x04,     /**< A callback function should be called but is not initialized */
+    kErrorInvalidTxMemory                   = 0x05,     /**< There is no transmit memory left for sending */
+
+    kErrorSyncProcessFailed                 = 0x20,     /**< Processing the synchronous task has failed */
+    kErrorSyncFramePostingFailed            = 0x21,
+    kErrorSyncFrameCopyFailed               = 0x22,
+    kErrorSyncFrameNoBuffer                 = 0x23,
+
+    kErrorAsyncProcessFailed                = 0x30,     /**< Processing the asynchronous task has failed */
+    kErrorAsyncFramePostingFailed           = 0x31,
+    kErrorAsyncFrameCopyFailed              = 0x32,
+    kErrorAsyncFrameNoBuffer                = 0x33,
+
+    kErrorEnterPreOperationalFailed         = 0x41,
+    kErrorEnterOperationalFailed            = 0x42,
+    kErrorEnterFailSafeFailed               = 0x43,
+
+    kErrorParamSetInvalidSize               = 0x51,
+    kErrorParamSetUnableToParseObj          = 0x52,
+    kErrorObjTooLongForParameterSet         = 0x53,
+    kErrorUnableToObjAttr                   = 0x54,
+    kErrorUnableToWriteToSod                = 0x55,
+    kErrorUnableToReadFromSod               = 0x56,
+    kErrorUnableToSetLengthInSod            = 0x57,
+    kErrorNoCrcFieldAllocated               = 0x58,
+
+    kErrorSodStoreSizeMissmatch             = 0x60,
+    kErrorSodStoreWriteError                = 0x61,
+    kErrorSodStoreCrcError                  = 0x62
+} tErrorTypes;
+
+
+/**
+ * \brief Indicates all available error sources
+ */
+typedef enum
+{
+    kErrSourceInvalid      = 0x0,   /**< Error source is not net */
+    kErrSourceStack        = 0x1,   /**< Error source = openSafety stack */
+    kErrSourceHnf          = 0x2,   /**< Error source = Hardware near firmware inteface */
+    kErrSourceShnf         = 0x3,   /**< Error source = SHNF managing module */
+    kErrSourceSapl         = 0x4,   /**< Error source = Safe application */
+    kErrSourcePeriph       = 0x5,   /**< Error source = Managing module */
+} tErrSource;
+
+/**
+ * \brief Indicates how serious or expected an error is
+ */
+typedef enum
+{
+    kErrLevelInvalid      = 0x0,    /**< Invalid error level */
+    kErrLevelInfo         = 0x1,    /**< Error level = INFO */
+    kErrLevelMinor        = 0x2,    /**< Error level = MINOR */
+    kErrLevelFatal        = 0x3,    /**< Error level = FATAL */
+} tErrLevel;
+
+/**
+ * \brief Defines the structure of the error descriptor
+ */
+typedef struct
+{
+    BOOLEAN fFailSafe_m;    /**< TRUE if the device shall enter fail safe on this error */
+    tErrSource source_m;    /**< The origin of this error */
+    tErrLevel class_m;      /**< Provides information about the criticality of the error */
+    UINT8 unit_m;           /**< Origin module of the error */
+    UINT8 code_m;           /**< Error code to identify the error withing the unit */
+    UINT32 addInfo_m;       /**< Additional error information */
+} tErrorDesc;
+
+/**
+ * \brief Error handler initialisation parameters
+ */
+typedef struct
+{
+    BOOLEAN * pShutdown_m;      /**< Pointer to the shutdown flag */
+    BOOLEAN * pFailSafe_m;      /**< Pointer to the failsafe flag */
+} tErrHInitParam;
+
+/*----------------------------------------------------------------------------*/
+/* function prototypes                                                        */
+/*----------------------------------------------------------------------------*/
+
+#ifdef __cplusplus
+    extern "C" {
+#endif
+
+BOOLEAN errh_init(tErrHInitParam * pInitParam_p);
+void errh_exit();
+
+void errh_postInfo(tErrSource source_p, tErrorTypes code_p, UINT32 addInfo_p);
+void errh_postMinorError(tErrSource source_p, tErrorTypes code_p, UINT32 addInfo_p);
+void errh_postFatalError(tErrSource source_p, tErrorTypes code_p, UINT32 addInfo_p);
+
+void errh_postError(tErrorDesc * pErrInfo_p);
+
+
+#ifdef __cplusplus
+    }
+#endif
+
+
+#endif /* _INC_sn_errorhandler_H_ */

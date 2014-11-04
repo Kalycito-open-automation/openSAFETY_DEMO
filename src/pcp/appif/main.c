@@ -162,7 +162,7 @@ int main (void)
 {
     UINT8    nodeId;
     tAppIfStatus ret = kAppIfSuccessful;
-    const UINT8 aMacAddr[] = {MAC_ADDR};
+    const UINT8 aMacAddr[] = MAC_ADDR;
 
     // reset local instance of main
     APPIF_MEMSET(&mainInstance_l, 0 , sizeof(tMainInstance));

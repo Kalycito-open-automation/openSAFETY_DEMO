@@ -49,7 +49,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 //------------------------------------------------------------------------------
-// POWERLINK CN default settings (Use <demo>/config/pcp/powerlink.h to overload settings)
+// POWERLINK CN default settings (Use powerlink.h to overload these settings)
 //------------------------------------------------------------------------------
 #ifndef CONFIG_ISOCHR_TX_MAX_PAYLOAD
 #define CONFIG_ISOCHR_TX_MAX_PAYLOAD    max(40, sizeof(tTpdoMappedObj))
@@ -80,7 +80,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endif
 
 #ifndef MAC_ADDR
-#define MAC_ADDR    0x00, 0x12, 0x34, 0x56, 0x78, 0x9A  ///< MAC address of the CN
+#define MAC_ADDR    {0x00,0x12,0x34,0x56,0x78,0x9A}  ///< MAC address of the CN
 #endif
 
 #ifndef IP_ADDR

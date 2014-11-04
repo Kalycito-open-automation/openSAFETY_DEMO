@@ -79,11 +79,11 @@ set ID_CON_AVALON 2
 
 # Assemble settings list
 set gTbufDemoPro { { 4 12 4 } \
-                   { 4 12 32 36 } \
+                   { 4 32 36 12 } \
                    { 4 }      \
 };
 set gTbufDemoCon { { 12 12 8 } \
-                   { 12 12 36 36 } \
+                   { 12 36 36 } \
                    { 12 }      \
 };
 

@@ -47,10 +47,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
-// set the benchmark level as needed
-#define BENCHMARK_MODULES       0x00000003L
-
-
 #ifdef __NIOS2__
 
     #include "system.h"

@@ -53,4 +53,15 @@
    type="com.altera.entityinterfaces.IElementClass"
    subtype="com.altera.embeddedsw.bsp.elements.IBaseSoftwareElement"
    factory="EmbeddedSwTclDriverFactory" />
+ <component
+   name="counter"
+   file="components/counter_hw.tcl"
+   displayName="Counter"
+   version="0.0.1"
+   description=""
+   tags="AUTHORSHIP=B&amp;R /// CONNECTION_TYPES=avalon,clock,conduit,reset /// INTERNAL_COMPONENT=false"
+   categories="Counter"
+   factory="TclModuleFactory">
+  <tag2 key="COMPONENT_EDITABLE" value="false" />
+ </component>
 </library>

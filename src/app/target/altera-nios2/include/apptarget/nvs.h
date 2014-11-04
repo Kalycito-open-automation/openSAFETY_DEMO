@@ -1,11 +1,10 @@
 /**
 ********************************************************************************
-\file   config/powerlink.h
+\file   apptarget/nvs.h
 
-\brief  This header defines some configurable parameters of the POWERLINk stack
+\brief  Interface to the non volatile storage
 
-These defines override the standard configuration of the POWERLINK CN on the
-PCP and enable to pass a different configuration to the POWERLINK processor.
+This file implements the interface to the non volatile memory.
 
 *******************************************************************************/
 
@@ -36,29 +35,18 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
 
-#ifndef _INC_config_powerlink_H_
-#define _INC_config_powerlink_H_
+#ifndef _INC_app_nvs_H_
+#define _INC_app_nvs_H_
 
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
+#include <apptarget/target.h>
 
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
 
-#define CONFIG_IDENT_DEVICE_TYPE        -1              ///< Device type of the node
-#define CONFIG_IDENT_VENDOR_ID          0x00000000      ///< Vendor ID of the node
-#define CONFIG_IDENT_PRODUCT_CODE       0x00            ///< Product code of the node
-#define CONFIG_IDENT_REVISION           0x00010020      ///< Revision number of the node
-#define CONFIG_IDENT_SERIAL_NUMBER      0x00000000      ///< Serial number of the node
-
-
-#define MAC_VENDOR_ID   0x00,0x12,0x34                      ///< Vendor specific part of the MAC address
-#define MAC_ADDR        {MAC_VENDOR_ID,0x56,0x78,0x9A}      ///< MAC address of the CN
-#define IP_ADDR         0xc0a86401                          ///< IP-Address 192.168.100.1 (Object: 0x1E40/0x02) (don't care the last byte!)
-#define SUBNET_MASK     0xFFFFFF00                          ///< Subnet mask 255.255.255.0 (Object: 0x1E40/0x03)
-#define DEF_GATEWAY     0xc0a864f0                          ///< Default gateway: 192.168.100.254 (Object: 0x1E40/0x05)
 
 //------------------------------------------------------------------------------
 // typedef
@@ -67,5 +55,16 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // function prototypes
 //------------------------------------------------------------------------------
+UINT8 nvs_init(void);
+void nvs_close(void);
 
-#endif /* _INC_config_powerlink_H_ */
+UINT8 nvs_read(UINT32 offset_p, UINT8 * pReadData_p, UINT32 length_p);
+UINT8 nvs_write(UINT32 offset_p, UINT8 * pData_p, UINT32 length_p);
+
+UINT8 nvs_erase(UINT32 offset_p);
+
+UINT8* nvs_getAddress(UINT32 offset_p);
+
+#endif /* _INC_app_nvs_H_ */
+
+

@@ -1,16 +1,13 @@
 /**
 ********************************************************************************
-\file   config/ccobjectlist.h
+\file   shnf/shnf.h
 
-\brief  Object list for ccobjects module
-
-Provides the list of objects exchanged by the configuration channel
-module.
+\brief  TODO
 
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -36,38 +33,52 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
 
-#ifndef _INC_config_ccobjectlist_H_
-#define _INC_config_ccobjectlist_H_
+#ifndef _INC_shnf_shnf_H_
+#define _INC_shnf_shnf_H_
 
-//------------------------------------------------------------------------------
-// includes
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
+/* includes                                                                   */
+/*----------------------------------------------------------------------------*/
+#include <sn/global.h>
 
-#include <libappifcommon/global.h>
+/*----------------------------------------------------------------------------*/
+/* const defines                                                              */
+/*----------------------------------------------------------------------------*/
 
-//------------------------------------------------------------------------------
-// const defines
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
+/* typedef                                                                    */
+/*----------------------------------------------------------------------------*/
 
-#define CONF_CHAN_NUM_OBJECTS     4     ///< Number of objects in list CCOBJECT_LIST_INIT_VECTOR
+/**
+ * \brief Represents the current state of the SHNF
+ */
+typedef enum
+{
+    kShnfStateInvalid        = 0x0,
+    kShnfStateInitializing   = 0x1,
+    kShnfStatePreOperational = 0x2,
+    kShnfStateOperational    = 0x3,
+} tShnfState;
 
-//------------------------------------------------------------------------------
-// typedef
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
+/* function prototypes                                                        */
+/*----------------------------------------------------------------------------*/
 
-// List of object index, subindex and size in list
-#define CCOBJECT_LIST_INIT_VECTOR     { {0x2000, 0x01, kTypeUint16Size}, \
-                                        {0x2000, 0x02, kTypeUint16Size}, \
-                                        {0x2000, 0x03, kTypeUint16Size}, \
-                                        {0x2000, 0x04, kTypeUint16Size}  \
-                                      }
+#ifdef __cplusplus
+    extern "C" {
+#endif
+
+BOOLEAN shnf_init(void);
+void shnf_exit(void);
+
+void shnf_changeState(tShnfState shnfState_p);
+BOOLEAN shnf_process(void);
+
+UINT32 shnf_getConsecutiveTime(void);
+
+#ifdef __cplusplus
+    }
+#endif
 
 
-
-//------------------------------------------------------------------------------
-// function prototypes
-//------------------------------------------------------------------------------
-
-#endif /* _INC_config_ccobjectlist_H_ */
-
-
+#endif /* _INC_shnf_shnf_H_ */

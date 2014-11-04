@@ -1,11 +1,10 @@
 /**
 ********************************************************************************
-\file   config/powerlink.h
+\file   apptarget/timer.h
 
-\brief  This header defines some configurable parameters of the POWERLINk stack
+\brief  Target specific header file of the system timer
 
-These defines override the standard configuration of the POWERLINK CN on the
-PCP and enable to pass a different configuration to the POWERLINK processor.
+This file implements the system timer for platform altera nios2.
 
 *******************************************************************************/
 
@@ -36,36 +35,43 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
 
-#ifndef _INC_config_powerlink_H_
-#define _INC_config_powerlink_H_
+#ifndef _INC_appttimer_H_
+#define _INC_appttimer_H_
 
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
+#include <apptarget/target.h>
 
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
 
-#define CONFIG_IDENT_DEVICE_TYPE        -1              ///< Device type of the node
-#define CONFIG_IDENT_VENDOR_ID          0x00000000      ///< Vendor ID of the node
-#define CONFIG_IDENT_PRODUCT_CODE       0x00            ///< Product code of the node
-#define CONFIG_IDENT_REVISION           0x00010020      ///< Revision number of the node
-#define CONFIG_IDENT_SERIAL_NUMBER      0x00000000      ///< Serial number of the node
-
-
-#define MAC_VENDOR_ID   0x00,0x12,0x34                      ///< Vendor specific part of the MAC address
-#define MAC_ADDR        {MAC_VENDOR_ID,0x56,0x78,0x9A}      ///< MAC address of the CN
-#define IP_ADDR         0xc0a86401                          ///< IP-Address 192.168.100.1 (Object: 0x1E40/0x02) (don't care the last byte!)
-#define SUBNET_MASK     0xFFFFFF00                          ///< Subnet mask 255.255.255.0 (Object: 0x1E40/0x03)
-#define DEF_GATEWAY     0xc0a864f0                          ///< Default gateway: 192.168.100.254 (Object: 0x1E40/0x05)
 
 //------------------------------------------------------------------------------
 // typedef
 //------------------------------------------------------------------------------
 
+/**
+ * \brief Base values of the timer
+ */
+typedef enum
+{
+    kTimerBase1us        = 0,
+    kTimerBase10us       = 1,
+    kTimerBase100us      = 2,
+    kTimerBase1ms        = 3,
+} tTimerBase;
+
 //------------------------------------------------------------------------------
 // function prototypes
 //------------------------------------------------------------------------------
+UINT8 timer_init(void);
+void timer_close(void);
 
-#endif /* _INC_config_powerlink_H_ */
+UINT32 timer_getTickCount(void);
+UINT8 timer_setBase(tTimerBase base_p);
+
+#endif /* _INC_appttimer_H_ */
+
+

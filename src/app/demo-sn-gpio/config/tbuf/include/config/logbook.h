@@ -1,11 +1,8 @@
 /**
 ********************************************************************************
-\file   config/ccobjectlist.h
+\file   config/logbook.h
 
-\brief  Object list for ccobjects module
-
-Provides the list of objects exchanged by the configuration channel
-module.
+\brief  This header provides the configuration parameters of the logbook module
 
 *******************************************************************************/
 
@@ -36,38 +33,39 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
 
-#ifndef _INC_config_ccobjectlist_H_
-#define _INC_config_ccobjectlist_H_
+#ifndef _INC_config_logbook_H_
+#define _INC_config_logbook_H_
 
-//------------------------------------------------------------------------------
-// includes
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
+/* includes                                                                   */
+/*----------------------------------------------------------------------------*/
 
 #include <libappifcommon/global.h>
 
-//------------------------------------------------------------------------------
-// const defines
-//------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------*/
+/* const defines                                                              */
+/*----------------------------------------------------------------------------*/
+#define LOG_STUB_OBJECT_INDEX           0x2403     /**< Object index of the logbook stub (Container needs to be defined in xdd) */
 
-#define CONF_CHAN_NUM_OBJECTS     4     ///< Number of objects in list CCOBJECT_LIST_INIT_VECTOR
+/*----------------------------------------------------------------------------*/
+/* typedef                                                                    */
+/*----------------------------------------------------------------------------*/
 
-//------------------------------------------------------------------------------
-// typedef
-//------------------------------------------------------------------------------
+/**
+ * \brief Number of logbook channel instances
+ */
+typedef enum {
+    kNumLogChan0     = 0x00,    /**< Id of the first logbook channel */
+    kNumLogInstCount = 0x01,    /**< Maximum count of logbook channels */
+} tLogChanNum;
 
-// List of object index, subindex and size in list
-#define CCOBJECT_LIST_INIT_VECTOR     { {0x2000, 0x01, kTypeUint16Size}, \
-                                        {0x2000, 0x02, kTypeUint16Size}, \
-                                        {0x2000, 0x03, kTypeUint16Size}, \
-                                        {0x2000, 0x04, kTypeUint16Size}  \
-                                      }
+/*----------------------------------------------------------------------------*/
+/* offsetof defines                                                           */
+/*----------------------------------------------------------------------------*/
 
+/*----------------------------------------------------------------------------*/
+/* function prototypes                                                        */
+/*----------------------------------------------------------------------------*/
 
-
-//------------------------------------------------------------------------------
-// function prototypes
-//------------------------------------------------------------------------------
-
-#endif /* _INC_config_ccobjectlist_H_ */
-
+#endif /* _INC_config_logbook_H_ */
 
