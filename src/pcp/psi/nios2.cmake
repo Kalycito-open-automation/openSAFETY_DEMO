@@ -97,7 +97,7 @@ IF( ${CMAKE_BUILD_TYPE} MATCHES "Release" )
     SET( NIOS2_BSP_ARGS "${NIOS2_BSP_ARGS} --set hal.stdout none --set hal.stderr none" )
 ENDIF ( ${CMAKE_BUILD_TYPE} MATCHES "Release" )
 
-EXECUTE_PROCESS( COMMAND bash ${ALT_BSP_GEN_DIR}/nios2-bsp ${BSP_TYPE} ${BSP_DIR} ${NIOS2_QUARTUS_DIR} ${NIOS2_BSP_ARGS}
+EXECUTE_PROCESS( COMMAND bash ${ALT_BSP_GEN_DIR}/nios2-bsp ${BSP_TYPE} ${BSP_DIR} ${CFG_NIOS2_QUARTUS_DIR} ${NIOS2_BSP_ARGS}
                  WORKING_DIRECTORY ${ALT_BUILD_DIR}
                  RESULT_VARIABLE GEN_BSP_RES
                  OUTPUT_VARIABLE GEN_BSP_STDOUT
@@ -142,7 +142,7 @@ SET( APP_CFLAGS_EXTENDED "-DALT_TCIMEM_SIZE=${TCI_MEM_SIZE} -DPSI_BUILD_PCP" )
 
 SET( ALT_APP_GEN_ARGS
                       "--bsp-dir ${BSP_DIR}"
-                      "--set QUARTUS_PROJECT_DIR=${NIOS2_QUARTUS_DIR}"
+                      "--set QUARTUS_PROJECT_DIR=${CFG_NIOS2_QUARTUS_DIR}"
                       "--src-files ${ALT_PSI_SRCS}"
                       "--set APP_INCLUDE_DIRS=${ALT_PSI_INCS}"
                       "--set APP_CFLAGS_DEFINED_SYMBOLS"

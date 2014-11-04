@@ -30,11 +30,7 @@
 
 Include(CMakeDependentOption)
 
-# The version number.
-# Allow the developer to select if Dynamic or Static libraries are built
-OPTION ( BUILD_SHARED_LIBS "Build Shared Libraries" ON)
-MARK_AS_ADVANCED ( BUILD_SHARED_LIBS )
-
+# Select the type of build for the whole project
 IF( NOT CMAKE_BUILD_TYPE )
     SET(CMAKE_BUILD_TYPE Release CACHE STRING
         "Choose the type of build"
@@ -42,6 +38,7 @@ IF( NOT CMAKE_BUILD_TYPE )
     SET_PROPERTY(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "None;Debug;Release;RelWithDebInfo;MinSizeRel")
 ENDIF( NOT CMAKE_BUILD_TYPE )
 
+# Select the demo the project should be built for [cn-gpio. sn-gpio, custom]
 IF( NOT CFG_DEMO_TYPE )
     SET(CFG_DEMO_TYPE cn-gpio CACHE STRING
         "Choose the demo you want to build"
@@ -49,34 +46,32 @@ IF( NOT CFG_DEMO_TYPE )
     SET_PROPERTY(CACHE CFG_DEMO_TYPE PROPERTY STRINGS "cn-gpio;sn-gpio;custom")
 ENDIF( NOT CFG_DEMO_TYPE )
 
-# Disable Unitests when cross compiling to an embedded platform
-IF(NOT CMAKE_SYSTEM_NAME STREQUAL "Generic")
-    OPTION ( UNITTEST_ENABLE "Enables the unittest integration for the openSAFETY distribution" ON )
+IF(CMAKE_SYSTEM_NAME STREQUAL "Generic")
+    ############################################################################
+    # Section when we are cross compiling for an embedded processor
+
+    # Only build static libs
+    SET(BUILD_SHARED_LIBS OFF)
+
+    # Disable unit test options
+    UNSET(UNITTEST_ENABLE)
+    UNSET(UNITTEST_SMALL_TARGETS)
+    UNSET(UNITTEST_XML_REPORTS)
+    UNSET(UNITTEST_PSI_LIBS)
+ELSE(CMAKE_SYSTEM_NAME STREQUAL "Generic")
+    ############################################################################
+    # Only enable unit tests when compiling for the local machine
+
+    # Allow the developer to select if Dynamic or Static libraries are built
+    OPTION(BUILD_SHARED_LIBS "Build Shared Libraries" ON)
+    MARK_AS_ADVANCED(BUILD_SHARED_LIBS)
+
+    # Provide options to enable the PSI unit tests
+    OPTION ( UNITTEST_ENABLE "Enables the unittest integration for the PSI project" ON )
 
     CMAKE_DEPENDENT_OPTION ( UNITTEST_SMALL_TARGETS "Splits the unittest into smaller targets, to enable building for smaller memory footprint targets"  OFF "UNITTEST_ENABLE" OFF )
     CMAKE_DEPENDENT_OPTION ( UNITTEST_XML_REPORTS "Generates XML reports instead of stdout output" ON "UNITTEST_ENABLE" ON )
 
-    OPTION ( UNITTEST_PSI "Enables the unittest integration for the tools directory" ON )
-    MARK_AS_ADVANCED ( UNITTEST_PSI )
-
-    UNSET(CFG_INCLUDE_SUBPROJECTS)
-ELSE()
-    UNSET(UNITTEST_ENABLE)
-    UNSET(UNITTEST_SMALL_TARGETS)
-    UNSET(UNITTEST_XML_REPORTS)
-    UNSET(UNITTEST_PSI)
-
-    IF( NOT CFG_DEMO_INTERCONNECT )
-        SET(CFG_DEMO_INTERCONNECT spi CACHE STRING
-            "Choose the interconnect of the demo" FORCE
-           )
-        SET_PROPERTY(CACHE CFG_DEMO_INTERCONNECT PROPERTY STRINGS "spi;parallel;avalon")
-    ENDIF( NOT CFG_DEMO_INTERCONNECT )
-
-    IF(NOT CFG_INCLUDE_SUBPROJECTS)
-        SET(CFG_INCLUDE_SUBPROJECTS all CACHE STRING
-            "Choose the subprojects you want to generate Makefiles for" FORCE
-           )
-        SET_PROPERTY(CACHE CFG_INCLUDE_SUBPROJECTS PROPERTY STRINGS "pcp;application;all")
-    ENDIF(NOT CFG_INCLUDE_SUBPROJECTS)
-ENDIF()
+    OPTION ( UNITTEST_PSI_LIBS "Enables the unittest integration for the PSI libraries" ON )
+    MARK_AS_ADVANCED ( UNITTEST_PSI_LIBS )
+ENDIF(CMAKE_SYSTEM_NAME STREQUAL "Generic")

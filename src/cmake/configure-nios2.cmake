@@ -35,22 +35,34 @@ MESSAGE ( STATUS "Generating build files for platform Altera/Nios2 ..." )
 
 ###############################################################################
 # User settings
-OPTION( CFG_SINGLE_BITSTREAM "Both processors are in a single bitstream" ON )
+IF(NOT CFG_NIOS2_QUARTUS_DIR)
+    SET(CFG_NIOS2_QUARTUS_DIR ${FPGA_DIR}
+        CACHE PATH "Set the location of the FPGA hardware project you want to build"
+       )
+ENDIF(NOT CFG_NIOS2_QUARTUS_DIR)
+
+###############################################################################
+# Include new configuration file
+IF(EXISTS "${CFG_NIOS2_QUARTUS_DIR}/config.cmake")
+    INCLUDE(${CFG_NIOS2_QUARTUS_DIR}/config.cmake)
+ELSE()
+    MESSAGE(FATAL_ERROR "Settings file for demo ${CFG_NIOS2_QUARTUS_DIR}/config.cmake does not exist! Adapt 'CFG_NIOS2_QUARTUS_DIR' and continue!")
+ENDIF()
+
+MESSAGE(STATUS "\nConfiguration for this demo is:")
+MESSAGE(STATUS "CFG_INCLUDE_SUBPROJECTS=${CFG_INCLUDE_SUBPROJECTS}")
+MESSAGE(STATUS "CFG_DEMO_INTERCONNECT=${CFG_DEMO_INTERCONNECT}")
+MESSAGE(STATUS "CFG_QSYS_SYSTEM_NAME=${CFG_QSYS_SYSTEM_NAME}")
+MESSAGE(STATUS "\n")
 
 ###############################################################################
 # Hardware settings
-IF( CFG_DEMO_INTERCONNECT MATCHES "spi" AND CFG_SINGLE_BITSTREAM )
-    set( QSYS_SYSTEM_NAME cnDualSpiGpio)
-    SET( NIOS2_QUARTUS_DIR ${CMAKE_SOURCE_DIR}/fpga/boards/altera/terasic-de2-115/cn-dual-spi-gpio )
-    SET( QSYS_SYSTEM_FILE ${NIOS2_QUARTUS_DIR}/${QSYS_SYSTEM_NAME}.qsys )
-ELSE( CFG_DEMO_INTERCONNECT MATCHES "spi" AND CFG_SINGLE_BITSTREAM )
-    MESSAGE( FATAL_ERROR "Only demos with 'spi' interconnect and CFG_SINGLE_BITSTREAM is supported!" )
-ENDIF( CFG_DEMO_INTERCONNECT MATCHES "spi" AND CFG_SINGLE_BITSTREAM )
+SET(QSYS_SYSTEM_FILE ${CFG_NIOS2_QUARTUS_DIR}/${CFG_QSYS_SYSTEM_NAME}.qsys)
 
 ###############################################################################
 # Check if QSYS system is generated
-IF(NOT EXISTS "${NIOS2_QUARTUS_DIR}/${QSYS_SYSTEM_NAME}.sopcinfo")
-    MESSAGE(FATAL_ERROR "unexpected: The Qsys system from ${NIOS2_QUARTUS_DIR} is not generated! Please build the project first!")
+IF(NOT EXISTS "${CFG_NIOS2_QUARTUS_DIR}/${CFG_QSYS_SYSTEM_NAME}.sopcinfo")
+    MESSAGE(FATAL_ERROR "unexpected: The Qsys system from ${CFG_NIOS2_QUARTUS_DIR} is not generated! Please build the project first!")
 ENDIF()
 
 ###############################################################################
@@ -118,10 +130,10 @@ IF( ${ALT_QSYS_SCRIPT} STREQUAL "ALT_QSYS_SCRIPT-NOTFOUND" )
     MESSAGE( FATAL_ERROR "unexpected: The variable ALT_QSYS_SCRIPT is set to ${ALT_QSYS_SCRIPT}! Start CMake from the nios2 shell to solve this issue!" )
 ENDIF ()
 
-SET( QSYS_SCRIPT_COMMAND "set selDemo ${CFG_DEMO_TYPE}\; set qsysSystemName ${QSYS_SYSTEM_NAME}" )
+SET( QSYS_SCRIPT_COMMAND "set selDemo ${CFG_DEMO_TYPE}\; set qsysSystemName ${CFG_QSYS_SYSTEM_NAME}" )
 
 EXECUTE_PROCESS( COMMAND ${ALT_QSYS_SCRIPT} --cmd=${QSYS_SCRIPT_COMMAND} --script=${ALT_MISC_DIR}/scripts/plkif-config.tcl --system-file=${QSYS_SYSTEM_FILE}
-                 WORKING_DIRECTORY ${NIOS2_QUARTUS_DIR}
+                 WORKING_DIRECTORY ${CFG_NIOS2_QUARTUS_DIR}
                  RESULT_VARIABLE QSYS_RES
                  OUTPUT_VARIABLE QSYS_STDOUT
                  ERROR_VARIABLE QSYS_STDERR

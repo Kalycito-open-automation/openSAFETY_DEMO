@@ -1,6 +1,6 @@
 ################################################################################
 #
-# Unit tests cmake main file
+# CMake demo configuration file (Provides information about the demo setup)
 #
 # Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 # All rights reserved.
@@ -28,17 +28,11 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ################################################################################
 
-CMAKE_MINIMUM_REQUIRED (VERSION 2.8)
+# Are both processors (PCP, APP) in this FPGA project
+SET(CFG_INCLUDE_SUBPROJECTS "both")
 
-PROJECT (unittests)
+# Interconnect of the board
+SET(CFG_DEMO_INTERCONNECT "spi")
 
-INCLUDE_DIRECTORIES ( "${CMAKE_SOURCE_DIR}/contrib/cunit/include/cunit/" )
-INCLUDE_DIRECTORIES ( "${CMAKE_SOURCE_DIR}/contrib/cunit/include/" )
-INCLUDE_DIRECTORIES ( "${CMAKE_SOURCE_DIR}/unittest/common/" )
-
-IF(UNITTEST_PSI_LIBS)
-    # Unit tests for the PSI libraries
-    ADD_SUBDIRECTORY ( "${PROJECT_SOURCE_DIR}/psi" )
-    ADD_SUBDIRECTORY ( "${PROJECT_SOURCE_DIR}/psicommon" )
-    ADD_SUBDIRECTORY ( "${PROJECT_SOURCE_DIR}/endian" )
-ENDIF(UNITTEST_PSI_LIBS)
+# Name of the qsys toplevel
+SET(CFG_QSYS_SYSTEM_NAME cnDualSpiGpio)
