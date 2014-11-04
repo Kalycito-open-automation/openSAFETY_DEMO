@@ -79,6 +79,7 @@ SET(ALT_DEMO_INCS ${DEMO_INCS}
                   ${ALT_APP_BSP_DIR}/HAL/inc
                   ${ALT_APP_BSP_DIR}/drivers/inc
                   ${ALT_DRIVERS_DIR}/avalon_spi/include
+                  ${ALT_SN_TARGET_DIR}/include
 
 )
 
@@ -120,7 +121,7 @@ MESSAGE ( STATUS  "Generate board support package: ${GEN_BSP_STDOUT}" )
 # Application Makefile
 ########################################################################
 
-SET( APP_CFLAGS "${CMAKE_C_FLAGS} -D${DBG_MODE} -DDEF_DEBUG_LVL=${DEF_DEBUG_LVL} -DBENCHMARK_MODULES=0xEE800043L" )
+SET( APP_CFLAGS "${CMAKE_C_FLAGS} -D${DBG_MODE} -DDEF_DEBUG_LVL=${DEF_DEBUG_LVL} -DBENCHMARK_MODULES=0xEE800043L -DCFG_SAPL_SN_UDID=\"${CFG_SAPL_SN_UDID}\"" )
 
 SET( ALT_LIB_GEN_ARGS
                       "--bsp-dir ${ALT_APP_BSP_DIR}"

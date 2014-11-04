@@ -36,6 +36,11 @@ SET(GEN_LIB_TARGET ON)
 PROJECT(demo-${CFG_DEMO_TYPE} C)
 
 ########################################################################
+# Define the CN unique id
+########################################################################
+SET(CFG_SAPL_SN_UDID "\"{0x00U,0x60U,0x65U,0x01U,0x14U,0x9BU}\"" CACHE STRING "Unique id of this SN")
+
+########################################################################
 # Set paths
 SET(OSFT_BASE_DIR ${CMAKE_SOURCE_DIR}/stacks/openSAFETY)
 SET(SN_BASE_DIR ${OSFT_BASE_DIR}/src/eplssrc/SN)
@@ -46,13 +51,6 @@ SET(SAPL_DIR ${PROJECT_SOURCE_DIR}/sapl)
 
 SET(COMMON_SOURCE_DIR ${PROJECT_SOURCE_DIR}/../common)
 SET(SN_TARGET_SOURCE_DIR ${PROJECT_SOURCE_DIR}/target)
-
-########################################################################
-# Define the CN unique id
-########################################################################
-SET(CFG_SAPL_SN_UDID "{0x00U,0x60U,0x65U,0x01U,0x14U,0x9BU}" CACHE STRING "Unique id of this SN")
-
-SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DCFG_SAPL_SN_UDID=${CFG_SAPL_SN_UDID}")
 
 ########################################################################
 # Set all source files
