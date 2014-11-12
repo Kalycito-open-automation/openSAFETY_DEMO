@@ -246,13 +246,16 @@ int main (void)
     }
 
 Exit:
-    DEBUG_TRACE(DEBUG_LVL_ALWAYS,"\n\nShutdown slim interface modules...\n");
-    psi_exitModules();
-    DEBUG_TRACE(DEBUG_LVL_ALWAYS,"... ok!\n");
+    DEBUG_TRACE(DEBUG_LVL_ALWAYS,"\n\nPerform system shutdown...\n");
 
-    DEBUG_TRACE(DEBUG_LVL_ALWAYS,"\n\nShutdown slim interface internals...\n");
+    /* Shutdown platform specific parts */
+    syncir_exit();
+    serial_exit();
+    platform_exit();
+
+    /* Shutdown slim interface */
+    psi_exitModules();
     psi_exit();
-    DEBUG_TRACE(DEBUG_LVL_ALWAYS,"... ok!\n");
 
     return 0;
 }

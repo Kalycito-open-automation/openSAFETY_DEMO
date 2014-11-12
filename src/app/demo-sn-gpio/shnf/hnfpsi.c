@@ -207,13 +207,13 @@ void hnf_exit(void)
 {
     DEBUG_TRACE(DEBUG_LVL_ALWAYS,"\n\nShutdown slim interface -> ");
 
-    exitModules();
-
-    psi_exit();
-
     /* Cleanup target specific functions */
-    serial_exit();
     syncir_exit();
+    serial_exit();
+
+    /* Cleanup libpsi */
+    exitModules();
+    psi_exit();
 
     MEMSET(&hnfPsiInstance_l, 0, sizeof(tHnfPsiInstance));
 
