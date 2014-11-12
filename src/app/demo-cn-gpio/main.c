@@ -57,6 +57,7 @@ sends/receives exemplary data from and to the PCP.
 #include <common/benchmark.h>     /* Debug header for performance measurements */
 #include <common/debug.h>
 #include <common/tbufparams.h>
+#include <powerlink.h>
 
 #include <cn/app-gpio.h>          /* Interface header to the application of this demo */
 
@@ -147,6 +148,7 @@ int main (void)
     tBuffDescriptor   buffDescList[kTbufCount];
     tHandlerParam     transferParam;
     UINT8 * pTbufMemBase = (UINT8 *)(&mainInstance_l.tbufMemLayout_m[0]);
+    UINT8             macAddr[] = MAC_ADDR;
 
     PSI_MEMSET(&mainInstance_l, 0, sizeof(mainInstance_l));
     PSI_MEMSET(&buffDescList, 0, sizeof(buffDescList));
@@ -154,6 +156,14 @@ int main (void)
 
     /* Init the target platform */
     platform_init();
+
+    DEBUG_TRACE(DEBUG_LVL_ALWAYS, "\n\n********************************************************************\n");
+    DEBUG_TRACE(DEBUG_LVL_ALWAYS, "\n\topenPOWERLINK - GPIO Demo \n\n ");
+    DEBUG_TRACE(DEBUG_LVL_ALWAYS, "\tSerial number: \t\t0x%X\n", CONFIG_IDENT_SERIAL_NUMBER );
+    DEBUG_TRACE(DEBUG_LVL_ALWAYS, "\tVendor id: \t\t0x%X\n", CONFIG_IDENT_VENDOR_ID );
+    DEBUG_TRACE(DEBUG_LVL_ALWAYS, "\tMAC address: \t\t0x%X,0x%X,0x%X,0x%X,0x%X,0x%X\n",
+                                   macAddr[0], macAddr[1], macAddr[2], macAddr[3], macAddr[4], macAddr[5] );
+    DEBUG_TRACE(DEBUG_LVL_ALWAYS, "********************************************************************\n");
 
     /* Generate buffer descriptor list */
     if(tbufp_genDescList(pTbufMemBase, kTbufCount, &buffDescList[0]) == FALSE)
@@ -199,7 +209,7 @@ int main (void)
     }
 
     /* Init the serial device */
-    DEBUG_TRACE(DEBUG_LVL_ALWAYS,"\n\nInitialize the serial device...\n");
+    DEBUG_TRACE(DEBUG_LVL_ALWAYS,"\n\nInitialize serial device...\n");
     if(serial_init(&transferParam, psi_serialTransferFinished) == FALSE)
     {
         DEBUG_TRACE(DEBUG_LVL_ERROR," ... error!\n");

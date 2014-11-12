@@ -109,6 +109,9 @@ SET(DEMO_INCS
     ${TARGET_DIR}/include
 )
 
+########################################################################
+# Add target specific build information
+########################################################################
 IF((CMAKE_SYSTEM_NAME STREQUAL "Generic") AND (CMAKE_SYSTEM_PROCESSOR STREQUAL "nios2"))
     INCLUDE(nios2.cmake)
 ELSEIF((CMAKE_SYSTEM_NAME STREQUAL "Generic") AND (CMAKE_SYSTEM_PROCESSOR STREQUAL "cortex-m3"))
@@ -121,6 +124,9 @@ ELSE()
     MESSAGE(FATAL_ERROR "The selected platform is not supported by this application!")
 ENDIF()
 
+########################################################################
+# Set include paths
+########################################################################
 INCLUDE_DIRECTORIES(
                     ${DEMO_INCS}
                     ${DEMO_ARCH_INCS}

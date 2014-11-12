@@ -864,7 +864,7 @@ static BOOL processRxAsyncChannel0(UINT8 * pPayload_p, UINT16 size_p)
         /* The openSAFETY stack modifies the second subframe in place
          * This modification is overwritten by the SPI stream which results in
          * a CRC error. Therefore we need to save the asynchronous payload
-         * in this temporary buffer to prevent the manipulation from the
+         * in this temporary buffer to prevent any manipulation of the
          * stream.
          */
         MEMCOPY(&hnfPsiInstance_l.ssdoSnmtRcvBuffer_m, pPayload_p, size_p);
