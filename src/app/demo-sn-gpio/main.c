@@ -147,7 +147,6 @@ APs state machine will be updated and input/output ports will be processed.
 \ingroup module_main
 */
 /*----------------------------------------------------------------------------*/
-
 int main (void)
 {
     int retVal = -1;
@@ -201,12 +200,7 @@ int main (void)
                             }
                         }   /* no else: Error is already reported in the called function */
                     }   /* no else: Error is already reported in the called function */
-                }
-                else
-                {
-                    DEBUG_TRACE(DEBUG_LVL_ALWAYS, "ERROR!\n");
-                    /* sapl_init() failed to initialize! */
-                }
+                }   /* no else: Error is already reported in the called function */
             }   /* no else: Error is already reported in the called function */
         }   /* no else: Error is already reported via SAPL_SERR_SignalErrorClbk */
     }   /* no else: Error is already reported in the called function */

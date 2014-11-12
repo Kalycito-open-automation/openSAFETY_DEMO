@@ -512,27 +512,19 @@ static BOOL initPsi(void)
                             syncir_enable();
 
                             fReturn = TRUE;
-                        }
-                        else
-                        {
-                            DEBUG_TRACE(DEBUG_LVL_ALWAYS, "ERROR!\n");
-                        }
-                    }
-                    else
-                    {   /* platform_initSyncInterrupt() failed! */
-                        DEBUG_TRACE(DEBUG_LVL_ALWAYS, "ERROR!\n");
-                    }
+                        }    /* Error on libpsi module initialization! Error reported via errorHandler() */
+                    }    /* platform_initSyncInterrupt() failed! */
                 }
-            }
-            else
-            {   /* Error on libpsi module initialization! Error reported via errorHandler() */
-                DEBUG_TRACE(DEBUG_LVL_ALWAYS, "ERROR!\n");
-            }
-        }
-        else
-        {   /* Error on libpsi initialization! Error reported via errorHandler() */
-            DEBUG_TRACE(DEBUG_LVL_ALWAYS, "ERROR!\n");
-        }
+                else
+                {
+                    errh_postFatalError(kErrSourceHnf, kErrorUnableToGenerateStreamParams, 0);
+                }
+            }    /* Error on libpsi module initialization! Error reported via errorHandler() */
+        }    /* Error on libpsi initialization! Error reported via errorHandler() */
+    }
+    else
+    {
+        errh_postFatalError(kErrSourceHnf, kErrorUnableToGenerateStreamParams, 0);
     }
 
     return fReturn;
