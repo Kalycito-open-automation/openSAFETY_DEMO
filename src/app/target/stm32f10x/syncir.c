@@ -219,10 +219,10 @@ This function enables/disables the interrupts of the AP processor
 /*----------------------------------------------------------------------------*/
 void syncir_enterCriticalSection(UINT8 fEnable_p)
 {
-    UNUSED_PARAMETER(fEnable_p);
-
-    /* Toggle global interrupt disable/enable */
-    __asm volatile ("cpsid i");
+    if(fEnable_p)
+        syncir_enable();
+    else
+        syncir_disable();
 }
 
 
