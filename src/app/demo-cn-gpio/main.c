@@ -442,11 +442,7 @@ static BOOL psi_workInputOutput(UINT32 rpdoRelTimeLow_p,
 \ingroup module_main
 */
 /*----------------------------------------------------------------------------*/
-#if defined(__NIOS2__) && !defined(ALT_ENHANCED_INTERRUPT_API_PRESENT)
-static void psi_syncIntH(void* pArg_p, void* dwInt_p)
-#else
 static void psi_syncIntH(void* pArg_p)
-#endif
 {
     UNUSED_PARAMETER(pArg_p);
 
