@@ -74,6 +74,7 @@ typedef enum
     kErrorAsyncFramePostingFailed           = 0x31,
     kErrorAsyncFrameCopyFailed              = 0x32,
     kErrorAsyncFrameNoBuffer                = 0x33,
+    kErrorAsyncFrameTooLarge                = 0x34,
 
     kErrorEnterPreOperationalFailed         = 0x41,
     kErrorEnterOperationalFailed            = 0x42,

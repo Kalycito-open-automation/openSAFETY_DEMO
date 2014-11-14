@@ -853,18 +853,25 @@ static BOOL processRxAsyncChannel0(UINT8 * pPayload_p, UINT16 size_p)
 
     if(hnfPsiInstance_l.pfnSsdoSnmtRcvHandler_m != NULL)
     {
-        /* The openSAFETY stack modifies the second subframe in place
-         * This modification is overwritten by the SPI stream which results in
-         * a CRC error. Therefore we need to save the asynchronous payload
-         * in this temporary buffer to prevent any manipulation of the
-         * stream.
-         */
-        MEMCOPY(&hnfPsiInstance_l.ssdoSnmtRcvBuffer_m, pPayload_p, size_p);
-
-        /* Forward frame to SHNF main module */
-        if(hnfPsiInstance_l.pfnSsdoSnmtRcvHandler_m((UINT8 *)&hnfPsiInstance_l.ssdoSnmtRcvBuffer_m, size_p))
+        if(size_p <= SSDO_STUB_DATA_DOM_SIZE)
         {
-            fReturn = TRUE;
+            /* The openSAFETY stack modifies the second subframe in place
+             * This modification is overwritten by the SPI stream which results in
+             * a CRC error. Therefore we need to save the asynchronous payload
+             * in this temporary buffer to prevent any manipulation of the
+             * stream.
+             */
+            MEMCOPY(&hnfPsiInstance_l.ssdoSnmtRcvBuffer_m, pPayload_p, size_p);
+
+            /* Forward frame to SHNF main module */
+            if(hnfPsiInstance_l.pfnSsdoSnmtRcvHandler_m((UINT8 *)&hnfPsiInstance_l.ssdoSnmtRcvBuffer_m, size_p))
+            {
+                fReturn = TRUE;
+            }
+        }
+        else
+        {
+            errh_postFatalError(kErrSourceHnf, kErrorAsyncFrameTooLarge, size_p);
         }
     }
     else
