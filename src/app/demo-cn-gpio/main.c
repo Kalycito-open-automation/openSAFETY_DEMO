@@ -146,6 +146,7 @@ int main (void)
     tPsiInitParam     initParam;
     tBuffDescriptor   buffDescList[kTbufCount];
     tHandlerParam     transferParam;
+    UINT8 * pTbufMemBase = (UINT8 *)(&mainInstance_l.tbufMemLayout_m[0]);
 
     PSI_MEMSET(&mainInstance_l, 0, sizeof(mainInstance_l));
     PSI_MEMSET(&buffDescList, 0, sizeof(buffDescList));
@@ -155,7 +156,7 @@ int main (void)
     platform_init();
 
     /* Generate buffer descriptor list */
-    if(tbufp_genDescList((UINT8 *)&mainInstance_l.tbufMemLayout_m[0], kTbufCount, &buffDescList[0]))
+    if(tbufp_genDescList(pTbufMemBase, kTbufCount, &buffDescList[0]) == FALSE)
     {
         DEBUG_TRACE(DEBUG_LVL_ERROR," ERROR: Unable to generate tbuf descriptor list!\n");
         goto Exit;
@@ -191,7 +192,7 @@ int main (void)
     DEBUG_TRACE(DEBUG_LVL_ALWAYS,"... ok!\n");
 
     /* Setup consumer/producer transfer parameters with initialization fields */
-    if(tbufp_genTransferParams((UINT8 *)&mainInstance_l.tbufMemLayout_m[0], &transferParam))
+    if(tbufp_genTransferParams(pTbufMemBase, &transferParam) == FALSE)
     {
         DEBUG_TRACE(DEBUG_LVL_ERROR,"ERROR: Unable to generate transfer parameters!\n");
         goto Exit;

@@ -458,12 +458,13 @@ static BOOL initPsi(void)
     tPsiInitParam initParam;
     tBuffDescriptor buffDescList[kTbufCount];
     tHandlerParam transferParam;
+    UINT8 * pTbufMemBase = (UINT8 *)(&hnfPsiInstance_l.tbufMemLayout_m[0]);
 
     PSI_MEMSET(&transferParam, 0, sizeof(tHandlerParam));
     PSI_MEMSET(&buffDescList, 0, sizeof(buffDescList));
 
     /* Generate buffer descriptor list */
-    if(tbufp_genDescList((UINT8*)&hnfPsiInstance_l.tbufMemLayout_m[0], kTbufCount, &buffDescList[0]))
+    if(tbufp_genDescList(pTbufMemBase, kTbufCount, &buffDescList[0]))
     {
         /* Enable test of configuration channel */
         hnfPsiInstance_l.fCcWriteObjTestEnable_m = TRUE;
@@ -493,7 +494,7 @@ static BOOL initPsi(void)
                 hnfPsiInstance_l.spdo0TxBuffer_m.buffSize_m = TX_SPDO_SIZE;
 
                 /* Setup consumer/producer transfer parameters with initialization fields */
-                if(tbufp_genTransferParams((UINT8*)&hnfPsiInstance_l.tbufMemLayout_m[0], &transferParam))
+                if(tbufp_genTransferParams(pTbufMemBase, &transferParam))
                 {
                     /* initialize serial interface*/
                     DEBUG_TRACE(DEBUG_LVL_ALWAYS,"\nInitialize serial device -> ");
