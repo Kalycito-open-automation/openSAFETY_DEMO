@@ -5,7 +5,7 @@
 \brief  Target specific functions of the system gpio pins
 
 This module implements the hardware near target specific functions of the
-system gpio pins for Cortex-m3 on stm32f103.
+system gpio pins for stm32f103rb (Cortex-M3).
 
 \ingroup module_gpio
 *******************************************************************************/

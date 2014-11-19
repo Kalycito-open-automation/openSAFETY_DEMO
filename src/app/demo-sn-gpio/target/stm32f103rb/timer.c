@@ -5,7 +5,7 @@
 \brief  Target specific functions of the system timer
 
 This module implements the hardware near target specific functions of the
-system timer for stm32f10x (Cortex-M3).
+system timer for stm32f103rb (Cortex-M3).
 
 \ingroup module_timer
 *******************************************************************************/
@@ -80,13 +80,25 @@ system timer for stm32f10x (Cortex-M3).
 #define TIMER_PRESCALE_100US       6400
 #define TIMER_PRESCALE_1MS         32000
 
+/* Defines for the TIMx peripheral */
+#define TIMx                TIM2
+
+#define TIMx_RCC_PERIPH     RCC_APB1Periph_TIM2
+
+#define TIMx_IRQn           TIM2_IRQn
+#define TIMx_IRQHandler     TIM2_IRQHandler
+
+#if ENABLE_TIM_DEBUG == 1
+#define TIMx_DEBUG_PIN            GPIO_Pin_5
+#define TIMx_DEBUG_GPIO_PORT      GPIOA
+#define TIMx_DEBUG_RCC_PERIPH     RCC_APB2Periph_GPIOA
+#endif
+
 /*----------------------------------------------------------------------------*/
 /* local types                                                                */
 /*----------------------------------------------------------------------------*/
-
 static UINT16 timerValHigh_l = 0;       /**< High UINT16 of the timer value */
 static BOOLEAN enpresc1ms_l = FALSE;    /**< Is the prescale for 1ms */
-
 
 /*----------------------------------------------------------------------------*/
 /* local vars                                                                 */
@@ -123,8 +135,8 @@ BOOLEAN timer_init(void)
     initTimer(TIMER_PRESCALE_100US);
     initNvic();
 
-    /* Enable timer2 */
-    TIM_Cmd(TIM2, ENABLE);
+    /* Enable timer interface */
+    TIM_Cmd(TIMx, ENABLE);
 
 #if ENABLE_TIM_DEBUG == 1
     initGpio();
@@ -142,10 +154,12 @@ BOOLEAN timer_init(void)
 /*----------------------------------------------------------------------------*/
 void timer_close(void)
 {
-    /* Close TIM2 */
-    TIM_Cmd(TIM2, DISABLE);
+    /* Close TIMx interface */
+    TIM_DeInit(TIMx);
 
-    TIM_DeInit(TIM2);
+#if ENABLE_TIM_DEBUG == 1
+    GPIO_DeInit(TIMx_DEBUG_GPIO_PORT);
+#endif
 }
 
 /*----------------------------------------------------------------------------*/
@@ -164,9 +178,9 @@ UINT32 timer_getTickCount(void)
     UINT64 time = 0;
 
     if(enpresc1ms_l == TRUE)
-        time = ((timerValHigh_l << 16) | (UINT16)TIM_GetCounter(TIM2))>>2;
+        time = ((timerValHigh_l << 16) | (UINT16)TIM_GetCounter(TIMx))>>2;
     else
-        time = (timerValHigh_l << 16) | (UINT16)TIM_GetCounter(TIM2);
+        time = (timerValHigh_l << 16) | (UINT16)TIM_GetCounter(TIMx);
 
     return (UINT32)time;
 }
@@ -210,12 +224,12 @@ BOOLEAN timer_setBase(tTimerBase base_p)
             break;
     }
 
-    TIM_Cmd(TIM2, DISABLE);
+    TIM_Cmd(TIMx, DISABLE);
 
     /* Set new prescale to timer */
     initTimer(prescale);
 
-    TIM_Cmd(TIM2, ENABLE);
+    TIM_Cmd(TIMx, ENABLE);
 
     return retVal;
 }
@@ -243,17 +257,17 @@ static void initTimer(UINT16 prescale)
     memset(&TIM_TimeBaseStructure, 0, sizeof(TIM_TimeBaseInitTypeDef));
 
     /* Enable timer2 clock */
-    RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM2, ENABLE);
+    RCC_APB1PeriphClockCmd(TIMx_RCC_PERIPH, ENABLE);
 
     TIM_TimeBaseStructure.TIM_Prescaler = prescale;
     TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
     TIM_TimeBaseStructure.TIM_Period = 0xFFFF;
     TIM_TimeBaseStructure.TIM_ClockDivision = TIM_CKD_DIV1;
     TIM_TimeBaseStructure.TIM_RepetitionCounter = 0;
-    TIM_TimeBaseInit(TIM2, &TIM_TimeBaseStructure);
+    TIM_TimeBaseInit(TIMx, &TIM_TimeBaseStructure);
 
     /* Enable update event interrupt */
-    TIM_ITConfig(TIM2, TIM_IT_Update, ENABLE);
+    TIM_ITConfig(TIMx, TIM_IT_Update, ENABLE);
 }
 
 /*----------------------------------------------------------------------------*/
@@ -269,8 +283,8 @@ static void initNvic(void)
 
     memset(&NVIC_InitStructure, 0, sizeof(NVIC_InitTypeDef));
 
-    /* Enable TIM2 interrupt in NVIC */
-    NVIC_InitStructure.NVIC_IRQChannel = TIM2_IRQn;
+    /* Enable TIMx interrupt in NVIC */
+    NVIC_InitStructure.NVIC_IRQChannel = TIMx_IRQn;
     NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
     NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
     NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
@@ -292,37 +306,38 @@ static void initGpio(void)
     memset(&GPIO_InitStructure, 0, sizeof(GPIO_InitTypeDef));
 
     /* Enable the GPIOA clock */
-    RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE);
+    RCC_APB2PeriphClockCmd(TIMx_DEBUG_RCC_PERIPH, ENABLE);
 
-    /* GPIO GA9 */
-    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_9;   /* NSS = Pin6 */
+    /* Initialize the timer debug pin */
+    GPIO_InitStructure.GPIO_Pin = TIMx_DEBUG_PIN;
     GPIO_InitStructure.GPIO_Speed = GPIO_Speed_10MHz;
     GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
-    GPIO_Init(GPIOA, &GPIO_InitStructure);
+    GPIO_Init(TIMx_DEBUG_GPIO_PORT, &GPIO_InitStructure);
 }
 #endif
+
 /*----------------------------------------------------------------------------*/
 /**
-\brief  Handle TIM2 overflow interrupt
+\brief  Handle TIMx overflow interrupt
 
 \ingroup module_timer
 */
 /*----------------------------------------------------------------------------*/
-void TIM2_IRQHandler(void)
+void TIMx_IRQHandler(void)
 {
-    if(TIM_GetITStatus(TIM2, TIM_IT_Update) == SET)
+    if(TIM_GetITStatus(TIMx, TIM_IT_Update) == SET)
     {
 #if ENABLE_TIM_DEBUG == 1
-        GPIOA->BSRR = GPIO_Pin_9;
+        TIMx_DEBUG_GPIO_PORT->BSRR = TIMx_DEBUG_PIN;
 #endif
 
-        /* TIM2 overflow -> increment high word! */
+        /* TIMx overflow -> increment high word! */
         timerValHigh_l++;
 
-        TIM_ClearITPendingBit(TIM2, TIM_IT_Update);
+        TIM_ClearITPendingBit(TIMx, TIM_IT_Update);
 
 #if ENABLE_TIM_DEBUG == 1
-        GPIOA->BRR = GPIO_Pin_9;
+        TIMx_DEBUG_GPIO_PORT->BRR = TIMx_DEBUG_PIN;
 #endif
     }
 }

@@ -4,8 +4,8 @@
 
 \brief  Application interface target handling
 
-Defines the platform specific functions of the slim interface example
-implementation.
+Defines the platform specific functions of the slim interface for target
+stm32f103rb (Cortex-M3).
 
 *******************************************************************************/
 
@@ -47,7 +47,7 @@ implementation.
 /*----------------------------------------------------------------------------*/
 #include <common/platform.h>
 
-#include "misc.h"
+#include <misc.h>
 
 #include <stdio.h>
 
@@ -77,6 +77,22 @@ static void initBenchmark(void);
 /*----------------------------------------------------------------------------*/
 /* const defines                                                              */
 /*----------------------------------------------------------------------------*/
+#define USARTx                           USART2
+
+#define USARTx_RCC_PERIPH                RCC_APB1Periph_USART2
+#define USARTx_RX_RCC_PERIPH             RCC_APB2Periph_GPIOA
+#define USARTx_TX_RCC_PERIPH             RCC_APB2Periph_GPIOA
+
+/* Definition for USARTx Pins */
+#define USARTx_TX_PIN                    GPIO_Pin_2
+#define USARTx_TX_GPIO_PORT              GPIOA
+#define USARTx_RX_PIN                    GPIO_Pin_3
+#define USARTx_RX_GPIO_PORT              GPIOA
+
+/* Definition for Benchmark pins */
+#define PINx_BENCHMARK_PIN               GPIO_Pin_8
+#define PINx_BENCHMARK_PORT              GPIOA
+#define PINx_BENCHMARK_RCC_APB2Periph    RCC_APB2Periph_GPIOA
 
 /*----------------------------------------------------------------------------*/
 /* local types                                                                */
@@ -108,8 +124,6 @@ controller.
 /*----------------------------------------------------------------------------*/
 BOOL platform_init(void)
 {
-    BOOL retVal = TRUE;
-
     /* by default stdin/stdout are on usart2 */
     usart2init();
 
@@ -121,7 +135,7 @@ BOOL platform_init(void)
     /* Initialize the benchmark pins */
     initBenchmark();
 
-    return retVal;
+    return TRUE;
 }
 
 /*----------------------------------------------------------------------------*/
@@ -133,7 +147,14 @@ BOOL platform_init(void)
 /*----------------------------------------------------------------------------*/
 void platform_exit(void)
 {
-    /* No cleanup needed for now! */
+    /* Close the USART serial */
+    GPIO_DeInit(USARTx_TX_GPIO_PORT);
+    GPIO_DeInit(USARTx_RX_GPIO_PORT);
+
+    USART_DeInit(USARTx);
+
+    /* Close the benchmark pins */
+    GPIO_DeInit(PINx_BENCHMARK_PORT);
 }
 
 /*============================================================================*/
@@ -144,9 +165,9 @@ void platform_exit(void)
 
 /*----------------------------------------------------------------------------*/
 /**
-\brief  Initialize the USART2 to enable prints to the terminal
+\brief  Initialize the USART to enable prints to the terminal
 
-The USART2 is used to forward characters from printf via the stdlib to the
+The USART is used to forward characters from printf via the stdlib to the
 host PC terminal.
 
 \ingroup module_platform
@@ -157,20 +178,20 @@ static void usart2init(void)
     USART_InitTypeDef USART_InitStructure;
     GPIO_InitTypeDef GPIO_InitStructure;
 
-    /* Init periph clocks */
-    RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA | RCC_APB2Periph_GPIOA | RCC_APB2Periph_AFIO, ENABLE);
-    RCC_APB1PeriphClockCmd(RCC_APB1Periph_USART2, ENABLE);
+    /* Init peripheral clocks */
+    RCC_APB2PeriphClockCmd(USARTx_RX_RCC_PERIPH | USARTx_TX_RCC_PERIPH | RCC_APB2Periph_AFIO, ENABLE);
+    RCC_APB1PeriphClockCmd(USARTx_RCC_PERIPH, ENABLE);
 
     /* Configure USART Tx as push-pull */
     GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
-    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_2;
+    GPIO_InitStructure.GPIO_Pin = USARTx_TX_PIN;
     GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-    GPIO_Init(GPIOA, &GPIO_InitStructure);
+    GPIO_Init(USARTx_TX_GPIO_PORT, &GPIO_InitStructure);
 
     /* Configure USART Rx as input floating */
     GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING;
-    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_3;
-    GPIO_Init(GPIOA, &GPIO_InitStructure);
+    GPIO_InitStructure.GPIO_Pin = USARTx_RX_PIN;
+    GPIO_Init(USARTx_RX_GPIO_PORT, &GPIO_InitStructure);
 
     /* Configure USART */
     USART_InitStructure.USART_BaudRate = 115200;
@@ -180,10 +201,10 @@ static void usart2init(void)
     USART_InitStructure.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
     USART_InitStructure.USART_Mode = USART_Mode_Rx | USART_Mode_Tx;
 
-    USART_Init(USART2, &USART_InitStructure);
+    USART_Init(USARTx, &USART_InitStructure);
 
     /* Enable USART */
-    USART_Cmd(USART2, ENABLE);
+    USART_Cmd(USARTx, ENABLE);
 }
 
 /*----------------------------------------------------------------------------*/
@@ -200,13 +221,13 @@ static void initBenchmark(void)
     memset(&GPIO_InitStructure, 0, sizeof(GPIO_InitTypeDef));
 
     /* Enable GPIOA clock */
-    RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE);
+    RCC_APB2PeriphClockCmd(PINx_BENCHMARK_RCC_APB2Periph, ENABLE);
 
     /* Use PA8 for benchmark pin 0 */
-    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_8;
+    GPIO_InitStructure.GPIO_Pin = PINx_BENCHMARK_PIN;
     GPIO_InitStructure.GPIO_Speed = GPIO_Speed_10MHz;
     GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
-    GPIO_Init(GPIOA, &GPIO_InitStructure);
+    GPIO_Init(PINx_BENCHMARK_PORT, &GPIO_InitStructure);
 }
 
 /* \} */

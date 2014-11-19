@@ -5,7 +5,7 @@
 \brief  Implements the driver for the synchronous interrupt
 
 Defines the platform specific functions for the synchronous interrupt for target
-stm32f103rb.
+stm32f103rb (Cortex-M3).
 
 *******************************************************************************/
 
@@ -47,9 +47,9 @@ stm32f103rb.
 /*----------------------------------------------------------------------------*/
 #include <common/syncir.h>
 
-#include "stm32f10x_exti.h"
-#include "stm32f10x_gpio.h"
-#include "misc.h"
+#include <stm32f10x_exti.h>
+#include <stm32f10x_gpio.h>
+#include <misc.h>
 
 #include <stdio.h>
 
@@ -77,6 +77,12 @@ stm32f103rb.
 /*----------------------------------------------------------------------------*/
 /* const defines                                                              */
 /*----------------------------------------------------------------------------*/
+#define IRx_SYNC_PIN                     GPIO_Pin_7
+#define IRx_SYNC_GPIO_PORT               GPIOC
+#define IRx_RCC_APB2Periph               RCC_APB2Periph_GPIOC
+
+#define EXTI_LINEx                       EXTI_Line7
+#define EXTIx_IRQn                       EXTI9_5_IRQn
 
 /*----------------------------------------------------------------------------*/
 /* local types                                                                */
@@ -123,31 +129,33 @@ BOOL syncir_init(tPlatformSyncIrq pfnSyncIrq_p)
     /* Remember ISR handler callback */
     pfnSyncIrq_l = pfnSyncIrq_p;
 
-    /* Disable GPIOC clock */
-    RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOC, DISABLE);
+    /* Enable GPIOC clock */
+    RCC_APB2PeriphClockCmd(IRx_RCC_APB2Periph, ENABLE);
 
-    /* Configure PC7 pin as input floating */
+    /* Configure SYNC IR pin as input floating */
+    GPIO_InitStructure.GPIO_Pin = IRx_SYNC_PIN;
     GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING;
     GPIO_InitStructure.GPIO_Speed = GPIO_Speed_10MHz;
-    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_7;
-    GPIO_Init(GPIOC, &GPIO_InitStructure);
+    GPIO_Init(IRx_SYNC_GPIO_PORT, &GPIO_InitStructure);
 
     /* Connect EXTI Line7 to PC7 pin */
     GPIO_EXTILineConfig(GPIO_PortSourceGPIOC,GPIO_PinSource7);
 
     /* Configure EXTI Line7 */
-    EXTI_InitStructure.EXTI_Line = EXTI_Line7;
+    EXTI_InitStructure.EXTI_Line = EXTI_LINEx;
     EXTI_InitStructure.EXTI_Mode = EXTI_Mode_Interrupt;
     EXTI_InitStructure.EXTI_Trigger = EXTI_Trigger_Rising;
     EXTI_InitStructure.EXTI_LineCmd = ENABLE;
     EXTI_Init(&EXTI_InitStructure);
 
     /* Enable and set EXTI Line7 Interrupt to the highest priority */
-    NVIC_InitStructure.NVIC_IRQChannel = EXTI9_5_IRQn;
+    NVIC_InitStructure.NVIC_IRQChannel = EXTIx_IRQn;
     NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0x0F;
     NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0x01;   /* Use lowest sub priority! */
     NVIC_InitStructure.NVIC_IRQChannelCmd = DISABLE;
     NVIC_Init(&NVIC_InitStructure);
+
+    syncir_disable();
 
     return fReturn;
 }
@@ -162,6 +170,7 @@ BOOL syncir_init(tPlatformSyncIrq pfnSyncIrq_p)
 void syncir_exit(void)
 {
     EXTI_DeInit();
+    GPIO_DeInit(IRx_SYNC_GPIO_PORT);
 
     pfnSyncIrq_l = NULL;
 }
@@ -189,7 +198,7 @@ syncir_enable() enables the synchronous interrupt.
 /*----------------------------------------------------------------------------*/
 void syncir_enable(void)
 {
-    NVIC_EnableIRQ(EXTI9_5_IRQn);
+    NVIC_EnableIRQ(EXTIx_IRQn);
 }
 
 /*----------------------------------------------------------------------------*/
@@ -203,7 +212,7 @@ syncir_disable() disable the synchronous interrupt.
 /*----------------------------------------------------------------------------*/
 void syncir_disable(void)
 {
-    NVIC_DisableIRQ(EXTI9_5_IRQn);
+    NVIC_DisableIRQ(EXTIx_IRQn);
 }
 
 /*----------------------------------------------------------------------------*/
@@ -234,7 +243,7 @@ void syncir_enterCriticalSection(UINT8 fEnable_p)
 
 void EXTI9_5_IRQHandler(void)
 {
-    if(EXTI_GetITStatus(EXTI_Line7) != RESET)
+    if(EXTI_GetITStatus(EXTI_LINEx) != RESET)
     {
         if(pfnSyncIrq_l != NULL)
         {
@@ -242,7 +251,7 @@ void EXTI9_5_IRQHandler(void)
         }
 
         /* Clear the EXTI line pending bit */
-        EXTI_ClearITPendingBit(EXTI_Line7);
+        EXTI_ClearITPendingBit(EXTI_LINEx);
     }
 }
 

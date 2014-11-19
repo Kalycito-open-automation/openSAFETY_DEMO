@@ -5,7 +5,7 @@
 \brief  Implements the driver for the serial device
 
 Defines the platform specific functions for the serial for target
-stm32f103rb.
+stm32f103rb (Cortex-M3).
 
 *******************************************************************************/
 
@@ -75,6 +75,41 @@ stm32f103rb.
 /* const defines                                                              */
 /*----------------------------------------------------------------------------*/
 
+/* Defines for the SPI peripheral */
+#define SPIx                 SPI1
+#define SPIx_RCC_PERIPH      RCC_APB2Periph_SPI1
+
+/* Definition for SPIx Pins */
+#define SPIx_SCK_PIN                     GPIO_Pin_5
+#define SPIx_SCK_GPIO_PORT               GPIOA
+#define SPIx_MISO_PIN                    GPIO_Pin_6
+#define SPIx_MISO_GPIO_PORT              GPIOA
+#define SPIx_MOSI_PIN                    GPIO_Pin_7
+#define SPIx_MOSI_GPIO_PORT              GPIOA
+#define SPIx_SSN_PIN                     GPIO_Pin_6
+#define SPIx_SSN_GPIO_PORT               GPIOB
+
+/* Defines for the DMA channels */
+#define DMAx_CHANNEL_RX      DMA1_Channel2
+#define DMAx_CHANNEL_TX      DMA1_Channel3
+
+#define DMAx_ChannelRx_IRQn  DMA1_Channel2_IRQn
+#define DMAx_ChannelTx_IRQn  DMA1_Channel3_IRQn
+
+#define DMAx_ChannelRx_IRQHandler    DMA1_Channel2_IRQHandler
+#define DMAx_ChannelTx_IRQHandler    DMA1_Channel3_IRQHandler
+
+#define DMAx_RCC_PERIPH      RCC_AHBPeriph_DMA1
+
+#define DMAx_FLAG_TE2        DMA1_FLAG_TE2
+#define DMAx_FLAG_TE3        DMA1_FLAG_TE3
+#define DMAx_FLAG_TC2        DMA1_FLAG_TC2
+#define DMAx_FLAG_TC3        DMA1_FLAG_TC3
+#define DMAx_IT_TE2          DMA1_IT_TE2
+#define DMAx_IT_TE3          DMA1_IT_TE3
+#define DMAx_IT_TC2          DMA1_IT_TC2
+#define DMAx_IT_TC3          DMA1_IT_TC3
+
 /*----------------------------------------------------------------------------*/
 /* local types                                                                */
 /*----------------------------------------------------------------------------*/
@@ -98,16 +133,16 @@ static void initNvic(void);
 
 /*----------------------------------------------------------------------------*/
 /**
-\brief  Initialize the peripherals of the target
+\brief  Initialize the PCP serial in master mode
 
-This function init's the peripherals of the AP like cache and the interrupt
-controller.
+This function init's the SPI serial device which connects the uP-Master with the
+POWERLINK processor in master mode.
 
 \param pTransParam_p    The transfer parameters (rx/tx base and size)
 \param pfnTransfFin_p   Pointer to the transfer finished interrupt
 
 \retval TRUE    On success
-\retval FALSE   On error
+\retval FALSE   Error during initialization
 
 \ingroup module_serial
 */
@@ -125,17 +160,17 @@ BOOL serial_init(tHandlerParam * pTransParam_p, tSerialTransferFin pfnTransfFin_
         initNvic();
 
         /* Set NSS high (not active!) */
-        GPIOB->BSRR = GPIO_Pin_6;
+        SPIx_SSN_GPIO_PORT->BSRR = SPIx_SSN_PIN;
 
         /* Init the SPI1 core */
-        SPI_Cmd(SPI1, ENABLE);
+        SPI_Cmd(SPIx, ENABLE);
 
         /* Disable both DMA channels for now */
-        DMA_Cmd(DMA1_Channel2, DISABLE);
-        DMA_Cmd(DMA1_Channel3, DISABLE);
+        DMA_Cmd(DMAx_CHANNEL_RX, DISABLE);
+        DMA_Cmd(DMAx_CHANNEL_TX, DISABLE);
 
         /* Enable SPI DMA interface */
-        SPI_I2S_DMACmd(SPI1, SPI_I2S_DMAReq_Tx | SPI_I2S_DMAReq_Rx, ENABLE);
+        SPI_I2S_DMACmd(SPIx, SPI_I2S_DMAReq_Tx | SPI_I2S_DMAReq_Rx, ENABLE);
 
         /* Assign transfer finished interrupt callback function */
         pfnTransfFin_l = pfnTransfFin_p;
@@ -148,7 +183,7 @@ BOOL serial_init(tHandlerParam * pTransParam_p, tSerialTransferFin pfnTransfFin_
 
 /*----------------------------------------------------------------------------*/
 /**
-\brief  Close all peripherals of the target
+\brief  Close the serial device
 
 \ingroup module_serial
 */
@@ -156,13 +191,27 @@ BOOL serial_init(tHandlerParam * pTransParam_p, tSerialTransferFin pfnTransfFin_
 void serial_exit(void)
 {
     pfnTransfFin_l =  NULL;
+
+    /* Close the SPIx serial */
+    SPI_I2S_DeInit(SPIx);
+
+    /* Close the DMAx channels */
+    DMA_DeInit(DMAx_CHANNEL_RX);
+    DMA_DeInit(DMAx_CHANNEL_TX);
+
+    /* Close the GPIO pins */
+    GPIO_DeInit(SPIx_SCK_GPIO_PORT);
+    GPIO_DeInit(SPIx_MISO_GPIO_PORT);
+    GPIO_DeInit(SPIx_MOSI_GPIO_PORT);
+    GPIO_DeInit(SPIx_SSN_GPIO_PORT);
+
 }
 
 /*----------------------------------------------------------------------------*/
 /**
 \brief  Start an SPI transfer
 
-serial_transfer() sends starts an SPI DMA transfer to exchange the process
+pcpserial_transfer() starts an SPI DMA transfer to exchange the process
 image with the PCP.
 
 \param[in] pHandlParam_p       The parameters of the SPI transfer handler
@@ -176,18 +225,18 @@ image with the PCP.
 BOOL serial_transfer(tHandlerParam* pHandlParam_p)
 {
     /* Reset the current data counter value */
-    DMA_SetCurrDataCounter(DMA1_Channel2 , pHandlParam_p->consDesc_m.buffSize_m + 4);
-    DMA_SetCurrDataCounter(DMA1_Channel3 , pHandlParam_p->prodDesc_m.buffSize_m + 4);
+    DMA_SetCurrDataCounter(DMAx_CHANNEL_RX , pHandlParam_p->consDesc_m.buffSize_m + 4);
+    DMA_SetCurrDataCounter(DMAx_CHANNEL_TX , pHandlParam_p->prodDesc_m.buffSize_m + 4);
 
     /* Set NSS low (active) */
-    GPIOB->BRR = GPIO_Pin_6;
+    SPIx_SSN_GPIO_PORT->BRR = SPIx_SSN_PIN;
 
     /* Enable both DMA channels */
-    DMA_Cmd(DMA1_Channel2, ENABLE);
-    DMA_Cmd(DMA1_Channel3, ENABLE);
+    DMA_Cmd(DMAx_CHANNEL_RX, ENABLE);
+    DMA_Cmd(DMAx_CHANNEL_TX, ENABLE);
 
     /* Enable the SPI1 DMA interface (This starts the transfer!) */
-    SPI_I2S_DMACmd(SPI1, SPI_I2S_DMAReq_Rx | SPI_I2S_DMAReq_Tx, ENABLE);
+    SPI_I2S_DMACmd(SPIx, SPI_I2S_DMAReq_Rx | SPI_I2S_DMAReq_Tx, ENABLE);
 
     return TRUE;
 }
@@ -213,25 +262,26 @@ static void initGpio(void)
 
     memset(&GPIO_InitStructure, 0, sizeof(GPIO_InitTypeDef));
 
-    /* Enable GPIOA, GPIOB and AFIO clocks */
+    /* Enable peripheral clocks */
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA | RCC_APB2Periph_GPIOB, ENABLE);
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_AFIO  , ENABLE);
 
-    /*  SPI1 : SCK, MISO and MOSI */
-    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_5 | GPIO_Pin_7;  /* SCK = Pin5 || MOSI = Pin7 */
+    /*  SPIx: SCK, MOSI */
+    GPIO_InitStructure.GPIO_Pin = SPIx_SCK_PIN | SPIx_MOSI_PIN;
     GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
     GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
-    GPIO_Init(GPIOA, &GPIO_InitStructure);
+    GPIO_Init(SPIx_SCK_GPIO_PORT, &GPIO_InitStructure);
 
-    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_6;   /* MISO = Pin6 */
+    /* SPIx: MISO pin */
+    GPIO_InitStructure.GPIO_Pin = SPIx_MISO_PIN;
     GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING;
-    GPIO_Init(GPIOA, &GPIO_InitStructure);
+    GPIO_Init(SPIx_MISO_GPIO_PORT, &GPIO_InitStructure);
 
-    /*NSS   SPI_NSS_Soft */
-    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_6;   /* NSS = Pin6 */
+    /* SPIx: SPI_NSS_Soft */
+    GPIO_InitStructure.GPIO_Pin = SPIx_SSN_PIN;
     GPIO_InitStructure.GPIO_Speed = GPIO_Speed_10MHz;
     GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
-    GPIO_Init(GPIOB, &GPIO_InitStructure);
+    GPIO_Init(SPIx_SSN_GPIO_PORT, &GPIO_InitStructure);
 }
 
 /*----------------------------------------------------------------------------*/
@@ -249,13 +299,13 @@ static void initSpi(void)
 
     memset(&SPI_InitStructure, 0, sizeof(SPI_InitTypeDef));
 
-    /* Enable the SPI1 periph */
-    RCC_APB2PeriphClockCmd(RCC_APB2Periph_SPI1, ENABLE);
+    /* Enable the SPI periph */
+    RCC_APB2PeriphClockCmd(SPIx_RCC_PERIPH, ENABLE);
 
     /* Reset SPI Interface */
-    SPI_I2S_DeInit(SPI1);
+    SPI_I2S_DeInit(SPIx);
 
-    /* SPI1 configuration */
+    /* SPI configuration */
     SPI_StructInit(&SPI_InitStructure);
     SPI_InitStructure.SPI_Direction = SPI_Direction_2Lines_FullDuplex;
     SPI_InitStructure.SPI_Mode = SPI_Mode_Master;
@@ -266,7 +316,7 @@ static void initSpi(void)
     SPI_InitStructure.SPI_FirstBit = SPI_FirstBit_MSB;
     SPI_InitStructure.SPI_BaudRatePrescaler = SPI_BaudRatePrescaler_4; /* SPI_BaudRatePrescaler_2; */
     SPI_InitStructure.SPI_CRCPolynomial = 7;
-    SPI_Init(SPI1, &SPI_InitStructure);
+    SPI_Init(SPIx, &SPI_InitStructure);
 }
 
 /*----------------------------------------------------------------------------*/
@@ -286,14 +336,14 @@ static void initDma(tHandlerParam * pTransParam_p)
 
     memset(&DMA_InitStructure, 0, sizeof(DMA_InitTypeDef));
 
-    /* Enable DMA1 clock */
-    RCC_AHBPeriphClockCmd(RCC_AHBPeriph_DMA1, ENABLE);
+    /* Enable DMAx clock */
+    RCC_AHBPeriphClockCmd(DMAx_RCC_PERIPH, ENABLE);
 
-    /* Configure DMA1 - Channel2 (SPI -> memory) */
-    DMA_DeInit(DMA1_Channel2);    /* Reset DMA registers to default values */
+    /* Configure DMAx - ChannelRx (SPI -> memory) */
+    DMA_DeInit(DMAx_CHANNEL_RX);    /* Reset DMA registers to default values */
 
     DMA_StructInit(&DMA_InitStructure);
-    DMA_InitStructure.DMA_PeripheralBaseAddr = (uint32_t)&SPI1->DR;     /* Address of peripheral the DMA must map to */
+    DMA_InitStructure.DMA_PeripheralBaseAddr = (uint32_t)&SPIx->DR;     /* Address of peripheral the DMA must map to */
     DMA_InitStructure.DMA_MemoryBaseAddr = (uint32_t)pTransParam_p->consDesc_m.pBuffBase_m;    /* Variable to which received data will be stored */
     DMA_InitStructure.DMA_DIR = DMA_DIR_PeripheralSRC;
     DMA_InitStructure.DMA_BufferSize = pTransParam_p->consDesc_m.buffSize_m;    /* Buffer size */
@@ -304,15 +354,15 @@ static void initDma(tHandlerParam * pTransParam_p)
     DMA_InitStructure.DMA_Mode = DMA_Mode_Normal;
     DMA_InitStructure.DMA_Priority = DMA_Priority_High;
     DMA_InitStructure.DMA_M2M = DMA_M2M_Disable;
-    DMA_Init(DMA1_Channel2, &DMA_InitStructure);
+    DMA_Init(DMAx_CHANNEL_RX, &DMA_InitStructure);
 
-    DMA_ITConfig(DMA1_Channel2, DMA_IT_TC | DMA_IT_TE, ENABLE);
+    DMA_ITConfig(DMAx_CHANNEL_RX, DMA_IT_TC | DMA_IT_TE, ENABLE);
 
-    /* Configure DMA1 - Channel3 (memory -> SPI) */
-    DMA_DeInit(DMA1_Channel3);    /* Reset DMA registers to default values */
+    /* Configure DMAx - ChannelTx (memory -> SPI) */
+    DMA_DeInit(DMAx_CHANNEL_TX);    /* Reset DMA registers to default values */
 
     DMA_StructInit(&DMA_InitStructure);
-    DMA_InitStructure.DMA_PeripheralBaseAddr = (uint32_t)&SPI1->DR;     /* Address of peripheral the DMA must map to */
+    DMA_InitStructure.DMA_PeripheralBaseAddr = (uint32_t)&SPIx->DR;     /* Address of peripheral the DMA must map to */
     DMA_InitStructure.DMA_MemoryBaseAddr = (uint32_t)pTransParam_p->prodDesc_m.pBuffBase_m;    /* Variable from which data will be transmitted */
     DMA_InitStructure.DMA_DIR = DMA_DIR_PeripheralDST;
     DMA_InitStructure.DMA_BufferSize = pTransParam_p->prodDesc_m.buffSize_m;    /* Buffer size */
@@ -323,9 +373,9 @@ static void initDma(tHandlerParam * pTransParam_p)
     DMA_InitStructure.DMA_Mode = DMA_Mode_Normal;
     DMA_InitStructure.DMA_Priority = DMA_Priority_High;
     DMA_InitStructure.DMA_M2M = DMA_M2M_Disable;
-    DMA_Init(DMA1_Channel3, &DMA_InitStructure);
+    DMA_Init(DMAx_CHANNEL_TX, &DMA_InitStructure);
 
-    DMA_ITConfig(DMA1_Channel3, DMA_IT_TC | DMA_IT_TE, ENABLE);
+    DMA_ITConfig(DMAx_CHANNEL_TX, DMA_IT_TC | DMA_IT_TE, ENABLE);
 }
 
 /*----------------------------------------------------------------------------*/
@@ -345,14 +395,14 @@ static void initNvic(void)
     memset(&NVIC_InitStructure, 0, sizeof(NVIC_InitTypeDef));
 
     /* Enable DMA1 Channel2 interrupt */
-    NVIC_InitStructure.NVIC_IRQChannel = DMA1_Channel2_IRQn;
+    NVIC_InitStructure.NVIC_IRQChannel = DMAx_ChannelRx_IRQn;
     NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0x0E;
     NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0x01;
     NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
     NVIC_Init(&NVIC_InitStructure);
 
     /* Enable DMA1 Channel3 interrupt */
-    NVIC_InitStructure.NVIC_IRQChannel = DMA1_Channel3_IRQn;
+    NVIC_InitStructure.NVIC_IRQChannel = DMAx_ChannelTx_IRQn;
     NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0x0E;
     NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0x01;
     NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
@@ -361,70 +411,72 @@ static void initNvic(void)
 
 /*----------------------------------------------------------------------------*/
 /**
-\brief  DMA channel2 interrupt handler (SPI -> memory)
+\brief  DMA receive channel interrupt handler (SPI -> memory)
 
 \ingroup module_serial
 */
 /*----------------------------------------------------------------------------*/
-void DMA1_Channel2_IRQHandler(void)
+void DMAx_ChannelRx_IRQHandler(void)
 {
-    if(DMA_GetITStatus(DMA1_IT_TC2) == SET)
+    if(DMA_GetITStatus(DMAx_IT_TC2) == SET)
     {
         /* Disable the DMA channel */
-        DMA_Cmd(DMA1_Channel2, DISABLE);
+        DMA_Cmd(DMAx_CHANNEL_RX, DISABLE);
 
         /* Wait until SPI is finished -> Then disable the SPI -> DMA interface */
-        while(SPI_I2S_GetFlagStatus(SPI1, SPI_I2S_FLAG_BSY) == SET);
-        SPI_I2S_DMACmd(SPI1, SPI_I2S_DMAReq_Rx, DISABLE);
+        while(SPI_I2S_GetFlagStatus(SPIx, SPI_I2S_FLAG_BSY) == SET);
+        SPI_I2S_DMACmd(SPIx, SPI_I2S_DMAReq_Rx, DISABLE);
 
         /* Set NSS high (not active!) */
-        GPIOB->BSRR = GPIO_Pin_6;
+        SPIx_SSN_GPIO_PORT->BSRR = SPIx_SSN_PIN;
 
         /* Call transfer finished callback function */
         if(pfnTransfFin_l != NULL)
             pfnTransfFin_l(FALSE);
 
         /* Clear the interrupt flag */
-        DMA_ClearFlag(DMA1_FLAG_TC2);
+        DMA_ClearFlag(DMAx_FLAG_TC2);
     }
-    else if(DMA_GetITStatus(DMA1_IT_TE2) == SET)
+    else if(DMA_GetITStatus(DMAx_IT_TE2) == SET)
     {   /* Transfer error! */
         /* Call transfer finished callback function with error TRUE */
         if(pfnTransfFin_l != NULL)
             pfnTransfFin_l(TRUE);
 
-        DMA_ClearFlag(DMA1_FLAG_TE2);
+        DMA_ClearFlag(DMAx_FLAG_TE2);
     }
 }
 
+
+
 /*----------------------------------------------------------------------------*/
 /**
-\brief  DMA channel3 interrupt handler (memory -> SPI)
+\brief  DMA transmit channel interrupt handler (memory -> SPI)
 
 \ingroup module_serial
 */
 /*----------------------------------------------------------------------------*/
-void DMA1_Channel3_IRQHandler(void)
+void DMAx_ChannelTx_IRQHandler(void)
 {
-    if(DMA_GetITStatus(DMA1_IT_TC3) == SET)
+    if(DMA_GetITStatus(DMAx_IT_TC3) == SET)
     {
         /* Disable the DMA channel */
-        DMA_Cmd(DMA1_Channel3, DISABLE);
+        DMA_Cmd(DMAx_CHANNEL_TX, DISABLE);
 
         /* Wait for the SPI core to finish transfer */
-        while(SPI_I2S_GetFlagStatus(SPI1, SPI_I2S_FLAG_BSY) == SET);
-        SPI_I2S_DMACmd(SPI1, SPI_I2S_DMAReq_Tx, DISABLE);
+        while(SPI_I2S_GetFlagStatus(SPIx, SPI_I2S_FLAG_BSY) == SET);
+        SPI_I2S_DMACmd(SPIx, SPI_I2S_DMAReq_Tx, DISABLE);
 
         /* Clear the interrupt flag */
-        DMA_ClearFlag(DMA1_FLAG_TC3);
+        DMA_ClearFlag(DMAx_FLAG_TC3);
     }
-    else if(DMA_GetITStatus(DMA1_IT_TE3) == SET)
+    else if(DMA_GetITStatus(DMAx_IT_TE3) == SET)
     {
         /* Call transfer finished callback function with error TRUE */
         if(pfnTransfFin_l != NULL)
             pfnTransfFin_l(TRUE);
 
-        DMA_ClearFlag(DMA1_FLAG_TE3);
+        DMA_ClearFlag(DMAx_FLAG_TE3);
     }
 }
 

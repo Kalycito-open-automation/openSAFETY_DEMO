@@ -5,7 +5,7 @@
 \brief  Target specific functions to access the non volatile storage.
 
 This module implements the hardware near target specific functions of the
-flash memory for target stm32f103.
+flash memory for target stm32f103rb (Cortex-M3).
 
 \ingroup module_nvs
 *******************************************************************************/
