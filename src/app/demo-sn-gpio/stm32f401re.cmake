@@ -65,12 +65,14 @@ IF(${CURRENT_DEMO_CONTEXT} STREQUAL "ups")
     SET(DEMO_ARCH_SRCS
                       ${DEMO_ARCH_SRCS}
                       ${TARGET_DIR}/pcpserial-sl.c
+                      ${BOARD_TARGET_DIR}/upserial.c
     )
 ELSEIF(${CURRENT_DEMO_CONTEXT} STREQUAL "upm")
     # This project is for the processor up-master
     SET(DEMO_ARCH_SRCS
                       ${DEMO_ARCH_SRCS}
                       ${TARGET_DIR}/pcpserial-ma.c
+                      ${BOARD_TARGET_DIR}/upserial.c
     )
 ELSE()
     # This project is a single processor demo
