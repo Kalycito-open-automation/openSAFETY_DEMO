@@ -1,11 +1,11 @@
 /**
 ********************************************************************************
-\file   serial.c
+\file   pcpserial-ma.c
 
-\brief  Implements the driver for the serial device
+\brief  Implements the driver for the serial device in master mode
 
-Defines the platform specific functions for the serial for target
-stm32f103rb (Cortex-M3).
+Defines the platform specific functions for the serial to interconnect the app
+with the POWERLINK processor. (Target is the stm32f103rb board)
 
 *******************************************************************************/
 
@@ -45,7 +45,7 @@ stm32f103rb (Cortex-M3).
 /*----------------------------------------------------------------------------*/
 /* includes                                                                   */
 /*----------------------------------------------------------------------------*/
-#include <common/serial.h>
+#include <common/pcpserial.h>
 
 #include <stm32f10x_spi.h>
 #include <stm32f10x_dma.h>
@@ -117,7 +117,7 @@ stm32f103rb (Cortex-M3).
 /*----------------------------------------------------------------------------*/
 /* local vars                                                                 */
 /*----------------------------------------------------------------------------*/
-static tSerialTransferFin pfnTransfFin_l = NULL;
+static tPcpSerialTransferFin pfnTransfFin_l = NULL;
 
 /*----------------------------------------------------------------------------*/
 /* local function prototypes                                                  */
@@ -147,7 +147,7 @@ POWERLINK processor in master mode.
 \ingroup module_serial
 */
 /*----------------------------------------------------------------------------*/
-BOOL serial_init(tHandlerParam * pTransParam_p, tSerialTransferFin pfnTransfFin_p)
+BOOL pcpserial_init(tHandlerParam * pTransParam_p, tPcpSerialTransferFin pfnTransfFin_p)
 {
     UINT8 fReturn = FALSE;
 
@@ -188,7 +188,7 @@ BOOL serial_init(tHandlerParam * pTransParam_p, tSerialTransferFin pfnTransfFin_
 \ingroup module_serial
 */
 /*----------------------------------------------------------------------------*/
-void serial_exit(void)
+void pcpserial_exit(void)
 {
     pfnTransfFin_l =  NULL;
 
@@ -222,7 +222,7 @@ image with the PCP.
 \ingroup module_serial
 */
 /*----------------------------------------------------------------------------*/
-BOOL serial_transfer(tHandlerParam* pHandlParam_p)
+BOOL pcpserial_transfer(tHandlerParam* pHandlParam_p)
 {
     /* Reset the current data counter value */
     DMA_SetCurrDataCounter(DMAx_CHANNEL_RX , pHandlParam_p->consDesc_m.buffSize_m + 4);

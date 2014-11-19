@@ -63,7 +63,7 @@ FILE(COPY ${ALT_MISC_DIR}/scripts/${NIOS2_LS_TCL_NAME} DESTINATION ${ALT_BUILD_D
 # Adapt source file lists and includes
 ########################################################################
 SET(ALT_TARGET_SRCS ${TARGET_DIR}/platform.c
-                    ${TARGET_DIR}/serial.c
+                    ${TARGET_DIR}/pcpserial-ma.c
                     ${TARGET_DIR}/syncir.c
                     #${TARGET_DIR}/app-gpio.c   # No application implemented yet!
                     ${ALT_SN_TARGET_DIR}/timer.c

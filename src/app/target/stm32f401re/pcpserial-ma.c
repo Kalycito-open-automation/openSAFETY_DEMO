@@ -1,11 +1,11 @@
 /**
 ********************************************************************************
-\file   serial.c
+\file   pcpserial-ma.c
 
-\brief  Implements the driver for the serial device
+\brief  Implements the driver for the serial device in master mode
 
-Defines the platform specific functions for the serial for target
-stm32f103rb.
+Defines the platform specific functions for the serial to interconnect the app
+with the POWERLINK processor. (Target is the stm32f401re board)
 
 *******************************************************************************/
 
@@ -45,7 +45,7 @@ stm32f103rb.
 /*----------------------------------------------------------------------------*/
 /* includes                                                                   */
 /*----------------------------------------------------------------------------*/
-#include <common/serial.h>
+#include <common/pcpserial.h>
 
 #include <stm32f4xx_hal_cortex.h>
 #include <stm32f4xx_hal_def.h>
@@ -117,7 +117,7 @@ stm32f103rb.
 /*----------------------------------------------------------------------------*/
 /* local vars                                                                 */
 /*----------------------------------------------------------------------------*/
-static tSerialTransferFin pfnTransfFin_l = NULL;
+static tPcpSerialTransferFin pfnTransfFin_l = NULL;
 
 static SPI_HandleTypeDef SpiHandle_l;        /**< SPI handle structure */
 static DMA_HandleTypeDef DmaRxHandle_l;      /**< DMA receive handle structure */
@@ -151,7 +151,7 @@ POWERLINK processor in master mode.
 \ingroup module_serial
 */
 /*----------------------------------------------------------------------------*/
-BOOL serial_init(tHandlerParam * pTransParam_p, tSerialTransferFin pfnTransfFin_p)
+BOOL pcpserial_init(tHandlerParam * pTransParam_p, tPcpSerialTransferFin pfnTransfFin_p)
 {
     UINT8 fReturn = FALSE;
     GPIO_InitTypeDef GPIO_InitStruct;
@@ -190,7 +190,7 @@ BOOL serial_init(tHandlerParam * pTransParam_p, tSerialTransferFin pfnTransfFin_
 \ingroup module_serial
 */
 /*----------------------------------------------------------------------------*/
-void serial_exit(void)
+void pcpserial_exit(void)
 {
     pfnTransfFin_l =  NULL;
 
@@ -212,7 +212,7 @@ image with the PCP.
 \ingroup module_serial
 */
 /*----------------------------------------------------------------------------*/
-BOOL serial_transfer(tHandlerParam* pHandlParam_p)
+BOOL pcpserial_transfer(tHandlerParam* pHandlParam_p)
 {
     BOOL retVal = FALSE;
     UINT8* pConsWithInit = NULL;

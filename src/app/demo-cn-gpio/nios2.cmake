@@ -56,7 +56,7 @@ SET(ALT_FLASH_OVERRIDE ${ALT_MISC_DIR}/scripts/nios2-flash-override.txt)
 ########################################################################
 SET( ALT_DEMO_SRCS ${DEMO_SRCS}
                    ${TARGET_DIR}/platform.c
-                   ${TARGET_DIR}/serial.c
+                   ${TARGET_DIR}/pcpserial-ma.c
                    ${TARGET_DIR}/syncir.c
                    ${TARGET_DIR}/app-gpio.c
                    ${ALT_DRIVERS_DIR}/avalon_spi/avalon_spi.c

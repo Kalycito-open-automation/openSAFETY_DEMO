@@ -46,7 +46,7 @@ SET(DEMO_LINKER_SCRIPT ${TARGET_DIR}/stm32f401cr_flash.ld)
 # Set architecture specific sources
 SET(DEMO_ARCH_SRCS
                   ${TARGET_DIR}/platform.c
-                  ${TARGET_DIR}/serial.c
+                  ${TARGET_DIR}/pcpserial-ma.c
                   ${TARGET_DIR}/syncir.c
                   ${TARGET_DIR}/app-gpio.c
                   ${TARGET_DIR}/startup_stm32f401xe.s

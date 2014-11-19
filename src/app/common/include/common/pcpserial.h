@@ -1,11 +1,11 @@
 /**
 ********************************************************************************
-\file   common/serial.h
+\file   common/pcpserial.h
 
 \brief  Interface to the target specific serial handler
 
 Implements the interface to the serial which provides the connection to the
-communication processor.
+POWERLINK communication processor (PCP).
 
 *******************************************************************************/
 
@@ -36,8 +36,8 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
 
-#ifndef _INC_common_serial_H_
-#define _INC_common_serial_H_
+#ifndef _INC_common_pcpserial_H_
+#define _INC_common_pcpserial_H_
 
 /*----------------------------------------------------------------------------*/
 /* includes                                                                   */
@@ -55,15 +55,15 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /**
  * \brief Transfer finished interrupt type
  */
-typedef void (*tSerialTransferFin)(BOOL fError_p);
+typedef void (*tPcpSerialTransferFin)(BOOL fError_p);
 
 /*----------------------------------------------------------------------------*/
 /* function prototypes                                                        */
 /*----------------------------------------------------------------------------*/
-BOOL serial_init(tHandlerParam * pTransParam_p, tSerialTransferFin pfnTransfFin_p);
-void serial_exit(void);
+BOOL pcpserial_init(tHandlerParam * pTransParam_p, tPcpSerialTransferFin pfnTransfFin_p);
+void pcpserial_exit(void);
 
-BOOL serial_transfer(tHandlerParam* pHandlParam_p);
+BOOL pcpserial_transfer(tHandlerParam* pHandlParam_p);
 
-#endif /* _INC_common_serial_H_ */
+#endif /* _INC_common_pcpserial_H_ */
 

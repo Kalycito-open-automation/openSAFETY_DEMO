@@ -50,7 +50,7 @@ Provides the interface from the SHNF to the slim interface library.
 
 #include <libpsi/psi.h>
 
-#include <common/serial.h>       /* Platform specific functions for the serial */
+#include <common/pcpserial.h>       /* Platform specific functions for the serial */
 #include <common/syncir.h>       /* Platform specific functions for the synchronous interrupt */
 #include <common/benchmark.h>    /* Debug header for performance measurements */
 
@@ -209,7 +209,7 @@ void hnf_exit(void)
 
     /* Cleanup target specific functions */
     syncir_exit();
-    serial_exit();
+    pcpserial_exit();
 
     /* Cleanup libpsi */
     exitModules();
@@ -473,7 +473,7 @@ static BOOL initPsi(void)
         DEBUG_TRACE(DEBUG_LVL_ALWAYS,"\nInitialize psi internals -> ");
 
         initParam.pBuffDescList_m = &buffDescList[0];
-        initParam.pfnStreamHandler_m = serial_transfer;
+        initParam.pfnStreamHandler_m = pcpserial_transfer;
         initParam.pfnErrorHandler_m = errorHandler;
         initParam.idConsAck_m = kTbufAckRegisterCons;
         initParam.idProdAck_m = kTbufAckRegisterProd;
@@ -498,7 +498,7 @@ static BOOL initPsi(void)
                 {
                     /* initialize serial interface*/
                     DEBUG_TRACE(DEBUG_LVL_ALWAYS,"\nInitialize serial device -> ");
-                    if(serial_init(&transferParam, serialTransferFinished))
+                    if(pcpserial_init(&transferParam, serialTransferFinished))
                     {
                         DEBUG_TRACE(DEBUG_LVL_ALWAYS, "SUCCESS!\n");
 

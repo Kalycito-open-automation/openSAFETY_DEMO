@@ -51,7 +51,7 @@ sends/receives exemplary data from and to the PCP.
 #include <libpsi/psi.h>         /* Header for the psi library */
 
 #include <common/platform.h>      /* Interface header to the platform specific functions */
-#include <common/serial.h>        /* Interface header to the platform specific serial device */
+#include <common/pcpserial.h>     /* Interface header to the platform specific serial device */
 #include <common/syncir.h>        /* Interface header to initialize the synchronous interrupt */
 
 #include <common/benchmark.h>     /* Debug header for performance measurements */
@@ -179,7 +179,7 @@ int main (void)
     DEBUG_TRACE(DEBUG_LVL_ALWAYS,"\n\nInitialize slim interface internals...\n");
 
     initParam.pBuffDescList_m = &buffDescList[0];
-    initParam.pfnStreamHandler_m = serial_transfer;
+    initParam.pfnStreamHandler_m = pcpserial_transfer;
     initParam.pfnErrorHandler_m = psi_errorHandler;
     initParam.idConsAck_m = kTbufAckRegisterCons;
     initParam.idProdAck_m = kTbufAckRegisterProd;
@@ -210,7 +210,7 @@ int main (void)
 
     /* Init the serial device */
     DEBUG_TRACE(DEBUG_LVL_ALWAYS,"\n\nInitialize serial device...\n");
-    if(serial_init(&transferParam, psi_serialTransferFinished) == FALSE)
+    if(pcpserial_init(&transferParam, psi_serialTransferFinished) == FALSE)
     {
         DEBUG_TRACE(DEBUG_LVL_ERROR," ... error!\n");
         goto Exit;
@@ -260,7 +260,7 @@ Exit:
 
     /* Shutdown platform specific parts */
     syncir_exit();
-    serial_exit();
+    pcpserial_exit();
     platform_exit();
 
     /* Shutdown slim interface */

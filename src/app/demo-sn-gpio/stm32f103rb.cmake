@@ -50,7 +50,6 @@ SET(DEMO_LINKER_SCRIPT ${TARGET_DIR}/stm32f103rb_flash.ld)
 # Set architecture specific sources
 SET(DEMO_ARCH_SRCS
                     ${TARGET_DIR}/platform.c
-                    ${TARGET_DIR}/serial.c
                     ${TARGET_DIR}/syncir.c
                     #${TARGET_DIR}/app-gpio.c   #No application implemented yet!
                     ${TARGET_DIR}/startup_stm32f10x_md.s
@@ -61,6 +60,26 @@ SET(DEMO_ARCH_SRCS
                     ${BOARD_TARGET_DIR}/nvs.c
                     ${BOARD_TARGET_DIR}/gpio.c
 )
+
+IF(${CURRENT_DEMO_CONTEXT} STREQUAL "ups")
+    # This project is for the processor up-slave
+    SET(DEMO_ARCH_SRCS
+                      ${DEMO_ARCH_SRCS}
+                      ${TARGET_DIR}/pcpserial-sl.c
+    )
+ELSEIF(${CURRENT_DEMO_CONTEXT} STREQUAL "upm")
+    # This project is for the processor up-master
+    SET(DEMO_ARCH_SRCS
+                      ${DEMO_ARCH_SRCS}
+                      ${TARGET_DIR}/pcpserial-ma.c
+    )
+ELSE()
+    # This project is a single processor demo
+    SET(DEMO_ARCH_SRCS
+                      ${DEMO_ARCH_SRCS}
+                      ${TARGET_DIR}/pcpserial-ma.c
+    )
+ENDIF()
 
 SET(DEMO_ARCH_INCS
                   ${TARGET_DIR}

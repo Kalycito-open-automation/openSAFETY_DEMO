@@ -1,11 +1,11 @@
 /**
 ********************************************************************************
-\file   serial.c
+\file   pcpserial-ma.c
 
-\brief  Implements the driver for the serial device
+\brief  Implements the driver for the serial device in master mode
 
-Defines the platform specific functions for the serial for target
-Altera Nios2.
+Defines the platform specific functions for the serial to interconnect the app
+with the POWERLINK processor. (Target is Altera Nios2)
 
 *******************************************************************************/
 
@@ -45,7 +45,7 @@ Altera Nios2.
 /*----------------------------------------------------------------------------*/
 /* includes                                                                   */
 /*----------------------------------------------------------------------------*/
-#include <common/serial.h>
+#include <common/pcpserial.h>
 
 #include <system.h>
 #include <string.h>
@@ -95,7 +95,7 @@ Altera Nios2.
 /*----------------------------------------------------------------------------*/
 /* local vars                                                                 */
 /*----------------------------------------------------------------------------*/
-static tSerialTransferFin pfnTransfFin_l = NULL;
+static tPcpSerialTransferFin pfnTransfFin_l = NULL;
 
 /*----------------------------------------------------------------------------*/
 /* local function prototypes                                                  */
@@ -121,7 +121,7 @@ controller.
 \ingroup module_serial
 */
 /*----------------------------------------------------------------------------*/
-BOOL serial_init(tHandlerParam* pHandlParam_p, tSerialTransferFin pfnTransfFin_p)
+BOOL pcpserial_init(tHandlerParam* pHandlParam_p, tPcpSerialTransferFin pfnTransfFin_p)
 {
     UNUSED_PARAMETER(pHandlParam_p);
 
@@ -138,7 +138,7 @@ BOOL serial_init(tHandlerParam* pHandlParam_p, tSerialTransferFin pfnTransfFin_p
 \ingroup module_serial
 */
 /*----------------------------------------------------------------------------*/
-void serial_exit(void)
+void pcpserial_exit(void)
 {
     pfnTransfFin_l = NULL;
 }
@@ -158,7 +158,7 @@ avalon_spi driver
 \ingroup module_serial
 */
 /*----------------------------------------------------------------------------*/
-BOOL serial_transfer(tHandlerParam* pHandlParam_p)
+BOOL pcpserial_transfer(tHandlerParam* pHandlParam_p)
 {
     BOOL fReturn = FALSE;
     int spiRet;
