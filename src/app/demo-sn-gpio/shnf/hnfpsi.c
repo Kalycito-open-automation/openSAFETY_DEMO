@@ -791,7 +791,7 @@ static void serialTransferFinished(BOOL fError_p)
 {
     if(fError_p == FALSE)
     {
-        BENCHMARK_MOD_01_SET(2);
+        BENCHMARK_MOD_01_SET(0);
 
         /* Transfer finished -> Call all post action tasks */
         if(psi_processPostTransferActions() == FALSE)
@@ -799,7 +799,7 @@ static void serialTransferFinished(BOOL fError_p)
             errh_postFatalError(kErrSourceHnf, kErrorSyncProcessFailed, 0);
         }
 
-        BENCHMARK_MOD_01_RESET(2);
+        BENCHMARK_MOD_01_RESET(0);
     }
     else
     {

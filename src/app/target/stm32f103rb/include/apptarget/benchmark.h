@@ -42,16 +42,21 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /*----------------------------------------------------------------------------*/
 /* includes                                                                   */
 /*----------------------------------------------------------------------------*/
-
+#include <stm32f10x_gpio.h>
 
 /*----------------------------------------------------------------------------*/
 /* const defines                                                              */
 /*----------------------------------------------------------------------------*/
-#ifdef BENCHMARK_ENABLED
-    #include <stm32f10x_gpio.h>
+/* Definition for Benchmark pins */
+#define PINx_BENCHMARK_PIN0              GPIO_Pin_10
+#define PINx_BENCHMARK_PIN1              GPIO_Pin_11
+#define PINx_BENCHMARK_PIN2              GPIO_Pin_12
+#define PINx_BENCHMARK_PORT              GPIOC
+#define PINx_BENCHMARK_CLK_ENABLE        RCC_APB2Periph_GPIOC
 
-    #define BENCHMARK_SET(x)    GPIOA->BSRR = (GPIO_Pin_8 + (x))
-    #define BENCHMARK_RESET(x)  GPIOA->BRR = (GPIO_Pin_8 + (x))
+#ifdef BENCHMARK_ENABLED
+    #define BENCHMARK_SET(x)    GPIO_WriteBit(PINx_BENCHMARK_PORT, (UINT16)(1<<(10 + (x))), Bit_SET)
+    #define BENCHMARK_RESET(x)  GPIO_WriteBit(PINx_BENCHMARK_PORT, (UINT16)(1<<(10 + (x))), Bit_RESET)
     #define BENCHMARK_TOGGLE(x) /* No toggle till now */
 #else
     #undef BENCHMARK_MODULES

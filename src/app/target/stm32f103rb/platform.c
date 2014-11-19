@@ -51,6 +51,8 @@ stm32f103rb (Cortex-M3).
 /*----------------------------------------------------------------------------*/
 #include <common/platform.h>
 
+#include <apptarget/benchmark.h>
+
 #include <misc.h>
 #include <stm32f1xx_it.h>
 
@@ -93,11 +95,6 @@ static void initBenchmark(void);
 #define USARTx_TX_GPIO_PORT              GPIOA
 #define USARTx_RX_PIN                    GPIO_Pin_3
 #define USARTx_RX_GPIO_PORT              GPIOA
-
-/* Definition for Benchmark pins */
-#define PINx_BENCHMARK_PIN               GPIO_Pin_8
-#define PINx_BENCHMARK_PORT              GPIOA
-#define PINx_BENCHMARK_RCC_APB2Periph    RCC_APB2Periph_GPIOA
 
 /*----------------------------------------------------------------------------*/
 /* local types                                                                */
@@ -241,11 +238,11 @@ static void initBenchmark(void)
 
     memset(&GPIO_InitStructure, 0, sizeof(GPIO_InitTypeDef));
 
-    /* Enable GPIOA clock */
-    RCC_APB2PeriphClockCmd(PINx_BENCHMARK_RCC_APB2Periph, ENABLE);
+    /* Enable BENCHMARK GPIO clock */
+    RCC_APB2PeriphClockCmd(PINx_BENCHMARK_CLK_ENABLE, ENABLE);
 
     /* Use PA8 for benchmark pin 0 */
-    GPIO_InitStructure.GPIO_Pin = PINx_BENCHMARK_PIN;
+    GPIO_InitStructure.GPIO_Pin = PINx_BENCHMARK_PIN0 | PINx_BENCHMARK_PIN1 | PINx_BENCHMARK_PIN2;
     GPIO_InitStructure.GPIO_Speed = GPIO_Speed_10MHz;
     GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
     GPIO_Init(PINx_BENCHMARK_PORT, &GPIO_InitStructure);

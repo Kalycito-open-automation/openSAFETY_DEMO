@@ -48,16 +48,18 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /* const defines                                                              */
 /*----------------------------------------------------------------------------*/
 /* Definition for Benchmark pins */
-#define PINx_BENCHMARK_PIN               GPIO_PIN_8
-#define PINx_BENCHMARK_PORT              GPIOA
-#define PINx_BENCHMARK_CLK_ENABLE()      __GPIOA_CLK_ENABLE()
+#define PINx_BENCHMARK_PIN0              GPIO_PIN_10
+#define PINx_BENCHMARK_PIN1              GPIO_PIN_11
+#define PINx_BENCHMARK_PIN2              GPIO_PIN_12
+#define PINx_BENCHMARK_PORT              GPIOC
+#define PINx_BENCHMARK_CLK_ENABLE()      __GPIOC_CLK_ENABLE()
 
 
 #ifdef BENCHMARK_ENABLED
     #include <stm32f4xx_hal_gpio.h>
 
-    #define BENCHMARK_SET(x)    HAL_GPIO_WritePin(PINx_BENCHMARK_PORT + (x), PINx_BENCHMARK_PIN, GPIO_PIN_SET)
-    #define BENCHMARK_RESET(x)  HAL_GPIO_WritePin(PINx_BENCHMARK_PORT + (x), PINx_BENCHMARK_PIN, GPIO_PIN_RESET)
+    #define BENCHMARK_SET(x)    HAL_GPIO_WritePin(PINx_BENCHMARK_PORT, (UINT16)(1<<(10 + (x))), GPIO_PIN_SET)
+    #define BENCHMARK_RESET(x)  HAL_GPIO_WritePin(PINx_BENCHMARK_PORT, (UINT16)(1<<(10 + (x))), GPIO_PIN_RESET)
     #define BENCHMARK_TOGGLE(x) /* No toggle till now */
 #else
     #undef BENCHMARK_MODULES

@@ -174,7 +174,8 @@ void platform_exit(void)
     HAL_GPIO_DeInit(USARTx_RX_GPIO_PORT, USARTx_RX_PIN);
 
     /* Disable benchmark */
-    HAL_GPIO_DeInit(PINx_BENCHMARK_PORT, PINx_BENCHMARK_PIN);
+    HAL_GPIO_DeInit(PINx_BENCHMARK_PORT, PINx_BENCHMARK_PIN0);
+    HAL_GPIO_DeInit(PINx_BENCHMARK_PORT, PINx_BENCHMARK_PIN1);
 
     /* Close HAL library */
     HAL_DeInit();
@@ -332,8 +333,8 @@ static void initBenchmark(void)
     /* Enable benchmark GPIO clock */
     PINx_BENCHMARK_CLK_ENABLE();
 
-    /* Init benchmark pin 0 */
-    GPIO_InitStructure.Pin = PINx_BENCHMARK_PIN;
+    /* Init benchmark pins */
+    GPIO_InitStructure.Pin = PINx_BENCHMARK_PIN0 | PINx_BENCHMARK_PIN1 | PINx_BENCHMARK_PIN2;
     GPIO_InitStructure.Speed = GPIO_SPEED_MEDIUM;
     GPIO_InitStructure.Mode = GPIO_MODE_OUTPUT_PP;
     HAL_GPIO_Init(PINx_BENCHMARK_PORT, &GPIO_InitStructure);
