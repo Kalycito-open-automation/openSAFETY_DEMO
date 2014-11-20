@@ -755,7 +755,7 @@ static BOOL processApp(UINT32 rpdoRelTimeLow_p,
 
             if(hnfPsiInstance_l.pfnProcSync_m != NULL)
             {
-                /* Call the process sync callback function */
+                /* Call the process sync callback function (Handles all actions of the end of the cycle) */
                 if(hnfPsiInstance_l.pfnProcSync_m())
                 {
                     fReturn = TRUE;

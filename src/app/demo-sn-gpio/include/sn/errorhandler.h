@@ -108,7 +108,7 @@ typedef enum
 {
     kErrSourceInvalid      = 0x0,   /**< Error source is not net */
     kErrSourceStack        = 0x1,   /**< Error source = openSafety stack */
-    kErrSourceHnf          = 0x2,   /**< Error source = Hardware near firmware inteface */
+    kErrSourceHnf          = 0x2,   /**< Error source = Hardware near firmware interface */
     kErrSourceShnf         = 0x3,   /**< Error source = SHNF managing module */
     kErrSourceSapl         = 0x4,   /**< Error source = Safe application */
     kErrSourcePeriph       = 0x5,   /**< Error source = Managing module */
@@ -134,7 +134,7 @@ typedef struct
     tErrSource source_m;    /**< The origin of this error */
     tErrLevel class_m;      /**< Provides information about the criticality of the error */
     UINT8 unit_m;           /**< Origin module of the error */
-    UINT8 code_m;           /**< Error code to identify the error withing the unit */
+    UINT8 code_m;           /**< Error code to identify the error within the unit */
     UINT32 addInfo_m;       /**< Additional error information */
 } tErrorDesc;
 
