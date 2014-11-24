@@ -99,6 +99,4 @@ void stream_registerSyncCb(tBuffSyncCb pfnSyncCb_p);
 BOOL stream_processSync(void);
 BOOL stream_processPostActions(void);
 
-void stream_ackBuffer(UINT8 buffId_p);
-
 #endif /* _INC_libpsi_intenal_stream_H_ */

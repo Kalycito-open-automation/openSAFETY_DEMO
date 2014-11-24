@@ -313,19 +313,15 @@ BOOL stream_processSync(void)
     /* Call all pre filling actions */
     if(stream_callActions(kStreamActionPre) != FALSE)
     {
-        /* Call synchronization function handler */
-        if(stream_callSyncCb() != FALSE)
+        /* Transfer stream input/output data */
+        if(streamInstance_l.pfnStreamHandler_m(&streamInstance_l.handlParam_m) != FALSE)
         {
-            /* Transfer stream input/output data */
-            if(streamInstance_l.pfnStreamHandler_m(&streamInstance_l.handlParam_m) != FALSE)
-            {
-                fReturn = TRUE;
-            }
-            else
-            {
-                /* Stream handler error handler */
-                error_setError(kPsiModuleStream, kPsiStreamTransferError);
-            }
+            fReturn = TRUE;
+        }
+        else
+        {
+            /* Stream handler error handler */
+            error_setError(kPsiModuleStream, kPsiStreamTransferError);
         }
     }
 
@@ -350,29 +346,17 @@ BOOL stream_processPostActions(void)
 {
     BOOL fReturn = FALSE;
 
-    /* Call all post filling actions */
+    /* Call all post transfer actions */
     if(stream_callActions(kStreamActionPost) != FALSE)
     {
-        fReturn = TRUE;
+        /* Call synchronization function handler */
+        if(stream_callSyncCb() != FALSE)
+        {
+            fReturn = TRUE;
+        }
     }
 
     return fReturn;
-}
-
-/*----------------------------------------------------------------------------*/
-/**
-\brief   Function for buffer acknowledging
-
-\param[in]  buffId_p    If of the buffer to acknowledge
-
-\ingroup module_stream
-*/
-/*----------------------------------------------------------------------------*/
-void stream_ackBuffer(UINT8 buffId_p)
-{
-    UNUSED_PARAMETER(buffId_p);
-
-    /* Empty function! (No acknowledge needed with SPI!) */
 }
 
 /*============================================================================*/

@@ -146,9 +146,6 @@ void TST_init(void)
 
     CU_ASSERT_FALSE ( !fReturn );
 
-    // Call dummy acknowledge function
-    stream_ackBuffer(0);
-
     // Call exit function
     stream_exit();
 }

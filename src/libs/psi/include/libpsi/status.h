@@ -71,10 +71,10 @@ typedef BOOL (* tPsiAppCbSync) ( tPsiTimeStamp* pTimeStamp_p );
  * \brief  Status module initialization structure
  */
 typedef struct {
-    tPsiAppCbSync          pfnAppCbSync_m;    /**< Syncronous callback function */
+    tPsiAppCbSync        pfnProcSyncCb_m;    /**< Synchronization callback function */
 
-    tTbufNumLayout           buffOutId_m;       /**< Id of the output status buffer */
-    tTbufNumLayout           buffInId_m;        /**< Id of the input status buffer */
+    tTbufNumLayout       buffOutId_m;        /**< Id of the output status buffer */
+    tTbufNumLayout       buffInId_m;         /**< Id of the input status buffer */
 } tStatusInitParam;
 
 /*----------------------------------------------------------------------------*/

@@ -127,7 +127,7 @@ int TST_asyncInitStatus(void)
     if(fReturn != FALSE)
     {
         // Init status module
-        StatusInitParam.pfnAppCbSync_m = stb_dummySyncHandlerSuccess;
+        StatusInitParam.pfnProcSyncCb_m = stb_dummySyncHandlerSuccess;
         StatusInitParam.buffInId_m = kTbufNumStatusIn;
         StatusInitParam.buffOutId_m = kTbufNumStatusOut;
 

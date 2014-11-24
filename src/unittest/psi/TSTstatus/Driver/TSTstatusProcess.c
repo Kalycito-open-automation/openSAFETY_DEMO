@@ -143,7 +143,7 @@ void TST_statusInit(void)
     CU_ASSERT_FALSE( fReturn );
 
     // Test with invalid in buffer id
-    InitParam.pfnAppCbSync_m = stb_dummySyncHandlerSuccess;
+    InitParam.pfnProcSyncCb_m = stb_dummySyncHandlerSuccess;
     InitParam.buffInId_m = kTbufCount;
 
     fReturn = status_init(&InitParam);
@@ -151,7 +151,7 @@ void TST_statusInit(void)
     CU_ASSERT_FALSE( fReturn );
 
     // Test with invalid out buffer id
-    InitParam.pfnAppCbSync_m = stb_dummySyncHandlerSuccess;
+    InitParam.pfnProcSyncCb_m = stb_dummySyncHandlerSuccess;
     InitParam.buffInId_m = kTbufNumStatusIn;
     InitParam.buffOutId_m = kTbufCount;
 
@@ -160,7 +160,7 @@ void TST_statusInit(void)
     CU_ASSERT_FALSE( fReturn );
 
     // Test initialization successful
-    InitParam.pfnAppCbSync_m = stb_dummySyncHandlerSuccess;
+    InitParam.pfnProcSyncCb_m = stb_dummySyncHandlerSuccess;
     InitParam.buffInId_m = kTbufNumStatusIn;
     InitParam.buffOutId_m = kTbufNumStatusOut;
 
@@ -203,7 +203,7 @@ void TST_statusProcessSyncFail(void)
     PSI_MEMSET(&InitParam, 0, sizeof(tStatusInitParam));
 
      // Test initialization with failing sync handler
-    InitParam.pfnAppCbSync_m = stb_dummySyncHandlerFail;
+    InitParam.pfnProcSyncCb_m = stb_dummySyncHandlerFail;
     InitParam.buffInId_m = kTbufNumStatusIn;
     InitParam.buffOutId_m = kTbufNumStatusOut;
 

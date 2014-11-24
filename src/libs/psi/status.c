@@ -98,7 +98,7 @@ typedef struct
     tTbufNumLayout            buffInId_m;           /**< Id of the incoming status register buffer */
     UINT16                    ssdoRxStatus_m;       /**< Status of the SSDO receive channel */
 
-    tPsiAppCbSync           pfnAppCbSync_m;       /**< Synchronous callback function */
+    tPsiAppCbSync           pfnProcSyncCb_m;       /**< Synchronous callback function */
 } tStatusInstance;
 
 /*----------------------------------------------------------------------------*/
@@ -148,7 +148,7 @@ BOOL status_init(tStatusInitParam* pInitParam_p)
     }
     else
     {
-        if(pInitParam_p->pfnAppCbSync_m == NULL    ||
+        if(pInitParam_p->pfnProcSyncCb_m == NULL    ||
            pInitParam_p->buffOutId_m >= kTbufCount ||
            pInitParam_p->buffInId_m >= kTbufCount   )
         {
@@ -166,7 +166,7 @@ BOOL status_init(tStatusInitParam* pInitParam_p)
                     statusInstance_l.buffOutId_m = pInitParam_p->buffOutId_m;
 
                     /* Remember synchronous callback function */
-                    statusInstance_l.pfnAppCbSync_m = pInitParam_p->pfnAppCbSync_m;
+                    statusInstance_l.pfnProcSyncCb_m = pInitParam_p->pfnProcSyncCb_m;
 
                     fReturn = TRUE;
                 }
@@ -432,7 +432,7 @@ static BOOL status_processSync(UINT8* pBuffer_p, UINT16 bufSize_p,
     timeStamp.relTimeLow_m = ami_getUint32Le((UINT8 *)&pStatusBuff->relTimeLow_m);
     timeStamp.relTimeHigh_m = ami_getUint32Le((UINT8 *)&pStatusBuff->relTimeHigh_m);
 
-    if(statusInstance_l.pfnAppCbSync_m(&timeStamp) != FALSE)
+    if(statusInstance_l.pfnProcSyncCb_m(&timeStamp) != FALSE)
     {
         fReturn = TRUE;
     }
@@ -479,9 +479,6 @@ static BOOL status_updateOutStatusReg(UINT8* pBuffer_p, UINT16 bufSize_p,
     /* Update logbook tx status register */
     statusInstance_l.logTxStatus_m = ami_getUint8Le((UINT8 *)&pStatusBuff->logConsStatus_m);
 
-    /* Acknowledge buffer */
-    stream_ackBuffer(statusInstance_l.buffOutId_m);
-
     return TRUE;
 }
 
@@ -510,9 +507,6 @@ static BOOL status_updateInStatusReg(UINT8* pBuffer_p, UINT16 bufSize_p,
 
     /* Convert to status buffer structure */
     pStatusBuff = (tTbufStatusInStructure*) pBuffer_p;
-
-    /* Acknowledge buffer */
-    stream_ackBuffer(statusInstance_l.buffInId_m);
 
     /* Write rx status register */
     ami_setUint16Le((UINT8 *)&pStatusBuff->ssdoProdStatus_m, statusInstance_l.ssdoRxStatus_m);

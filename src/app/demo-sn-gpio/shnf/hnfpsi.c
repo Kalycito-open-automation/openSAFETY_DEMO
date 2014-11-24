@@ -123,8 +123,8 @@ static tHnfPsiInstance hnfPsiInstance_l SAFE_INIT_SEKTOR;            /**< Instan
 static BOOL initPsi(void);
 static BOOL initModules(void);
 static void exitModules(void);
-static BOOL appCbSync(tPsiTimeStamp* pTimeStamp_p );
-static BOOL processSync(UINT32 rpdoRelTimeLow_p,
+static BOOL processSync(tPsiTimeStamp* pTimeStamp_p );
+static BOOL processApp(UINT32 rpdoRelTimeLow_p,
         tRpdoMappedObj* pRpdoImage_p,
         tTpdoMappedObj* pTpdoImage_p );
 
@@ -559,7 +559,7 @@ static BOOL initModules(void)
 #endif
 
     /* Initialize the status module */
-    statusInitParam.pfnAppCbSync_m = appCbSync;
+    statusInitParam.pfnProcSyncCb_m = processSync;
     statusInitParam.buffOutId_m = kTbufNumStatusOut;
     statusInitParam.buffInId_m = kTbufNumStatusIn;
 
@@ -574,7 +574,7 @@ static BOOL initModules(void)
     pdoInitParam.buffIdRpdo_m = kTbufNumRpdoImage;
     pdoInitParam.buffIdTpdo_m = kTbufNumTpdoImage;
 
-    if(pdo_init(processSync, &pdoInitParam) == FALSE)
+    if(pdo_init(processApp, &pdoInitParam) == FALSE)
     {
         DEBUG_TRACE(DEBUG_LVL_ERROR,"ERROR: pdo_init() failed!\n");
         return fReturn;
@@ -673,16 +673,16 @@ static void exitModules(void)
 
 /*----------------------------------------------------------------------------*/
 /**
-\brief    Application synchronization to the POWERLINK cycle
+\brief    Synchronization to the POWERLINK cycle
 
- \param[in] pTimeStamp_p             Time information of the current interrupt.
+ \param[in] pTimeStamp_p             Time information of the last interrupt.
 
  \return This function always succeeds
 
 \ingroup module_hnf
 */
 /*----------------------------------------------------------------------------*/
-static BOOL appCbSync(tPsiTimeStamp* pTimeStamp_p )
+static BOOL processSync(tPsiTimeStamp* pTimeStamp_p )
 {
     UNUSED_PARAMETER(pTimeStamp_p);
 
@@ -696,6 +696,10 @@ static BOOL appCbSync(tPsiTimeStamp* pTimeStamp_p )
 /**
 \brief    Process synchronous data
 
+This function is used to process the synchronous part of the application.
+Basically it calls all functions of the openSAFETY stack which need to be
+finished in one cycle. (This function is called at the end of the PSI tasks)
+
 \param[in] rpdoRelTimeLow_p     Relative time low value
 \param[in] pRpdoImage_p         Pointer to the RPDO objects
 \param[in] pTpdoImage_p         Pointer to the TPDO objects
@@ -705,7 +709,7 @@ static BOOL appCbSync(tPsiTimeStamp* pTimeStamp_p )
 \ingroup module_hnf
 */
 /*----------------------------------------------------------------------------*/
-static BOOL processSync(UINT32 rpdoRelTimeLow_p,
+static BOOL processApp(UINT32 rpdoRelTimeLow_p,
         tRpdoMappedObj* pRpdoImage_p,
         tTpdoMappedObj* pTpdoImage_p )
 {

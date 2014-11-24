@@ -288,7 +288,7 @@ void TST_statusInitFail(void)
     PSI_MEMSET(&InitParam, 0, sizeof(tStatusInitParam));
 
     // Test initialization successful
-    InitParam.pfnAppCbSync_m = stb_dummySyncHandlerSuccess;
+    InitParam.pfnProcSyncCb_m = stb_dummySyncHandlerSuccess;
     InitParam.buffInId_m = kTbufNumStatusIn;
     InitParam.buffOutId_m = kTbufNumStatusOut;
 

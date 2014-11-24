@@ -320,9 +320,6 @@ tCcWriteStatus cc_writeObject(tConfChanObject* pObject_p)
                     /* Enable transmit timer */
                     timeout_startTimer(ccInstance_l.txChannel_m.pTimeoutInst_m);
 
-                    /* Acknowledge producing transmit buffer */
-                    stream_ackBuffer(ccInstance_l.txChannel_m.idIccTx_m);
-
                     stateWrite = kCcWriteStatusSuccessful;
                 }
             }

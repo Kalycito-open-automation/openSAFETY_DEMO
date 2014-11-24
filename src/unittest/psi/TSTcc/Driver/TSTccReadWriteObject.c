@@ -136,7 +136,7 @@ int TST_initFull(void)
     {
         statusInitParam.buffInId_m = kTbufNumStatusIn;
         statusInitParam.buffOutId_m = kTbufNumStatusOut;
-        statusInitParam.pfnAppCbSync_m = stb_dummySyncHandlerSuccess;
+        statusInitParam.pfnProcSyncCb_m = stb_dummySyncHandlerSuccess;
 
         fReturn = status_init(&statusInitParam);
 

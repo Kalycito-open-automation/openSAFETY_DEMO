@@ -271,9 +271,6 @@ tLogTxStatus log_postLogEntry(tLogInstance pInstance_p, tLogFormat* pLogData_p)
             /* Enable transmit timer */
             timeout_startTimer(pInstance_p->pTimeoutInst_m);
 
-            /* Acknowledge producing transmit buffer */
-            stream_ackBuffer(pInstance_p->idTxBuff_m);
-
             chanState = kLogTxStatusSuccessful;
         }
         else

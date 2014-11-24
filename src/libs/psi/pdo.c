@@ -108,7 +108,6 @@ static tPdoInstance          pdoInstance_l;
 static BOOL pdo_process(void);
 static BOOL pdo_initRpdoBuffer(tTbufNumLayout rpdoId_p);
 static BOOL pdo_initTpdoBuffer(tTbufNumLayout tpdoId_p);
-static BOOL pdo_ackTpdo(UINT8* pBuffer_p, UINT16 bufSize_p, void * pUserArg_p);
 static BOOL pdo_processRpdo(UINT8* pBuffer_p, UINT16 bufSize_p, void * pUserArg_p);
 
 /*============================================================================*/
@@ -273,7 +272,7 @@ static BOOL pdo_initRpdoBuffer(tTbufNumLayout rpdoId_p)
             pdoInstance_l.pRpdoLayout_m = (tTbufRpdoImage *)pDescRpdo->pBuffBase_m;
 
             /* Register rpdo acknowledge action */
-            if(stream_registerAction(kStreamActionPre, rpdoId_p,
+            if(stream_registerAction(kStreamActionPost, rpdoId_p,
                     pdo_processRpdo, NULL) != FALSE)
             {
                 fReturn = TRUE;
@@ -318,12 +317,7 @@ static BOOL pdo_initTpdoBuffer(tTbufNumLayout tpdoId_p)
             /* Remember buffer address for later usage */
             pdoInstance_l.pTpdoLayout_m = (tTbufTpdoImage *)pDescTpdo->pBuffBase_m;
 
-            /* Register rpdo acknowledge action */
-            if(stream_registerAction(kStreamActionPost, tpdoId_p,
-                    pdo_ackTpdo, NULL) != FALSE)
-            {
-                fReturn = TRUE;
-            }
+            fReturn = TRUE;
         }
         else
         {
@@ -426,33 +420,6 @@ static BOOL pdo_processRpdo(UINT8* pBuffer_p, UINT16 bufSize_p, void * pUserArg_
 
     /* Write relative time to local structure */
     pdoInstance_l.rpdoRelTimeLow_m = ami_getUint32Le((UINT8 *)&pRpdoImage->relativeTimeLow_m);
-
-    stream_ackBuffer(pdoInstance_l.rpdoId_m);
-
-    return TRUE;
-}
-
-/*----------------------------------------------------------------------------*/
-/**
-\brief    Acknowledge TPDO buffer
-
-\param[in] pBuffer_p        Pointer to the base address of the buffer
-\param[in] bufSize_p        Size of the buffer
-\param[in] pUserArg_p       User defined argument
-
-\return BOOL
-\retval TRUE     Processing of TPDO buffer successful
-
-\ingroup module_pdo
-*/
-/*----------------------------------------------------------------------------*/
-static BOOL pdo_ackTpdo(UINT8* pBuffer_p, UINT16 bufSize_p, void * pUserArg_p)
-{
-    UNUSED_PARAMETER(pBuffer_p);
-    UNUSED_PARAMETER(bufSize_p);
-    UNUSED_PARAMETER(pUserArg_p);
-
-    stream_ackBuffer(pdoInstance_l.tpdoId_m);
 
     return TRUE;
 }

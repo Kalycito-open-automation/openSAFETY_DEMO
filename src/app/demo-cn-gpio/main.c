@@ -109,7 +109,7 @@ static tMainInstance mainInstance_l;            /**< Instance of main module */
 /*----------------------------------------------------------------------------*/
 static BOOL initModules(void);
 static void exitModules(void);
-static BOOL appCbSync(tPsiTimeStamp* pTimeStamp_p );
+static BOOL processSync(tPsiTimeStamp* pTimeStamp_p );
 static BOOL workInputOutput(UINT32 rpdoRelTimeLow_p,
         tRpdoMappedObj* pRpdoImage_p,
         tTpdoMappedObj* pTpdoImage_p );
@@ -303,7 +303,7 @@ static BOOL initModules(void)
 #endif
 
     /* Initialize the status module */
-    statusInitParam.pfnAppCbSync_m = appCbSync;
+    statusInitParam.pfnProcSyncCb_m = processSync;
     statusInitParam.buffOutId_m = kTbufNumStatusOut;
     statusInitParam.buffInId_m = kTbufNumStatusIn;
 
@@ -369,16 +369,16 @@ static void exitModules(void)
 
 /*----------------------------------------------------------------------------*/
 /**
-\brief    Application synchronization to the POWERLINK cycle
+\brief    Synchronize to the POWERLINK cycle
 
- \param[in] pTimeStamp_p             Time information of the current interrupt.
+ \param[in] pTimeStamp_p             Time information of the last interrupt.
 
  \return TRUE
 
 \ingroup module_main
 */
 /*----------------------------------------------------------------------------*/
-static BOOL appCbSync(tPsiTimeStamp* pTimeStamp_p )
+static BOOL processSync(tPsiTimeStamp* pTimeStamp_p )
 {
     UNUSED_PARAMETER(pTimeStamp_p);
 

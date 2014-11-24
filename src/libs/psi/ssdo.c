@@ -300,9 +300,6 @@ tSsdoTxStatus ssdo_postPayload(tSsdoInstance pInstance_p, UINT8* pPayload_p,
                 /* Enable transmit timer */
                 timeout_startTimer(pInstance_p->txBuffParam_m.pTimeoutInst_m);
 
-                /* Acknowledge producing transmit buffer */
-                stream_ackBuffer(pInstance_p->txBuffParam_m.idTxBuff_m);
-
                 chanState = kSsdoTxStatusSuccessful;
             }
             else
@@ -609,9 +606,6 @@ static BOOL ssdo_receiveFrame(UINT8* pBuffer_p, UINT16 bufSize_p,
 
     /* Convert to status buffer structure */
     pSsdoRxBuff = (tTbufSsdoRxStructure*) pBuffer_p;
-
-    /* Acknowledge buffer before access */
-    stream_ackBuffer(pInstance->rxBuffParam_m.idRxBuff_m);
 
     currSeqNr = (tSeqNrValue)ami_getUint8Le((UINT8 *)&pSsdoRxBuff->seqNr_m);
 
