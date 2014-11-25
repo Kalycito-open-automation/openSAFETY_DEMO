@@ -237,7 +237,7 @@ tProcParamRet paramset_process(UINT8* pParamSetBase_p, UINT32 paramSetLen_p)
         {
             case kParamSetStateInitiateProcessing:
             {
-                DEBUG_TRACE(DEBUG_LVL_ALWAYS, "\nParse parameter set: "
+                DEBUG_TRACE(DEBUG_LVL_SAPL, "\nParse parameter set: "
                                               "(Size: %dBytes)\n", paramSetLen_p);
 
                 /* Reset global object attributes structures */
@@ -292,7 +292,7 @@ tProcParamRet paramset_process(UINT8* pParamSetBase_p, UINT32 paramSetLen_p)
             }
             case kParamSetStateFinishProcessing:
             {
-                DEBUG_TRACE(DEBUG_LVL_ALWAYS, "Parsing finished!\n");
+                DEBUG_TRACE(DEBUG_LVL_SAPL, "Parsing finished!\n");
 
                 /* Reset global object attributes structures */
                 MEMSET(&paramSetInstance_l.currObjAttr_m, 0, sizeof(tObjectAttr));
@@ -386,9 +386,9 @@ static tParseObjStatus processParameterSetObject(UINT8 * pObjData_p,
             parseObjRet = kParseObjBusy;
             paramSetInstance_l.objectState_m = kObjStateVerifyParameters;
 
-            DEBUG_TRACE(DEBUG_LVL_ALWAYS, "Idx: 0x%x Sub: 0x%x Len: %d\n", paramSetInstance_l.currObjAttr_m.index_m,
-                                          paramSetInstance_l.currObjAttr_m.subIndex_m,
-                                          paramSetInstance_l.currObjAttr_m.length_m);
+            DEBUG_TRACE(DEBUG_LVL_SAPL, "Idx: 0x%x Sub: 0x%x Len: %d\n", paramSetInstance_l.currObjAttr_m.index_m,
+                                        paramSetInstance_l.currObjAttr_m.subIndex_m,
+                                        paramSetInstance_l.currObjAttr_m.length_m);
 
             break;
         }

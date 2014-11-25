@@ -60,16 +60,36 @@ SET(LIB_INCS
             ${TARGET_DIR}/include
 )
 
+###############################################################################
+# Set CFLAGS depending on build type
+###############################################################################
+# Set CFLAGS depending on build type
+IF(${CMAKE_BUILD_TYPE} MATCHES "Debug" OR ${CMAKE_BUILD_TYPE} MATCHES "RelWithDebInfo")
+    SET(DBG_MODE _DEBUG)
+    SET(CFG_PSI_DEBUG_LVL 0xEC000000L CACHE STRING "Set the level of the debug output")
+ELSE()
+    #All other builds are release builds
+    SET(DBG_MODE NDEBUG)
+    UNSET(CFG_PSI_DEBUG_LVL CACHE)
+    SET(CFG_PSI_DEBUG_LVL 0x00000000L)
+ENDIF()
+
+IF("${CMAKE_C_COMPILER_ID}" STREQUAL "GNU")
+    SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -D${DBG_MODE} -DDEF_DEBUG_LVL=${CFG_PSI_DEBUG_LVL}")
+ENDIF()
+
+###############################################################################
+# Add target specific section
 IF((CMAKE_SYSTEM_NAME STREQUAL "Generic") AND (CMAKE_SYSTEM_PROCESSOR STREQUAL "nios2"))
     INCLUDE (nios2.cmake)
 ENDIF()
-
-INCLUDE_DIRECTORIES ( ${LIB_INCS} )
 
 ########################################################################
 # Build library
 ########################################################################
 IF(GEN_LIB_TARGET)
+    INCLUDE_DIRECTORIES(${LIB_INCS})
+
     ADD_LIBRARY ( psi ${LIB_TYPE} ${LIB_SRCS} )
 
     TARGET_LINK_LIBRARIES ( psi "psicommon${CURR_APPLICATION}" )

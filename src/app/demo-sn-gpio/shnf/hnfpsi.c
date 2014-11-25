@@ -109,6 +109,7 @@ typedef struct {
     tSyncRxHandler pfnSpdoRxHandler_m;                      /**< SPDO receive handler */
     tSyncTxCreate pfnSpdoTxCreate_m;                        /**< Triggers the building of a transmit spdo frame */
     tBuffer spdo0TxBuffer_m;                                /**< Describes the current transmit buffer of the spdo0 channel */
+    tProcSync pfnProcSync_m;                                /**< Pointer to the process sync callback function */
 } tHnfPsiInstance;
 
 /*----------------------------------------------------------------------------*/
@@ -173,6 +174,7 @@ BOOLEAN hnf_init(tHnfInit * pHnfInit_p)
             hnfPsiInstance_l.pfnSsdoSnmtRcvHandler_m = pHnfInit_p->asyncRcvChan0Handler_m;
             hnfPsiInstance_l.pfnSpdoRxHandler_m = pHnfInit_p->syncRcvHandler_m;
             hnfPsiInstance_l.pfnSpdoTxCreate_m = pHnfInit_p->syncTxBuild_m;
+            hnfPsiInstance_l.pfnProcSync_m = pHnfInit_p->pfnProcSync_m;
 
             /* Init array of SSDO channel receive handler */
             hnfPsiInstance_l.apfnSsdoRxHandler[kNumSsdoChan0] = processRxAsyncChannel0;
@@ -436,6 +438,19 @@ BOOLEAN hnf_getSyncTxBuffer(UINT8 ** ppTxBuffer_p, UINT16 * pBuffLen_p)
     return fReturn;
 }
 
+/*----------------------------------------------------------------------------*/
+/**
+\brief    Enable the syncronous interrupt
+
+\ingroup module_hnf
+*/
+/*----------------------------------------------------------------------------*/
+void hnf_enableSyncIr(void)
+{
+    /* Now enable the synchronous interrupt */
+    syncir_enable();
+}
+
 /*============================================================================*/
 /*            P R I V A T E   F U N C T I O N S                               */
 /*============================================================================*/
@@ -507,9 +522,6 @@ static BOOL initPsi(void)
                         if(syncir_init(syncHandler))
                         {
                             DEBUG_TRACE(DEBUG_LVL_ALWAYS, "SUCCESS!\n");
-
-                            /* Now enable the synchronous interrupt */
-                            syncir_enable();
 
                             fReturn = TRUE;
                         }    /* Error on libpsi module initialization! Error reported via errorHandler() */
@@ -720,14 +732,26 @@ static BOOL processApp(UINT32 rpdoRelTimeLow_p,
 
     if(hnfPsiInstance_l.pfnSpdoRxHandler_m != NULL)
     {
-        /* Call register receive handler */
+        /* Call RSPDO receive handler () */
         hnfPsiInstance_l.pfnSpdoRxHandler_m(&pRpdoImage_p->spdo0[0], RX_SPDO0_SIZE);
 
         if(hnfPsiInstance_l.pfnSpdoTxCreate_m != NULL)
         {
-            /* Call transmit create */
+            /* Call TSPDO transmit create */
             hnfPsiInstance_l.pfnSpdoTxCreate_m();
-            fReturn = TRUE;
+
+            if(hnfPsiInstance_l.pfnProcSync_m != NULL)
+            {
+                /* Call the process sync callback function */
+                if(hnfPsiInstance_l.pfnProcSync_m())
+                {
+                    fReturn = TRUE;
+                }
+            }
+            else
+            {
+                errh_postFatalError(kErrSourceHnf, kErrorCallbackNotInitialized, 0);
+            }
         }
         else
         {

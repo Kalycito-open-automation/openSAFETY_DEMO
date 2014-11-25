@@ -192,7 +192,7 @@ tProcCrcRet paramcrc_process(void)
     {
         case kParamCrcStateInit:
         {
-            DEBUG_TRACE(DEBUG_LVL_ALWAYS, "\nStart SOD CRC calculation...\n");
+            DEBUG_TRACE(DEBUG_LVL_SAPL, "\nStart SOD CRC calculation...\n");
 
             resetParamCrcModule();
 
@@ -458,7 +458,7 @@ static BOOLEAN verifyCrc32Values(void)
                 }
                 else
                 {
-                    DEBUG_TRACE(DEBUG_LVL_ALWAYS, "CRC32: 0x%x verified!\n", paramCrcInstance_l.crc32Entries_m[i]);
+                    DEBUG_TRACE(DEBUG_LVL_SAPL, "CRC32: 0x%x verified!\n", paramCrcInstance_l.crc32Entries_m[i]);
                 }
             }
 

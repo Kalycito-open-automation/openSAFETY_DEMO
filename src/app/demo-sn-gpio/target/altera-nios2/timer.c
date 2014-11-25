@@ -114,7 +114,7 @@ BOOLEAN timer_init(void)
     IOWR_32DIRECT(COUNTER_BASE, COUNTER_TICKCNT_REG, 0);
 
     /* Set default timerbase to ipcore */
-    IOWR_32DIRECT(COUNTER_BASE, COUNTER_TICKCNT_REG, TIMER_TICKS_100US);
+    IOWR_32DIRECT(COUNTER_BASE, COUNTER_TICKCNT_REG, TIMER_TICKS_1US);
 
     return TRUE;
 }
@@ -138,67 +138,19 @@ void timer_close(void)
 
 This function returns the current system tick determined by the system timer.
 
-\return Returns the system tick in milliseconds
+\return Returns the system tick in microseconds
 
 \ingroup module_timer
 */
 /*----------------------------------------------------------------------------*/
-UINT32 timer_getTickCount(void)
+UINT16 timer_getTickCount(void)
 {
     UINT32 time;
 
     time = IORD_32DIRECT(COUNTER_BASE, COUNTER_TIME_REG);
 
-    return time;
+    return (UINT16)time;
 }
-
-/*----------------------------------------------------------------------------*/
-/**
-\brief    Update the base of the timer
-
-\param base_p The new base of the timer
-
-\return TRUE on success; FALSE on error
-
-\ingroup module_timer
-*/
-/*----------------------------------------------------------------------------*/
-BOOLEAN timer_setBase(tTimerBase base_p)
-{
-    BOOLEAN retVal = FALSE;
-    UINT32 timerBase = kTimerBase1us;
-
-    /* De-activate timer core */
-    IOWR_32DIRECT(COUNTER_BASE, COUNTER_TICKCNT_REG, 0);
-
-    switch(base_p)
-    {
-        case kTimerBase1us:
-            timerBase = TIMER_TICKS_1US;
-            retVal = TRUE;
-            break;
-        case kTimerBase10us:
-            timerBase = TIMER_TICKS_10US;
-            retVal = TRUE;
-            break;
-        case kTimerBase100us:
-            timerBase = TIMER_TICKS_100US;
-            retVal = TRUE;
-            break;
-        case kTimerBase1ms:
-            timerBase = TIMER_TICKS_1MS;
-            retVal = TRUE;
-            break;
-        default:
-            break;
-    }
-
-    /* Update the base register of the timer core */
-    IOWR_32DIRECT(COUNTER_BASE, COUNTER_TICKCNT_REG, timerBase);
-
-    return retVal;
-}
-
 
 /*============================================================================*/
 /*            P R I V A T E   F U N C T I O N S                               */

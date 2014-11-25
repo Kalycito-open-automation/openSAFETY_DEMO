@@ -39,11 +39,13 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /*----------------------------------------------------------------------------*/
 /* includes                                                                   */
 /*----------------------------------------------------------------------------*/
-#include <common/debug.h>
+#include <sn/debug.h>
 
 #include <EPLScfg.h>
 #include <EPLStarget.h>
 #include <EPLStypes.h>
+
+#include <shnf/constime.h>
 
 /*----------------------------------------------------------------------------*/
 /* const defines                                                              */
@@ -54,6 +56,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /*----------------------------------------------------------------------------*/
 /* typedef                                                                    */
 /*----------------------------------------------------------------------------*/
+
+/**
+ * \brief Type of the synchronous process function
+ */
+typedef BOOLEAN (*tProcSync)(void);
 
 /*----------------------------------------------------------------------------*/
 /* includes                                                                   */
@@ -68,7 +75,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     extern "C" {
 #endif
 
-
+void util_enterCriticalSection(BOOLEAN fEnable_p);
 
 #ifdef __cplusplus
     }

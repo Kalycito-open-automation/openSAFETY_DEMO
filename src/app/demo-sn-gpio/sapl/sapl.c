@@ -299,6 +299,8 @@ BOOLEAN sapl_restoreSod(void)
 
     if(sodstore_getSodImage(&pParamSetBase, &paramSetLen))
     {
+        DEBUG_TRACE(DEBUG_LVL_ALWAYS, "\nRestore SOD -> ");
+
         /* A valid SOD image is in the NVS -> Restore it with the parameter parser */
         do
         {
@@ -308,6 +310,8 @@ BOOLEAN sapl_restoreSod(void)
 
         if(procRet == kParamProcFinished)
         {
+            DEBUG_TRACE(DEBUG_LVL_ALWAYS, "SUCCESS!\n");
+
             fReturn = TRUE;
         }
     }

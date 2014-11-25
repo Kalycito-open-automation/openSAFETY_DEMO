@@ -105,6 +105,7 @@ SET(SN_SRCS
     ${APP_COMMON_DIR}/tbufparams.c
     ${PROJECT_SOURCE_DIR}/errorhandler.c
     ${DEMO_CONFIG_DIR}/sn/sod.c
+    ${PROJECT_SOURCE_DIR}/util.c
 )
 
 SET(DEMO_SRCS
@@ -134,6 +135,31 @@ SET(DEMO_INCS
 )
 
 ########################################################################
+# Set CFLAGS depending on build type
+########################################################################
+IF(${CMAKE_BUILD_TYPE} MATCHES "Debug" OR ${CMAKE_BUILD_TYPE} MATCHES "RelWithDebInfo")
+    SET(DBG_MODE _DEBUG)
+    SET(CFG_APP_DEBUG_LVL 0xEC000000L CACHE STRING "Set the level of the debug output")
+ELSE()
+    #All other builds are release builds
+    SET(DBG_MODE NDEBUG)
+    UNSET(CFG_APP_DEBUG_LVL CACHE)
+    SET(CFG_APP_DEBUG_LVL 0x00000000L)
+ENDIF()
+
+IF("${CMAKE_C_COMPILER_ID}" STREQUAL "GNU")
+    SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -D${DBG_MODE} -DDEF_DEBUG_LVL=${CFG_APP_DEBUG_LVL}")
+
+    # Remove unknown pragma warning (This disables a warning on CTC_SKIP)
+    SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-unknown-pragmas")
+
+    # Set C macro to forward SYSTEM_PATH to code
+    SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DSYSTEM_PATH=${SYSTEM_PATH}")
+ELSE()
+    MESSAGE(FATAL_ERROR "Only GNU compilers allowed in this project!")
+ENDIF()
+
+########################################################################
 # Add target specific build information
 ########################################################################
 IF((CMAKE_SYSTEM_NAME STREQUAL "Generic") AND (CMAKE_SYSTEM_PROCESSOR STREQUAL "nios2"))
@@ -161,14 +187,6 @@ INCLUDE_DIRECTORIES(
                     ${DEMO_INCS}
                     ${DEMO_ARCH_INCS}
 )
-
-IF("${CMAKE_C_COMPILER_ID}" STREQUAL "GNU")
-    # Remove unknown pragma warning (This disables a warning on CTC_SKIP)
-    SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-unknown-pragmas")
-
-    # Set C macro to forward SYSTEM_PATH to code
-    SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DSYSTEM_PATH=${SYSTEM_PATH}")
-ENDIF()
 
 ########################################################################
 # Build Executable

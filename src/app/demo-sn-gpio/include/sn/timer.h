@@ -42,7 +42,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <apptarget/target.h>
 #include <sn/global.h>
 
 //------------------------------------------------------------------------------
@@ -54,25 +53,13 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // typedef
 //------------------------------------------------------------------------------
 
-/**
- * \brief Base values of the timer
- */
-typedef enum
-{
-    kTimerBase1us        = 0,
-    kTimerBase10us       = 1,
-    kTimerBase100us      = 2,
-    kTimerBase1ms        = 3,
-} tTimerBase;
-
 //------------------------------------------------------------------------------
 // function prototypes
 //------------------------------------------------------------------------------
 BOOLEAN timer_init(void);
 void timer_close(void);
 
-UINT32 timer_getTickCount(void);
-BOOLEAN timer_setBase(tTimerBase base_p);
+UINT16 timer_getTickCount(void);
 
 #endif /* _INC_sn_timer_H_ */
 

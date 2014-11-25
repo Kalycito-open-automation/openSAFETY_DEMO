@@ -108,6 +108,20 @@ SET(OMETHLIB_SRCS
     ${OPLK_OMETHLIB_DIR}/src/omethlibint.c
    )
 
+###############################################################################
+# Set CFLAGS depending on build type
+IF(${CMAKE_BUILD_TYPE} MATCHES "Debug" OR ${CMAKE_BUILD_TYPE} MATCHES "RelWithDebInfo")
+    SET(DBG_MODE _DEBUG)
+    SET(CFG_PCP_DEBUG_LVL 0xEC000000L CACHE STRING "Set the level of the debug output")
+ELSE()
+    #All other builds are release builds
+    SET(DBG_MODE NDEBUG)
+    UNSET(CFG_PCP_DEBUG_LVL CACHE)
+    SET(CFG_PCP_DEBUG_LVL 0x00000000L)
+ENDIF()
+
+SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -D${DBG_MODE} -DDEF_DEBUG_LVL=${CFG_PCP_DEBUG_LVL} -DPSI_BUILD_PCP -DCONFIG_CN")
+
 ########################################################################
 # Set include paths
 ########################################################################

@@ -139,8 +139,7 @@ SET( TCI_MEM_SIZE ${GET_TCM_STDOUT} )
 MESSAGE( STATUS "Size TCIMEM: ${TCI_MEM_SIZE}" )
 
 # Generate application Makefile
-SET( APP_CFLAGS "${CMAKE_C_FLAGS} -D${DBG_MODE} -DDEF_DEBUG_LVL=${DEF_DEBUG_LVL} -DCONFIG_CN" )
-SET( APP_CFLAGS_EXTENDED "-DALT_TCIMEM_SIZE=${TCI_MEM_SIZE} -DPSI_BUILD_PCP" )
+SET( APP_CFLAGS "${CMAKE_C_FLAGS} -DALT_TCIMEM_SIZE=${TCI_MEM_SIZE}" )
 
 SET( ALT_APP_GEN_ARGS
                       "--bsp-dir ${ALT_PCP_BSP_DIR}"
@@ -153,7 +152,7 @@ SET( ALT_APP_GEN_ARGS
                       "--set CREATE_OBJDUMP=0"
                       "--set FLASH_OVERRIDE=${ALT_FLASH_OVERRIDE}"
                       "--set INSTANCE_ID=${ALT_PCP_INSTANCE_ID}"
-                      "--set CFLAGS=${APP_CFLAGS} ${APP_CFLAGS_EXTENDED}"
+                      "--set CFLAGS=${APP_CFLAGS}"
                       "--set APP_CFLAGS_OPTIMIZATION=${OPT_LEVEL}"
                       "--elf-name ${PROJECT_NAME}.elf"
                       "--use-lib-dir ${psicommonpcp_BINARY_DIR}/${ALT_BUILD_DIR_NAME}"

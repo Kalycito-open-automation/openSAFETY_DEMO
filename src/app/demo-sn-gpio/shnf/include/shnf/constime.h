@@ -62,6 +62,9 @@ void constime_exit(void);
 
 UINT32 constime_getTime(void);
 
+UINT64 constime_getTimeBase(void);
+void constime_process(void);
+
 #ifdef __cplusplus
     }
 #endif

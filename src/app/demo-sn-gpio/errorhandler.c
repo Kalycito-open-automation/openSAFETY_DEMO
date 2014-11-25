@@ -88,11 +88,21 @@ static UINT32 lostErrors_l = 0;     /**< Is incremented when an error was not fo
 /* local types                                                                */
 /*----------------------------------------------------------------------------*/
 
+/**
+ * \brief Error handler instance parameter
+ */
+typedef struct
+{
+    BOOLEAN    fErrDescFull_m;   /**< TRUE if the local error descriptor is full */
+    tErrorDesc errDesc_m;        /**< Place for one error to be printed in the background loop */
+} tErrhInstance;
+
 /*----------------------------------------------------------------------------*/
 /* local vars                                                                 */
 /*----------------------------------------------------------------------------*/
+static tErrhInstance errHanInstance_l SAFE_INIT_SEKTOR;
 
-#ifndef NDEBUG
+#ifdef _DEBUG
 static char *errSource[] = { "Invalid", "EPS", "HNF", "SHNF", "SAPL", "Periph" };
 #endif
 
@@ -107,13 +117,37 @@ static BOOLEAN enterPreopOnError(tErrorDesc * pErrDesc_p);
 
 /*----------------------------------------------------------------------------*/
 /**
+\brief    Initialize the error handler module
+
+\ingroup module_errorhandler
+*/
+/*----------------------------------------------------------------------------*/
+void errh_init(void)
+{
+    MEMSET(&errHanInstance_l, 0, sizeof(tErrhInstance));
+}
+
+/*----------------------------------------------------------------------------*/
+/**
+\brief    Close the error handler module
+
+\ingroup module_errorhandler
+*/
+/*----------------------------------------------------------------------------*/
+void errh_exit(void)
+{
+    /* Nothing to free */
+}
+
+/*----------------------------------------------------------------------------*/
+/**
 \brief    Post information to erro handler
 
 \param[in] source_p     The source module of the error
 \param[in] code_p       The error code
 \param[in] addInfo_p    Additional error info
 
-\ingroup module_sapl
+\ingroup module_errorhandler
 */
 /*----------------------------------------------------------------------------*/
 void errh_postInfo(tErrSource source_p, tErrorTypes code_p, UINT32 addInfo_p)
@@ -139,7 +173,7 @@ void errh_postInfo(tErrSource source_p, tErrorTypes code_p, UINT32 addInfo_p)
 \param[in] code_p       The error code
 \param[in] addInfo_p    Additional error info
 
-\ingroup module_sapl
+\ingroup module_errorhandler
 */
 /*----------------------------------------------------------------------------*/
 void errh_postMinorError(tErrSource source_p, tErrorTypes code_p, UINT32 addInfo_p)
@@ -166,7 +200,7 @@ Posting an error of this kind produces a shutdown of the SN.
 \param[in] code_p       The error code
 \param[in] addInfo_p    Additional error info
 
-\ingroup module_sapl
+\ingroup module_errorhandler
 */
 /*----------------------------------------------------------------------------*/
 void errh_postFatalError(tErrSource source_p, tErrorTypes code_p, UINT32 addInfo_p)
@@ -189,14 +223,66 @@ void errh_postFatalError(tErrSource source_p, tErrorTypes code_p, UINT32 addInfo
 
 \param[in] pErrDesc_p   Pointer to the error description
 
-\ingroup module_sapl
+\ingroup module_errorhandler
 */
 /*----------------------------------------------------------------------------*/
 void errh_postError(tErrorDesc * pErrDesc_p)
 {
     if(pErrDesc_p != NULL)
     {
-#ifndef NDEBUG
+        /* Check if the local error buffer can handle this error */
+        if(errHanInstance_l.fErrDescFull_m == FALSE)
+        {
+            /* Store this error for later printing */
+            MEMCOPY(&errHanInstance_l.errDesc_m, pErrDesc_p, sizeof(tErrorDesc));
+
+            errHanInstance_l.fErrDescFull_m = TRUE;
+        }
+
+        /* React on errors */
+        if(pErrDesc_p->fFailSafe_m)
+        {
+            /* On errors with failsafe set -> shutdown the firmware */
+            stateh_setShutdownFlag(TRUE);
+        }
+        else
+        {
+            /* On some unique errors/infos we perform a switch to preop! */
+            if(enterPreopOnError(pErrDesc_p))
+            {
+                stateh_setEnterPreOpFlag(TRUE);
+            }
+        }
+
+        /* Forward the error to the logger module if the SN state is preop */
+        if(stateh_getSnState() > kSnStateInitializing)
+        {
+            /* The error is reported via the logbook to the PLC */
+            if(hnf_postLogChannel0(pErrDesc_p) == FALSE)
+                lostErrors_l++;
+        }
+    }
+}
+
+/*----------------------------------------------------------------------------*/
+/**
+\brief    Process the posted errors
+
+This function is called in the background loop to print the error messages.
+This is needed because error message printing can take very long.
+
+\note No error FIFO is implemented. A possible loss of an error shall be expected!
+
+\ingroup module_errorhandler
+*/
+/*----------------------------------------------------------------------------*/
+void errh_proccessError(void)
+{
+#ifdef _DEBUG
+    tErrorDesc * pErrDesc_p = &errHanInstance_l.errDesc_m;
+
+    if(errHanInstance_l.fErrDescFull_m == TRUE)
+    {
         switch(pErrDesc_p->class_m)
         {
             case kErrLevelInfo:
@@ -229,33 +315,11 @@ void errh_postError(tErrorDesc * pErrDesc_p)
             default:
                 break;
         }
-#endif /* #ifndef NDEBUG */
 
-        /* React on errors */
-        if(pErrDesc_p->fFailSafe_m)
-        {
-            /* On errors with failsafe set -> shutdown the firmware */
-            stateh_setShutdownFlag(TRUE);
-            DEBUG_TRACE(DEBUG_LVL_ALWAYS, "\n-> Shutdown!\n");
-        }
-        else
-        {
-            /* On some unique errors/infos we perform a switch to preop! */
-            if(enterPreopOnError(pErrDesc_p))
-            {
-                stateh_setEnterPreOpFlag(TRUE);
-                DEBUG_TRACE(DEBUG_LVL_ALWAYS, "\n-> Enter Preop!\n");
-            }
-        }
-
-        /* Forward the error to the logger module if the SN state is preop */
-        if(stateh_getSnState() > kSnStateInitializing)
-        {
-            /* The error is reported via the logbook to the PLC */
-            if(hnf_postLogChannel0(pErrDesc_p) == FALSE)
-                lostErrors_l++;
-        }
+        errHanInstance_l.fErrDescFull_m = FALSE;
     }
+
+#endif /* #ifdef _DEBUG */
 }
 
 /*============================================================================*/

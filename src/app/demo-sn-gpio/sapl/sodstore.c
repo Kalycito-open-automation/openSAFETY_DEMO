@@ -87,7 +87,7 @@ extern UINT32 HNFiff_Crc32CalcSwp(UINT32 w_initCrc, INT32 l_length,
 /*----------------------------------------------------------------------------*/
 #define NVS_MAGIC_WORD      0xdeadbeefUL     /**< Magic word which indicates the start of the SOD image */
 
-#define NVS_IMAGE_DATA_CHUNK_SIZE       20   /**< Size of one chunk written to the NVS in one process cycle */
+#define NVS_IMAGE_DATA_CHUNK_SIZE       12   /**< Size of one chunk written to the NVS in one process cycle (Needs to be a divider of 4) */
 
 /*----------------------------------------------------------------------------*/
 /* local types                                                                */
@@ -156,6 +156,10 @@ BOOLEAN sodstore_init(void)
     {
         fReturn = TRUE;
     }
+    else
+    {
+        errh_postFatalError(kErrSourceSapl, kErrorUnableToOpenNvm, 0);
+    }
 
     return fReturn;
 }
@@ -200,7 +204,7 @@ tProcStoreRet sodstore_process(UINT8* pParamSetBase_p, UINT32 paramSetLen_p)
         {
             case kSodStoreStateInit:
             {
-                DEBUG_TRACE(DEBUG_LVL_ALWAYS, "\nStore parameter set to NVS -> ");
+                DEBUG_TRACE(DEBUG_LVL_SAPL, "\nStore parameter set to NVS -> ");
 
                 sodStoreInstance_l.currDataPos_m = NVS_IMG_OFFSET_DATA;
                 sodStoreInstance_l.currParamSetOffs_m = 0;
@@ -305,7 +309,7 @@ tProcStoreRet sodstore_process(UINT8* pParamSetBase_p, UINT32 paramSetLen_p)
 
                 sodStoreRet = kSodStoreProcFinished;
 
-                DEBUG_TRACE(DEBUG_LVL_ALWAYS, "Success!\n");
+                DEBUG_TRACE(DEBUG_LVL_SAPL, "Success!\n");
                 break;
             }
             default:

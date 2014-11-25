@@ -102,9 +102,6 @@ MESSAGE ( STATUS  "Generate board support package: ${GEN_BSP_STDOUT}" )
 ########################################################################
 # Application Makefile
 ########################################################################
-
-SET( APP_CFLAGS "${CMAKE_C_FLAGS} -D${DBG_MODE} -DDEF_DEBUG_LVL=${DEF_DEBUG_LVL}" )
-
 SET( ALT_LIB_GEN_ARGS
                       "--bsp-dir ${ALT_APP_BSP_DIR}"
                       "--set QUARTUS_PROJECT_DIR=${CFG_NIOS2_QUARTUS_DIR}"
@@ -114,7 +111,7 @@ SET( ALT_LIB_GEN_ARGS
                       "--set QSYS_SUB_CPU=${NIOS2_QSYS_SUB_CPU}"
                       "--set OBJDUMP_INCLUDE_SOURCE=1"
                       "--set CREATE_OBJDUMP=0"
-                      "--set CFLAGS=${APP_CFLAGS}"
+                      "--set CFLAGS=${CMAKE_C_FLAGS}"
                       "--set APP_CFLAGS_OPTIMIZATION=${OPT_LEVEL}"
                       "--set FLASH_OVERRIDE=${ALT_FLASH_OVERRIDE}"
                       "--set INSTANCE_ID=${ALT_APP_INSTANCE_ID}"

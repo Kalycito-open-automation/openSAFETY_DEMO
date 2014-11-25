@@ -76,14 +76,28 @@ target specific module of the hardware timer.
 /*----------------------------------------------------------------------------*/
 /* const defines                                                              */
 /*----------------------------------------------------------------------------*/
+#define CONSTIME_BASE_1US       (UINT32)1       /**< The consecutive timebase is 1us */
+#define CONSTIME_BASE_10US      (UINT32)10      /**< The consecutive timebase is 10us */
+#define CONSTIME_BASE_100US     (UINT32)100     /**< The consecutive timebase is 100us */
+#define CONSTIME_BASE_1MS       (UINT32)1000    /**< The consecutive timebase is 1ms */
 
 /*----------------------------------------------------------------------------*/
 /* local types                                                                */
 /*----------------------------------------------------------------------------*/
 
+/**
+ * \brief Consecutive time module instance type
+ */
+typedef struct
+{
+    UINT64 usTimeBase_m;        /**< Ms timbase of the system. Derived from a 16bit hardware counter */
+    UINT32 consTimeFactor_m;    /**< The consecutive timebase division factor */
+} tConsTimeInstance;
+
 /*----------------------------------------------------------------------------*/
 /* local vars                                                                 */
 /*----------------------------------------------------------------------------*/
+static tConsTimeInstance consTimeInstance_l;
 
 /*----------------------------------------------------------------------------*/
 /* local function prototypes                                                  */
@@ -107,8 +121,13 @@ BOOLEAN constime_init(void)
 {
     BOOLEAN fReturn = FALSE;
 
+    MEMSET(&consTimeInstance_l, 0, sizeof(tConsTimeInstance));
+
     if(timer_init())
     {
+        /* Initialize the consecutive timebase division factor */
+        consTimeInstance_l.consTimeFactor_m = CONSTIME_BASE_100US;
+
         fReturn = TRUE;
     }
 
@@ -124,6 +143,8 @@ BOOLEAN constime_init(void)
 /*----------------------------------------------------------------------------*/
 void constime_exit(void)
 {
+    MEMSET(&consTimeInstance_l, 0, sizeof(tConsTimeInstance));
+
     timer_close();
 }
 
@@ -138,7 +159,59 @@ void constime_exit(void)
 /*----------------------------------------------------------------------------*/
 UINT32 constime_getTime(void)
 {
-    return timer_getTickCount();
+    UINT64 usTime = constime_getTimeBase();
+
+    usTime = usTime / consTimeInstance_l.consTimeFactor_m;
+
+    return (UINT32)usTime;
+}
+
+/*----------------------------------------------------------------------------*/
+/**
+\brief    Get the us timebase of the consecutive time
+
+The system generates a microsecond timebase as a basis value for the consecutive
+time.
+
+\return The current timebase of the system
+
+\ingroup module_constime
+*/
+/*----------------------------------------------------------------------------*/
+UINT64 constime_getTimeBase(void)
+{
+    UINT64 currentTime = 0;
+    UINT64 newTime = 0;
+
+    util_enterCriticalSection(FALSE);    /* Disable global interrupts */
+    currentTime = consTimeInstance_l.usTimeBase_m;
+    util_enterCriticalSection(TRUE);     /* Enable global interrupts */
+
+    newTime = currentTime + (((UINT64)(timer_getTickCount()) - currentTime) & 0xffff);
+
+    return newTime;
+}
+
+/*----------------------------------------------------------------------------*/
+/**
+\brief    Process the system microsecond timer
+
+This function needs to be called at least each 65ms in order to update the
+local microsecond counter of the system.
+
+\ingroup module_constime
+*/
+/*----------------------------------------------------------------------------*/
+void constime_process(void)
+{
+    UINT64 usTimeBase = 0;
+
+    util_enterCriticalSection(FALSE);    /* Disable global interrupts */
+    usTimeBase = consTimeInstance_l.usTimeBase_m;
+    util_enterCriticalSection(TRUE);     /* Enable global interrupts */
+
+    consTimeInstance_l.usTimeBase_m = usTimeBase + (((UINT64)(timer_getTickCount())
+                                      - consTimeInstance_l.usTimeBase_m) & 0xffff);
 }
 
 
@@ -185,7 +258,7 @@ BOOLEAN SHNF_SOD_ConsTimeBase_CLBK(BYTE_B_INSTNUM_ SOD_t_SERVICE e_srvc,
                                    SOD_t_ABORT_CODES *pe_abortCode)
 {
     BOOLEAN fReturn = FALSE;
-    tTimerBase timeBase;
+    UINT32 timeBase = 0;
 
     /* The parameter set is handled in the process function in the background.
      * Therefore these function parameters are not used!
@@ -210,13 +283,36 @@ BOOLEAN SHNF_SOD_ConsTimeBase_CLBK(BYTE_B_INSTNUM_ SOD_t_SERVICE e_srvc,
     else
     {
         /* Store parameter set details in global structure */
-        timeBase = (tTimerBase)(*(INT8*)ps_obj->pv_objData);
-        if(timer_setBase(timeBase))
+        timeBase = (UINT32)(*(INT8*)ps_obj->pv_objData);
+        switch(timeBase)
         {
-            *pe_abortCode   = SOD_ABT_NO_ERROR;
-            fReturn = TRUE;
+            case 0:
+                consTimeInstance_l.consTimeFactor_m = CONSTIME_BASE_1US;
+                fReturn = TRUE;
+            break;
+            case 1:
+                consTimeInstance_l.consTimeFactor_m = CONSTIME_BASE_10US;
+                fReturn = TRUE;
+            break;
+            case 2:
+                consTimeInstance_l.consTimeFactor_m = CONSTIME_BASE_100US;
+                fReturn = TRUE;
+            break;
+            case 3:
+                consTimeInstance_l.consTimeFactor_m = CONSTIME_BASE_1MS;
+                fReturn = TRUE;
+            break;
+            default:
+            {
+                *pe_abortCode   = SOD_ABT_GENERAL_ERROR;
+                fReturn = TRUE;
+                break;
+            }
         }
     }
+
+    if(fReturn == TRUE)
+        *pe_abortCode   = SOD_ABT_NO_ERROR;
 
     return fReturn;
 }

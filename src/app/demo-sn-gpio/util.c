@@ -1,13 +1,12 @@
 /**
 ********************************************************************************
-\file   timer.c
+\file   util.c
 
-\brief  Target specific functions of the system timer
+\brief Utility module
 
-This module implements the hardware near target specific functions of the
-system timer for stm32f401 (Cortex-M4).
+This module provides globally used functions and services to all other modules.
 
-\ingroup module_timer
+\ingroup module_util
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
@@ -46,11 +45,9 @@ system timer for stm32f401 (Cortex-M4).
 /*----------------------------------------------------------------------------*/
 /* includes                                                                   */
 /*----------------------------------------------------------------------------*/
-#include <sn/timer.h>
+#include <sn/global.h>
 
-#include <stm32f4xx_hal_rcc.h>
-#include <stm32f4xx_hal_dma.h>
-#include <stm32f4xx_hal_tim.h>
+#include <common/syncir.h>
 
 /*============================================================================*/
 /*            G L O B A L   D E F I N I T I O N S                             */
@@ -64,9 +61,11 @@ system timer for stm32f401 (Cortex-M4).
 /* module global vars                                                         */
 /*----------------------------------------------------------------------------*/
 
+
 /*----------------------------------------------------------------------------*/
 /* global function prototypes                                                 */
 /*----------------------------------------------------------------------------*/
+
 
 /*============================================================================*/
 /*            P R I V A T E   D E F I N I T I O N S                           */
@@ -75,13 +74,6 @@ system timer for stm32f401 (Cortex-M4).
 /*----------------------------------------------------------------------------*/
 /* const defines                                                              */
 /*----------------------------------------------------------------------------*/
-#define ENABLE_TIM_DEBUG           0        /* 1=enable; 0=disable */
-
-#define TIMER_PRESCALE_1US         84       /**< Prescaler for 1us resolution */
-
-/* Definition for TIMx clock resources */
-#define TIMx                       TIM1
-#define TIMx_CLK_ENABLE            __TIM1_CLK_ENABLE
 
 /*----------------------------------------------------------------------------*/
 /* local types                                                                */
@@ -90,12 +82,10 @@ system timer for stm32f401 (Cortex-M4).
 /*----------------------------------------------------------------------------*/
 /* local vars                                                                 */
 /*----------------------------------------------------------------------------*/
-static TIM_HandleTypeDef TimerHandle_l;
 
 /*----------------------------------------------------------------------------*/
 /* local function prototypes                                                  */
 /*----------------------------------------------------------------------------*/
-static BOOLEAN initTimer(void);
 
 /*============================================================================*/
 /*            P U B L I C   F U N C T I O N S                                 */
@@ -103,59 +93,16 @@ static BOOLEAN initTimer(void);
 
 /*----------------------------------------------------------------------------*/
 /**
-\brief    Initialize the timer module
+\brief    Enter the critical section
 
-\return TRUE on success; FALSE on error
+\param[in] fEnable_p     TRUE = Enable the interrupts; FALSE = Disable
 
-\ingroup module_timer
+\ingroup module_util
 */
 /*----------------------------------------------------------------------------*/
-BOOLEAN timer_init(void)
+void util_enterCriticalSection(BOOLEAN fEnable_p)
 {
-    BOOLEAN fReturn = FALSE;
-
-    if(initTimer())
-    {
-        if(HAL_TIM_Base_Start(&TimerHandle_l) == HAL_OK)
-        {
-            fReturn = TRUE;
-        }
-    }
-
-    return fReturn;
-}
-
-/*----------------------------------------------------------------------------*/
-/**
-\brief    Close the timer module
-
-\ingroup module_timer
-*/
-/*----------------------------------------------------------------------------*/
-void timer_close(void)
-{
-    /* Close TIMx */
-    HAL_TIM_Base_DeInit(&TimerHandle_l);
-}
-
-/*----------------------------------------------------------------------------*/
-/**
-\brief    Get current system tick
-
-This function returns the current value of the internal 16bit timer.
-
-\return Returns the system tick in milliseconds
-
-\ingroup module_timer
-*/
-/*----------------------------------------------------------------------------*/
-UINT16 timer_getTickCount(void)
-{
-    UINT64 usTime = 0;
-
-    usTime = (UINT32)__HAL_TIM_GetCounter(&TimerHandle_l);
-
-    return usTime;
+    syncir_enterCriticalSection(fEnable_p);
 }
 
 /*============================================================================*/
@@ -164,30 +111,5 @@ UINT16 timer_getTickCount(void)
 /* \name Private Functions */
 /* \{ */
 
-/*----------------------------------------------------------------------------*/
-/**
-\brief  Initialize the timer core
-
-\ingroup module_timer
-*/
-/*----------------------------------------------------------------------------*/
-static BOOLEAN initTimer(void)
-{
-    BOOLEAN fReturn = FALSE;
-
-    TIMx_CLK_ENABLE();
-
-    TimerHandle_l.Instance = TIMx;
-    TimerHandle_l.Init.Period = 0xFFFF;
-    TimerHandle_l.Init.Prescaler = TIMER_PRESCALE_1US;
-    TimerHandle_l.Init.ClockDivision = 0;
-    TimerHandle_l.Init.CounterMode = TIM_COUNTERMODE_UP;
-    if(HAL_TIM_Base_Init(&TimerHandle_l) == HAL_OK)
-    {
-        fReturn = TRUE;
-    }
-
-    return fReturn;
-}
 
 /* \} */

@@ -118,24 +118,16 @@ FIND_PROGRAM(ALT_QSYS_SCRIPT qsys-script
 MARK_AS_ADVANCED(ALT_QSYS_SCRIPT)
 
 ###############################################################################
-# Set CFLAGS depending on build type
-IF( ${CMAKE_BUILD_TYPE} MATCHES "Debug" )
-    SET ( DBG_MODE _DEBUG)
-    SET ( DEF_DEBUG_LVL 0xEC000000L)
-    SET ( OPT_LEVEL -O0)
-ELSEIF ( ${CMAKE_BUILD_TYPE} MATCHES "Release" )
-    SET ( DBG_MODE NDEBUG)
-    SET ( DEF_DEBUG_LVL 0x00000000L)
-    SET ( OPT_LEVEL -O2)
-ELSEIF ( ${CMAKE_BUILD_TYPE} MATCHES "MinSizeRel" )
-    SET ( DBG_MODE NDEBUG)
-    SET ( DEF_DEBUG_LVL 0x00000000L)
-    SET ( OPT_LEVEL -Os)
-ELSE( ${CMAKE_BUILD_TYPE} MATCHES "Debug" )
-    SET ( DBG_MODE NDEBUG)
-    SET ( DEF_DEBUG_LVL 0x00000000L)
-    SET ( OPT_LEVEL -O2)
-ENDIF( ${CMAKE_BUILD_TYPE} MATCHES "Debug" )
+# Get opt level from build type
+IF(${CMAKE_BUILD_TYPE} MATCHES "Debug")
+    SET(OPT_LEVEL -O0)
+ELSEIF(${CMAKE_BUILD_TYPE} MATCHES "Release")
+    SET(OPT_LEVEL -O2)
+ELSEIF(${CMAKE_BUILD_TYPE} MATCHES "MinSizeRel")
+    SET(OPT_LEVEL -Os)
+ELSE()
+    SET(OPT_LEVEL -O2)
+ENDIF()
 
 ###############################################################################
 # Check plkif ipcore parameters

@@ -521,14 +521,14 @@ static void serialTransferFinished(BOOL fError_p)
 /*----------------------------------------------------------------------------*/
 static void errorHandler(tPsiErrorInfo* pErrorInfo_p)
 {
-#ifdef NDEBUG
-    UNUSED_PARAMETER(pErrorInfo_p);
-#else
+#ifdef _DEBUG
     /* Print error message */
     DEBUG_TRACE(DEBUG_LVL_ERROR,"ERROR: Module origin: 0x%0x, Error Code: 0x%0x\n",
                     pErrorInfo_p->srcModule_m,
                     pErrorInfo_p->errCode_m);
-#endif /* #ifdef NDEBUG */
+#else
+    UNUSED_PARAMETER(pErrorInfo_p);
+#endif /* #ifdef _DEBUG */
 }
 
 #if(((PSI_MODULE_INTEGRATION) & (PSI_MODULE_CC)) != 0)

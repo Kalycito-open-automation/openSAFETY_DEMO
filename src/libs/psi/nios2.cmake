@@ -48,14 +48,11 @@ SET( ALT_LIB_INCS ${LIB_INCS} )
 ########################################################################
 # Library Makefile
 ########################################################################
-
-SET( LIB_CFLAGS "${CMAKE_C_FLAGS} -D${DBG_MODE} -DDEF_DEBUG_LVL=${DEF_DEBUG_LVL}" )
-
 SET( ALT_LIB_GEN_ARGS
                      "--bsp-dir ${ALT_APP_BSP_DIR}"
                      "--lib-dir ${ALT_BUILD_DIR}"
                      "--lib-name ${PROJECT_NAME}"
-                     "--set LIB_CFLAGS_DEFINED_SYMBOLS=${LIB_CFLAGS}"
+                     "--set LIB_CFLAGS_DEFINED_SYMBOLS=${CMAKE_C_FLAGS}"
                      "--set LIB_CFLAGS_OPTIMIZATION=${OPT_LEVEL}"
                      "--set LIB_INCLUDE_DIRS=${ALT_LIB_INCS}"
                      "--src-files ${ALT_LIB_SRCS}"

@@ -50,7 +50,6 @@ to the HNF. Also the frame CRCs are calculated inside this module.
 #include <shnf/shnf.h>
 
 #include <shnf/hnf.h>
-#include <shnf/constime.h>
 #include <shnf/statehandler.h>
 
 #include <SODapi.h>
@@ -174,6 +173,8 @@ static BOOLEAN prepareTransmitFrame(UINT8 * pTargBuffer_p, UINT16 targBuffLen_p,
 /**
 \brief    Initialize the SHNF managing module
 
+\param[in] pfnProcSync_p    Pointer to the process sync callback
+
 The hardware near firmware provides the interface to the underlying
 black channel.
 
@@ -183,7 +184,7 @@ black channel.
 \ingroup module_shnf
 */
 /*----------------------------------------------------------------------------*/
-BOOLEAN shnf_init(void)
+BOOLEAN shnf_init(tProcSync pfnProcSync_p)
 {
     BOOLEAN fReturn = FALSE;
     tHnfInit hnfInitParam;
@@ -191,22 +192,27 @@ BOOLEAN shnf_init(void)
     MEMSET(&shnfInstance_l, 0, sizeof(tShnfInstance));
     MEMSET(&hnfInitParam, 0, sizeof(tHnfInit));
 
-    /* Initialize the local instance structure */
-    shnfInstance_l.ssdoRxStatus_m = kSsdoRxStatusReady;
-
-    /* Setup the HNF initialization parameters */
-    hnfInitParam.asyncRcvChan0Handler_m = processRxSsdoSnmtFrame;
-    hnfInitParam.syncRcvHandler_m = processRxSpdoFrame;
-    hnfInitParam.syncTxBuild_m = buildTxSpdoFrame;
-
-    /* Initialize the slim interface HNF */
-    if(hnf_init(&hnfInitParam))
+    if(pfnProcSync_p != NULL)
     {
-        /* Initialize the consecutive time module */
-        if(constime_init())
+        /* Initialize the local instance structure */
+        shnfInstance_l.ssdoRxStatus_m = kSsdoRxStatusReady;
+
+        /* Setup the HNF initialization parameters */
+        hnfInitParam.asyncRcvChan0Handler_m = processRxSsdoSnmtFrame;
+        hnfInitParam.syncRcvHandler_m = processRxSpdoFrame;
+        hnfInitParam.syncTxBuild_m = buildTxSpdoFrame;
+        hnfInitParam.pfnProcSync_m = pfnProcSync_p;
+
+        /* Initialize the slim interface HNF */
+        if(hnf_init(&hnfInitParam))
         {
+            /* Initialize the consecutive time module */
             fReturn = TRUE;
         }
+    }
+    else
+    {
+        errh_postFatalError(kErrSourceShnf, kErrorInvalidParameter, 0);
     }
 
     return fReturn;
@@ -222,7 +228,6 @@ BOOLEAN shnf_init(void)
 void shnf_exit(void)
 {
     hnf_exit();
-    constime_exit();
 }
 
 /*----------------------------------------------------------------------------*/
@@ -251,7 +256,7 @@ BOOLEAN shnf_process(void)
             {
                 if(stateh_getSnState() == kSnStateOperational)
                 {
-                    consTime = shnf_getConsecutiveTime();
+                    consTime = constime_getTime();
 
                     /* Guard timeout is checked in operational cyclically */
                     SNMTS_TimerCheck(B_INSTNUM_ consTime, &freeMngtFrmsCount);
@@ -262,7 +267,7 @@ BOOLEAN shnf_process(void)
         }
         case kSsdoRxStatusBusy:
         {
-            consTime = shnf_getConsecutiveTime();
+            consTime = constime_getTime();
 
             /* Call SSDO/SNMT process function with null argument to continue processing */
             ssdoProcRet = SSC_ProcessSNMTSSDOFrame(B_INSTNUM_ consTime, NULL, 0);
@@ -288,20 +293,14 @@ BOOLEAN shnf_process(void)
 
 /*----------------------------------------------------------------------------*/
 /**
-\brief    Get the current consecutive time
-
-\return The current value of the consecutive time
+\brief    Enable the synchronous interrupt
 
 \ingroup module_shnf
 */
 /*----------------------------------------------------------------------------*/
-UINT32 shnf_getConsecutiveTime(void)
+void shnf_enableSyncIr(void)
 {
-    UINT32 consTime;
-
-    consTime = constime_getTime();
-
-    return consTime;
+    hnf_enableSyncIr();
 }
 
 /*
@@ -425,6 +424,8 @@ BOOLEAN SHNF_MarkTxMemBlock(BYTE_B_INSTNUM_ const UINT8 *pb_memBlock)
                                     pTxDesc->txBuffer_m, pTxDesc->frameLen_m,
                                     FALSE))
             {
+                DEBUG_TRACE(DEBUG_LVL_SHNF, "Snd TPDO\n");
+
                 /* Forward filled buffer to HNF */
                 if(hnf_postSyncTx(pTargBuffer, targBuffLen))
                 {
@@ -458,6 +459,8 @@ BOOLEAN SHNF_MarkTxMemBlock(BYTE_B_INSTNUM_ const UINT8 *pb_memBlock)
                                     pTxDesc->txBuffer_m, pTxDesc->frameLen_m,
                                     pTxDesc->isSlim))
             {
+                DEBUG_TRACE(DEBUG_LVL_SHNF, "Snd SSDO/SNMT\n");
+
                 /* Post transmit frame to hnf */
                 if(hnf_postAsyncTxChannel0(pTargBuffer, pTxDesc->frameLen_m))
                 {
@@ -563,7 +566,9 @@ static void buildTxSpdoFrame(void)
 
     if(stateh_getSnState() == kSnStateOperational)
     {
-        consTime = shnf_getConsecutiveTime();
+        consTime = constime_getTime();
+
+        DEBUG_TRACE(DEBUG_LVL_SHNF, "Build TSPDO\n");
 
         /* SPDO frames are built */
         SPDO_BuildTxSpdo(B_INSTNUM_ consTime, &numFreeSpdoFrms);
@@ -594,7 +599,9 @@ static BOOLEAN processRxSsdoSnmtFrame(UINT8* pPayload_p, UINT16 paylLen_p)
 
     if(shnfInstance_l.ssdoRxStatus_m == kSsdoRxStatusReady)
     {
-        consTime = shnf_getConsecutiveTime();
+        consTime = constime_getTime();
+
+        DEBUG_TRACE(DEBUG_LVL_SHNF, "Rcv SSDO/SNMT\n");
 
         /* Forward frame to stack */
         procRet = SSC_ProcessSNMTSSDOFrame(B_INSTNUM_ consTime, pPayload_p, paylLen_p);
@@ -650,7 +657,9 @@ static void processRxSpdoFrame(UINT8* pPayload_p, UINT16 paylLen_p)
             pLenField = &pPayload_p[FRAME_OFFSET_LENGTH];
             if(*pLenField > 0)
             {
-                consTime = shnf_getConsecutiveTime();
+                DEBUG_TRACE(DEBUG_LVL_SHNF, "Rcv RSPDO\n");
+
+                consTime = constime_getTime();
 
                 /* Calculate real size of frame by using the length field */
                 paylLen = getFrameLength(pLenField);

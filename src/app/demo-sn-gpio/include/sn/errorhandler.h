@@ -63,6 +63,7 @@ typedef enum
     kErrorCallbackNotInitialized            = 0x04,     /**< A callback function should be called but is not initialized */
     kErrorInvalidTxMemory                   = 0x05,     /**< There is no transmit memory left for sending */
     kErrorUnableToGenerateStreamParams      = 0x06,     /**< Unable to generate parameters for the stream interface */
+    kErrorInitConsTimeFailed                = 0x07,     /**< Unable to init the consecutive timebase */
 
     kErrorSyncProcessFailed                 = 0x20,     /**< Processing the synchronous task has failed */
     kErrorSyncProcessActionFailed           = 0x21,     /**< Processing the post action has failed */
@@ -88,6 +89,7 @@ typedef enum
     kErrorUnableToReadFromSod               = 0x56,
     kErrorUnableToSetLengthInSod            = 0x57,
     kErrorNoCrcFieldAllocated               = 0x58,
+    kErrorUnableToOpenNvm                   = 0x59,
 
     kErrorSodStoreSizeMissmatch             = 0x60,
     kErrorSodStoreWriteError                = 0x61,
@@ -142,11 +144,16 @@ typedef struct
     extern "C" {
 #endif
 
+void errh_init(void);
+void errh_exit(void);
+
 void errh_postInfo(tErrSource source_p, tErrorTypes code_p, UINT32 addInfo_p);
 void errh_postMinorError(tErrSource source_p, tErrorTypes code_p, UINT32 addInfo_p);
 void errh_postFatalError(tErrSource source_p, tErrorTypes code_p, UINT32 addInfo_p);
 
 void errh_postError(tErrorDesc * pErrInfo_p);
+
+void errh_proccessError(void);
 
 
 #ifdef __cplusplus

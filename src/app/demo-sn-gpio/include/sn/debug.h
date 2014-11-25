@@ -1,8 +1,8 @@
 /**
 ********************************************************************************
-\file   shnf/hnf.h
+\file   sn/debug.h
 
-\brief  Hardware near firmware interface to the grey channel
+\brief  Debug header of the SN firmware
 
 *******************************************************************************/
 
@@ -33,36 +33,30 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
 
-#ifndef _INC_shnf_hnf_H_
-#define _INC_shnf_hnf_H_
+#ifndef _INC_sn_debug_H_
+#define _INC_sn_debug_H_
 
 /*----------------------------------------------------------------------------*/
 /* includes                                                                   */
 /*----------------------------------------------------------------------------*/
-#include <sn/global.h>
+#include <common/debug.h>
 
 /*----------------------------------------------------------------------------*/
 /* const defines                                                              */
 /*----------------------------------------------------------------------------*/
+#define DEBUG_LVL_SHNF                DEBUG_LVL_10          /**< Debug level of the SHNF module*/
+#define DEBUG_LVL_SHNF_TRACE          DEBUG_LVL_10_TRACE
+
+#define DEBUG_LVL_SAPL                DEBUG_LVL_11          /**< Debug level of the SAPL module*/
+#define DEBUG_LVL_SAPL_TRACE          DEBUG_LVL_11_TRACE
 
 /*----------------------------------------------------------------------------*/
 /* typedef                                                                    */
 /*----------------------------------------------------------------------------*/
 
-typedef BOOLEAN (*tAsyncRxHandler)(UINT8 * pPayload_p, UINT16 paylLen_p);
-typedef void (*tSyncRxHandler)(UINT8 * pPayload_p, UINT16 paylLen_p);
-typedef void (*tSyncTxCreate)(void);
-
-/**
- * \brief Module initialization parameters
- */
-typedef struct
-{
-    tAsyncRxHandler asyncRcvChan0Handler_m;       /**< Asynchronous receive handler */
-    tSyncRxHandler syncRcvHandler_m;              /**< Synchronous receive handler */
-    tSyncTxCreate syncTxBuild_m;                  /**< Trigger the build of synchronous transmit frames */
-    tProcSync pfnProcSync_m;                      /**< Process the syncronous task */
-} tHnfInit;
+/*----------------------------------------------------------------------------*/
+/* includes                                                                   */
+/*----------------------------------------------------------------------------*/
 
 /*----------------------------------------------------------------------------*/
 /* function prototypes                                                        */
@@ -72,28 +66,11 @@ typedef struct
     extern "C" {
 #endif
 
-BOOLEAN hnf_init(tHnfInit * pHnfInit_p);
-void hnf_exit(void);
 
-BOOLEAN hnf_processAsync(void);
-
-/* Access functions of the asynchronous channels */
-BOOLEAN hnf_postAsyncTxChannel0(const UINT8 * pPayload_p, UINT16 paylLen_p);
-BOOLEAN hnf_getAsyncTxBufferChannel0(UINT8 ** ppTxBuffer_p, UINT16 * pBuffLen_p);
-void hnf_finishedAsyncRxChannel0(void);
-
-/* Access functions of the logbook channels */
-BOOLEAN hnf_postLogChannel0(tErrorDesc * pErrDesc_p);
-
-/* Access functions of the synchronous channels */
-BOOLEAN hnf_postSyncTx(const UINT8 * pPayload_p, UINT16 paylLen_p);
-BOOLEAN hnf_getSyncTxBuffer(UINT8 ** ppTxBuffer_p, UINT16 * pBuffLen_p);
-
-void hnf_enableSyncIr(void);
 
 #ifdef __cplusplus
     }
 #endif
 
 
-#endif /* _INC_shnf_shnf_H_ */
+#endif /* _INC_sn_debug_H_ */

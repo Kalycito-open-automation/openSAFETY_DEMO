@@ -57,12 +57,12 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     extern "C" {
 #endif
 
-BOOLEAN shnf_init(void);
+BOOLEAN shnf_init(tProcSync pfnProcSync_p);
 void shnf_exit(void);
 
 BOOLEAN shnf_process(void);
 
-UINT32 shnf_getConsecutiveTime(void);
+void shnf_enableSyncIr(void);
 
 #ifdef __cplusplus
     }

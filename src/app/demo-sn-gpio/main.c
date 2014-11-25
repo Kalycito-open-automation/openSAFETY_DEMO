@@ -90,6 +90,9 @@ stack and processes the background task.
 /* local types                                                                */
 /*----------------------------------------------------------------------------*/
 
+/**
+ * \brief Main module instance type
+ */
 typedef struct
 {
     SNMTS_t_SN_STATE_MAIN lastSnState_m;   /**< Consists of the last SN state */
@@ -101,7 +104,7 @@ typedef struct
 
 static tMainInstance instance_l SAFE_INIT_SEKTOR;
 
-#ifndef NDEBUG
+#ifdef _DEBUG
 static char *strSnStates[] = { "SNMTS_k_ST_INITIALIZATION",
                                "SNMTS_k_ST_PRE_OPERATIONAL",
                                "SNMTS_k_ST_OPERATIONAL"};
@@ -112,12 +115,15 @@ static char *strSnStates[] = { "SNMTS_k_ST_INITIALIZATION",
 /*----------------------------------------------------------------------------*/
 static BOOLEAN initOpenSafety(void);
 
-static BOOLEAN process(void);
-#ifndef NDEBUG
+static BOOLEAN processAsync(void);
+static BOOLEAN processSync(void);
+
+#ifdef _DEBUG
 static void printSNState(void);
 #endif
 static void checkConnectionValid(void);
 
+static BOOLEAN handleStateChange(void);
 static BOOLEAN enterPreOperational(void);
 static BOOLEAN enterOperational(void);
 
@@ -166,36 +172,54 @@ int main (void)
     /* Initialize the state handler */
     if(stateh_init(kSnStateInitializing))
     {
+        errh_init();
+
         /* Initialize the openSAFETY stack and change state to init */
         if(initOpenSafety())
         {
-            /* Initialize the SHNF module */
-            if(shnf_init())
+            /* Initialize the consecutive time module */
+            if(constime_init())
             {
-                /* Initialize the safe application module */
-                DEBUG_TRACE(DEBUG_LVL_ALWAYS, "\nInitialize the SAPL -> ");
-                if(sapl_init())
+                /* Initialize the SHNF module */
+                if(shnf_init(processSync))
                 {
-                    DEBUG_TRACE(DEBUG_LVL_ALWAYS, "SUCCESS!\n");
-
-                    /* Restore the SOD from NVS if possible */
-                    if(sapl_restoreSod())
+                    /* Initialize the safe application module */
+                    DEBUG_TRACE(DEBUG_LVL_ALWAYS, "\nInitialize the SAPL -> ");
+                    if(sapl_init())
                     {
-                        /* Change state of the openSAFETY stack to pre operational */
-                        if(enterPreOperational())
+                        DEBUG_TRACE(DEBUG_LVL_ALWAYS, "SUCCESS!\n");
+
+                        /* Restore the SOD from NVS if possible */
+                        if(sapl_restoreSod())
                         {
-                            DEBUG_TRACE(DEBUG_LVL_ALWAYS, "\n\nStart processing ... \n ");
-                            if(process())
+                            /* Change state of the openSAFETY stack to pre operational */
+                            if(enterPreOperational())
                             {
-                                /* Shutdown triggered -> Terminate! */
-                                retVal = 0;
-                            }
+
+                                /* Enable the synchronous interrupt */
+                                shnf_enableSyncIr();
+
+                                DEBUG_TRACE(DEBUG_LVL_ALWAYS, "\nStart processing ... \n ");
+
+                                if(processAsync())
+                                {
+                                    /* Shutdown triggered -> Terminate! */
+                                    retVal = 0;
+                                }
+                            }   /* no else: Error is already reported in the called function */
                         }   /* no else: Error is already reported in the called function */
                     }   /* no else: Error is already reported in the called function */
                 }   /* no else: Error is already reported in the called function */
-            }   /* no else: Error is already reported in the called function */
+            }
+            else
+            {
+                errh_postFatalError(kErrSourcePeriph, kErrorInitConsTimeFailed, 0);
+            }
         }   /* no else: Error is already reported via SAPL_SERR_SignalErrorClbk */
     }   /* no else: Error is already reported in the called function */
+
+    /* Print error before shutdown */
+    errh_proccessError();
 
     shutdown();
 
@@ -249,9 +273,11 @@ static BOOLEAN initOpenSafety(void)
 
 /*----------------------------------------------------------------------------*/
 /**
-\brief    Process all periodic actions
+\brief    Process all asynchronous actions
 
-Initialize the openSAFETY stack and switch the SN to the Pre-operational state.
+Call all non time critical tasks in the background loop. No function of the
+openSAFETY stack where the consecutive timebase is needed shall be
+called in this context.
 
 \retval TRUE    Shutdown is triggered
 \retval FALSE   Processing failed due to error
@@ -259,60 +285,77 @@ Initialize the openSAFETY stack and switch the SN to the Pre-operational state.
 \ingroup module_main
 */
 /*----------------------------------------------------------------------------*/
-static BOOLEAN process(void)
+static BOOLEAN processAsync(void)
 {
     BOOLEAN fReturn = FALSE;
 
     while(TRUE)
     {
-        /* Periodically process the asynchronous task of the SHNF */
-        if(shnf_process() == FALSE)
-        {
-            DEBUG_TRACE(DEBUG_LVL_ERROR,"ERROR: Processing of the SHNF failed!\n");
-            break;
-        }
-
-        if(sapl_process() == FALSE)
-        {
-            DEBUG_TRACE(DEBUG_LVL_ALWAYS, "ERROR: Processing of the SAPL failed!\n");
-            break;
-        }
-
-#ifndef NDEBUG
+#ifdef _DEBUG
         printSNState();
 #endif
 
         checkConnectionValid();
 
-        /* Check if operational flag is active */
-        if(stateh_getEnterOpFlag())
-        {
-            if(enterOperational() == FALSE)
-            {
-                break;
-            }
-        }
-
-        /* Check if enter preop flag is active */
-        if(stateh_getEnterPreOpFlag())
-        {
-            if(enterPreop() == FALSE)
-            {
-                break;
-            }
-        }
+        /* Process a possible error */
+        errh_proccessError();
 
         if(stateh_getShutdownFlag())
         {
             fReturn = TRUE;
             break;
         }
+
+        /* Periodically process the asynchronous task of the SAPL */
+        if(sapl_process() == FALSE)
+        {
+            DEBUG_TRACE(DEBUG_LVL_ALWAYS, "\nProcessing the SAPL failed ...\n");
+            break;
+        }
+
+
     }
 
     return fReturn;
 }
 
-#ifndef NDEBUG
+/*----------------------------------------------------------------------------*/
+/**
+\brief    Process all synchronous actions
+
+Process all openSAFETY stack tasks which would be possible to be called in the
+background loop at the end of the synchronous task. In order to reduce the cycle
+time this tasks are multiplexed over multiple cycles.
+
+\note Calling this function synchronous ensures a valid consecutive time.
+
+\retval TRUE    Processing of sync task successful
+\retval FALSE   Processing failed due to error
+
+\ingroup module_main
+*/
+/*----------------------------------------------------------------------------*/
+static BOOLEAN processSync(void)
+{
+    BOOLEAN fReturn = FALSE;
+
+    /* Call the consecutive time process function in each cycle */
+    constime_process();
+
+    /* Periodically process the asynchronous task of the SHNF */
+    if(shnf_process())
+    {
+        /* Handle internal state changes */
+        if(handleStateChange())
+        {
+            fReturn = TRUE;
+        }
+    }
+
+    return fReturn;
+}
+
+#ifdef _DEBUG
 /*----------------------------------------------------------------------------*/
 /**
 \brief    Print the current state of the SN
@@ -376,6 +419,44 @@ static void checkConnectionValid(void)
 
 /*----------------------------------------------------------------------------*/
 /**
+\brief    Handle state changes of the openSAFETY stack
+
+\return Processing successful; Error on state change
+
+\ingroup module_main
+*/
+/*----------------------------------------------------------------------------*/
+static BOOLEAN handleStateChange(void)
+{
+    BOOLEAN fReturn = FALSE;
+
+    if(stateh_getEnterOpFlag())
+    {
+        /* Perform state change to operational */
+        if(enterOperational())
+        {
+            fReturn = TRUE;
+        }
+    }
+    else if(stateh_getEnterPreOpFlag())
+    {
+        /* Perform state change to pre operational */
+        if(enterPreop())
+        {
+            fReturn = TRUE;
+        }
+    }
+    else
+    {
+        /* No state change in this cycle */
+        fReturn = TRUE;
+    }
+
+    return fReturn;
+}
+
+/*----------------------------------------------------------------------------*/
+/**
 \brief    Perform state change to pre operational state
 
 \retval TRUE    Change to pre operational successful
@@ -389,14 +470,14 @@ static BOOLEAN enterPreOperational(void)
     BOOLEAN fReturn = FALSE;
     UINT32 consTime = 0;
 
-    consTime = shnf_getConsecutiveTime();
+    consTime = constime_getTime();
 
     /* transition to PreOperational */
     if(SNMTS_PerformTransPreOp(B_INSTNUM_ consTime))
     {
         stateh_setSnState(kSnStatePreOperational);
 
-#ifndef NDEBUG
+#ifdef _DEBUG
         printSNState();
 #endif
 
@@ -460,7 +541,7 @@ static BOOLEAN enterPreop(void)
     BOOLEAN fReturn = FALSE;
     UINT32 consTime = 0;
 
-    consTime = shnf_getConsecutiveTime();
+    consTime = constime_getTime();
 
     /* Perform transition to pre operational */
     if(SNMTS_PerformTransPreOp(B_INSTNUM_ consTime))
@@ -495,7 +576,9 @@ static void shutdown(void)
     sapl_exit();
 
     stateh_exit();
+    errh_exit();
 
+    constime_exit();
     gpio_close();
     platform_exit();
 }
