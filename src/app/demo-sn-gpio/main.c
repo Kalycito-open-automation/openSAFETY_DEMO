@@ -127,7 +127,6 @@ static BOOLEAN handleStateChange(void);
 static BOOLEAN enterPreOperational(void);
 static BOOLEAN enterOperational(void);
 
-static BOOLEAN enterPreop(void);
 static void shutdown(void);
 
 
@@ -441,7 +440,7 @@ static BOOLEAN handleStateChange(void)
     else if(stateh_getEnterPreOpFlag())
     {
         /* Perform state change to pre operational */
-        if(enterPreop())
+        if(enterPreOperational())
         {
             fReturn = TRUE;
         }
@@ -477,16 +476,18 @@ static BOOLEAN enterPreOperational(void)
     {
         stateh_setSnState(kSnStatePreOperational);
 
-#ifdef _DEBUG
-        printSNState();
-#endif
-
         fReturn = TRUE;
+
+        /* call the Control Flow Monitoring */
+        SCFM_TACK_PATH();
     }
     else
     {
         errh_postFatalError(kErrSourcePeriph, kErrorEnterPreOperationalFailed, 0);
     }
+
+    /* Reset the enter pre operation flag */
+     stateh_setEnterPreOpFlag(FALSE);
 
     return fReturn;
 }
@@ -522,43 +523,6 @@ static BOOLEAN enterOperational(void)
 
     /* Reset the operation flag */
     stateh_setEnterOpFlag(FALSE);
-
-    return fReturn;
-}
-
-/*----------------------------------------------------------------------------*/
-/**
-\brief    Handle the switch to preop state
-
-\retval TRUE    Change to preop successful
-\retval FALSE   Failed to change the state
-
-\ingroup module_main
-*/
-/*----------------------------------------------------------------------------*/
-static BOOLEAN enterPreop(void)
-{
-    BOOLEAN fReturn = FALSE;
-    UINT32 consTime = 0;
-
-    consTime = constime_getTime();
-
-    /* Perform transition to pre operational */
-    if(SNMTS_PerformTransPreOp(B_INSTNUM_ consTime))
-    {
-        /* Transition to preop successful! */
-        fReturn = TRUE;
-
-        /* call the Control Flow Monitoring */
-        SCFM_TACK_PATH();
-    }
-    else
-    {
-        errh_postFatalError(kErrSourcePeriph, kErrorEnterFailSafeFailed, 0);
-    }
-
-    /* Reset the enter pre operation flag */
-    stateh_setEnterPreOpFlag(FALSE);
 
     return fReturn;
 }
