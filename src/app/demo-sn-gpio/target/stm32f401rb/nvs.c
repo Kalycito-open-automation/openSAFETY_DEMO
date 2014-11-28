@@ -73,7 +73,7 @@ flash memory for target stm32f103.
 /*----------------------------------------------------------------------------*/
 /* const defines                                                              */
 /*----------------------------------------------------------------------------*/
-#define FLASH_IMAGE_OFFSET        0x20000UL       /**< Offset of the stored SOD in the NVS (Sector: 5) */
+#define FLASH_IMAGE_OFFSET        0x40000UL       /**< Offset of the stored SOD in the NVS (Sector: 6) */
 
 /* Base address of the Flash sectors Bank 1 */
 #define ADDR_FLASH_SECTOR_0     ((uint32_t)0x08000000)    /**< Base @ of Sector 0, 16 Kbytes */
