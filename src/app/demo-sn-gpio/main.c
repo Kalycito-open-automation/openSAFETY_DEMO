@@ -49,6 +49,7 @@ stack and processes the background task.
 
 #include <sn/global.h>
 #include <sn/gpio.h>
+#include <sn/cyclemon.h>
 
 #include <common/platform.h>
 
@@ -117,6 +118,7 @@ static BOOLEAN initOpenSafety(void);
 
 static BOOLEAN processAsync(void);
 static BOOLEAN processSync(void);
+static BOOLEAN syncCycle(void);
 
 #ifdef _DEBUG
 static void printSNState(void);
@@ -126,6 +128,8 @@ static void checkConnectionValid(void);
 static BOOLEAN handleStateChange(void);
 static BOOLEAN enterPreOperational(void);
 static BOOLEAN enterOperational(void);
+
+static void enterReset(void);
 
 static void shutdown(void);
 
@@ -152,8 +156,10 @@ APs state machine will be updated and input/output ports will be processed.
 int main (void)
 {
     int retVal = -1;
+    tShnfInitParam shnfInitParam;
 
     MEMSET(&instance_l, 0, sizeof(tMainInstance));
+    MEMSET(&shnfInitParam, 0, sizeof(tShnfInitParam));
 
     /* Initialize target specific functions */
     platform_init();
@@ -179,36 +185,43 @@ int main (void)
             /* Initialize the consecutive time module */
             if(constime_init())
             {
-                /* Initialize the SHNF module */
-                if(shnf_init(processSync))
+                /* Initialize the cycle monitoring module */
+                if(cyclemon_init())
                 {
-                    /* Initialize the safe application module */
-                    DEBUG_TRACE(DEBUG_LVL_ALWAYS, "\nInitialize the SAPL -> ");
-                    if(sapl_init())
+                    /* Initialize the SHNF module */
+                    shnfInitParam.pfnSyncronize_m = syncCycle;
+                    shnfInitParam.pfnProcSync_m = processSync;
+
+                    if(shnf_init(&shnfInitParam))
                     {
-                        DEBUG_TRACE(DEBUG_LVL_ALWAYS, "SUCCESS!\n");
-
-                        /* Restore the SOD from NVS if possible */
-                        if(sapl_restoreSod())
+                        /* Initialize the safe application module */
+                        DEBUG_TRACE(DEBUG_LVL_ALWAYS, "\nInitialize the SAPL -> ");
+                        if(sapl_init())
                         {
-                            /* Change state of the openSAFETY stack to pre operational */
-                            if(enterPreOperational())
+                            DEBUG_TRACE(DEBUG_LVL_ALWAYS, "SUCCESS!\n");
+
+                            /* Restore the SOD from NVS if possible */
+                            if(sapl_restoreSod())
                             {
-
-                                /* Enable the synchronous interrupt */
-                                shnf_enableSyncIr();
-
-                                DEBUG_TRACE(DEBUG_LVL_ALWAYS, "\nStart processing ... \n ");
-
-                                if(processAsync())
+                                /* Change state of the openSAFETY stack to pre operational */
+                                if(enterPreOperational())
                                 {
-                                    /* Shutdown triggered -> Terminate! */
-                                    retVal = 0;
-                                }
+
+                                    /* Enable the synchronous interrupt */
+                                    shnf_enableSyncIr();
+
+                                    DEBUG_TRACE(DEBUG_LVL_ALWAYS, "\nStart processing ... \n ");
+
+                                    if(processAsync())
+                                    {
+                                        /* Shutdown triggered -> Terminate! */
+                                        retVal = 0;
+                                    }
+                                }   /* no else: Error is already reported in the called function */
                             }   /* no else: Error is already reported in the called function */
                         }   /* no else: Error is already reported in the called function */
                     }   /* no else: Error is already reported in the called function */
-                }   /* no else: Error is already reported in the called function */
+                }
             }
             else
             {
@@ -287,6 +300,7 @@ called in this context.
 static BOOLEAN processAsync(void)
 {
     BOOLEAN fReturn = FALSE;
+    BOOLEAN fTimeout = FALSE;
 
     while(TRUE)
     {
@@ -312,6 +326,12 @@ static BOOLEAN processAsync(void)
             break;
         }
 
+        /* Check if the cycle monitoring has a timeout */
+        fTimeout = cyclemon_checkTimeout();
+        if(fTimeout == TRUE)
+        {
+            enterReset();
+        }
 
     }
 
@@ -326,7 +346,7 @@ Process all openSAFETY stack tasks which would be possible to be called in the
 background loop at the end of the synchronous task. In order to reduce the cycle
 time this tasks are multiplexed over multiple cycles.
 
-\note Calling this function synchronous ensures a valid consecutive time.
+\note Calling these functions synchronous ensures a valid consecutive time.
 
 \retval TRUE    Processing of sync task successful
 \retval FALSE   Processing failed due to error
@@ -338,9 +358,6 @@ static BOOLEAN processSync(void)
 {
     BOOLEAN fReturn = FALSE;
 
-    /* Call the consecutive time process function in each cycle */
-    constime_process();
-
     /* Periodically process the asynchronous task of the SHNF */
     if(shnf_process())
     {
@@ -349,6 +366,37 @@ static BOOLEAN processSync(void)
         {
             fReturn = TRUE;
         }
+    }
+
+    return fReturn;
+}
+
+/*----------------------------------------------------------------------------*/
+/**
+\brief    Synchronize to the current cycle
+
+This function is used to synchronize to the current synchronous IR cycle. It
+monitors the cycle time and processes the consecutive time.
+
+\note This function is always called at the start of the sync ISR.
+
+\retval TRUE    Processing of sync cycle successful
+\retval FALSE   Processing failed due to error
+
+\ingroup module_main
+*/
+/*----------------------------------------------------------------------------*/
+static BOOLEAN syncCycle(void)
+{
+    BOOLEAN fReturn = FALSE;
+
+    /* Call the consecutive time process function in each cycle */
+    constime_process();
+
+    /* Call the cycle monitoring process function */
+    if(cyclemon_process())
+    {
+        fReturn = TRUE;
     }
 
     return fReturn;
@@ -529,6 +577,22 @@ static BOOLEAN enterOperational(void)
 
 /*----------------------------------------------------------------------------*/
 /**
+\brief    On a cycle time violation a reset needs to be performed
+
+\ingroup module_main
+*/
+/*----------------------------------------------------------------------------*/
+static void enterReset(void)
+{
+    shnf_reset();
+    sapl_reset();
+
+    /* Switch to preop */
+    (void)enterPreOperational();
+}
+
+/*----------------------------------------------------------------------------*/
+/**
 \brief    Shutdown the SN and cleanup all structures
 
 \ingroup module_main
@@ -539,7 +603,6 @@ static void shutdown(void)
     shnf_exit();
     sapl_exit();
 
-    stateh_exit();
     errh_exit();
 
     constime_exit();

@@ -106,6 +106,7 @@ SET(SN_SRCS
     ${PROJECT_SOURCE_DIR}/errorhandler.c
     ${DEMO_CONFIG_DIR}/sn/sod.c
     ${PROJECT_SOURCE_DIR}/util.c
+    ${PROJECT_SOURCE_DIR}/cyclemon.c
 )
 
 SET(DEMO_SRCS

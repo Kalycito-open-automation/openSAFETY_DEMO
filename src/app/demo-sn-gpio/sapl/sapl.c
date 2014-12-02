@@ -189,6 +189,20 @@ void sapl_exit(void)
 
 /*----------------------------------------------------------------------------*/
 /**
+\brief    Reset all SAPL internals
+
+\note This function is called on a cycle time violation
+
+\ingroup module_shnf
+*/
+/*----------------------------------------------------------------------------*/
+void sapl_reset(void)
+{
+    /* Call the application here and reset all outputs */
+}
+
+/*----------------------------------------------------------------------------*/
+/**
 \brief    Process the SAPL background task
 
 \retval TRUE    Processing of the SAPL successful

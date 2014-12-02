@@ -95,7 +95,9 @@ typedef enum
     kErrorSodStoreWriteError                = 0x61,
     kErrorSodStoreCrcError                  = 0x62,
 
-    kErrorSerialTransferFailed              = 0x70,     /**< Error during the serial transfer */
+    kErrorCycleMonStateInvalid              = 0x70,     /**< Invalid cycle monitoring state */
+
+    kErrorSerialTransferFailed              = 0x80,     /**< Error during the serial transfer */
 } tErrorTypes;
 
 

@@ -173,7 +173,7 @@ static BOOLEAN prepareTransmitFrame(UINT8 * pTargBuffer_p, UINT16 targBuffLen_p,
 /**
 \brief    Initialize the SHNF managing module
 
-\param[in] pfnProcSync_p    Pointer to the process sync callback
+\param[in] pInitParam_p    Pointer to the init parameters
 
 The hardware near firmware provides the interface to the underlying
 black channel.
@@ -184,7 +184,7 @@ black channel.
 \ingroup module_shnf
 */
 /*----------------------------------------------------------------------------*/
-BOOLEAN shnf_init(tProcSync pfnProcSync_p)
+BOOLEAN shnf_init(tShnfInitParam * pInitParam_p)
 {
     BOOLEAN fReturn = FALSE;
     tHnfInit hnfInitParam;
@@ -192,22 +192,31 @@ BOOLEAN shnf_init(tProcSync pfnProcSync_p)
     MEMSET(&shnfInstance_l, 0, sizeof(tShnfInstance));
     MEMSET(&hnfInitParam, 0, sizeof(tHnfInit));
 
-    if(pfnProcSync_p != NULL)
+    if(pInitParam_p != NULL)
     {
-        /* Initialize the local instance structure */
-        shnfInstance_l.ssdoRxStatus_m = kSsdoRxStatusReady;
-
-        /* Setup the HNF initialization parameters */
-        hnfInitParam.asyncRcvChan0Handler_m = processRxSsdoSnmtFrame;
-        hnfInitParam.syncRcvHandler_m = processRxSpdoFrame;
-        hnfInitParam.syncTxBuild_m = buildTxSpdoFrame;
-        hnfInitParam.pfnProcSync_m = pfnProcSync_p;
-
-        /* Initialize the slim interface HNF */
-        if(hnf_init(&hnfInitParam))
+        if(pInitParam_p->pfnProcSync_m != NULL  &&
+           pInitParam_p->pfnSyncronize_m != NULL )
         {
-            /* Initialize the consecutive time module */
-            fReturn = TRUE;
+            /* Initialize the local instance structure */
+            shnfInstance_l.ssdoRxStatus_m = kSsdoRxStatusReady;
+
+            /* Setup the HNF initialization parameters */
+            hnfInitParam.asyncRcvChan0Handler_m = processRxSsdoSnmtFrame;
+            hnfInitParam.syncRcvHandler_m = processRxSpdoFrame;
+            hnfInitParam.syncTxBuild_m = buildTxSpdoFrame;
+            hnfInitParam.pfnProcSync_m = pInitParam_p->pfnProcSync_m;
+            hnfInitParam.pfnSyncronize_m = pInitParam_p->pfnSyncronize_m;
+
+            /* Initialize the slim interface HNF */
+            if(hnf_init(&hnfInitParam))
+            {
+                /* Initialize the consecutive time module */
+                fReturn = TRUE;
+            }
+        }
+        else
+        {
+            errh_postFatalError(kErrSourceShnf, kErrorInvalidParameter, 0);
         }
     }
     else
@@ -228,6 +237,21 @@ BOOLEAN shnf_init(tProcSync pfnProcSync_p)
 void shnf_exit(void)
 {
     hnf_exit();
+}
+
+/*----------------------------------------------------------------------------*/
+/**
+\brief    Reset all SHNF internals
+
+\note This function is called on a cycle time violation
+
+\ingroup module_shnf
+*/
+/*----------------------------------------------------------------------------*/
+void shnf_reset(void)
+{
+    /* Reset the connection valid bit field */
+    MEMSET(&SHNF_aaulConnValidBit[B_INSTNUMidx][0],0,sizeof(SHNF_aaulConnValidBit[B_INSTNUMidx]));
 }
 
 /*----------------------------------------------------------------------------*/

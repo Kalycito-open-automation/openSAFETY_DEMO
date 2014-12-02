@@ -61,7 +61,8 @@ typedef struct
     tAsyncRxHandler asyncRcvChan0Handler_m;       /**< Asynchronous receive handler */
     tSyncRxHandler syncRcvHandler_m;              /**< Synchronous receive handler */
     tSyncTxCreate syncTxBuild_m;                  /**< Trigger the build of synchronous transmit frames */
-    tProcSync pfnProcSync_m;                      /**< Process the syncronous task */
+    tProcSync pfnProcSync_m;                      /**< Process the synchronous task */
+    tSyncCycle pfnSyncronize_m;                   /**< Callback to synchronize to the current cycle*/
 } tHnfInit;
 
 /*----------------------------------------------------------------------------*/

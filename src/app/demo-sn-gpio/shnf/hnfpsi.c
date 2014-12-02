@@ -110,6 +110,7 @@ typedef struct {
     tSyncTxCreate pfnSpdoTxCreate_m;                        /**< Triggers the building of a transmit spdo frame */
     tBuffer spdo0TxBuffer_m;                                /**< Describes the current transmit buffer of the spdo0 channel */
     tProcSync pfnProcSync_m;                                /**< Pointer to the process sync callback function */
+    tSyncCycle pfnSyncronize_m;                             /**< Pointer to the synchronization callback function */
 } tHnfPsiInstance;
 
 /*----------------------------------------------------------------------------*/
@@ -175,6 +176,7 @@ BOOLEAN hnf_init(tHnfInit * pHnfInit_p)
             hnfPsiInstance_l.pfnSpdoRxHandler_m = pHnfInit_p->syncRcvHandler_m;
             hnfPsiInstance_l.pfnSpdoTxCreate_m = pHnfInit_p->syncTxBuild_m;
             hnfPsiInstance_l.pfnProcSync_m = pHnfInit_p->pfnProcSync_m;
+            hnfPsiInstance_l.pfnSyncronize_m = pHnfInit_p->pfnSyncronize_m;
 
             /* Init array of SSDO channel receive handler */
             hnfPsiInstance_l.apfnSsdoRxHandler[kNumSsdoChan0] = processRxAsyncChannel0;
@@ -696,12 +698,23 @@ static void exitModules(void)
 /*----------------------------------------------------------------------------*/
 static BOOL processSync(tPsiTimeStamp* pTimeStamp_p )
 {
+    BOOL fReturn = FALSE;
+
     UNUSED_PARAMETER(pTimeStamp_p);
 
     /* Note: This is your place to do local synchronization. Synchronize */
     /*       your local clock here by using the provided timestamp. */
 
-    return TRUE;
+    if(hnfPsiInstance_l.pfnSyncronize_m != NULL)
+    {
+        /* Call the synchronization callback function */
+        if(hnfPsiInstance_l.pfnSyncronize_m())
+        {
+            fReturn = TRUE;
+        }
+    }
+
+    return fReturn;
 }
 
 /*----------------------------------------------------------------------------*/

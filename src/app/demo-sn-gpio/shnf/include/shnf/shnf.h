@@ -49,6 +49,15 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /* typedef                                                                    */
 /*----------------------------------------------------------------------------*/
 
+/**
+ * \brief Shnf module initialization parameters
+ */
+typedef struct
+{
+    tProcSync pfnProcSync_m;    /**< Pointer to the process sync callback */
+    tSyncCycle pfnSyncronize_m; /**< Pointer to the sync cycle callback function */
+} tShnfInitParam;
+
 /*----------------------------------------------------------------------------*/
 /* function prototypes                                                        */
 /*----------------------------------------------------------------------------*/
@@ -57,8 +66,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     extern "C" {
 #endif
 
-BOOLEAN shnf_init(tProcSync pfnProcSync_p);
+BOOLEAN shnf_init(tShnfInitParam * pInitParam_p);
 void shnf_exit(void);
+
+void shnf_reset(void);
 
 BOOLEAN shnf_process(void);
 

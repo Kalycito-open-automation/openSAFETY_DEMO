@@ -1,8 +1,8 @@
 /**
 ********************************************************************************
-\file   sapl/sapl.h
+\file   sn/cyclemon.h
 
-\brief  Interface to the application near firmware module.
+\brief  Cycle monitoring module header
 
 *******************************************************************************/
 
@@ -33,23 +33,34 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
 
-#ifndef _INC_sapl_H_
-#define _INC_sapl_H_
+#ifndef _INC_sn_cyclemon_H_
+#define _INC_sn_cyclemon_H_
 
 /*----------------------------------------------------------------------------*/
 /* includes                                                                   */
 /*----------------------------------------------------------------------------*/
 #include <sn/global.h>
 
-#include <sapl/saplapi.h>
 
 /*----------------------------------------------------------------------------*/
 /* const defines                                                              */
 /*----------------------------------------------------------------------------*/
 
+
 /*----------------------------------------------------------------------------*/
 /* typedef                                                                    */
 /*----------------------------------------------------------------------------*/
+
+/**
+ * \brief Represents the states of the cycle monitoring
+ */
+typedef enum
+{
+    kCycleMonStateInvalid   = 0x0,      /**< Invalid state reached */
+    kCycleMonStateInit      = 0x1,      /**< Cycle monitoring is initializing */
+    kCycleMonStateActive    = 0x2,      /**< Cycle monitoring is active */
+    kCycleMonStateTimeout   = 0x3,      /**< Cycle monitoring has encountered a timeout */
+} tCycleMonState;
 
 /*----------------------------------------------------------------------------*/
 /* function prototypes                                                        */
@@ -59,18 +70,15 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     extern "C" {
 #endif
 
-BOOLEAN sapl_init(void);
-void sapl_exit(void);
+BOOLEAN cyclemon_init(void);
+void cyclemon_exit(void);
 
-void sapl_reset(void);
-
-BOOLEAN sapl_process(void);
-
-BOOLEAN sapl_restoreSod(void);
+BOOLEAN cyclemon_process(void);
+BOOLEAN cyclemon_checkTimeout(void);
 
 #ifdef __cplusplus
     }
 #endif
 
 
-#endif /* _INC_sapl_H_ */
+#endif /* _INC_sn_cyclemon_H_ */
