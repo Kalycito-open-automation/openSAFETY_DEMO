@@ -132,6 +132,8 @@ BOOL platform_init(void)
 {
     BOOL retVal = FALSE;
 
+    (void)HAL_DeInit();
+
     if(HAL_Init() == HAL_OK)
     {
         if(systemClockInit())
