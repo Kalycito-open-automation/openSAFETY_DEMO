@@ -245,18 +245,12 @@ tProcCrcRet paramcrc_process(void)
                 /* Parameter CRC is valid */
                 paramCrcInstance_l.paramCrcState_m = kParamCrcStateInvalid;
                 paramCrcRet = kParamCrcProcCrcValid;
-
-                /* call the Control Flow Monitoring */
-                SCFM_TACK_PATH();
             }
             else
             {
                 /* Parameter CRC is not valid */
                 paramCrcInstance_l.paramCrcState_m = kParamCrcStateInvalid;
                 paramCrcRet = kParamCrcProcCrcInvalid;
-
-                /* call the Control Flow Monitoring */
-                SCFM_TACK_PATH();
             }
             break;
         }

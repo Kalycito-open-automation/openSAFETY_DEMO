@@ -400,9 +400,6 @@ UINT8 * SHNF_GetTxMemBlock(BYTE_B_INSTNUM_ UINT16 w_blockSize,
         }
     }
 
-    /* call the Control Flow Monitoring */
-    SCFM_TACK_PATH();
-
     return pResBuffer;
 
 }
@@ -512,9 +509,6 @@ BOOLEAN SHNF_MarkTxMemBlock(BYTE_B_INSTNUM_ const UINT8 *pb_memBlock)
         errh_postFatalError(kErrSourceShnf, kErrorInvalidTxMemory, 0);
     }
 
-    /* call the Control Flow Monitoring */
-    SCFM_TACK_PATH();
-
     return fReturn;
 }
 
@@ -596,9 +590,6 @@ static void buildTxSpdoFrame(void)
 
         /* SPDO frames are built */
         SPDO_BuildTxSpdo(B_INSTNUM_ consTime, &numFreeSpdoFrms);
-
-        /* call the Control Flow Monitoring */
-        SCFM_TACK_PATH();
     }
 }
 
@@ -642,9 +633,6 @@ static BOOLEAN processRxSsdoSnmtFrame(UINT8* pPayload_p, UINT16 paylLen_p)
                 /* Frame is finished without change to busy */
                 fReturn = TRUE;
             }
-
-            /* call the Control Flow Monitoring */
-            SCFM_TACK_PATH();
         }   /* no else: frame can only be posted when state machine is ready -> return false! */
     }
     else
@@ -702,9 +690,6 @@ static void processRxSpdoFrame(UINT8* pPayload_p, UINT16 paylLen_p)
                 /* SCT timeout is checked */
                 SPDO_CheckRxTimeout(B_INSTNUM_ consTime);
 #endif
-
-                /* call the Control Flow Monitoring */
-                SCFM_TACK_PATH();
             }
         }
     }

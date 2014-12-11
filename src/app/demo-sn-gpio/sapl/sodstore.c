@@ -51,8 +51,6 @@ a fast bootup on SN start.
 
 #include <sn/nvs.h>
 
-#include <SCFMapi.h>
-
 /*============================================================================*/
 /*            G L O B A L   D E F I N I T I O N S                             */
 /*============================================================================*/
@@ -321,9 +319,6 @@ tProcStoreRet sodstore_process(UINT8* pParamSetBase_p, UINT32 paramSetLen_p)
 
                 /* Reset state to init */
                 sodStoreInstance_l.sodStoreState_m = kSodStoreStateInit;
-
-                /* call the Control Flow Monitoring */
-                SCFM_TACK_PATH();
 
                 sodStoreRet = kSodStoreProcFinished;
 

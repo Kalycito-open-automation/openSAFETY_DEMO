@@ -301,9 +301,6 @@ tProcParamRet paramset_process(UINT8* pParamSetBase_p, UINT32 paramSetLen_p)
 
                 paramSetInstance_l.paramSetState_m = kParamSetStateInitiateProcessing;
 
-                /* call the Control Flow Monitoring */
-                SCFM_TACK_PATH();
-
                 procRet = kParamProcFinished;
                 break;
             }

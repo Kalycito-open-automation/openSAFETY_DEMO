@@ -294,9 +294,6 @@ static BOOLEAN initOpenSafety(void)
         }
     }
 
-    /* call the Control Flow Monitoring */
-    SCFM_TACK_PATH();
-
     return fReturn;
 }
 
@@ -575,9 +572,6 @@ static BOOLEAN enterPreOperational(void)
         stateh_setSnState(kSnStatePreOperational);
 
         fReturn = TRUE;
-
-        /* call the Control Flow Monitoring */
-        SCFM_TACK_PATH();
     }
     else
     {
