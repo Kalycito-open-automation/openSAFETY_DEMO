@@ -205,6 +205,9 @@ void sapl_reset(void)
 /**
 \brief    Process the SAPL background task
 
+Process all tasks which are independent of the openSAFETY stack in the
+background loop. (Shall not increment the flow counter)
+
 \retval TRUE    Processing of the SAPL successful
 \retval FALSE   Error during processing
 
@@ -214,9 +217,80 @@ void sapl_reset(void)
 BOOLEAN sapl_process(void)
 {
     BOOLEAN fReturn = FALSE;
+    tProcStoreRet sodStoreRet;
+    static UINT32 lastTask = 0;
+
+    if((saplInstance_l.activeTasks_m & SAPL_TASK_PROCESS_PARAM_SET_PARSE_MASK) != 0)
+    {
+        if(lastTask != saplInstance_l.activeTasks_m)
+        {
+            DEBUG_TRACE(DEBUG_LVL_ALWAYS, "\nParse ParameterSet ...\n");
+            lastTask = saplInstance_l.activeTasks_m;
+        }
+
+        fReturn = TRUE;
+    }
+    else if((saplInstance_l.activeTasks_m & SAPL_TASK_PROCESS_PARAM_SET_CRC_MASK) != 0)
+    {
+        if(lastTask != saplInstance_l.activeTasks_m)
+        {
+            DEBUG_TRACE(DEBUG_LVL_ALWAYS, "\nCalc CRC ...\n");
+            lastTask = saplInstance_l.activeTasks_m;
+        }
+
+        fReturn = TRUE;
+    }
+    else if((saplInstance_l.activeTasks_m & SAPL_TASK_PROCESS_PARAM_SET_STORE_MASK) != 0)
+    {
+        if(lastTask != saplInstance_l.activeTasks_m)
+        {
+            DEBUG_TRACE(DEBUG_LVL_ALWAYS, "\nStore SOD ...\n");
+            lastTask = saplInstance_l.activeTasks_m;
+        }
+
+        /* Process the SOD store state machine */
+        sodStoreRet = sodstore_process((UINT8*)saplInstance_l.paramSetAttr_m.pData_m,
+                                       saplInstance_l.paramSetAttr_m.length_m);
+        if(sodStoreRet == kSodStoreProcFinished)
+        {
+            /* Reset the flag of the parameter store task */
+            saplInstance_l.activeTasks_m &= ~(1<<SAPL_TASK_PROCESS_PARAM_SET_STORE_BIT);
+
+            fReturn = TRUE;
+        }
+        else if(sodStoreRet == kSodStoreProcBusy)
+        {
+            /* Continue processing on next call of SAPL process */
+            fReturn = TRUE;
+        }
+    }
+    else
+    {
+        /* Nothing to process -> Success! */
+        fReturn = TRUE;
+    }
+
+    return fReturn;
+}
+
+/*----------------------------------------------------------------------------*/
+/**
+\brief    Process the SAPL synchronous task
+
+All tasks of the SAPL which call stack functions need to be processed
+in the synchronous IR. (Stack functions increment the flow counter)
+
+\retval TRUE    Processing of the SAPL successful
+\retval FALSE   Error during processing
+
+\ingroup module_sapl
+*/
+/*----------------------------------------------------------------------------*/
+BOOLEAN sapl_processSync(void)
+{
+    BOOLEAN fReturn = FALSE;
     tProcParamRet paramProcRet;
     tProcCrcRet paramCrcRet;
-    tProcStoreRet sodStoreRet;
 
     if((saplInstance_l.activeTasks_m & SAPL_TASK_PROCESS_PARAM_SET_PARSE_MASK) != 0)
     {
@@ -262,24 +336,6 @@ BOOLEAN sapl_process(void)
             saplInstance_l.activeTasks_m &= ~(1<<SAPL_TASK_PROCESS_PARAM_SET_CRC_BIT);
         }
         else if(paramCrcRet == kParamCrcProcBusy)
-        {
-            /* Continue processing on next call of SAPL process */
-            fReturn = TRUE;
-        }
-    }
-    else if((saplInstance_l.activeTasks_m & SAPL_TASK_PROCESS_PARAM_SET_STORE_MASK) != 0)
-    {
-        /* Process the SOD store state machine */
-        sodStoreRet = sodstore_process((UINT8*)saplInstance_l.paramSetAttr_m.pData_m,
-                                       saplInstance_l.paramSetAttr_m.length_m);
-        if(sodStoreRet == kSodStoreProcFinished)
-        {
-            /* Reset the flag of the parameter store task */
-            saplInstance_l.activeTasks_m &= ~(1<<SAPL_TASK_PROCESS_PARAM_SET_STORE_BIT);
-
-            fReturn = TRUE;
-        }
-        else if(sodStoreRet == kSodStoreProcBusy)
         {
             /* Continue processing on next call of SAPL process */
             fReturn = TRUE;

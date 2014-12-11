@@ -65,6 +65,7 @@ void sapl_exit(void);
 void sapl_reset(void);
 
 BOOLEAN sapl_process(void);
+BOOLEAN sapl_processSync(void);
 
 BOOLEAN sapl_restoreSod(void);
 

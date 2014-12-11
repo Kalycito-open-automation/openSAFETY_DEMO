@@ -96,6 +96,20 @@ stack and processes the background task.
 /* local types                                                                */
 /*----------------------------------------------------------------------------*/
 
+/**
+ * \brief Slots to process in the synchronous IR
+ */
+typedef enum
+{
+    kSyncTaskInvalid  = 0x0,    /**< Invalid state */
+    kSyncTaskShnf     = 0x1,    /**< The SHNF task is processed in this slot */
+    kSyncTaskSapl     = 0x2,    /**< The SAPL task is processed in this slot */
+    kSyncTaskState    = 0x3,    /**< State changes are processed in this slot */
+    kSyncTaskCount    = 0x4,    /**< Count of states */
+} tProcSyncTask;
+
+static tProcSyncTask syncTaskState_l;     /**< The current state of the sync task */
+
 /*----------------------------------------------------------------------------*/
 /* local vars                                                                 */
 /*----------------------------------------------------------------------------*/
@@ -158,6 +172,9 @@ int main (void)
     tShnfInitParam shnfInitParam;
 
     MEMSET(&shnfInitParam, 0, sizeof(tShnfInitParam));
+
+    /* Set initial sync task state */
+    syncTaskState_l = kSyncTaskShnf;
 
     /* Initialize target specific functions */
     platform_init();
@@ -400,14 +417,47 @@ static BOOLEAN processSync(void)
 {
     BOOLEAN fReturn = FALSE;
 
-    /* Periodically process the asynchronous task of the SHNF */
-    if(shnf_process())
+    /* Process one synchronous action in each cycle */
+    switch(syncTaskState_l)
     {
-        /* Handle internal state changes */
-        if(handleStateChange())
-        {
-            fReturn = TRUE;
-        }
+        case kSyncTaskShnf:
+            /* Periodically process the asynchronous task of the SHNF */
+            if(shnf_process())
+            {
+                fReturn = TRUE;
+            }
+
+            /* Switch to next state */
+            syncTaskState_l = kSyncTaskSapl;
+
+            break;
+
+        case kSyncTaskSapl:
+            /* Periodically process the asynchronous task of the SAPL */
+            if(sapl_processSync())
+            {
+                fReturn = TRUE;
+            }
+
+            /* Switch to next state */
+            syncTaskState_l = kSyncTaskState;
+
+            break;
+
+        case kSyncTaskState:
+            /* Handle internal state changes */
+            if(handleStateChange())
+            {
+                fReturn = TRUE;
+            }
+
+            /* Switch to first state */
+            syncTaskState_l = kSyncTaskShnf;
+            break;
+
+        default:
+            errh_postFatalError(kErrSourcePeriph, kErrorInvalidState, 0);
+            break;
     }
 
     return fReturn;
