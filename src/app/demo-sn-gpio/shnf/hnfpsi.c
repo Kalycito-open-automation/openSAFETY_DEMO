@@ -209,8 +209,6 @@ BOOLEAN hnf_init(tHnfInit * pHnfInit_p)
 /*----------------------------------------------------------------------------*/
 void hnf_exit(void)
 {
-    DEBUG_TRACE(DEBUG_LVL_ALWAYS,"\n\nShutdown slim interface -> ");
-
     /* Cleanup target specific functions */
     syncir_exit();
     pcpserial_exit();
@@ -220,8 +218,6 @@ void hnf_exit(void)
     psi_exit();
 
     MEMSET(&hnfPsiInstance_l, 0, sizeof(tHnfPsiInstance));
-
-    DEBUG_TRACE(DEBUG_LVL_ALWAYS,"SUCCESS!\n");
 }
 
 /*----------------------------------------------------------------------------*/

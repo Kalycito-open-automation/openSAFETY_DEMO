@@ -96,22 +96,13 @@ stack and processes the background task.
 /* local types                                                                */
 /*----------------------------------------------------------------------------*/
 
-/**
- * \brief Main module instance type
- */
-typedef struct
-{
-    SNMTS_t_SN_STATE_MAIN lastSnState_m;   /**< Consists of the last SN state */
-} tMainInstance;
-
 /*----------------------------------------------------------------------------*/
 /* local vars                                                                 */
 /*----------------------------------------------------------------------------*/
 
-static tMainInstance instance_l SAFE_INIT_SEKTOR;
-
 #ifdef _DEBUG
-static char *strSnStates[] = { "SNMTS_k_ST_INITIALIZATION",
+static char *strSnStates[] = { "SNMTS_k_ST_BOOTING",
+                               "SNMTS_k_ST_INITIALIZATION",
                                "SNMTS_k_ST_PRE_OPERATIONAL",
                                "SNMTS_k_ST_OPERATIONAL"};
 #endif
@@ -166,7 +157,6 @@ int main (void)
     int retVal = -1;
     tShnfInitParam shnfInitParam;
 
-    MEMSET(&instance_l, 0, sizeof(tMainInstance));
     MEMSET(&shnfInitParam, 0, sizeof(tShnfInitParam));
 
     /* Initialize target specific functions */
@@ -183,7 +173,7 @@ int main (void)
     DEBUG_TRACE(DEBUG_LVL_ALWAYS, "********************************************************************\n");
 
     /* Initialize the state handler */
-    if(stateh_init(kSnStateInitializing))
+    if(stateh_init(kSnStateBooting))
     {
         errh_init();
 
@@ -286,11 +276,16 @@ static BOOLEAN initOpenSafety(void)
         /* if the initialization of the last SN state succeeded */
         if(SNMTS_GetSnState(B_INSTNUM_ &snState))
         {
-            DEBUG_TRACE(DEBUG_LVL_ALWAYS, "\nCHANGE STATE: SN_BOOTING -> %s\n", strSnStates[snState]);
+            /* Verify state change to init */
+            if(snState == SNMTS_k_ST_INITIALIZATION)
+            {
+                stateh_setSnState(kSnStateInitializing);
+#ifdef _DEBUG
+                printSNState();
+#endif
 
-            stateh_setSnState(kSnStateInitializing);
-
-            fReturn = TRUE;
+                fReturn = TRUE;
+            }
         }
     }
 
@@ -461,28 +456,20 @@ If changed this function prints the current state of the SN to stdout.
 /*----------------------------------------------------------------------------*/
 static void printSNState(void)
 {
-    SNMTS_t_SN_STATE_MAIN actSnState;    /* to get the actual SN state */
-    char * lastSnState = NULL;
-    char * currSnState = NULL;
+    static tSnState lastState = kSnStateBooting;
+    tSnState currState = stateh_getSnState();
 
-    /* if the actual SN state update succeeded */
-    if(SNMTS_GetSnState(B_INSTNUM_ &actSnState))
+    /* if the SN state changed */
+    if(currState != lastState)
     {
-        /* if the SN state changed */
-        if(actSnState != instance_l.lastSnState_m)
+        if(lastState < kSnStateCount && currState < kSnStateCount)
         {
-            if(actSnState <= 2 && instance_l.lastSnState_m <= 2)
-            {
-                lastSnState = strSnStates[instance_l.lastSnState_m];
-                currSnState = strSnStates[actSnState];
+            /* signal the actual SN state */
+            DEBUG_TRACE(DEBUG_LVL_ALWAYS, "\nCHANGE STATE: %s -> %s\n", strSnStates[lastState],
+                                                                        strSnStates[currState]);
 
-                /* signal the actual SN state */
-                DEBUG_TRACE(DEBUG_LVL_ALWAYS, "\nCHANGE STATE: %s -> %s\n", lastSnState,
-                                                                            currSnState);
-
-                /*store the last SN state */
-                instance_l.lastSnState_m = actSnState;
-            }
+            /*store the last SN state */
+            lastState = currState;
         }
     }
 }
@@ -644,6 +631,8 @@ static void enterReset(void)
 /*----------------------------------------------------------------------------*/
 static void shutdown(void)
 {
+    DEBUG_TRACE(DEBUG_LVL_ALWAYS, "\n\nShutdown ...\n");
+
     shnf_exit();
     sapl_exit();
 

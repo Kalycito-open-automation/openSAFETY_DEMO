@@ -54,7 +54,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 typedef enum
 {
-    kSnStateInvalid        = 0x0,       /**< Invalid SN state */
+    kSnStateBooting        = 0x0,       /**< Default the SN is in state booting */
     kSnStateInitializing   = 0x1,       /**< SN is currently initializing */
     kSnStatePreOperational = 0x2,       /**< SN is in pre-operational state */
     kSnStateOperational    = 0x3,       /**< SN is operational */

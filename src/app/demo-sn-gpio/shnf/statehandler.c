@@ -115,7 +115,7 @@ BOOLEAN stateh_init(tSnState snInitState_p)
 {
     BOOLEAN fReturn = FALSE;
 
-    if(snInitState_p > kSnStateInvalid && snInitState_p < kSnStateCount)
+    if(snInitState_p < kSnStateCount)
     {
         MEMSET(&statehInstance_l, 0, sizeof(tStateHInstance));
 
