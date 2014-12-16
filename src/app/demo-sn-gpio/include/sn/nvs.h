@@ -43,6 +43,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // includes
 //------------------------------------------------------------------------------
 #include <apptarget/target.h>
+#include <sn/global.h>
 
 //------------------------------------------------------------------------------
 // const defines
@@ -56,13 +57,13 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // function prototypes
 //------------------------------------------------------------------------------
-UINT8 nvs_init(void);
+BOOLEAN nvs_init(void);
 void nvs_close(void);
 
-UINT8 nvs_readUint32(UINT32 offset_p, UINT32 ** ppReadData_p);
-UINT8 nvs_write(UINT32 offset_p, UINT8 * pData_p, UINT32 length_p);
+BOOLEAN nvs_readUint32(UINT32 offset_p, UINT32 ** ppReadData_p);
+BOOLEAN nvs_write(UINT32 offset_p, UINT8 * pData_p, UINT32 length_p);
 
-UINT8 nvs_erase(UINT32 offset_p);
+BOOLEAN nvs_erase(UINT32 offset_p);
 
 UINT8* nvs_getAddress(UINT32 offset_p);
 

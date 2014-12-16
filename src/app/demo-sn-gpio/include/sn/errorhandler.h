@@ -62,6 +62,7 @@ typedef enum
     kErrorInvalidFrameType                  = 0x03,     /**< This type of frame is not an openSAFETY frame */
     kErrorCallbackNotInitialized            = 0x04,     /**< A callback function should be called but is not initialized */
     kErrorInvalidTxMemory                   = 0x05,     /**< There is no transmit memory left for sending */
+    kErrorUnableToGenerateStreamParams      = 0x06,     /**< Unable to generate parameters for the stream interface */
 
     kErrorSyncProcessFailed                 = 0x20,     /**< Processing the synchronous task has failed */
     kErrorSyncProcessActionFailed           = 0x21,     /**< Processing the post action has failed */

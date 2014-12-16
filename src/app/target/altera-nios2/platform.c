@@ -99,13 +99,19 @@ implementation.
 This function init's the peripherals of the AP like cache and the interrupt
 controller.
 
+\return TRUE on success; FALSE on error
+
 \ingroup module_platform
 */
 /*----------------------------------------------------------------------------*/
-void platform_init(void)
+BOOL platform_init(void)
 {
+    BOOL retVal = TRUE;
+
     alt_icache_flush_all();
     alt_dcache_flush_all();
+
+    return retVal;
 }
 
 /*----------------------------------------------------------------------------*/
@@ -117,7 +123,7 @@ void platform_init(void)
 /*----------------------------------------------------------------------------*/
 void platform_exit(void)
 {
-
+    /* crt0.s cleans for us */
 }
 
 /*============================================================================*/

@@ -57,10 +57,6 @@ system gpio pins for Cortex-m3 on stm32f103.
 /*----------------------------------------------------------------------------*/
 /* const defines                                                              */
 /*----------------------------------------------------------------------------*/
-#define STATUS_BASE_ADDRESS   STATUS_PIO_BASE   /**< Base address of the gpio module */
-#define STATUS_LED_BIT        1                 /**< Id of the first led of the target */
-
-#define TARGET_MAX_LEDS       1                 /**< Maximum of LEDS on this target */
 
 /*----------------------------------------------------------------------------*/
 /* module global vars                                                         */

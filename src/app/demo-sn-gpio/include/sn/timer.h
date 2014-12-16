@@ -43,6 +43,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // includes
 //------------------------------------------------------------------------------
 #include <apptarget/target.h>
+#include <sn/global.h>
 
 //------------------------------------------------------------------------------
 // const defines
@@ -67,11 +68,11 @@ typedef enum
 //------------------------------------------------------------------------------
 // function prototypes
 //------------------------------------------------------------------------------
-UINT8 timer_init(void);
+BOOLEAN timer_init(void);
 void timer_close(void);
 
 UINT32 timer_getTickCount(void);
-UINT8 timer_setBase(tTimerBase base_p);
+BOOLEAN timer_setBase(tTimerBase base_p);
 
 #endif /* _INC_sn_timer_H_ */
 

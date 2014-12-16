@@ -1,6 +1,6 @@
 ################################################################################
 #
-# CMake file of slim interface on demo-cn-gpio for PSI (target is stm32f103)
+# CMake file of slim interface on demo-cn-gpio for PSI (Target is stm32f103rb)
 #
 # Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 # All rights reserved.
@@ -28,34 +28,36 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ################################################################################
 
-################################################################################
-# Add board support target project
-ADD_SUBDIRECTORY(${TARGET_DIR}/bsp ${PROJECT_BINARY_DIR}/bsp)
+ENABLE_LANGUAGE(ASM-ATT)
 
 ################################################################################
-# Set paths
-SET(BOARD_TARGET_DIR ${SN_TARGET_SOURCE_DIR}/stm32f10x)
+# Set C flags for this board configuration
+SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DUSE_STDPERIPH_DRIVER -DSTM32F10X_MD")
+
+################################################################################
+# Add board support package for target stm32f10x
+ADD_SUBDIRECTORY(${APP_TARGET_DIR}/stm32f10x ${PROJECT_BINARY_DIR}/bsp)
 
 ################################################################################
 # Set demo linker script
-SET(DEMO_LINKER_SCRIPT ${TARGET_DIR}/bsp/stm32f103rb_flash.ld)
+SET(DEMO_LINKER_SCRIPT ${TARGET_DIR}/stm32f103rb_flash.ld)
 
 ################################################################################
 # Set architecture specific sources
 SET(DEMO_ARCH_SRCS
-                    ${TARGET_DIR}/platform.c
-                    ${TARGET_DIR}/serial.c
-                    ${TARGET_DIR}/syncir.c
-                    #${TARGET_DIR}/app-gpio.c   #No application implemented yet!
-                    ${BOARD_TARGET_DIR}/timer.c
-                    ${BOARD_TARGET_DIR}/nvs.c
-                    ${BOARD_TARGET_DIR}/gpio.c
+                  ${TARGET_DIR}/platform.c
+                  ${TARGET_DIR}/serial.c
+                  ${TARGET_DIR}/syncir.c
+                  ${TARGET_DIR}/app-gpio.c
+                  ${TARGET_DIR}/startup_stm32f10x_md.s
+                  ${TARGET_DIR}/newlib_stubs.c
+                  ${TARGET_DIR}/stm32f1xx_it.c
+                  ${TARGET_DIR}/system_stm32f10x.c
 )
 
 SET(DEMO_ARCH_INCS
                   ${TARGET_DIR}
                   ${HAL_LIB_INCS}
-                  ${BOARD_TARGET_DIR}/include
 )
 
 ################################################################################
@@ -65,9 +67,8 @@ SET(DEMO_ARCH_SRCS
                   $<TARGET_OBJECTS:bsp-${CFG_ARM_BOARD_TYPE}>
 )
 
-SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DUSE_STDPERIPH_DRIVER -DSTM32F10X_MD -DCFG_SAPL_SN_UDID=${CFG_SAPL_SN_UDID}")
-
-# Remove pedantic from CMAKE_C_FLAGS (Causes a lot of warnings!)
+#################################################################################
+# Set compile flags
 STRING (REPLACE "-pedantic" "" CMAKE_C_FLAGS ${CMAKE_C_FLAGS})
 
 ################################################################################

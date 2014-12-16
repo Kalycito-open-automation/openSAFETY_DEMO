@@ -104,19 +104,19 @@ system timer for Altera Nios2.
 /**
 \brief    Initialize the timer module
 
-\return 0 on success; 1 on error
+\return TRUE on success; FALSE on error
 
 \ingroup module_timer
 */
 /*----------------------------------------------------------------------------*/
-UINT8 timer_init(void)
+BOOLEAN timer_init(void)
 {
     IOWR_32DIRECT(COUNTER_BASE, COUNTER_TICKCNT_REG, 0);
 
     /* Set default timerbase to ipcore */
     IOWR_32DIRECT(COUNTER_BASE, COUNTER_TICKCNT_REG, TIMER_TICKS_100US);
 
-    return 0;
+    return TRUE;
 }
 
 /*----------------------------------------------------------------------------*/
@@ -158,14 +158,14 @@ UINT32 timer_getTickCount(void)
 
 \param base_p The new base of the timer
 
-\return 0 on success; 1 on error
+\return TRUE on success; FALSE on error
 
 \ingroup module_timer
 */
 /*----------------------------------------------------------------------------*/
-UINT8 timer_setBase(tTimerBase base_p)
+BOOLEAN timer_setBase(tTimerBase base_p)
 {
-    UINT8 ret = 1;
+    BOOLEAN retVal = FALSE;
     UINT32 timerBase = kTimerBase1us;
 
     /* De-activate timer core */
@@ -175,19 +175,19 @@ UINT8 timer_setBase(tTimerBase base_p)
     {
         case kTimerBase1us:
             timerBase = TIMER_TICKS_1US;
-            ret = 0;
+            retVal = TRUE;
             break;
         case kTimerBase10us:
             timerBase = TIMER_TICKS_10US;
-            ret = 0;
+            retVal = TRUE;
             break;
         case kTimerBase100us:
             timerBase = TIMER_TICKS_100US;
-            ret = 0;
+            retVal = TRUE;
             break;
         case kTimerBase1ms:
             timerBase = TIMER_TICKS_1MS;
-            ret = 0;
+            retVal = TRUE;
             break;
         default:
             break;
@@ -196,7 +196,7 @@ UINT8 timer_setBase(tTimerBase base_p)
     /* Update the base register of the timer core */
     IOWR_32DIRECT(COUNTER_BASE, COUNTER_TICKCNT_REG, timerBase);
 
-    return ret;
+    return retVal;
 }
 
 

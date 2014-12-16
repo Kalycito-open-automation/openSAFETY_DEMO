@@ -55,7 +55,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /*----------------------------------------------------------------------------*/
 /* function prototypes                                                        */
 /*----------------------------------------------------------------------------*/
-void platform_init(void);
+BOOL platform_init(void);
 void platform_exit(void);
 
 #endif /* _INC_common_platform_H_ */

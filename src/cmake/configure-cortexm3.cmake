@@ -39,11 +39,11 @@ INCLUDE(AppPostAction)
 ################################################################################
 # User option: Select the type of Cortex-M3 board
 IF(NOT CFG_ARM_BOARD_TYPE)
-    SET(CFG_ARM_BOARD_TYPE stm32f10x CACHE STRING
+    SET(CFG_ARM_BOARD_TYPE stm32f103rb CACHE STRING
         "Select the cortex-m3 target board type"
         FORCE
     )
-    SET_PROPERTY(CACHE CFG_ARM_BOARD_TYPE PROPERTY STRINGS "stm32f10x")
+    SET_PROPERTY(CACHE CFG_ARM_BOARD_TYPE PROPERTY STRINGS "stm32f103rb")
 ENDIF(NOT CFG_ARM_BOARD_TYPE)
 
 OPTION(CFG_BENCHMARK_ENABLED ON "Enable application benchmark module")

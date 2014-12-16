@@ -152,7 +152,7 @@ BOOLEAN sodstore_init(void)
     sodStoreInstance_l.sodStoreState_m = kSodStoreStateInit;
 
     /* Initialize the non volatile storage on this target */
-    if(nvs_init() == 0)
+    if(nvs_init())
     {
         fReturn = TRUE;
     }
@@ -228,7 +228,7 @@ tProcStoreRet sodstore_process(UINT8* pParamSetBase_p, UINT32 paramSetLen_p)
                 {
                     /* Store the CRC32 at the end of the header info in the NVS */
                     writeRet = nvs_write(NVS_IMG_OFFSET_CRC32, (UINT8*)&paramCrc, sizeof(paramCrc));
-                    if(writeRet == 0)
+                    if(writeRet == TRUE)
                     {
                         /* Perform switch to process state */
                         sodStoreInstance_l.sodStoreState_m = kSodStoreStateProcess;
@@ -262,7 +262,7 @@ tProcStoreRet sodstore_process(UINT8* pParamSetBase_p, UINT32 paramSetLen_p)
                 writeRet = nvs_write(sodStoreInstance_l.currDataPos_m,
                                      pParamSetBase_p + sodStoreInstance_l.currParamSetOffs_m,
                                      writeChunkSize);
-                if(writeRet == 0)
+                if(writeRet == TRUE)
                 {
                     sodStoreInstance_l.currDataPos_m += writeChunkSize;
                     sodStoreInstance_l.currParamSetOffs_m += writeChunkSize;
@@ -347,7 +347,7 @@ BOOLEAN sodstore_getSodImage(UINT8** ppParamSetBase_p, UINT32* pParamSetLen_p)
         if(verifyMagic())
         {
             /* Read the length of the parameter set */
-            if(nvs_readUint32(NVS_IMG_OFFSET_LENGTH, &pParamSetLen) == 0)
+            if(nvs_readUint32(NVS_IMG_OFFSET_LENGTH, &pParamSetLen))
             {
                 if(*pParamSetLen > 0 && *pParamSetLen < UINT32_MAX)
                 {
@@ -394,7 +394,7 @@ static BOOLEAN eraseNvsSector(UINT32 offset_p)
 {
     BOOLEAN fReturn = FALSE;
 
-    if(nvs_erase(offset_p) == 0)
+    if(nvs_erase(offset_p))
     {
         fReturn = TRUE;
     }
@@ -418,16 +418,16 @@ static BOOLEAN storeHeaderToNvs(UINT32 paramSetLen_p)
 {
     BOOLEAN fReturn = FALSE;
     UINT32 nvsMagic = NVS_MAGIC_WORD;
-    UINT8 writeRet;
+    BOOLEAN writeRet = FALSE;
 
     /* Write magic to the start of the SOD image */
     writeRet = nvs_write(NVS_IMG_OFFSET_MAGIC, (UINT8*)&nvsMagic, sizeof(nvsMagic));
-    if(writeRet == 0)
+    if(writeRet == TRUE)
     {
         /* Write the size of the image to the NVS */
         writeRet = nvs_write(NVS_IMG_OFFSET_LENGTH,
                              (UINT8*)&paramSetLen_p, sizeof(paramSetLen_p));
-        if(writeRet == 0)
+        if(writeRet == TRUE)
         {
             fReturn = TRUE;
         }
@@ -461,7 +461,7 @@ static BOOLEAN verifyMagic(void)
     UINT32 refMagic = NVS_MAGIC_WORD;
 
     /* Verify the magic word */
-    if(nvs_readUint32(NVS_IMG_OFFSET_MAGIC, &pReadMagic) == 0)
+    if(nvs_readUint32(NVS_IMG_OFFSET_MAGIC, &pReadMagic) == TRUE)
     {
         if(*pReadMagic == refMagic)
             magicValid = TRUE;
@@ -490,7 +490,7 @@ static BOOLEAN verifyParamSetCrc(UINT32 paramSetLen_p)
     UINT8* pParamSet = nvs_getAddress(NVS_IMG_OFFSET_DATA);
 
     /* Read the parameter set CRC from NVS */
-    if(nvs_readUint32(NVS_IMG_OFFSET_CRC32, &pReadCrc) == 0)
+    if(nvs_readUint32(NVS_IMG_OFFSET_CRC32, &pReadCrc) == TRUE)
     {
         /* Calculate the parameter CRC over the flash image */
         calcCrc = HNFiff_Crc32CalcSwp(0, paramSetLen_p, pParamSet);

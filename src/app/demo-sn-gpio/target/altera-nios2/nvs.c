@@ -102,14 +102,14 @@ static INT16 getBlockByOffset(UINT32 offset_p);
 /**
 \brief    Initialize the non volatile storage
 
-\return 0 on success; 1 on error
+\return TRUE on success; FALSE on error
 
 \ingroup module_nvs
 */
 /*----------------------------------------------------------------------------*/
-UINT8 nvs_init(void)
+BOOLEAN nvs_init(void)
 {
-    UINT8 ret = 1;
+    BOOLEAN retVal = FALSE;
 
     /* Set base address of flash image */
     imageBaseAddr_l = (UINT32)(FLASH_BASE + FLASH_IMAGE_OFFSET);
@@ -117,10 +117,10 @@ UINT8 nvs_init(void)
     pFlashDesc_l = alt_flash_open_dev(FLASH_DEV_NAME);
     if(pFlashDesc_l != (alt_flash_fd*)0)
     {
-        ret = 0;
+        retVal = TRUE;
     }
 
-    return ret;
+    return retVal;
 }
 
 /*----------------------------------------------------------------------------*/
@@ -144,14 +144,14 @@ void nvs_close(void)
 \param pData_p   Pointer to the data to write
 \param length_p  The length of the data to write
 
-\return 0 on success; 1 on error
+\return TRUE on success; FALSE on error
 
 \ingroup module_nvs
 */
 /*----------------------------------------------------------------------------*/
-UINT8 nvs_write(UINT32 offset_p, UINT8 * pData_p, UINT32 length_p)
+BOOLEAN nvs_write(UINT32 offset_p, UINT8 * pData_p, UINT32 length_p)
 {
-    UINT8 ret = 1;
+    BOOLEAN retVal = FALSE;
     int blockOffset;
     UINT32 address = imageBaseAddr_l + offset_p;
 
@@ -161,11 +161,11 @@ UINT8 nvs_write(UINT32 offset_p, UINT8 * pData_p, UINT32 length_p)
 
         if(alt_write_flash_block(pFlashDesc_l, blockOffset, address, pData_p, length_p) == 0)
         {
-            ret = 0;
+            retVal = TRUE;
         }
     }
 
-    return ret;
+    return retVal;
 }
 
 /*----------------------------------------------------------------------------*/
@@ -175,24 +175,23 @@ UINT8 nvs_write(UINT32 offset_p, UINT8 * pData_p, UINT32 length_p)
 \param offset_p       The offset of the data in the storage
 \param ppReadData_p   Pointer to the resulting read data
 
-\return 0 on success; 1 on error
+\return TRUE on success; FALSE on error
 
 \ingroup module_nvs
 */
 /*----------------------------------------------------------------------------*/
-UINT8 nvs_readUint32(UINT32 offset_p, UINT32 ** ppReadData_p)
+BOOLEAN nvs_readUint32(UINT32 offset_p, UINT32 ** ppReadData_p)
 {
-    UINT8 ret = 1;
-    UINT32 address = 0;
+    BOOLEAN retVal = FALSE;
 
-    if(ppReadData_p != (UINT8*)0)
+    if(ppReadData_p != NULL)
     {
         *ppReadData_p = (UINT32*)(imageBaseAddr_l + offset_p);
 
-        ret = 0;
+        retVal = TRUE;
     }
 
-    return ret;
+    return retVal;
 }
 
 /*----------------------------------------------------------------------------*/
@@ -201,22 +200,22 @@ UINT8 nvs_readUint32(UINT32 offset_p, UINT32 ** ppReadData_p)
 
 \param offset_p  The offset of the sector to erase
 
-\return 0 on success; 1 on error
+\return TRUE on success; FALSE on error
 
 \ingroup module_nvs
 */
 /*----------------------------------------------------------------------------*/
-UINT8 nvs_erase(UINT32 offset_p)
+BOOLEAN nvs_erase(UINT32 offset_p)
 {
-    UINT8 ret = 1;
+    BOOLEAN retVal = TRUE;
     UINT32 address = imageBaseAddr_l + offset_p;
 
     if(alt_erase_flash_block(pFlashDesc_l, address, 0) == 0)
     {
-        ret = 0;
+        retVal = TRUE;
     }
 
-    return ret;
+    return retVal;
 }
 
 /*----------------------------------------------------------------------------*/

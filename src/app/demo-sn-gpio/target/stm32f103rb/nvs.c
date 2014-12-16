@@ -5,7 +5,7 @@
 \brief  Target specific functions to access the non volatile storage.
 
 This module implements the hardware near target specific functions of the
-flash memory for Altera Nios2.
+flash memory for target stm32f103.
 
 \ingroup module_nvs
 *******************************************************************************/
@@ -87,9 +87,9 @@ static UINT32 imageBaseAddr_l = 0;
 /*----------------------------------------------------------------------------*/
 /* local function prototypes                                                  */
 /*----------------------------------------------------------------------------*/
-static UINT8 progUint32(UINT32 address_p, UINT32 * pData_p);
-static UINT8 progUint16(UINT32 address_p, UINT16 * pData_p);
-static UINT8 progUint8(UINT32 address_p, UINT8 * pData_p);
+static BOOLEAN progUint32(UINT32 address_p, UINT32 * pData_p);
+static BOOLEAN progUint16(UINT32 address_p, UINT16 * pData_p);
+static BOOLEAN progUint8(UINT32 address_p, UINT8 * pData_p);
 
 /*============================================================================*/
 /*            P U B L I C   F U N C T I O N S                                 */
@@ -99,22 +99,20 @@ static UINT8 progUint8(UINT32 address_p, UINT8 * pData_p);
 /**
 \brief    Initialize the non volatile storage
 
-\return 0 on success; 1 on error
+\return TRUE on success; FALSE on error
 
 \ingroup module_nvs
 */
 /*----------------------------------------------------------------------------*/
-UINT8 nvs_init(void)
+BOOLEAN nvs_init(void)
 {
-    UINT8 ret = 0;
-
     /* Set base address of flash image */
     imageBaseAddr_l = (UINT32)(FLASH_BASE + FLASH_IMAGE_OFFSET);
 
     /* Clear All pending flags */
     FLASH_ClearFlag(FLASH_FLAG_BSY | FLASH_FLAG_EOP|FLASH_FLAG_PGERR |FLASH_FLAG_WRPRTERR);
 
-    return ret;
+    return TRUE;
 }
 
 /*----------------------------------------------------------------------------*/
@@ -137,14 +135,14 @@ void nvs_close(void)
 \param pData_p   Pointer to the data to write
 \param length_p  The length of the data to write
 
-\return 0 on success; 1 on error
+\return TRUE on success; FALSE on error
 
 \ingroup module_nvs
 */
 /*----------------------------------------------------------------------------*/
-UINT8 nvs_write(UINT32 offset_p, UINT8 * pData_p, UINT32 length_p)
+BOOLEAN nvs_write(UINT32 offset_p, UINT8 * pData_p, UINT32 length_p)
 {
-    UINT8 ret = 1, error = 0;
+    BOOLEAN retVal = FALSE, error = FALSE;
     UINT32 address = imageBaseAddr_l + offset_p;
 
     if(length_p > 0 && pData_p != NULL)
@@ -156,9 +154,9 @@ UINT8 nvs_write(UINT32 offset_p, UINT8 * pData_p, UINT32 length_p)
             /* Program all UINT32 fields first */
             if(length_p > 4 || length_p == 4)
             {
-                if(progUint32(address, (UINT32*)pData_p) != 0)
+                if(progUint32(address, (UINT32*)pData_p) == FALSE)
                 {
-                    error = 1;
+                    error = TRUE;
                     break;
                 }
                 length_p -= 4;
@@ -167,9 +165,9 @@ UINT8 nvs_write(UINT32 offset_p, UINT8 * pData_p, UINT32 length_p)
             }
             else if(length_p == 2 || length_p == 3)
             {
-                if(progUint16(address, (UINT16*)pData_p) != 0)
+                if(progUint16(address, (UINT16*)pData_p) == FALSE)
                 {
-                    error = 1;
+                    error = TRUE;
                     break;
                 }
                 length_p -= 2;
@@ -178,9 +176,9 @@ UINT8 nvs_write(UINT32 offset_p, UINT8 * pData_p, UINT32 length_p)
             }
             else if(length_p == 1)
             {
-                if(progUint8(address, pData_p) != 0)
+                if(progUint8(address, pData_p) == FALSE)
                 {
-                    error = 1;
+                    error = TRUE;
                     break;
                 }
                 length_p--;
@@ -190,7 +188,7 @@ UINT8 nvs_write(UINT32 offset_p, UINT8 * pData_p, UINT32 length_p)
 
             else
             {
-                error = 1;
+                error = TRUE;
                 break;
             }
         }
@@ -198,10 +196,10 @@ UINT8 nvs_write(UINT32 offset_p, UINT8 * pData_p, UINT32 length_p)
         FLASH_Lock();
     }
 
-    if(error == 0)
-        ret = 0;
+    if(error == FALSE)
+        retVal = TRUE;
 
-    return ret;
+    return retVal;
 }
 
 /*----------------------------------------------------------------------------*/
@@ -211,22 +209,22 @@ UINT8 nvs_write(UINT32 offset_p, UINT8 * pData_p, UINT32 length_p)
 \param offset_p       The offset of the data in the storage
 \param ppReadData_p   Pointer to the resulting read data
 
-\return 0 on success; 1 on error
+\return TRUE on success; FALSE on error
 
 \ingroup module_nvs
 */
 /*----------------------------------------------------------------------------*/
-UINT8 nvs_readUint32(UINT32 offset_p, UINT32 ** ppReadData_p)
+BOOLEAN nvs_readUint32(UINT32 offset_p, UINT32 ** ppReadData_p)
 {
-    UINT8 ret = 1;
+    BOOLEAN retVal = FALSE;
 
     if(ppReadData_p != NULL)
     {
         *ppReadData_p = (UINT32 *)((UINT32)imageBaseAddr_l + offset_p);
-        ret = 0;
+        retVal = TRUE;
     }
 
-    return ret;
+    return retVal;
 }
 
 /*----------------------------------------------------------------------------*/
@@ -235,14 +233,14 @@ UINT8 nvs_readUint32(UINT32 offset_p, UINT32 ** ppReadData_p)
 
 \param offset_p  The offset of the sector to erase
 
-\return 0 on success; 1 on error
+\return TRUE on success; FALSE on error
 
 \ingroup module_nvs
 */
 /*----------------------------------------------------------------------------*/
-UINT8 nvs_erase(UINT32 offset_p)
+BOOLEAN nvs_erase(UINT32 offset_p)
 {
-    UINT8 ret = 1;
+    BOOLEAN retVal = FALSE;
     FLASH_Status status;
     UINT32 address = imageBaseAddr_l + offset_p;
 
@@ -251,12 +249,12 @@ UINT8 nvs_erase(UINT32 offset_p)
     status = FLASH_ErasePage(address);
     if(status == FLASH_COMPLETE)
     {
-        ret = 0;
+        retVal = TRUE;
     }
 
     FLASH_Lock();
 
-    return ret;
+    return retVal;
 }
 
 /*----------------------------------------------------------------------------*/
@@ -291,23 +289,23 @@ UINT8* nvs_getAddress(UINT32 offset_p)
 \param address_p    The address to write to
 \param pData_p      Pointer to the data to write
 
-\return 0 on success; 1 on error
+\return TRUE on success; FALSE on error
 
 \ingroup module_nvs
 */
 /*----------------------------------------------------------------------------*/
-static UINT8 progUint32(UINT32 address_p, UINT32 * pData_p)
+static BOOLEAN progUint32(UINT32 address_p, UINT32 * pData_p)
 {
-    UINT8 ret = 1;
+    BOOLEAN retVal = FALSE;
     FLASH_Status status;
 
     status = FLASH_ProgramWord(address_p, (UINT32)(*pData_p));
     if(status == FLASH_COMPLETE)
     {
-        ret = 0;
+        retVal = TRUE;
     }
 
-    return ret;
+    return retVal;
 }
 
 /*----------------------------------------------------------------------------*/
@@ -317,23 +315,23 @@ static UINT8 progUint32(UINT32 address_p, UINT32 * pData_p)
 \param address_p    The address to write to
 \param pData_p      Pointer to the data to write
 
-\return 0 on success; 1 on error
+\return TRUE on success; FALSE on error
 
 \ingroup module_nvs
 */
 /*----------------------------------------------------------------------------*/
-static UINT8 progUint16(UINT32 address_p, UINT16 * pData_p)
+static BOOLEAN progUint16(UINT32 address_p, UINT16 * pData_p)
 {
-    UINT8 ret = 1;
+    BOOLEAN retVal = FALSE;
     FLASH_Status status;
 
     status = FLASH_ProgramHalfWord(address_p, (UINT16)(*pData_p));
     if(status == FLASH_COMPLETE)
     {
-        ret = 0;
+        retVal = TRUE;
     }
 
-    return ret;
+    return retVal;
 }
 
 /*----------------------------------------------------------------------------*/
@@ -348,14 +346,14 @@ the CPU.
 \param address_p    The address to write to
 \param pData_p      Pointer to the data to write
 
-\return 0 on success; 1 on error
+\return TRUE on success; FALSE on error
 
 \ingroup module_nvs
 */
 /*----------------------------------------------------------------------------*/
-static UINT8 progUint8(UINT32 address_p, UINT8 * pData_p)
+static BOOLEAN progUint8(UINT32 address_p, UINT8 * pData_p)
 {
-    UINT8 ret = 1;
+    BOOLEAN retVal = FALSE;
     FLASH_Status status;
     UINT16 tempData = 0;
 
@@ -368,11 +366,11 @@ static UINT8 progUint8(UINT32 address_p, UINT8 * pData_p)
         status = FLASH_ProgramHalfWord(address_p, tempData);
         if(status == FLASH_COMPLETE)
         {
-            ret = 0;
+            retVal = TRUE;
         }
     }
 
-    return ret;
+    return retVal;
 }
 
 

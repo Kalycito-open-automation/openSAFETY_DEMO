@@ -30,8 +30,6 @@
 
 PROJECT(bsp-${CFG_ARM_BOARD_TYPE} C)
 
-ENABLE_LANGUAGE(ASM-ATT)
-
 #################################################################################
 # USER OPTIONS
 IF(NOT CFG_STM32_HAL_LIB_LOC)
@@ -44,12 +42,10 @@ ENDIF()
 #################################################################################
 # Target for creating the board support package
 SET(STM32_HAL_LIB_PATH ${CFG_STM32_HAL_LIB_LOC}/Libraries)
-SET(STM32_HAL_UTIL_DIR ${CFG_STM32_HAL_LIB_LOC}/Utilities)
 
-
-SET(STM32_HAL_LIB_DIR ${STM32_HAL_LIB_PATH}/${CFG_ARM_BOARD_TYPE}_StdPeriph_Driver)
+SET(STM32_HAL_LIB_DIR ${STM32_HAL_LIB_PATH}/STM32F10x_StdPeriph_Driver)
 SET(STM32_HAL_CMSIS_DIR ${STM32_HAL_LIB_PATH}/CMSIS)
-SET(STM32_HAL_CMSIS_TARG_DIR ${STM32_HAL_CMSIS_DIR}/Device/ST/${CFG_ARM_BOARD_TYPE})
+SET(STM32_HAL_CMSIS_TARG_DIR ${STM32_HAL_CMSIS_DIR}/Device/ST/STM32F10x)
 
 SET(HAL_LIB_SRC
     ${STM32_HAL_LIB_DIR}/src/misc.c
@@ -75,15 +71,6 @@ SET(HAL_LIB_SRC
     ${STM32_HAL_LIB_DIR}/src/stm32f10x_tim.c
     ${STM32_HAL_LIB_DIR}/src/stm32f10x_usart.c
     ${STM32_HAL_LIB_DIR}/src/stm32f10x_wwdg.c
-    ${STM32_HAL_UTIL_DIR}/STM32_Nucleo/stm32f1xx/stm32f1xx_nucleo.c
-)
-
-# Modified sources for stm32f10x
-SET(HAL_LIB_LOCAL_SRCS
-                    ${PROJECT_SOURCE_DIR}/newlib_stubs.c
-                    ${PROJECT_SOURCE_DIR}/stm32f1xx_it.c
-                    ${PROJECT_SOURCE_DIR}/system_stm32f10x.c
-                    ${PROJECT_SOURCE_DIR}/startup_stm32f10x_md.s
 )
 
 SET(HAL_LIB_INCS
@@ -91,19 +78,13 @@ SET(HAL_LIB_INCS
                 ${STM32_HAL_LIB_DIR}/inc
                 ${STM32_HAL_CMSIS_TARG_DIR}/Include
                 ${STM32_HAL_CMSIS_DIR}/Include
-                ${STM32_HAL_UTIL_DIR}/STM32_Nucleo/stm32f1xx
-                ${STM32_HAL_UTIL_DIR}/STM32_Nucleo/adafruit
-                ${STM32_HAL_UTIL_DIR}/Common
-                ${STM32_HAL_UTIL_DIR}/Third_Party/FatFs/src
-                ${TARGET_DIR}
-                CACHE INTERNAL "Very dirty!"
+                CACHE INTERNAL ""
 )
 
 INCLUDE_DIRECTORIES(${HAL_LIB_INCS})
 
-SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DUSE_STDPERIPH_DRIVER -DSTM32F10X_MD")
-
-# Remove pedantic from CMAKE_C_FLAGS (Causes a lot of warnings!)
+#################################################################################
+# Set compile flags
 STRING (REPLACE "-pedantic" "" CMAKE_C_FLAGS ${CMAKE_C_FLAGS})
 
 #################################################################################

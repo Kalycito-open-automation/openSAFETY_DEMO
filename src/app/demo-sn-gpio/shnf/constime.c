@@ -107,7 +107,7 @@ BOOLEAN constime_init(void)
 {
     BOOLEAN fReturn = FALSE;
 
-    if(timer_init() == 0)
+    if(timer_init())
     {
         fReturn = TRUE;
     }
@@ -211,7 +211,7 @@ BOOLEAN SHNF_SOD_ConsTimeBase_CLBK(BYTE_B_INSTNUM_ SOD_t_SERVICE e_srvc,
     {
         /* Store parameter set details in global structure */
         timeBase = (tTimerBase)(*(INT8*)ps_obj->pv_objData);
-        if(timer_setBase(timeBase) == 0)
+        if(timer_setBase(timeBase))
         {
             *pe_abortCode   = SOD_ABT_NO_ERROR;
             fReturn = TRUE;
