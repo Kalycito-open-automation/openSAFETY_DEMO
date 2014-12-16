@@ -35,6 +35,8 @@ SET(GEN_LIB_TARGET OFF)
 # Set build directory for the Altera Makefile
 SET(ALT_BUILD_DIR ${PROJECT_BINARY_DIR}/${ALT_BUILD_DIR_NAME})
 
+FILE(MAKE_DIRECTORY ${ALT_BUILD_DIR})
+
 ##########################################################################
 # Instance ID user option
 SET(ALT_APP_INSTANCE_ID "1" CACHE STRING "Instance ID of the application")

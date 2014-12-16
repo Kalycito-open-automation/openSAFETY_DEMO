@@ -32,6 +32,8 @@
 # Set build directory for the Altera Makefile
 SET(ALT_BUILD_DIR ${PROJECT_BINARY_DIR}/${ALT_BUILD_DIR_NAME})
 
+FILE(MAKE_DIRECTORY ${ALT_BUILD_DIR})
+
 ##########################################################################
 # Instance ID user option
 SET(ALT_PCP_INSTANCE_ID "0" CACHE STRING "Instance ID of the POWERLINK processor")

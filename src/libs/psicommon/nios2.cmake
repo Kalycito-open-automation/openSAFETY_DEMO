@@ -36,6 +36,8 @@ SET(GEN_LIB_TARGET OFF)
 # Set build directory for the Altera Makefile
 SET(ALT_BUILD_DIR ${PROJECT_BINARY_DIR}/${ALT_BUILD_DIR_NAME})
 
+FILE(MAKE_DIRECTORY ${ALT_BUILD_DIR})
+
 ########################################################################
 # Adapt source file lists and includes
 ########################################################################

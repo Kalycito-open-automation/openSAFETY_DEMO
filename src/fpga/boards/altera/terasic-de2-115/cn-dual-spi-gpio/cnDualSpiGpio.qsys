@@ -788,7 +788,7 @@
   <parameter name="inputClockRate" value="50000000" />
  </module>
  <module kind="plkif" version="0.1" enabled="1" name="plkif_0">
-  <parameter name="gDemoCfg" value="sn-gpio" />
+  <parameter name="gDemoCfg" value="cn-gpio" />
   <parameter name="numOfCon" value="1" />
   <parameter name="conBufSize0" value="12" />
   <parameter name="conBufSize1" value="12" />
