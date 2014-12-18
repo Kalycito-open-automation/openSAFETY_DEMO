@@ -68,11 +68,8 @@ SET(DEMO_ARCH_INCS
 )
 
 ################################################################################
-# Link bsp objects with executable
-SET(DEMO_ARCH_SRCS
-                  ${DEMO_ARCH_SRCS}
-                  $<TARGET_OBJECTS:bsp-${CFG_ARM_BOARD_TYPE}>
-)
+# Set list of target specific libraries
+SET(DEMO_ARCH_LIBS "bsp-${CFG_ARM_BOARD_TYPE}")
 
 #################################################################################
 # Set compile flags

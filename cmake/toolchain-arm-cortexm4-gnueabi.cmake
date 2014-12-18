@@ -61,7 +61,3 @@ SET(CMAKE_FIND_ROOT_PATH ${CMAKE_LIBC_PATH})
 SET(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
 SET(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
 SET(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
-
-################################################################################
-# Set compiler flags
-SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -mcpu=cortex-m4 -mthumb -ffunction-sections -fdata-sections " )

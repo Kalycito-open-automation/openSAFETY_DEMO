@@ -89,4 +89,4 @@ STRING (REPLACE "-pedantic" "" CMAKE_C_FLAGS ${CMAKE_C_FLAGS})
 
 #################################################################################
 # Create bsp library
-ADD_LIBRARY(${PROJECT_NAME} OBJECT ${HAL_LIB_SRC} ${HAL_LIB_LOCAL_SRCS})
+ADD_LIBRARY(${PROJECT_NAME} ${HAL_LIB_SRC} ${HAL_LIB_LOCAL_SRCS})

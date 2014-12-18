@@ -53,6 +53,10 @@ OPTION(CFG_BENCHMARK_ENABLED ON "Enable application benchmark module")
 SET(CFG_INCLUDE_SUBPROJECTS "application")
 
 ################################################################################
+# Set compiler flags
+SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -mcpu=cortex-m3 -mthumb -ffunction-sections -fdata-sections " )
+
+################################################################################
 # Set path to target specific files
 SET( TARGET_DIR ${APP_TARGET_DIR}/${CFG_ARM_BOARD_TYPE} )
 

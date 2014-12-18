@@ -124,4 +124,4 @@ SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-unused-parameter")
 
 #################################################################################
 # Create bsp library
-ADD_LIBRARY(${PROJECT_NAME} OBJECT ${HAL_LIB_SRC})
+ADD_LIBRARY(${PROJECT_NAME} ${HAL_LIB_SRC})

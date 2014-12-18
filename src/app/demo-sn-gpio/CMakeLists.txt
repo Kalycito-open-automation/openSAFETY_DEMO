@@ -150,7 +150,7 @@ IF(GEN_LIB_TARGET)
     ADD_EXECUTABLE(${PROJECT_NAME}.elf ${DEMO_SRCS} ${DEMO_ARCH_SRCS})
 
     SET_PROPERTY(TARGET ${PROJECT_NAME}.elf PROPERTY LINK_FLAGS ${DEMO_ARCH_LINKER_FLAGS})
-    TARGET_LINK_LIBRARIES(${PROJECT_NAME}.elf "psi" "psicommonapp")
+    TARGET_LINK_LIBRARIES(${PROJECT_NAME}.elf "psi" "psicommonapp" ${DEMO_ARCH_LIBS})
 
     # Call target post actions (Target specific!)
     AppPostAction(${PROJECT_NAME}.elf)
