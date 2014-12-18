@@ -153,15 +153,17 @@ BOOLEAN nvs_write(UINT32 offset_p, UINT8 * pData_p, UINT32 length_p)
 {
     BOOLEAN retVal = FALSE;
     int blockOffset;
-    UINT32 address = imageBaseAddr_l + offset_p;
+    UINT32 address = FLASH_IMAGE_OFFSET + offset_p;
 
     if(pData_p != (UINT8*)0 && length_p > 0)
     {
         blockOffset = getBlockByOffset(address);
-
-        if(alt_write_flash_block(pFlashDesc_l, blockOffset, address, pData_p, length_p) == 0)
+        if(blockOffset >= 0)
         {
-            retVal = TRUE;
+            if(alt_write_flash_block(pFlashDesc_l, blockOffset, address, pData_p, length_p) == 0)
+            {
+                retVal = TRUE;
+            }
         }
     }
 
@@ -208,7 +210,7 @@ BOOLEAN nvs_readUint32(UINT32 offset_p, UINT32 ** ppReadData_p)
 BOOLEAN nvs_erase(UINT32 offset_p)
 {
     BOOLEAN retVal = TRUE;
-    UINT32 address = imageBaseAddr_l + offset_p;
+    UINT32 address = FLASH_IMAGE_OFFSET + offset_p;
 
     if(alt_erase_flash_block(pFlashDesc_l, address, 0) == 0)
     {
@@ -269,14 +271,14 @@ static INT16 getBlockByOffset(UINT32 offset_p)
         {
             pCurrReg = &pFirstReg[i];
 
-            if(offset_p > (UINT32)pCurrReg->offset)
+            if(offset_p > (UINT32)(pCurrReg->offset + pCurrReg->region_size))
                 continue;
 
             /* Iterate over all blocks */
             for(j=0; j<(UINT16)pCurrReg->number_of_blocks; j++)
             {
                 /* Check if the provided block is in the region */
-                if(offset_p <= ((UINT32)pCurrReg->block_size * (j+1)))
+                if(offset_p <= ((UINT32)pCurrReg->offset + (pCurrReg->block_size * (j+1))))
                 {
                     isInBlock = j;
                     break;
