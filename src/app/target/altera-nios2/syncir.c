@@ -97,19 +97,9 @@ Altera Nios2.
 /* local vars                                                                 */
 /*----------------------------------------------------------------------------*/
 
-/**
- * \brief Platform module instance type
- */
-typedef struct {
-    alt_irq_context irqContext_m;
-} tPlatformInstance;
-
-
 /*----------------------------------------------------------------------------*/
 /* local function prototypes                                                  */
 /*----------------------------------------------------------------------------*/
-
-static tPlatformInstance platformInstance_l;
 
 /*============================================================================*/
 /*            P U B L I C   F U N C T I O N S                                 */
@@ -150,8 +140,8 @@ BOOL syncir_init(tPlatformSyncIrq pfnSyncIrq_p)
 
     if(regRet != FALSE)
     {
-        /* enable interrupt from PCP to AP */
-        alt_ic_irq_enable(APP_INTERRUPT_CONTROLLER_ID, SYNC_IRQ_NUM);      /* enable specific IRQ Number */
+        /* Disable interrupt until syncir_enable() is called! */
+        syncir_disable();
         IOWR_ALTERA_AVALON_PIO_IRQ_MASK(SYNC_IRQ_BASE, 0x01);
 
         fReturn = TRUE;
@@ -229,11 +219,11 @@ void syncir_enterCriticalSection(UINT8 fEnable_p)
 
     if(fEnable_p)
     {
-        alt_irq_enable_all(platformInstance_l.irqContext_m);
+        syncir_enable();
     }
     else
     {
-        platformInstance_l.irqContext_m = alt_irq_disable_all();
+        syncir_disable();
     }
 }
 
