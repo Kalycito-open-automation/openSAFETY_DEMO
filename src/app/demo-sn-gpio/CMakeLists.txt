@@ -109,6 +109,41 @@ SET(SN_SRCS
     ${PROJECT_SOURCE_DIR}/cyclemon.c
 )
 
+IF(${CURRENT_DEMO_CONTEXT} STREQUAL "ups")
+    # This project is for the processor up-slave
+    SET(SHNF_SRCS
+                  ${SHNF_SRCS}
+                  ${PROJECT_SOURCE_DIR}/handshake-sl.c
+                  ${SHNF_DIR}/xcom.c
+                  ${SHNF_DIR}/xcom-sl.c
+                  ${SHNF_DIR}/shnftx-dual.c
+    )
+
+    SET(SN_SRCS
+                  ${SN_SRCS}
+                  ${PROJECT_SOURCE_DIR}/handshake-sl.c
+    )
+ELSEIF(${CURRENT_DEMO_CONTEXT} STREQUAL "upm")
+    # This project is for the processor up-master
+    SET(SHNF_SRCS
+                  ${SHNF_SRCS}
+                  ${SHNF_DIR}/xcom.c
+                  ${SHNF_DIR}/xcom-ma.c
+                  ${SHNF_DIR}/shnftx-dual.c
+    )
+
+    SET(SN_SRCS
+                  ${SN_SRCS}
+                  ${PROJECT_SOURCE_DIR}/handshake-ma.c
+    )
+ELSE()
+    # This project is single channeled
+    SET(SHNF_SRCS
+                  ${SHNF_SRCS}
+                  ${SHNF_DIR}/shnftx-single.c
+    )
+ENDIF()
+
 SET(DEMO_SRCS
                 ${SN_SRCS}
                 ${SHNF_SRCS}
@@ -116,32 +151,6 @@ SET(DEMO_SRCS
                 ${OSFT_SN_SRCS}
                 ${LIBOSCHECKSUM_SRCS}
 )
-
-IF(${CURRENT_DEMO_CONTEXT} STREQUAL "ups")
-    # This project is for the processor up-slave
-    SET(DEMO_SRCS
-                  ${DEMO_SRCS}
-                  ${PROJECT_SOURCE_DIR}/handshake-sl.c
-                  ${SHNF_DIR}/xcom.c
-                  ${SHNF_DIR}/xcom-sl.c
-                  ${SHNF_DIR}/shnftx-dual.c
-    )
-ELSEIF(${CURRENT_DEMO_CONTEXT} STREQUAL "upm")
-    # This project is for the processor up-master
-    SET(DEMO_SRCS
-                  ${DEMO_SRCS}
-                  ${PROJECT_SOURCE_DIR}/handshake-ma.c
-                  ${SHNF_DIR}/xcom.c
-                  ${SHNF_DIR}/xcom-ma.c
-                  ${SHNF_DIR}/shnftx-dual.c
-    )
-ELSE()
-    # This project is single channeled
-    SET(DEMO_SRCS
-                  ${DEMO_SRCS}
-                  ${SHNF_DIR}/shnftx-single.c
-    )
-ENDIF()
 
 ########################################################################
 # Set include paths
