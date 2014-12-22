@@ -45,6 +45,8 @@ IF(NOT CFG_NIOS2_QUARTUS_DIR)
        )
 ENDIF(NOT CFG_NIOS2_QUARTUS_DIR)
 
+UNSET(CFG_DUAL_CHANNEL CACHE)
+
 ###############################################################################
 # Include new configuration file
 IF(EXISTS "${CFG_NIOS2_QUARTUS_DIR}/config.cmake")

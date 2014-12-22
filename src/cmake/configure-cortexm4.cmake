@@ -28,16 +28,15 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ################################################################################
 
-MESSAGE ( STATUS "Generating build files for platform ARM/Cortex-M4 ..." )
-
 ################################################################################
-# Handle target specific includes
-SET(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/../cmake/cortex-mx" ${CMAKE_MODULE_PATH})
-
+# Include generic configuration file for ARM processors
+INCLUDE(configure-cortexmx)
 INCLUDE(AppPostAction)
 
+MESSAGE(STATUS "Generating build files for platform ARM/Cortex-M4 ...")
+
 ################################################################################
-# User option: Select the type of Cortex-M3 board
+# User option: Select the type of Cortex-M4 board
 IF(NOT CFG_ARM_BOARD_TYPE)
     SET(CFG_ARM_BOARD_TYPE stm32f401re CACHE STRING
         "Select the cortex-m4 target board type"
@@ -46,22 +45,12 @@ IF(NOT CFG_ARM_BOARD_TYPE)
     SET_PROPERTY(CACHE CFG_ARM_BOARD_TYPE PROPERTY STRINGS "stm32f401re")
 ENDIF(NOT CFG_ARM_BOARD_TYPE)
 
-OPTION(CFG_BENCHMARK_ENABLED ON "Enable application benchmark module")
-
-################################################################################
-# This target only supports application style projects
-SET(CFG_INCLUDE_SUBPROJECTS "application")
+MESSAGE(STATUS "Board type CFG_ARM_BOARD_TYPE=${CFG_ARM_BOARD_TYPE}")
 
 ################################################################################
 # Set compiler flags
-SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -mcpu=cortex-m4 -mthumb -ffunction-sections -fdata-sections " )
+SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -mcpu=cortex-m4")
 
 ################################################################################
 # Set path to target specific files
-SET( TARGET_DIR ${APP_TARGET_DIR}/${CFG_ARM_BOARD_TYPE} )
-
-################################################################################
-# Enable benchmarking
-IF(CFG_BENCHMARK_ENABLED)
-    SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DBENCHMARK_ENABLED -DBENCHMARK_MODULES=0xEE800043L")
-ENDIF()
+SET(TARGET_DIR ${APP_TARGET_DIR}/${CFG_ARM_BOARD_TYPE})

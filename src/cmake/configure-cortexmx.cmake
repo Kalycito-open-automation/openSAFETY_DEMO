@@ -1,6 +1,6 @@
 ################################################################################
 #
-# CMake file of slim interface on demo-sn-gpio for PSI (Target is stm32f401re)
+# Cortex-Mx configuration options for POWERLINK Slim Interface
 #
 # Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 # All rights reserved.
@@ -28,55 +28,38 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ################################################################################
 
-ENABLE_LANGUAGE(ASM-ATT)
+################################################################################
+# Handle target specific includes
+SET(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/../cmake/cortex-mx" ${CMAKE_MODULE_PATH})
+
+INCLUDE(AppPostAction)
 
 ################################################################################
-# Set C flags for this board configuration
-SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DUSE_STDPERIPH_DRIVER -DSTM32F401xE")
+# Create user options
+IF(CFG_DEMO_TYPE STREQUAL "sn-gpio")
+    IF(NOT CFG_DUAL_CHANNEL)
+        SET(CFG_DUAL_CHANNEL ${SN_PROC_SINGLE_CHAN} CACHE STRING
+            "Enable dual channel openSAFETY demo"
+            FORCE
+        )
+        SET_PROPERTY(CACHE CFG_DUAL_CHANNEL PROPERTY STRINGS "${SN_PROC_SINGLE_CHAN};${SN_PROC_DUAL_CHAN};${SN_PROC_UP_MASTER};${SN_PROC_UP_SLAVE}")
+    ENDIF(NOT CFG_DUAL_CHANNEL)
+ELSE()
+    UNSET(CFG_DUAL_CHANNEL CACHE)
+ENDIF()
+
+OPTION(CFG_BENCHMARK_ENABLED ON "Enable application benchmark module")
 
 ################################################################################
-# Add board support package for target stm32f4xx
-ADD_SUBDIRECTORY(${APP_TARGET_DIR}/stm32f4xx ${PROJECT_BINARY_DIR}/bsp)
+# This target only supports application style projects
+SET(CFG_INCLUDE_SUBPROJECTS "application")
 
 ################################################################################
-# Set paths
-SET(BOARD_TARGET_DIR ${SN_TARGET_SOURCE_DIR}/stm32f401rb)
+# Set compiler flags
+SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -mthumb -ffunction-sections -fdata-sections ")
 
 ################################################################################
-# Set demo linker script
-SET(DEMO_LINKER_SCRIPT ${TARGET_DIR}/stm32f401cr_flash.ld)
-
-################################################################################
-# Set architecture specific sources
-SET(DEMO_ARCH_SRCS
-                    ${TARGET_DIR}/platform.c
-                    ${TARGET_DIR}/serial.c
-                    ${TARGET_DIR}/syncir.c
-                    ${TARGET_DIR}/startup_stm32f401xe.s
-                    ${TARGET_DIR}/syscalls.c
-                    ${TARGET_DIR}/stm32f4xx_it.c
-                    ${TARGET_DIR}/system_stm32f4xx.c
-                    ${BOARD_TARGET_DIR}/timer.c
-                    ${BOARD_TARGET_DIR}/nvs.c
-                    ${BOARD_TARGET_DIR}/gpio.c
-)
-
-SET(DEMO_ARCH_INCS
-                  ${TARGET_DIR}
-                  ${HAL_LIB_INCS}
-                  ${BOARD_TARGET_DIR}/include
-)
-
-################################################################################
-# Set list of target specific libraries
-SET(DEMO_BSP_NAME "bsp-${CFG_ARM_BOARD_TYPE}-${CURRENT_DEMO_CONTEXT}")
-SET(DEMO_ARCH_LIBS "${DEMO_BSP_NAME}")
-
-#################################################################################
-# Set compile flags
-SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DCFG_SAPL_SN_UDID=${CFG_SAPL_SN_UDID}")
-STRING (REPLACE "-pedantic" "" CMAKE_C_FLAGS ${CMAKE_C_FLAGS})
-
-################################################################################
-# Set architecture specific compile flags
-SET(DEMO_ARCH_LINKER_FLAGS "-T${DEMO_LINKER_SCRIPT} -Wl,--start-group -lc -lm -Wl,--end-group -static -Wl,-cref,-u,Reset_Handler -Wl,-Map=${PROJECT_NAME}.map -Wl,--gc-sections -Wl,--defsym=malloc_getpagesize_P=0x1000")
+# Enable benchmarking
+IF(CFG_BENCHMARK_ENABLED)
+    SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DBENCHMARK_ENABLED -DBENCHMARK_MODULES=0xEE800043L")
+ENDIF()

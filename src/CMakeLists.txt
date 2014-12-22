@@ -106,8 +106,16 @@ SET( PCP_DIR ${CMAKE_SOURCE_DIR}/pcp )
 SET( APP_DIR ${CMAKE_SOURCE_DIR}/app )
 SET( APP_COMMON_DIR ${APP_DIR}/common )
 SET( APP_TARGET_DIR ${APP_DIR}/target )
+SET( APP_BIN_DIR ${CMAKE_BINARY_DIR}/app )
 
 SET( DEMO_CONFIG_DIR ${APP_DIR}/demo-${CFG_DEMO_TYPE}/config )
+
+#####################################################################
+# Set global naming
+SET(SN_PROC_UP_MASTER "up-master")
+SET(SN_PROC_UP_SLAVE "up-slave")
+SET(SN_PROC_DUAL_CHAN "dual-channel")
+SET(SN_PROC_SINGLE_CHAN "single-channel")
 
 #####################################################################
 # Setup architecture specific configuration
@@ -122,6 +130,11 @@ ELSEIF((CMAKE_SYSTEM_NAME STREQUAL "Generic") AND (CMAKE_SYSTEM_PROCESSOR STREQU
 ELSEIF((CMAKE_SYSTEM_NAME STREQUAL "Generic") AND (CMAKE_SYSTEM_PROCESSOR STREQUAL "cortex-m4"))
     INCLUDE(configure-cortexm4)
 ENDIF()
+
+#####################################################################
+# Set path to current demo
+SET(DEMO_SOURCE_DIR ${APP_DIR}/demo-${CFG_DEMO_TYPE})
+SET(DEMO_BINARY_DIR ${APP_BIN_DIR}/demo-${CFG_DEMO_TYPE})
 
 #####################################################################
 # Set compiler specific definitions
@@ -139,8 +152,20 @@ IF((CMAKE_SYSTEM_NAME STREQUAL "Generic"))
         ADD_SUBDIRECTORY("${LIBS_DIR}/psicommon" "${PROJECT_BINARY_DIR}/libs/${CURR_APPLICATION}/psicommon")
         ADD_SUBDIRECTORY("${LIBS_DIR}/psi" "${PROJECT_BINARY_DIR}/libs/${CURR_APPLICATION}/psi")
 
-        # Add the current demo to the build
-        ADD_SUBDIRECTORY("${APP_DIR}/demo-${CFG_DEMO_TYPE}")
+        # Add the current demo type to the build
+        IF(CFG_DUAL_CHANNEL STREQUAL ${SN_PROC_DUAL_CHAN})
+            # Demo is a dual channel SN demo
+            ADD_SUBDIRECTORY("${DEMO_SOURCE_DIR}" "${DEMO_BINARY_DIR}/${SN_PROC_UP_MASTER}")
+            ADD_SUBDIRECTORY("${DEMO_SOURCE_DIR}" "${DEMO_BINARY_DIR}/${SN_PROC_UP_SLAVE}")
+        ELSEIF(CFG_DUAL_CHANNEL STREQUAL ${SN_PROC_UP_MASTER})
+            # Demo is up-master only
+            ADD_SUBDIRECTORY("${DEMO_SOURCE_DIR}" "${DEMO_BINARY_DIR}/${SN_PROC_UP_MASTER}")
+        ELSEIF(CFG_DUAL_CHANNEL STREQUAL ${SN_PROC_UP_SLAVE})
+            # Demo is up-slave only
+            ADD_SUBDIRECTORY("${DEMO_SOURCE_DIR}" "${DEMO_BINARY_DIR}/${SN_PROC_UP_SLAVE}")
+        ELSE()
+            ADD_SUBDIRECTORY("${DEMO_SOURCE_DIR}")
+        ENDIF()
     ENDIF()
 
     IF(CFG_INCLUDE_SUBPROJECTS MATCHES "pcp" OR CFG_INCLUDE_SUBPROJECTS MATCHES "both" )

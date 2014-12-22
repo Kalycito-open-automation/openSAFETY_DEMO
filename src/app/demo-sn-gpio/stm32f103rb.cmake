@@ -70,7 +70,8 @@ SET(DEMO_ARCH_INCS
 
 ################################################################################
 # Set list of target specific libraries
-SET(DEMO_ARCH_LIBS "bsp-${CFG_ARM_BOARD_TYPE}")
+SET(DEMO_BSP_NAME "bsp-${CFG_ARM_BOARD_TYPE}-${CURRENT_DEMO_CONTEXT}")
+SET(DEMO_ARCH_LIBS "${DEMO_BSP_NAME}")
 
 #################################################################################
 # Set compile flags

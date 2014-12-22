@@ -33,7 +33,30 @@ CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 # Generate a target for this library in the CMake Makefile
 SET(GEN_LIB_TARGET ON)
 
-PROJECT(demo-${CFG_DEMO_TYPE} C)
+########################################################################
+# Parse the current context of the demo (single or dual channel)
+GET_FILENAME_COMPONENT(CURRENT_DEMO_CONTEXT ${CMAKE_CURRENT_BINARY_DIR} NAME)
+
+########################################################################
+# Reset demo context variable to simpler strings, Set SYSTEM_PATH id
+SET(ID_SINGLE 0)
+SET(ID_UP_MASTER 1)
+SET(ID_UP_SLAVE 2)
+
+IF(CURRENT_DEMO_CONTEXT STREQUAL ${SN_PROC_UP_MASTER})
+    SET(CURRENT_DEMO_CONTEXT "upm")
+    SET(SYSTEM_PATH ${ID_UP_MASTER})
+ELSEIF(CURRENT_DEMO_CONTEXT STREQUAL ${SN_PROC_UP_SLAVE})
+    SET(CURRENT_DEMO_CONTEXT "ups")
+    SET(SYSTEM_PATH ${ID_UP_SLAVE})
+ELSE()
+    SET(CURRENT_DEMO_CONTEXT "single")
+    SET(SYSTEM_PATH ${ID_SINGLE})
+ENDIF()
+
+########################################################################
+# Create project
+PROJECT(demo-${CFG_DEMO_TYPE}-${CURRENT_DEMO_CONTEXT} C)
 
 ########################################################################
 # Define the CN unique id
@@ -142,6 +165,9 @@ INCLUDE_DIRECTORIES(
 IF("${CMAKE_C_COMPILER_ID}" STREQUAL "GNU")
     # Remove unknown pragma warning (This disables a warning on CTC_SKIP)
     SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-unknown-pragmas")
+
+    # Set C macro to forward SYSTEM_PATH to code
+    SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DSYSTEM_PATH=${SYSTEM_PATH}")
 ENDIF()
 
 ########################################################################

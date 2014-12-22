@@ -28,7 +28,11 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ################################################################################
 
-PROJECT(bsp-${CFG_ARM_BOARD_TYPE} C)
+IF(CFG_DEMO_TYPE STREQUAL "sn-gpio")
+    PROJECT(bsp-${CFG_ARM_BOARD_TYPE}-${CURRENT_DEMO_CONTEXT} C)
+ELSE()
+    PROJECT(bsp-${CFG_ARM_BOARD_TYPE} C)
+ENDIF()
 
 #################################################################################
 # USER OPTIONS
