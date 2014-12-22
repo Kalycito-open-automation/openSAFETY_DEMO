@@ -61,6 +61,7 @@ SET(SHNF_SRCS
     ${SHNF_DIR}/shnf.c
     ${SHNF_DIR}/constime.c
     ${SHNF_DIR}/hnfpsi.c
+    ${SHNF_DIR}/statehandler.c
 )
 
 SET(SAPL_SRCS

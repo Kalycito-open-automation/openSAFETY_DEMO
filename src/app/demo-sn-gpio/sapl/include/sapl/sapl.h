@@ -59,7 +59,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     extern "C" {
 #endif
 
-BOOLEAN sapl_init(BOOLEAN * pEnterOperational_p);
+BOOLEAN sapl_init(void);
 void sapl_exit(void);
 
 BOOLEAN sapl_process(void);

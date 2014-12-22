@@ -53,6 +53,7 @@ stack and processes the background task.
 #include <common/platform.h>
 
 #include <shnf/shnf.h>
+#include <shnf/statehandler.h>
 #include <sapl/sapl.h>
 
 #include <SNMTSapi.h>
@@ -91,10 +92,6 @@ stack and processes the background task.
 
 typedef struct
 {
-    BOOLEAN fShutdown_m;                   /**< TRUE if the SN should perform a shutdown */
-    BOOLEAN fEnterPreop_m;                 /**< TRUE if the SN should enter pre-operational state */
-
-    BOOLEAN fEnterOperational_m;           /**< TRUE if the SN should enter operational state */
     SNMTS_t_SN_STATE_MAIN lastSnState_m;   /**< Consists of the last SN state */
 } tMainInstance;
 
@@ -150,9 +147,7 @@ APs state machine will be updated and input/output ports will be processed.
 int main (void)
 {
     int retVal = -1;
-    tErrHInitParam errhInitParam;
 
-    MEMSET(&errhInitParam, 0, sizeof(tErrHInitParam));
     MEMSET(&instance_l, 0, sizeof(tMainInstance));
 
     /* Initialize target specific functions */
@@ -168,11 +163,8 @@ int main (void)
     DEBUG_TRACE(DEBUG_LVL_ALWAYS, "\tTarget System: \t\t%s\n", EPLS_k_TARGET_STRING );
     DEBUG_TRACE(DEBUG_LVL_ALWAYS, "********************************************************************\n");
 
-    /* Initialize the error handler */
-    errhInitParam.pShutdown_m = &instance_l.fShutdown_m;
-    errhInitParam.pEnterPreop_m = &instance_l.fEnterPreop_m;
-
-    if(errh_init(&errhInitParam))
+    /* Initialize the state handler */
+    if(stateh_init(kSnStateInitializing))
     {
         /* Initialize the openSAFETY stack and change state to init */
         if(initOpenSafety())
@@ -182,7 +174,7 @@ int main (void)
             {
                 /* Initialize the safe application module */
                 DEBUG_TRACE(DEBUG_LVL_ALWAYS, "\nInitialize the SAPL -> ");
-                if(sapl_init(&instance_l.fEnterOperational_m))
+                if(sapl_init())
                 {
                     DEBUG_TRACE(DEBUG_LVL_ALWAYS, "SUCCESS!\n");
 
@@ -242,6 +234,9 @@ static BOOLEAN initOpenSafety(void)
         if(SNMTS_GetSnState(B_INSTNUM_ &snState))
         {
             DEBUG_TRACE(DEBUG_LVL_ALWAYS, "\nCHANGE STATE: SN_BOOTING -> %s\n", strSnStates[snState]);
+
+            stateh_setSnState(kSnStateInitializing);
+
             fReturn = TRUE;
         }
     }
@@ -290,7 +285,7 @@ static BOOLEAN process(void)
         checkConnectionValid();
 
         /* Check if operational flag is active */
-        if(instance_l.fEnterOperational_m)
+        if(stateh_getEnterOpFlag())
         {
             if(enterOperational() == FALSE)
             {
@@ -299,7 +294,7 @@ static BOOLEAN process(void)
         }
 
         /* Check if enter preop flag is active */
-        if(instance_l.fEnterPreop_m)
+        if(stateh_getEnterPreOpFlag())
         {
             if(enterPreop() == FALSE)
             {
@@ -307,7 +302,7 @@ static BOOLEAN process(void)
             }
         }
 
-        if(instance_l.fShutdown_m)
+        if(stateh_getShutdownFlag())
         {
             fReturn = TRUE;
             break;
@@ -399,8 +394,7 @@ static BOOLEAN enterPreOperational(void)
     /* transition to PreOperational */
     if(SNMTS_PerformTransPreOp(B_INSTNUM_ consTime))
     {
-        /* Forward new state to SHNF */
-        shnf_changeState(kShnfStatePreOperational);
+        stateh_setSnState(kSnStatePreOperational);
 
 #ifndef NDEBUG
         printSNState();
@@ -436,7 +430,7 @@ static BOOLEAN enterOperational(void)
     if(SNMTS_EnterOpState(B_INSTNUM_ TRUE, errGrp, errCode))
     {
         /* Forward new state to SHNF */
-        shnf_changeState(kShnfStateOperational);
+        stateh_setSnState(kSnStateOperational);
 
         fReturn = TRUE;
     }
@@ -446,7 +440,7 @@ static BOOLEAN enterOperational(void)
     }
 
     /* Reset the operation flag */
-    instance_l.fEnterOperational_m = FALSE;
+    stateh_setEnterOpFlag(FALSE);
 
     return fReturn;
 }
@@ -471,8 +465,6 @@ static BOOLEAN enterPreop(void)
     /* Perform transition to pre operational */
     if(SNMTS_PerformTransPreOp(B_INSTNUM_ consTime))
     {
-        instance_l.fEnterPreop_m = FALSE;
-
         /* Transition to preop successful! */
         fReturn = TRUE;
 
@@ -483,6 +475,9 @@ static BOOLEAN enterPreop(void)
     {
         errh_postFatalError(kErrSourcePeriph, kErrorEnterFailSafeFailed, 0);
     }
+
+    /* Reset the enter pre operation flag */
+    stateh_setEnterPreOpFlag(FALSE);
 
     return fReturn;
 }
@@ -499,7 +494,7 @@ static void shutdown(void)
     shnf_exit();
     sapl_exit();
 
-    errh_exit();
+    stateh_exit();
 
     gpio_close();
     platform_exit();

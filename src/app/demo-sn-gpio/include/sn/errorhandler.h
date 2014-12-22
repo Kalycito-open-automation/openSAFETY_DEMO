@@ -134,15 +134,6 @@ typedef struct
     UINT32 addInfo_m;       /**< Additional error information */
 } tErrorDesc;
 
-/**
- * \brief Error handler initialisation parameters
- */
-typedef struct
-{
-    BOOLEAN * pShutdown_m;      /**< Pointer to the shutdown flag */
-    BOOLEAN * pEnterPreop_m;    /**< Pointer to the enter preop flag */
-} tErrHInitParam;
-
 /*----------------------------------------------------------------------------*/
 /* function prototypes                                                        */
 /*----------------------------------------------------------------------------*/
@@ -150,9 +141,6 @@ typedef struct
 #ifdef __cplusplus
     extern "C" {
 #endif
-
-BOOLEAN errh_init(tErrHInitParam * pInitParam_p);
-void errh_exit();
 
 void errh_postInfo(tErrSource source_p, tErrorTypes code_p, UINT32 addInfo_p);
 void errh_postMinorError(tErrSource source_p, tErrorTypes code_p, UINT32 addInfo_p);

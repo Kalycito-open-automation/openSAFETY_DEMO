@@ -49,6 +49,7 @@ This module manages the application near firmware parts.
 #include <sapl/sapl.h>
 
 #include <shnf/shnf.h>
+#include <shnf/statehandler.h>
 
 #include <sapl/parameterset.h>
 #include <sapl/parametercrc.h>
@@ -121,7 +122,6 @@ typedef struct
 typedef struct
 {
     UINT32 activeTasks_m;             /**< Stores which task of the SAPL is currently active */
-    BOOLEAN * pEnterOperational_m;    /**< Pointer to the switch to operational flag */
     BOOLEAN fParamCrcValid_m;         /**< TRUE if the parameter CRC is valid */
     tParamSetAttr paramSetAttr_m;     /**< Attributes of the SOD parameter set */
 } tSaplInstance;
@@ -143,41 +143,30 @@ static tSaplInstance saplInstance_l SAFE_INIT_SEKTOR;
 /**
 \brief    Initialize safe application main modules
 
-\param pEnterOperational_p      Pointer to the operational flag
-
 \retval TRUE    Initialization was successful
 \retval FALSE   Error during initialization
 
 \ingroup module_sapl
 */
 /*----------------------------------------------------------------------------*/
-BOOLEAN sapl_init(BOOLEAN * pEnterOperational_p)
+BOOLEAN sapl_init(void)
 {
     BOOLEAN fReturn = FALSE;
 
     MEMSET(&saplInstance_l, 0, sizeof(tSaplInstance));
 
-    if(pEnterOperational_p != NULL)
+    /* Initialize the parameter set module */
+    if(paramset_init())
     {
-        saplInstance_l.pEnterOperational_m = pEnterOperational_p;
-
-        /* Initialize the parameter set module */
-        if(paramset_init())
+        /* Initialize the SOD CRC calculation module */
+        if(paramcrc_init())
         {
-            /* Initialize the SOD CRC calculation module */
-            if(paramcrc_init())
+            /* Initialize the SOD storage module */
+            if(sodstore_init())
             {
-                /* Initialize the SOD storage module */
-                if(sodstore_init())
-                {
-                    fReturn = TRUE;
-                }
+                fReturn = TRUE;
             }
         }
-    }
-    else
-    {
-        errh_postFatalError(kErrSourceSapl, kErrorInvalidParameter, 0);
     }
 
     return fReturn;
@@ -382,7 +371,8 @@ void SAPL_SNMTS_SwitchToOpReqClbk(BYTE_B_INSTNUM)
        saplInstance_l.activeTasks_m == 0         )
     {
         saplInstance_l.fParamCrcValid_m = FALSE;
-        *saplInstance_l.pEnterOperational_m = TRUE;
+
+        stateh_setEnterOpFlag(TRUE);
     }
 }
 

@@ -1,8 +1,8 @@
 /**
 ********************************************************************************
-\file   shnf/shnf.h
+\file   shnf/statehandler.h
 
-\brief  TODO
+\brief  This module handles the current SN state
 
 *******************************************************************************/
 
@@ -33,8 +33,8 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
 
-#ifndef _INC_shnf_shnf_H_
-#define _INC_shnf_shnf_H_
+#ifndef _INC_shnf_statehandler_H_
+#define _INC_shnf_statehandler_H_
 
 /*----------------------------------------------------------------------------*/
 /* includes                                                                   */
@@ -49,6 +49,18 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /* typedef                                                                    */
 /*----------------------------------------------------------------------------*/
 
+/**
+ * \brief Represents the current state of the SN
+ */
+typedef enum
+{
+    kSnStateInvalid        = 0x0,       /**< Invalid SN state */
+    kSnStateInitializing   = 0x1,       /**< SN is currently initializing */
+    kSnStatePreOperational = 0x2,       /**< SN is in pre-operational state */
+    kSnStateOperational    = 0x3,       /**< SN is operational */
+    kSnStateCount          = 0x4,       /**< The count of SN states */
+} tSnState;
+
 /*----------------------------------------------------------------------------*/
 /* function prototypes                                                        */
 /*----------------------------------------------------------------------------*/
@@ -57,16 +69,24 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     extern "C" {
 #endif
 
-BOOLEAN shnf_init(void);
-void shnf_exit(void);
+BOOLEAN stateh_init(tSnState snInitState_p);
+void stateh_exit(void);
 
-BOOLEAN shnf_process(void);
+void stateh_setSnState(tSnState newState_p);
+tSnState stateh_getSnState(void);
 
-UINT32 shnf_getConsecutiveTime(void);
+void stateh_setEnterOpFlag(BOOLEAN newVal_p);
+BOOLEAN stateh_getEnterOpFlag(void);
+
+void stateh_setEnterPreOpFlag(BOOLEAN newVal_p);
+BOOLEAN stateh_getEnterPreOpFlag(void);
+
+void stateh_setShutdownFlag(BOOLEAN newVal_p);
+BOOLEAN stateh_getShutdownFlag(void);
 
 #ifdef __cplusplus
     }
 #endif
 
 
-#endif /* _INC_shnf_shnf_H_ */
+#endif /* _INC_shnf_statehandler_H_ */

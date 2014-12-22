@@ -51,6 +51,7 @@ to the HNF. Also the frame CRCs are calculated inside this module.
 
 #include <shnf/hnf.h>
 #include <shnf/constime.h>
+#include <shnf/statehandler.h>
 
 #include <SODapi.h>
 #include <SNMTSapi.h>
@@ -135,7 +136,6 @@ typedef struct
  */
 typedef struct
 {
-    tShnfState         shnfState_m;                     /**< The current state of the SHNF */
     tSsdoSnmtRxStatus  ssdoRxStatus_m;                  /**< Status of the receive state machine */
     tTxDescriptor      txDesc_m[TX_CHANNEL_COUNT];      /**< Transmit descriptor of each transmit channel */
 } tShnfInstance;
@@ -192,9 +192,9 @@ BOOLEAN shnf_init(void)
     MEMSET(&hnfInitParam, 0, sizeof(tHnfInit));
 
     /* Initialize the local instance structure */
-    shnfInstance_l.shnfState_m = kShnfStateInitializing;
     shnfInstance_l.ssdoRxStatus_m = kSsdoRxStatusReady;
 
+    /* Setup the HNF initialization parameters */
     hnfInitParam.asyncRcvChan0Handler_m = processRxSsdoSnmtFrame;
     hnfInitParam.syncRcvHandler_m = processRxSpdoFrame;
     hnfInitParam.syncTxBuild_m = buildTxSpdoFrame;
@@ -227,18 +227,6 @@ void shnf_exit(void)
 
 /*----------------------------------------------------------------------------*/
 /**
-\brief    Change the current state of the SHNF
-
-\ingroup module_shnf
-*/
-/*----------------------------------------------------------------------------*/
-void shnf_changeState(tShnfState shnfState_p)
-{
-    shnfInstance_l.shnfState_m = shnfState_p;
-}
-
-/*----------------------------------------------------------------------------*/
-/**
 \brief    Process the SHNF background task
 
 Needs to be called periodically and processes the asynchronous data of the
@@ -261,7 +249,7 @@ BOOLEAN shnf_process(void)
         {
             if(hnf_processAsync())
             {
-                if(shnfInstance_l.shnfState_m == kShnfStateOperational)
+                if(stateh_getSnState() == kSnStateOperational)
                 {
                     consTime = shnf_getConsecutiveTime();
 
@@ -573,7 +561,7 @@ static void buildTxSpdoFrame(void)
     UINT8 numFreeSpdoFrms = 1U; /* number of free SPDO frames can be sent per call of the SSC_BuildTxFrames */
     UINT32 consTime;
 
-    if(shnfInstance_l.shnfState_m == kShnfStateOperational)
+    if(stateh_getSnState() == kSnStateOperational)
     {
         consTime = shnf_getConsecutiveTime();
 
@@ -656,7 +644,7 @@ static void processRxSpdoFrame(UINT8* pPayload_p, UINT16 paylLen_p)
     if(pPayload_p != NULL)
     {
         /* Only forward receive frames when the SN is in operational state */
-        if(shnfInstance_l.shnfState_m == kShnfStateOperational)
+        if(stateh_getSnState() == kSnStateOperational)
         {
             /* Get payload length field from frame */
             pLenField = &pPayload_p[FRAME_OFFSET_LENGTH];

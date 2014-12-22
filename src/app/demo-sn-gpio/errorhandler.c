@@ -51,6 +51,7 @@ channel to the PLC.
 #include <sn/errorhandler.h>
 
 #include <shnf/hnf.h>
+#include <shnf/statehandler.h>
 
 #include <libpsicommon/ami.h>
 
@@ -87,20 +88,9 @@ static UINT32 lostErrors_l = 0;     /**< Is incremented when an error was not fo
 /* local types                                                                */
 /*----------------------------------------------------------------------------*/
 
-/**
- * \brief Error handler instance structure
- */
-typedef struct
-{
-    BOOLEAN * pShutdown_m;      /**< Pointer to the shutdown flag */
-    BOOLEAN * pEnterPreop_m;    /**< Pointer to the enter preop flag */
-} tErrHInstance;
-
 /*----------------------------------------------------------------------------*/
 /* local vars                                                                 */
 /*----------------------------------------------------------------------------*/
-
-static tErrHInstance errHanInstance_l;
 
 #ifndef NDEBUG
 static char *errSource[] = { "Invalid", "EPS", "HNF", "SHNF", "SAPL", "Periph" };
@@ -114,49 +104,6 @@ static BOOLEAN enterPreopOnError(tErrorDesc * pErrDesc_p);
 /*============================================================================*/
 /*            P U B L I C   F U N C T I O N S                                 */
 /*============================================================================*/
-
-/*----------------------------------------------------------------------------*/
-/**
-\brief    Initialize the error handler module
-
-\param[in] pInitParam_p     Error handler init parameters
-
-\return BOOLEAN
-\retval TRUE        Initialization successful
-\retval FALSe       Error on initialization
-
-\ingroup module_sapl
-*/
-/*----------------------------------------------------------------------------*/
-BOOLEAN errh_init(tErrHInitParam * pInitParam_p)
-{
-    BOOLEAN fReturn = FALSE;
-
-    MEMSET(&errHanInstance_l, 0, sizeof(tErrHInstance));
-
-    if(pInitParam_p != NULL)
-    {
-        errHanInstance_l.pShutdown_m = pInitParam_p->pShutdown_m;
-        errHanInstance_l.pEnterPreop_m = pInitParam_p->pEnterPreop_m;
-
-
-        fReturn = TRUE;
-    }
-
-    return fReturn;
-}
-
-/*----------------------------------------------------------------------------*/
-/**
-\brief    Close the error handler module
-
-\ingroup module_sapl
-*/
-/*----------------------------------------------------------------------------*/
-void errh_exit(void)
-{
-    /* Nothing to free */
-}
 
 /*----------------------------------------------------------------------------*/
 /**
@@ -288,7 +235,7 @@ void errh_postError(tErrorDesc * pErrDesc_p)
         if(pErrDesc_p->fFailSafe_m)
         {
             /* On errors with failsafe set -> shutdown the firmware */
-            *errHanInstance_l.pShutdown_m = TRUE;
+            stateh_setShutdownFlag(TRUE);
             DEBUG_TRACE(DEBUG_LVL_ALWAYS, "\n-> Shutdown!\n");
         }
         else
@@ -296,15 +243,18 @@ void errh_postError(tErrorDesc * pErrDesc_p)
             /* On some unique errors/infos we perform a switch to preop! */
             if(enterPreopOnError(pErrDesc_p))
             {
-                *errHanInstance_l.pEnterPreop_m = TRUE;
+                stateh_setEnterPreOpFlag(TRUE);
                 DEBUG_TRACE(DEBUG_LVL_ALWAYS, "\n-> Enter Preop!\n");
             }
         }
 
-        /* The error is reported via the logbook to the PLC */
-        if(hnf_postLogChannel0(pErrDesc_p) == FALSE)
-            lostErrors_l++;
-
+        /* Forward the error to the logger module if the SN state is preop */
+        if(stateh_getSnState() > kSnStateInitializing)
+        {
+            /* The error is reported via the logbook to the PLC */
+            if(hnf_postLogChannel0(pErrDesc_p) == FALSE)
+                lostErrors_l++;
+        }
     }
 }
 
