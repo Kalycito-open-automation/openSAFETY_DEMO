@@ -621,30 +621,37 @@ static BOOLEAN processRxSsdoSnmtFrame(UINT8* pPayload_p, UINT16 paylLen_p)
     UINT32 consTime;
     SSC_t_PROCESS procRet;
 
-    if(shnfInstance_l.ssdoRxStatus_m == kSsdoRxStatusReady)
+    if(stateh_getSnState() > kSnStateInitializing)
     {
-        consTime = constime_getTime();
-
-        DEBUG_TRACE(DEBUG_LVL_SHNF, "Rcv SSDO/SNMT\n");
-
-        /* Forward frame to stack */
-        procRet = SSC_ProcessSNMTSSDOFrame(B_INSTNUM_ consTime, pPayload_p, paylLen_p);
-        if(procRet == SSC_k_BUSY)
+        if(shnfInstance_l.ssdoRxStatus_m == kSsdoRxStatusReady)
         {
-            /* Frame is passed to the stack but takes further calls of the process function to finish */
-            shnfInstance_l.ssdoRxStatus_m = kSsdoRxStatusBusy;
-            fReturn = TRUE;
-        }
-        else if(procRet == SSC_k_OK)
-        {
-            /* Frame is finished without change to busy */
-            fReturn = TRUE;
-        }
+            consTime = constime_getTime();
 
-        /* call the Control Flow Monitoring */
-        SCFM_TACK_PATH();
+            DEBUG_TRACE(DEBUG_LVL_SHNF, "Rcv SSDO/SNMT\n");
+
+            /* Forward frame to stack */
+            procRet = SSC_ProcessSNMTSSDOFrame(B_INSTNUM_ consTime, pPayload_p, paylLen_p);
+            if(procRet == SSC_k_BUSY)
+            {
+                /* Frame is passed to the stack but takes further calls of the process function to finish */
+                shnfInstance_l.ssdoRxStatus_m = kSsdoRxStatusBusy;
+                fReturn = TRUE;
+            }
+            else if(procRet == SSC_k_OK)
+            {
+                /* Frame is finished without change to busy */
+                fReturn = TRUE;
+            }
+
+            /* call the Control Flow Monitoring */
+            SCFM_TACK_PATH();
+        }   /* no else: frame can only be posted when state machine is ready -> return false! */
     }
-    /* no else: frame can only be posted when state machine is ready -> return false! */
+    else
+    {
+        /* Ignore frame -> Return success! */
+        fReturn = TRUE;
+    }
 
     return fReturn;
 }
