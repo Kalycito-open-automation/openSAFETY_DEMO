@@ -48,6 +48,7 @@ stm32f103rb (Cortex-M3).
 #include <common/platform.h>
 
 #include <misc.h>
+#include <stm32f1xx_it.h>
 
 #include <stdio.h>
 
@@ -124,6 +125,12 @@ controller.
 /*----------------------------------------------------------------------------*/
 BOOL platform_init(void)
 {
+    RCC_ClocksTypeDef RCC_Clocks;
+
+    /* SysTick end of count event each 1ms */
+    RCC_GetClocksFreq(&RCC_Clocks);
+    SysTick_Config(RCC_Clocks.HCLK_Frequency / 1000);
+
     /* by default stdin/stdout are on usart2 */
     usart2init();
 
@@ -155,6 +162,26 @@ void platform_exit(void)
 
     /* Close the benchmark pins */
     GPIO_DeInit(PINx_BENCHMARK_PORT);
+}
+
+/*----------------------------------------------------------------------------*/
+/**
+\brief  Sleep for an amount of milliseconds
+
+\param[in] msec_p       The milliseconds to sleep
+
+\ingroup module_platform
+*/
+/*----------------------------------------------------------------------------*/
+void platform_msleep(UINT32 msec_p)
+{
+    UINT32 currTime = tickCnt_l;
+    UINT32 endTime = currTime + msec_p;
+
+    while(currTime < endTime)
+    {
+        currTime = tickCnt_l;
+    }
 }
 
 /*============================================================================*/

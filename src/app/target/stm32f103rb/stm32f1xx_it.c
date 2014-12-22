@@ -34,6 +34,8 @@
   * @{
   */
 
+volatile uint32_t tickCnt_l = 0;
+
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
 /* Private macro -------------------------------------------------------------*/
@@ -140,32 +142,8 @@ void PendSV_Handler(void)
   */
 void SysTick_Handler(void)
 {
+    tickCnt_l++;
 }
-
-/******************************************************************************/
-/*                 STM32F1xx Peripherals Interrupt Handlers                   */
-/*  Add here the Interrupt Handler for the used peripheral(s) (PPP), for the  */
-/*  available peripheral interrupt handler's name please refer to the startup */
-/*  file (startup_stm32f10x_md.s).                                            */
-/******************************************************************************/
-/**
-  * @brief  This function handles EXTI15_10_IRQHandler Handler.
-  * @param  None
-  * @retval None
-  */
-void EXTI15_10_IRQHandler(void)
-{
-}
-
-
-/**
-  * @brief  This function handles PPP interrupt request.
-  * @param  None
-  * @retval None
-  */
-/*void PPP_IRQHandler(void)
-{
-}*/
 
 /**
   * @}

@@ -180,6 +180,20 @@ void platform_exit(void)
     HAL_DeInit();
 }
 
+/*----------------------------------------------------------------------------*/
+/**
+\brief  Sleep for an amount of milliseconds
+
+\param[in] msec_p       The milliseconds to sleep
+
+\ingroup module_platform
+*/
+/*----------------------------------------------------------------------------*/
+void platform_msleep(UINT32 msec_p)
+{
+    HAL_Delay(msec_p);
+}
+
 /*============================================================================*/
 /*            P R I V A T E   F U N C T I O N S                               */
 /*============================================================================*/

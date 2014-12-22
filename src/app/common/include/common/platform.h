@@ -58,5 +58,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 BOOL platform_init(void);
 void platform_exit(void);
 
+void platform_msleep(UINT32 msec_p);
+
 #endif /* _INC_common_platform_H_ */
 
