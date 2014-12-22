@@ -107,21 +107,21 @@ static tMainInstance mainInstance_l;            /**< Instance of main module */
 /*----------------------------------------------------------------------------*/
 /* local function prototypes                                                  */
 /*----------------------------------------------------------------------------*/
-static BOOL psi_initModules(void);
-static void psi_exitModules(void);
-static BOOL psi_appCbSync(tPsiTimeStamp* pTimeStamp_p );
-static BOOL psi_workInputOutput(UINT32 rpdoRelTimeLow_p,
+static BOOL initModules(void);
+static void exitModules(void);
+static BOOL appCbSync(tPsiTimeStamp* pTimeStamp_p );
+static BOOL workInputOutput(UINT32 rpdoRelTimeLow_p,
         tRpdoMappedObj* pRpdoImage_p,
         tTpdoMappedObj* pTpdoImage_p );
 
-static void psi_syncIntH(void* pArg_p);
-static void psi_serialTransferFinished(BOOL fError_p);
+static void syncIntHandler(void* pArg_p);
+static void serialTransferFinished(BOOL fError_p);
 
-static void psi_errorHandler(tPsiErrorInfo* pErrorInfo_p);
+static void errorHandler(tPsiErrorInfo* pErrorInfo_p);
 
 #if(((PSI_MODULE_INTEGRATION) & (PSI_MODULE_CC)) != 0)
-static void psi_ccWriteObject(void);
-static void psi_ccReadObject(void);
+static void ccWriteObject(void);
+static void ccReadObject(void);
 #endif
 
 /*============================================================================*/
@@ -148,7 +148,9 @@ int main (void)
     tBuffDescriptor   buffDescList[kTbufCount];
     tHandlerParam     transferParam;
     UINT8 * pTbufMemBase = (UINT8 *)(&mainInstance_l.tbufMemLayout_m[0]);
+#ifdef _DEBUG
     UINT8             macAddr[] = MAC_ADDR;
+#endif
 
     PSI_MEMSET(&mainInstance_l, 0, sizeof(mainInstance_l));
     PSI_MEMSET(&buffDescList, 0, sizeof(buffDescList));
@@ -157,6 +159,7 @@ int main (void)
     /* Init the target platform */
     platform_init();
 
+#ifdef _DEBUG
     DEBUG_TRACE(DEBUG_LVL_ALWAYS, "\n\n********************************************************************\n");
     DEBUG_TRACE(DEBUG_LVL_ALWAYS, "\n\topenPOWERLINK - GPIO Demo \n\n ");
     DEBUG_TRACE(DEBUG_LVL_ALWAYS, "\tSerial number: \t\t0x%X\n", CONFIG_IDENT_SERIAL_NUMBER );
@@ -164,6 +167,7 @@ int main (void)
     DEBUG_TRACE(DEBUG_LVL_ALWAYS, "\tMAC address: \t\t0x%X,0x%X,0x%X,0x%X,0x%X,0x%X\n",
                                    macAddr[0], macAddr[1], macAddr[2], macAddr[3], macAddr[4], macAddr[5] );
     DEBUG_TRACE(DEBUG_LVL_ALWAYS, "********************************************************************\n");
+#endif
 
     /* Generate buffer descriptor list */
     if(tbufp_genDescList(pTbufMemBase, kTbufCount, &buffDescList[0]) == FALSE)
@@ -180,7 +184,7 @@ int main (void)
 
     initParam.pBuffDescList_m = &buffDescList[0];
     initParam.pfnStreamHandler_m = pcpserial_transfer;
-    initParam.pfnErrorHandler_m = psi_errorHandler;
+    initParam.pfnErrorHandler_m = errorHandler;
     initParam.idConsAck_m = kTbufAckRegisterCons;
     initParam.idProdAck_m = kTbufAckRegisterProd;
     initParam.idFirstProdBuffer_m = TBUF_NUM_CON + 1;   /* Add one buffer for the consumer ACK register */
@@ -194,7 +198,7 @@ int main (void)
 
     /* initialize and start the slim interface modules */
     DEBUG_TRACE(DEBUG_LVL_ALWAYS,"\n\nInitialize slim interface modules...\n");
-    if(psi_initModules() == FALSE)
+    if(initModules() == FALSE)
     {
         DEBUG_TRACE(DEBUG_LVL_ERROR," ... error!\n");
         goto Exit;
@@ -210,7 +214,7 @@ int main (void)
 
     /* Init the serial device */
     DEBUG_TRACE(DEBUG_LVL_ALWAYS,"\n\nInitialize serial device...\n");
-    if(pcpserial_init(&transferParam, psi_serialTransferFinished) == FALSE)
+    if(pcpserial_init(&transferParam, serialTransferFinished) == FALSE)
     {
         DEBUG_TRACE(DEBUG_LVL_ERROR," ... error!\n");
         goto Exit;
@@ -220,7 +224,7 @@ int main (void)
 
     /* initialize PCP interrupt handler */
     DEBUG_TRACE(DEBUG_LVL_ALWAYS,"\n\nInitialize synchronous interrupt...\n");
-    if(syncir_init(psi_syncIntH) == FALSE)
+    if(syncir_init(syncIntHandler) == FALSE)
     {
         DEBUG_TRACE(DEBUG_LVL_ERROR," ... error!\n");
         goto Exit;
@@ -245,7 +249,7 @@ int main (void)
         /* Transmit async dummy frame for testing */
         if(mainInstance_l.fCcWriteObjTestEnable_m != FALSE)
         {
-            psi_ccWriteObject();
+            ccWriteObject();
         }
 #endif
 
@@ -264,7 +268,7 @@ Exit:
     platform_exit();
 
     /* Shutdown slim interface */
-    psi_exitModules();
+    exitModules();
     psi_exit();
 
     return 0;
@@ -287,7 +291,7 @@ Exit:
 \ingroup module_main
 */
 /*----------------------------------------------------------------------------*/
-static BOOL psi_initModules(void)
+static BOOL initModules(void)
 {
     BOOL fReturn = FALSE;
     tStatusInitParam   statusInitParam;
@@ -299,7 +303,7 @@ static BOOL psi_initModules(void)
 #endif
 
     /* Initialize the status module */
-    statusInitParam.pfnAppCbSync_m = psi_appCbSync;
+    statusInitParam.pfnAppCbSync_m = appCbSync;
     statusInitParam.buffOutId_m = kTbufNumStatusOut;
     statusInitParam.buffInId_m = kTbufNumStatusIn;
 
@@ -314,7 +318,7 @@ static BOOL psi_initModules(void)
     pdoInitParam.buffIdRpdo_m = kTbufNumRpdoImage;
     pdoInitParam.buffIdTpdo_m = kTbufNumTpdoImage;
 
-    if(pdo_init(psi_workInputOutput, &pdoInitParam) == FALSE)
+    if(pdo_init(workInputOutput, &pdoInitParam) == FALSE)
     {
         DEBUG_TRACE(DEBUG_LVL_ERROR,"ERROR: pdo_init() failed!\n");
         goto Exit;
@@ -348,7 +352,7 @@ Exit:
 \ingroup module_main
 */
 /*----------------------------------------------------------------------------*/
-static void psi_exitModules(void)
+static void exitModules(void)
 {
     /* Destroy all library modules */
     status_exit();
@@ -374,7 +378,7 @@ static void psi_exitModules(void)
 \ingroup module_main
 */
 /*----------------------------------------------------------------------------*/
-static BOOL psi_appCbSync(tPsiTimeStamp* pTimeStamp_p )
+static BOOL appCbSync(tPsiTimeStamp* pTimeStamp_p )
 {
     UNUSED_PARAMETER(pTimeStamp_p);
 
@@ -397,7 +401,7 @@ static BOOL psi_appCbSync(tPsiTimeStamp* pTimeStamp_p )
 \ingroup module_main
 */
 /*----------------------------------------------------------------------------*/
-static BOOL psi_workInputOutput(UINT32 rpdoRelTimeLow_p,
+static BOOL workInputOutput(UINT32 rpdoRelTimeLow_p,
         tRpdoMappedObj* pRpdoImage_p,
         tTpdoMappedObj* pTpdoImage_p )
 {
@@ -446,13 +450,13 @@ static BOOL psi_workInputOutput(UINT32 rpdoRelTimeLow_p,
 
 \param[in] pArg_p       Interrupt handler arguments
 
- psi_syncIntH() implements the synchronous data interrupt. The PCP asserts
+ syncIntHandler() implements the synchronous data interrupt. The PCP asserts
  the interrupt when periodic data is ready to transfer.
 
 \ingroup module_main
 */
 /*----------------------------------------------------------------------------*/
-static void psi_syncIntH(void* pArg_p)
+static void syncIntHandler(void* pArg_p)
 {
     UNUSED_PARAMETER(pArg_p);
 
@@ -483,7 +487,7 @@ This function is called after a serial transfer from the PCP to the application.
 \ingroup module_hnf
 */
 /*----------------------------------------------------------------------------*/
-static void psi_serialTransferFinished(BOOL fError_p)
+static void serialTransferFinished(BOOL fError_p)
 {
     if(fError_p == FALSE)
     {
@@ -515,7 +519,7 @@ static void psi_serialTransferFinished(BOOL fError_p)
 \ingroup module_main
 */
 /*----------------------------------------------------------------------------*/
-static void psi_errorHandler(tPsiErrorInfo* pErrorInfo_p)
+static void errorHandler(tPsiErrorInfo* pErrorInfo_p)
 {
 #ifdef NDEBUG
     UNUSED_PARAMETER(pErrorInfo_p);
@@ -536,7 +540,7 @@ static void psi_errorHandler(tPsiErrorInfo* pErrorInfo_p)
 \ingroup module_main
 */
 /*----------------------------------------------------------------------------*/
-static void psi_ccWriteObject(void)
+static void ccWriteObject(void)
 {
     tCcWriteStatus retCc = kCcWriteStatusError;
     /* Create test object */
@@ -549,7 +553,7 @@ static void psi_ccWriteObject(void)
     }
     else if( retCc == kCcWriteStatusSuccessful)
     {
-        psi_ccReadObject();
+        ccReadObject();
 
         object.objSubIdx_m++;
         if(object.objSubIdx_m > 4)
@@ -569,7 +573,7 @@ static void psi_ccWriteObject(void)
 \ingroup module_main
 */
 /*----------------------------------------------------------------------------*/
-static void psi_ccReadObject(void)
+static void ccReadObject(void)
 {
     /* Create pointer to target object */
     static tConfChanObject*  pObject;
