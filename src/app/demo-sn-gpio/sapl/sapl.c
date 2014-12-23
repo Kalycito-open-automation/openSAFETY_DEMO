@@ -123,6 +123,7 @@ typedef struct
 typedef struct
 {
     UINT32 activeTasks_m;             /**< Stores which task of the SAPL is currently active */
+    UINT32 lastTask_m;                /**< Stores the last active task in the SAPL (Debug only!) */
     BOOLEAN fParamCrcValid_m;         /**< TRUE if the parameter CRC is valid */
     tParamSetAttr paramSetAttr_m;     /**< Attributes of the SOD parameter set */
 } tSaplInstance;
@@ -219,34 +220,33 @@ BOOLEAN sapl_process(void)
 {
     BOOLEAN fReturn = FALSE;
     tProcStoreRet sodStoreRet;
-    static UINT32 lastTask = 0;
 
     if((saplInstance_l.activeTasks_m & SAPL_TASK_PROCESS_PARAM_SET_PARSE_MASK) != 0)
     {
-        if(lastTask != saplInstance_l.activeTasks_m)
+        if(saplInstance_l.lastTask_m != saplInstance_l.activeTasks_m)
         {
             DEBUG_TRACE(DEBUG_LVL_ALWAYS, "\nParse ParameterSet ...\n");
-            lastTask = saplInstance_l.activeTasks_m;
+            saplInstance_l.lastTask_m = saplInstance_l.activeTasks_m;
         }
 
         fReturn = TRUE;
     }
     else if((saplInstance_l.activeTasks_m & SAPL_TASK_PROCESS_PARAM_SET_CRC_MASK) != 0)
     {
-        if(lastTask != saplInstance_l.activeTasks_m)
+        if(saplInstance_l.lastTask_m != saplInstance_l.activeTasks_m)
         {
             DEBUG_TRACE(DEBUG_LVL_ALWAYS, "\nCalc CRC ...\n");
-            lastTask = saplInstance_l.activeTasks_m;
+            saplInstance_l.lastTask_m = saplInstance_l.activeTasks_m;
         }
 
         fReturn = TRUE;
     }
     else if((saplInstance_l.activeTasks_m & SAPL_TASK_PROCESS_PARAM_SET_STORE_MASK) != 0)
     {
-        if(lastTask != saplInstance_l.activeTasks_m)
+        if(saplInstance_l.lastTask_m != saplInstance_l.activeTasks_m)
         {
             DEBUG_TRACE(DEBUG_LVL_ALWAYS, "\nStore SOD ...\n");
-            lastTask = saplInstance_l.activeTasks_m;
+            saplInstance_l.lastTask_m = saplInstance_l.activeTasks_m;
         }
 
         /* Process the SOD store state machine */
@@ -326,6 +326,8 @@ BOOLEAN sapl_processSync(void)
 
             /* Reset the flag of the CRC calculator */
             saplInstance_l.activeTasks_m &= ~(1<<SAPL_TASK_PROCESS_PARAM_SET_CRC_BIT);
+
+            saplInstance_l.lastTask_m = 0;
         }
         else if(paramCrcRet == kParamCrcProcCrcInvalid)
         {
@@ -335,6 +337,8 @@ BOOLEAN sapl_processSync(void)
 
             /* Reset the flag of the CRC calculator */
             saplInstance_l.activeTasks_m &= ~(1<<SAPL_TASK_PROCESS_PARAM_SET_CRC_BIT);
+
+            saplInstance_l.lastTask_m = 0;
         }
         else if(paramCrcRet == kParamCrcProcBusy)
         {
