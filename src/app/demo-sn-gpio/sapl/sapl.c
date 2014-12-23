@@ -49,7 +49,8 @@ This module manages the application near firmware parts.
 #include <sapl/sapl.h>
 
 #include <shnf/shnf.h>
-#include <shnf/statehandler.h>
+
+#include <sn/statehandler.h>
 
 #include <sapl/parameterset.h>
 #include <sapl/parametercrc.h>

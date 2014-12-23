@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   shnf/statehandler.h
+\file   sn/statehandler.h
 
 \brief  This module handles the current SN state
 
@@ -33,8 +33,8 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
 
-#ifndef _INC_shnf_statehandler_H_
-#define _INC_shnf_statehandler_H_
+#ifndef _INC_sn_statehandler_H_
+#define _INC_sn_statehandler_H_
 
 /*----------------------------------------------------------------------------*/
 /* includes                                                                   */
@@ -84,9 +84,15 @@ BOOLEAN stateh_getEnterPreOpFlag(void);
 void stateh_setShutdownFlag(BOOLEAN newVal_p);
 BOOLEAN stateh_getShutdownFlag(void);
 
+void stateh_printSNState(void);
+
+BOOLEAN stateh_handleStateChange(void);
+BOOLEAN stateh_enterPreOperational(void);
+
+
 #ifdef __cplusplus
     }
 #endif
 
 
-#endif /* _INC_shnf_statehandler_H_ */
+#endif /* _INC_sn_statehandler_H_ */

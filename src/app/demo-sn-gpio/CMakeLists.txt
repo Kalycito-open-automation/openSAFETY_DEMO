@@ -84,7 +84,6 @@ SET(SHNF_SRCS
     ${SHNF_DIR}/shnf.c
     ${SHNF_DIR}/constime.c
     ${SHNF_DIR}/hnfpsi.c
-    ${SHNF_DIR}/statehandler.c
 )
 
 SET(SAPL_SRCS
@@ -104,6 +103,7 @@ SET(SN_SRCS
     ${PROJECT_SOURCE_DIR}/main.c
     ${APP_COMMON_DIR}/tbufparams.c
     ${PROJECT_SOURCE_DIR}/errorhandler.c
+    ${PROJECT_SOURCE_DIR}/statehandler.c
     ${DEMO_CONFIG_DIR}/sn/sod.c
     ${PROJECT_SOURCE_DIR}/util.c
     ${PROJECT_SOURCE_DIR}/cyclemon.c

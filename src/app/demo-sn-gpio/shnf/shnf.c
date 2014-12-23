@@ -51,7 +51,8 @@ to the HNF. Also the frame CRCs are calculated inside this module.
 
 #include <shnf/shnftx.h>
 #include <shnf/hnf.h>
-#include <shnf/statehandler.h>
+
+#include <sn/statehandler.h>
 
 #include <SODapi.h>
 #include <SNMTSapi.h>

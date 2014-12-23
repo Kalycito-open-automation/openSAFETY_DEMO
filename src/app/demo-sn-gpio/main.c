@@ -50,11 +50,11 @@ stack and processes the background task.
 #include <sn/global.h>
 #include <sn/gpio.h>
 #include <sn/cyclemon.h>
+#include <sn/statehandler.h>
 
 #include <common/platform.h>
 
 #include <shnf/shnf.h>
-#include <shnf/statehandler.h>
 #include <sapl/sapl.h>
 
 #if (defined SYSTEM_PATH) & (SYSTEM_PATH > ID_ID_TARG_SINGLE )
@@ -116,13 +116,6 @@ static tProcSyncTask syncTaskState_l;     /**< The current state of the sync tas
 /* local vars                                                                 */
 /*----------------------------------------------------------------------------*/
 
-#ifdef _DEBUG
-static char *strSnStates[] = { "SNMTS_k_ST_BOOTING",
-                               "SNMTS_k_ST_INITIALIZATION",
-                               "SNMTS_k_ST_PRE_OPERATIONAL",
-                               "SNMTS_k_ST_OPERATIONAL"};
-#endif
-
 /*----------------------------------------------------------------------------*/
 /* local function prototypes                                                  */
 /*----------------------------------------------------------------------------*/
@@ -136,19 +129,10 @@ static BOOLEAN processAsync(void);
 static BOOLEAN processSync(void);
 static BOOLEAN syncCycle(void);
 
-#ifdef _DEBUG
-static void printSNState(void);
-#endif
 static void checkConnectionValid(void);
 
-static BOOLEAN handleStateChange(void);
-static BOOLEAN enterPreOperational(void);
-static BOOLEAN enterOperational(void);
-
 static void enterReset(void);
-
 static void shutdown(void);
-
 
 
 /*============================================================================*/
@@ -228,7 +212,7 @@ int main (void)
 #endif /* #if (defined SYSTEM_PATH) && (SYSTEM_PATH > ID_TARG_SINGLE) */
 
                                     /* Change state of the openSAFETY stack to pre operational */
-                                    if(enterPreOperational())
+                                    if(stateh_enterPreOperational())
                                     {
 
                                         /* Enable the synchronous interrupt */
@@ -296,9 +280,8 @@ static BOOLEAN initOpenSafety(void)
             if(snState == SNMTS_k_ST_INITIALIZATION)
             {
                 stateh_setSnState(kSnStateInitializing);
-#ifdef _DEBUG
-                printSNState();
-#endif
+
+                stateh_printSNState();
 
                 fReturn = TRUE;
             }
@@ -397,9 +380,7 @@ static BOOLEAN processAsync(void)
 
     while(TRUE)
     {
-#ifdef _DEBUG
-        printSNState();
-#endif
+        stateh_printSNState();
 
         checkConnectionValid();
 
@@ -480,7 +461,7 @@ static BOOLEAN processSync(void)
 
         case kSyncTaskState:
             /* Handle internal state changes */
-            if(handleStateChange())
+            if(stateh_handleStateChange())
             {
                 fReturn = TRUE;
             }
@@ -546,37 +527,6 @@ static BOOLEAN syncCycle(void)
     return fReturn;
 }
 
-#ifdef _DEBUG
-/*----------------------------------------------------------------------------*/
-/**
-\brief    Print the current state of the SN
-
-If changed this function prints the current state of the SN to stdout.
-
-\ingroup module_main
-*/
-/*----------------------------------------------------------------------------*/
-static void printSNState(void)
-{
-    static tSnState lastState = kSnStateBooting;
-    tSnState currState = stateh_getSnState();
-
-    /* if the SN state changed */
-    if(currState != lastState)
-    {
-        if(lastState < kSnStateCount && currState < kSnStateCount)
-        {
-            /* signal the actual SN state */
-            DEBUG_TRACE(DEBUG_LVL_ALWAYS, "\nCHANGE STATE: %s -> %s\n", strSnStates[lastState],
-                                                                        strSnStates[currState]);
-
-            /*store the last SN state */
-            lastState = currState;
-        }
-    }
-}
-#endif
-
 /*----------------------------------------------------------------------------*/
 /**
 \brief    Poll the connection valid bit and forward the value to the hardware
@@ -602,114 +552,6 @@ static void checkConnectionValid(void)
 
 /*----------------------------------------------------------------------------*/
 /**
-\brief    Handle state changes of the openSAFETY stack
-
-\return Processing successful; Error on state change
-
-\ingroup module_main
-*/
-/*----------------------------------------------------------------------------*/
-static BOOLEAN handleStateChange(void)
-{
-    BOOLEAN fReturn = FALSE;
-
-    if(stateh_getEnterOpFlag())
-    {
-        /* Perform state change to operational */
-        if(enterOperational())
-        {
-            fReturn = TRUE;
-        }
-    }
-    else if(stateh_getEnterPreOpFlag())
-    {
-        /* Perform state change to pre operational */
-        if(enterPreOperational())
-        {
-            fReturn = TRUE;
-        }
-    }
-    else
-    {
-        /* No state change in this cycle */
-        fReturn = TRUE;
-    }
-
-    return fReturn;
-}
-
-/*----------------------------------------------------------------------------*/
-/**
-\brief    Perform state change to pre operational state
-
-\retval TRUE    Change to pre operational successful
-\retval FALSE   Failed to change the state
-
-\ingroup module_main
-*/
-/*----------------------------------------------------------------------------*/
-static BOOLEAN enterPreOperational(void)
-{
-    BOOLEAN fReturn = FALSE;
-    UINT32 consTime = 0;
-
-    consTime = constime_getTime();
-
-    /* transition to PreOperational */
-    if(SNMTS_PerformTransPreOp(B_INSTNUM_ consTime))
-    {
-        stateh_setSnState(kSnStatePreOperational);
-
-        fReturn = TRUE;
-    }
-    else
-    {
-        errh_postFatalError(kErrSourcePeriph, kErrorEnterPreOperationalFailed, 0);
-    }
-
-    /* Reset the enter pre operation flag */
-     stateh_setEnterPreOpFlag(FALSE);
-
-    return fReturn;
-}
-
-/*----------------------------------------------------------------------------*/
-/**
-\brief    Perform state change to operational state
-
-\retval TRUE    Change to operational successful
-\retval FALSE   Failed to change the state
-
-\ingroup module_main
-*/
-/*----------------------------------------------------------------------------*/
-static BOOLEAN enterOperational(void)
-{
-    BOOLEAN fReturn = FALSE;
-    UINT8 errGrp = 0;
-    UINT8 errCode = 0;
-
-    /* Perform transition to operational */
-    if(SNMTS_EnterOpState(B_INSTNUM_ TRUE, errGrp, errCode))
-    {
-        /* Forward new state to SHNF */
-        stateh_setSnState(kSnStateOperational);
-
-        fReturn = TRUE;
-    }
-    else
-    {
-        errh_postFatalError(kErrSourcePeriph, kErrorEnterOperationalFailed, (errGrp<<8 | errCode));
-    }
-
-    /* Reset the operation flag */
-    stateh_setEnterOpFlag(FALSE);
-
-    return fReturn;
-}
-
-/*----------------------------------------------------------------------------*/
-/**
 \brief    On a cycle time violation a reset needs to be performed
 
 \ingroup module_main
@@ -721,7 +563,7 @@ static void enterReset(void)
     sapl_reset();
 
     /* Switch to preop */
-    (void)enterPreOperational();
+    (void)stateh_enterPreOperational();
 }
 
 /*----------------------------------------------------------------------------*/

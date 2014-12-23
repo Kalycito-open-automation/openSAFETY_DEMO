@@ -51,7 +51,8 @@ channel to the PLC.
 #include <sn/errorhandler.h>
 
 #include <shnf/hnf.h>
-#include <shnf/statehandler.h>
+
+#include <sn/statehandler.h>
 
 #include <libpsicommon/ami.h>
 

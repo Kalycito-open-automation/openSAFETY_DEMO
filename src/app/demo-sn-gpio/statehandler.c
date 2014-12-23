@@ -46,7 +46,9 @@ to this state in the whole firmware.
 /*----------------------------------------------------------------------------*/
 /* includes                                                                   */
 /*----------------------------------------------------------------------------*/
-#include <shnf/statehandler.h>
+#include <sn/statehandler.h>
+
+#include <SNMTSapi.h>
 
 /*============================================================================*/
 /*            G L O B A L   D E F I N I T I O N S                             */
@@ -92,9 +94,17 @@ typedef struct
 /*----------------------------------------------------------------------------*/
 static tStateHInstance statehInstance_l SAFE_INIT_SEKTOR;
 
+#ifdef _DEBUG
+static char *strSnStates[] = { "SNMTS_k_ST_BOOTING",
+                               "SNMTS_k_ST_INITIALIZATION",
+                               "SNMTS_k_ST_PRE_OPERATIONAL",
+                               "SNMTS_k_ST_OPERATIONAL"};
+#endif
+
 /*----------------------------------------------------------------------------*/
 /* local function prototypes                                                  */
 /*----------------------------------------------------------------------------*/
+static BOOLEAN enterOperational(void);
 
 /*============================================================================*/
 /*            P U B L I C   F U N C T I O N S                                 */
@@ -252,10 +262,152 @@ BOOLEAN stateh_getShutdownFlag(void)
     return statehInstance_l.fShutdown_m;
 }
 
+
+/*----------------------------------------------------------------------------*/
+/**
+\brief    Print the current state of the SN
+
+If changed this function prints the current state of the SN to stdout.
+
+\ingroup module_main
+*/
+/*----------------------------------------------------------------------------*/
+void stateh_printSNState(void)
+{
+#ifdef _DEBUG
+    static tSnState lastState = kSnStateBooting;
+    tSnState currState = statehInstance_l.currSnState_m;
+
+    /* if the SN state changed */
+    if(currState != lastState)
+    {
+        if(lastState < kSnStateCount && currState < kSnStateCount)
+        {
+            /* signal the actual SN state */
+            DEBUG_TRACE(DEBUG_LVL_ALWAYS, "\nCHANGE STATE: %s -> %s\n", strSnStates[lastState],
+                                                                        strSnStates[currState]);
+
+            /*store the last SN state */
+            lastState = currState;
+        }
+    }
+#endif
+}
+
+
+/*----------------------------------------------------------------------------*/
+/**
+\brief    Handle state changes of the openSAFETY stack
+
+\return Processing successful; Error on state change
+
+\ingroup module_stateh
+*/
+/*----------------------------------------------------------------------------*/
+BOOLEAN stateh_handleStateChange(void)
+{
+    BOOLEAN fReturn = FALSE;
+
+    if(stateh_getEnterOpFlag())
+    {
+        /* Perform state change to operational */
+        if(enterOperational())
+        {
+            fReturn = TRUE;
+        }
+    }
+    else if(stateh_getEnterPreOpFlag())
+    {
+        /* Perform state change to pre operational */
+        if(stateh_enterPreOperational())
+        {
+            fReturn = TRUE;
+        }
+    }
+    else
+    {
+        /* No state change in this cycle */
+        fReturn = TRUE;
+    }
+
+    return fReturn;
+}
+
+
+/*----------------------------------------------------------------------------*/
+/**
+\brief    Perform state change to pre operational state
+
+\retval TRUE    Change to pre operational successful
+\retval FALSE   Failed to change the state
+
+\ingroup module_stateh
+*/
+/*----------------------------------------------------------------------------*/
+BOOLEAN stateh_enterPreOperational(void)
+{
+    BOOLEAN fReturn = FALSE;
+    UINT32 consTime = 0;
+
+    consTime = constime_getTime();
+
+    /* transition to PreOperational */
+    if(SNMTS_PerformTransPreOp(B_INSTNUM_ consTime))
+    {
+        stateh_setSnState(kSnStatePreOperational);
+
+        fReturn = TRUE;
+    }
+    else
+    {
+        errh_postFatalError(kErrSourcePeriph, kErrorEnterPreOperationalFailed, 0);
+    }
+
+    /* Reset the enter pre operation flag */
+     stateh_setEnterPreOpFlag(FALSE);
+
+    return fReturn;
+}
+
 /*============================================================================*/
 /*            P R I V A T E   F U N C T I O N S                               */
 /*============================================================================*/
 /* \name Private Functions */
 /* \{ */
+
+/*----------------------------------------------------------------------------*/
+/**
+\brief    Perform state change to operational state
+
+\retval TRUE    Change to operational successful
+\retval FALSE   Failed to change the state
+
+\ingroup module_stateh
+*/
+/*----------------------------------------------------------------------------*/
+static BOOLEAN enterOperational(void)
+{
+    BOOLEAN fReturn = FALSE;
+    UINT8 errGrp = 0;
+    UINT8 errCode = 0;
+
+    /* Perform transition to operational */
+    if(SNMTS_EnterOpState(B_INSTNUM_ TRUE, errGrp, errCode))
+    {
+        /* Forward new state to SHNF */
+        stateh_setSnState(kSnStateOperational);
+
+        fReturn = TRUE;
+    }
+    else
+    {
+        errh_postFatalError(kErrSourcePeriph, kErrorEnterOperationalFailed, (errGrp<<8 | errCode));
+    }
+
+    /* Reset the operation flag */
+    stateh_setEnterOpFlag(FALSE);
+
+    return fReturn;
+}
 
 /* \} */
