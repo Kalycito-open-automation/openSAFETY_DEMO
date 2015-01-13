@@ -85,9 +85,9 @@ extern UINT32 HNFiff_Crc32CalcSwp(UINT32 w_initCrc, INT32 l_length,
 /*----------------------------------------------------------------------------*/
 /* const defines                                                              */
 /*----------------------------------------------------------------------------*/
-#define NVS_MAGIC_WORD      0xdeadbeefUL     /**< Magic word which indicates the start of the SOD image */
+#define NVS_MAGIC_WORD                  (UINT32)0xdeadbeef      /**< Magic word which indicates the start of the SOD image */
 
-#define NVS_IMAGE_DATA_CHUNK_SIZE       12   /**< Size of one chunk written to the NVS in one process cycle (Needs to be a divider of 4) */
+#define NVS_IMAGE_DATA_CHUNK_SIZE       (UINT8)8                /**< Size of one chunk written to the NVS in one process cycle (Needs to be a divider of 4) */
 
 /*----------------------------------------------------------------------------*/
 /* local types                                                                */
@@ -179,6 +179,28 @@ void sodstore_close(void)
 
 /*----------------------------------------------------------------------------*/
 /**
+\brief    Prepare the SOD storage
+
+\return TRUE on success; FALSE on error
+
+\ingroup module_sodstore
+*/
+/*----------------------------------------------------------------------------*/
+BOOLEAN sodstore_prepareStorage(void)
+{
+    BOOLEAN fReturn = FALSE;
+
+    /* Erase the sector behind the offset before storing data to it */
+    if(eraseNvsSector(NVS_IMG_OFFSET_MAGIC))
+    {
+        fReturn = TRUE;
+    }
+
+    return fReturn;
+}
+
+/*----------------------------------------------------------------------------*/
+/**
 \brief    Process the SOD storage module
 
 \param pParamSetBase_p      The base address of the parameter set
@@ -209,17 +231,13 @@ tProcStoreRet sodstore_process(UINT8* pParamSetBase_p, UINT32 paramSetLen_p)
                 sodStoreInstance_l.currDataPos_m = NVS_IMG_OFFSET_DATA;
                 sodStoreInstance_l.currParamSetOffs_m = 0;
 
-                /* Erase the sector behind the offset before storing data to it */
-                if(eraseNvsSector(NVS_IMG_OFFSET_MAGIC))
+                /* Store the header information to the NVS */
+                if(storeHeaderToNvs(paramSetLen_p))
                 {
-                    /* Store the header information to the NVS */
-                    if(storeHeaderToNvs(paramSetLen_p))
-                    {
-                        /* Switch the current state to add CRC */
-                        sodStoreInstance_l.sodStoreState_m = kSodStoreStateAddCrc;
+                    /* Switch the current state to add CRC */
+                    sodStoreInstance_l.sodStoreState_m = kSodStoreStateAddCrc;
 
-                        sodStoreRet = kSodStoreProcBusy;
-                    }
+                    sodStoreRet = kSodStoreProcBusy;
                 }
 
                 break;

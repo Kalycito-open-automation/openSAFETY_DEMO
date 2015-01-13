@@ -332,7 +332,10 @@ BOOLEAN sapl_restoreSod(void)
     else
     {
         /* No image available -> Continue normal bootup */
-        fReturn = TRUE;
+        if(sodstore_prepareStorage())
+        {
+            fReturn = TRUE;
+        }
     }
 
     return fReturn;

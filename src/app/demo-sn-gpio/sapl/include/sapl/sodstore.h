@@ -70,6 +70,7 @@ typedef enum
 BOOLEAN sodstore_init(void);
 void sodstore_close(void);
 
+BOOLEAN sodstore_prepareStorage(void);
 tProcStoreRet sodstore_process(UINT8* pParamSetBase_p, UINT32 paramSetLen_p);
 
 BOOLEAN sodstore_getSodImage(UINT8** ppParamSetBase_p, UINT32* pParamSetLen_p);
