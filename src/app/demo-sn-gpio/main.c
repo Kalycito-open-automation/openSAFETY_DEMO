@@ -30,14 +30,14 @@ stack and processes the background task.
 *     may be used to endorse or promote products derived from this software
 *     without specific prior written permission.
 *
-* THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
-* AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
-* THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+* THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS && CONTRIBUTORS "AS IS"
+* && ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
+* THE IMPLIED WARRANTIES OF MERCHANTABILITY && FITNESS FOR
 * A PARTICULAR PURPOSE ARE DISCLAIMED.
 * IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
 * ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
 * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-* LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+* LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED &&
 * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
@@ -56,6 +56,11 @@ stack and processes the background task.
 #include <shnf/shnf.h>
 #include <shnf/statehandler.h>
 #include <sapl/sapl.h>
+
+#if (defined SYSTEM_PATH) & (SYSTEM_PATH > ID_ID_TARG_SINGLE )
+#include <sn/upserial.h>
+#include <sn/handshake.h>
+#endif /* #if (defined SYSTEM_PATH) && (SYSTEM_PATH > ID_TARG_SINGLE) */
 
 #include <SNMTSapi.h>
 #include <SCFMapi.h>
@@ -115,6 +120,9 @@ static char *strSnStates[] = { "SNMTS_k_ST_INITIALIZATION",
 /* local function prototypes                                                  */
 /*----------------------------------------------------------------------------*/
 static BOOLEAN initOpenSafety(void);
+#if (defined SYSTEM_PATH) && (SYSTEM_PATH > ID_TARG_SINGLE)
+static BOOLEAN initXCom(void);
+#endif /* #if (defined SYSTEM_PATH) && (SYSTEM_PATH > ID_TARG_SINGLE) */
 
 static BOOLEAN processAsync(void);
 static BOOLEAN processSync(void);
@@ -203,25 +211,34 @@ int main (void)
                             /* Restore the SOD from NVS if possible */
                             if(sapl_restoreSod())
                             {
-                                /* Change state of the openSAFETY stack to pre operational */
-                                if(enterPreOperational())
+#if (defined SYSTEM_PATH) && (SYSTEM_PATH > ID_TARG_SINGLE)
+                                /* Initialize the uP-Master <-> uP-Slave cross communication */
+                                if(initXCom())
                                 {
+#endif /* #if (defined SYSTEM_PATH) && (SYSTEM_PATH > ID_TARG_SINGLE) */
 
-                                    /* Enable the synchronous interrupt */
-                                    shnf_enableSyncIr();
-
-                                    DEBUG_TRACE(DEBUG_LVL_ALWAYS, "\nStart processing ... \n ");
-
-                                    if(processAsync())
+                                    /* Change state of the openSAFETY stack to pre operational */
+                                    if(enterPreOperational())
                                     {
-                                        /* Shutdown triggered -> Terminate! */
-                                        retVal = 0;
-                                    }
-                                }   /* no else: Error is already reported in the called function */
+
+                                        /* Enable the synchronous interrupt */
+                                        shnf_enableSyncIr();
+
+                                        DEBUG_TRACE(DEBUG_LVL_ALWAYS, "\nStart processing ... \n ");
+
+                                        if(processAsync())
+                                        {
+                                            /* Shutdown triggered -> Terminate! */
+                                            retVal = 0;
+                                        }
+                                    }   /* no else: Error is already reported in the called function */
+#if (defined SYSTEM_PATH) && (SYSTEM_PATH > ID_TARG_SINGLE)
+                                }
+#endif /* #if (defined SYSTEM_PATH) && (SYSTEM_PATH > ID_TARG_SINGLE) */
                             }   /* no else: Error is already reported in the called function */
                         }   /* no else: Error is already reported in the called function */
                     }   /* no else: Error is already reported in the called function */
-                }
+                }   /* no else: Error is already reported in the called function */
             }
             else
             {
@@ -282,6 +299,39 @@ static BOOLEAN initOpenSafety(void)
 
     return fReturn;
 }
+
+#if (defined SYSTEM_PATH) && (SYSTEM_PATH > ID_TARG_SINGLE)
+/*----------------------------------------------------------------------------*/
+/**
+\brief    Initialize the uP-Master <-> uP-Slave cross communication
+
+\retval TRUE    XCom initialization successful
+\retval FALSE   Error on initialization
+
+\ingroup module_main
+*/
+/*----------------------------------------------------------------------------*/
+static BOOLEAN initXCom(void)
+{
+    BOOLEAN fReturn = FALSE;
+
+    /* Initialize the uP-Master <-> uP-Slave serial device */
+    if(upserial_init())
+    {
+        /* Carry out the boot-up handshake of uP-Master and uP-Slave */
+        if(hands_perfHandshake())
+        {
+            fReturn = TRUE;
+        }   /* no else: Error is reported in called function */
+    }
+    else
+    {
+        errh_postFatalError(kErrSourcePeriph, kErrorSerialInitFailed, 0);
+    }
+
+    return fReturn;
+}
+#endif /* #if (defined SYSTEM_PATH) && (SYSTEM_PATH > ID_TARG_SINGLE) */
 
 /*----------------------------------------------------------------------------*/
 /**
@@ -604,6 +654,10 @@ static void shutdown(void)
     sapl_exit();
 
     errh_exit();
+
+#if (defined SYSTEM_PATH) && (SYSTEM_PATH > ID_TARG_SINGLE)
+    upserial_exit();
+#endif /* #if (defined SYSTEM_PATH) && (SYSTEM_PATH > ID_TARG_SINGLE) */
 
     constime_exit();
     gpio_close();

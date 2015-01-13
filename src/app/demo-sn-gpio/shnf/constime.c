@@ -194,6 +194,20 @@ UINT64 constime_getTimeBase(void)
 
 /*----------------------------------------------------------------------------*/
 /**
+\brief    Update the local time to a new value
+
+\param[in] newTime_p    The new value of the time
+
+\ingroup module_constime
+*/
+/*----------------------------------------------------------------------------*/
+void constime_setTimebase(UINT64 newTime_p)
+{
+    consTimeInstance_l.usTimeBase_m = newTime_p;
+}
+
+/*----------------------------------------------------------------------------*/
+/**
 \brief    Process the system microsecond timer
 
 This function needs to be called at least each 65ms in order to update the

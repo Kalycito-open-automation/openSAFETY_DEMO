@@ -836,7 +836,7 @@ static void serialTransferFinished(BOOL fError_p)
     else
     {
         /* There was an error during serial transfer */
-        errh_postFatalError(kErrSourceHnf, kErrorSerialTransferFailed, 0);
+        errh_postFatalError(kErrSourceHnf, kErrorSerialTransmitFailed, 0);
     }
 }
 

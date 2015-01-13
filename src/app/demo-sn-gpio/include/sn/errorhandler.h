@@ -97,7 +97,13 @@ typedef enum
 
     kErrorCycleMonStateInvalid              = 0x70,     /**< Invalid cycle monitoring state */
 
-    kErrorSerialTransferFailed              = 0x80,     /**< Error during the serial transfer */
+    kErrorSerialInitFailed                  = 0x80,     /**< Unable to initialize the serial device */
+    kErrorSerialTransferFailed              = 0x81,     /**< Error during the serial transfer */
+    kErrorSerialTransmitFailed              = 0x82,     /**< Failed to transmit data */
+    kErrorSerialReceiveFailed               = 0x83,     /**< Failed to receive data */
+
+    kHandSWelcomeMsgInvalid                 = 0x90,     /**< Unable to verify the welcome message */
+    kHandSResponseMsgInvalid                = 0x91,     /**< Unable to create of verify the response message */
 } tErrorTypes;
 
 

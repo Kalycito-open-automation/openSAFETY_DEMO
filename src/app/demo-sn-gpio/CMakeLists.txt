@@ -39,19 +39,19 @@ GET_FILENAME_COMPONENT(CURRENT_DEMO_CONTEXT ${CMAKE_CURRENT_BINARY_DIR} NAME)
 
 ########################################################################
 # Reset demo context variable to simpler strings, Set SYSTEM_PATH id
-SET(ID_SINGLE 0)
-SET(ID_UP_MASTER 1)
-SET(ID_UP_SLAVE 2)
+SET(ID_TARG_SINGLE 1)
+SET(ID_TARG_UP_MASTER 2)
+SET(ID_TARG_UP_SLAVE 3)
 
 IF(CURRENT_DEMO_CONTEXT STREQUAL ${SN_PROC_UP_MASTER})
     SET(CURRENT_DEMO_CONTEXT "upm")
-    SET(SYSTEM_PATH ${ID_UP_MASTER})
+    SET(SYSTEM_PATH ${ID_TARG_UP_MASTER})
 ELSEIF(CURRENT_DEMO_CONTEXT STREQUAL ${SN_PROC_UP_SLAVE})
     SET(CURRENT_DEMO_CONTEXT "ups")
-    SET(SYSTEM_PATH ${ID_UP_SLAVE})
+    SET(SYSTEM_PATH ${ID_TARG_UP_SLAVE})
 ELSE()
     SET(CURRENT_DEMO_CONTEXT "single")
-    SET(SYSTEM_PATH ${ID_SINGLE})
+    SET(SYSTEM_PATH ${ID_TARG_SINGLE})
 ENDIF()
 
 ########################################################################
@@ -117,11 +117,26 @@ SET(DEMO_SRCS
                 ${LIBOSCHECKSUM_SRCS}
 )
 
+IF(${CURRENT_DEMO_CONTEXT} STREQUAL "ups")
+    # This project is for the processor up-slave
+    SET(DEMO_SRCS
+                  ${DEMO_SRCS}
+                  ${PROJECT_SOURCE_DIR}/handshake-sl.c
+    )
+ELSEIF(${CURRENT_DEMO_CONTEXT} STREQUAL "upm")
+    # This project is for the processor up-master
+    SET(DEMO_SRCS
+                  ${DEMO_SRCS}
+                  ${PROJECT_SOURCE_DIR}/handshake-ma.c
+    )
+ENDIF()
+
 ########################################################################
 # Set include paths
 ########################################################################
 SET(DEMO_INCS
     ${PROJECT_SOURCE_DIR}/include
+    ${PROJECT_BINARY_DIR}/include
     ${COMMON_SOURCE_DIR}/include
     ${SHNF_DIR}/include
     ${SAPL_DIR}/include
@@ -134,6 +149,11 @@ SET(DEMO_INCS
     ${OSCHECKSUM_BASE_DIR}/include
     ${TARGET_DIR}/include
 )
+
+########################################################################
+# Generate demo configuration header file
+########################################################################
+CONFIGURE_FILE(${PROJECT_SOURCE_DIR}/include/sn/config.h.in ${PROJECT_BINARY_DIR}/include/sn/config.h)
 
 ########################################################################
 # Set CFLAGS depending on build type

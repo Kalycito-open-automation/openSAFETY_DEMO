@@ -1,8 +1,8 @@
 /**
 ********************************************************************************
-\file   shnf/constime.h
+\file   sn/config.h
 
-\brief  Provides access to the consecutive time
+\brief  SN demo global configuration file
 
 *******************************************************************************/
 
@@ -33,20 +33,27 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
 
-#ifndef _INC_shnf_constime_H_
-#define _INC_shnf_constime_H_
+#ifndef _INC_sn_config_H_
+#define _INC_sn_config_H_
 
 /*----------------------------------------------------------------------------*/
 /* includes                                                                   */
 /*----------------------------------------------------------------------------*/
-#include <sn/global.h>
 
 /*----------------------------------------------------------------------------*/
 /* const defines                                                              */
 /*----------------------------------------------------------------------------*/
+#cmakedefine ID_TARG_SINGLE         @ID_TARG_SINGLE@       /**< This target is a single processor demo */
+#cmakedefine ID_TARG_UP_MASTER      @ID_TARG_UP_MASTER@       /**< This target is the uP-Master processor */
+#cmakedefine ID_TARG_UP_SLAVE       @ID_TARG_UP_SLAVE@       /**< This target is the uP-Slave processor */
+
 
 /*----------------------------------------------------------------------------*/
 /* typedef                                                                    */
+/*----------------------------------------------------------------------------*/
+
+/*----------------------------------------------------------------------------*/
+/* includes                                                                   */
 /*----------------------------------------------------------------------------*/
 
 /*----------------------------------------------------------------------------*/
@@ -57,18 +64,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     extern "C" {
 #endif
 
-BOOLEAN constime_init(void);
-void constime_exit(void);
-
-UINT32 constime_getTime(void);
-
-UINT64 constime_getTimeBase(void);
-void constime_setTimebase(UINT64 newTime_p);
-void constime_process(void);
-
 #ifdef __cplusplus
     }
 #endif
 
 
-#endif /* _INC_shnf_constime_H_ */
+#endif /* _INC_sn_config_H_ */

@@ -1,8 +1,12 @@
 /**
 ********************************************************************************
-\file   shnf/constime.h
+\file   sn/handshake.h
 
-\brief  Provides access to the consecutive time
+\brief  Interface to the handshake module.
+
+The handshake module ensures a synchronous boot-up of both the uP-Master and
+uP-Slave. It uses the upserial module to communicate with the other
+processor.
 
 *******************************************************************************/
 
@@ -33,17 +37,22 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
 
-#ifndef _INC_shnf_constime_H_
-#define _INC_shnf_constime_H_
+#ifndef _INC_sn_handshake_H_
+#define _INC_sn_handshake_H_
 
 /*----------------------------------------------------------------------------*/
 /* includes                                                                   */
 /*----------------------------------------------------------------------------*/
 #include <sn/global.h>
 
+
 /*----------------------------------------------------------------------------*/
 /* const defines                                                              */
 /*----------------------------------------------------------------------------*/
+#define WELCOME_MSG_LEN         4               /**< Length of the welcome message */
+#define WELCOME_MSG_CONTENT     0xDEADBEEF      /**< Data of the welcome message */
+
+#define RESPONSE_MSG_LEN        12              /**< Length of the response message */
 
 /*----------------------------------------------------------------------------*/
 /* typedef                                                                    */
@@ -57,18 +66,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     extern "C" {
 #endif
 
-BOOLEAN constime_init(void);
-void constime_exit(void);
-
-UINT32 constime_getTime(void);
-
-UINT64 constime_getTimeBase(void);
-void constime_setTimebase(UINT64 newTime_p);
-void constime_process(void);
+BOOLEAN hands_perfHandshake(void);
 
 #ifdef __cplusplus
     }
 #endif
 
 
-#endif /* _INC_shnf_constime_H_ */
+#endif /* _INC_sn_handshake_H_ */

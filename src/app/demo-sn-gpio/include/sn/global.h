@@ -46,12 +46,12 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <EPLStypes.h>
 
 #include <shnf/constime.h>
+#include <sn/config.h>
 
 /*----------------------------------------------------------------------------*/
 /* const defines                                                              */
 /*----------------------------------------------------------------------------*/
 #define UNUSED_PARAMETER(par)   (void)par
-
 
 /*----------------------------------------------------------------------------*/
 /* typedef                                                                    */
