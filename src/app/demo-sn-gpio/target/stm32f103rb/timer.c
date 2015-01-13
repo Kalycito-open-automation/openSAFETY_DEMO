@@ -151,6 +151,21 @@ UINT16 timer_getTickCount(void)
     return time;
 }
 
+/*----------------------------------------------------------------------------*/
+/**
+\brief    Set the current system tick to a desired value
+
+\param[in] newVal_p     The new value for the timer
+
+\ingroup module_timer
+*/
+/*----------------------------------------------------------------------------*/
+void timer_setTickCount(UINT16 newVal_p)
+{
+    TIM_SetCounter(TIMx, newVal_p);
+}
+
+
 /*============================================================================*/
 /*            P R I V A T E   F U N C T I O N S                               */
 /*============================================================================*/

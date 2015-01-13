@@ -246,11 +246,7 @@ int main (void)
                         }   /* no else: Error is already reported in the called function */
                     }   /* no else: Error is already reported in the called function */
                 }   /* no else: Error is already reported in the called function */
-            }
-            else
-            {
-                errh_postFatalError(kErrSourcePeriph, kErrorInitConsTimeFailed, 0);
-            }
+            }   /* no else: Error is already reported in the called function */
         }   /* no else: Error is already reported via SAPL_SERR_SignalErrorClbk */
     }   /* no else: Error is already reported in the called function */
 

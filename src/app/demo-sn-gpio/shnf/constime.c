@@ -90,7 +90,8 @@ target specific module of the hardware timer.
  */
 typedef struct
 {
-    UINT64 usTimeBase_m;        /**< Ms timbase of the system. Derived from a 16bit hardware counter */
+    UINT64 usTimeBase_m;        /**< Microsecond timebase of the system. (Derived from a 16bit hardware counter) */
+    UINT32 currConsTime_m;      /**< The current value of the consecutive time */
     UINT32 consTimeFactor_m;    /**< The consecutive timebase division factor */
 } tConsTimeInstance;
 
@@ -130,6 +131,10 @@ BOOLEAN constime_init(void)
 
         fReturn = TRUE;
     }
+    else
+    {
+        errh_postFatalError(kErrSourceShnf, kErrorInitConsTimeFailed, 0);
+    }
 
     return fReturn;
 }
@@ -159,11 +164,7 @@ void constime_exit(void)
 /*----------------------------------------------------------------------------*/
 UINT32 constime_getTime(void)
 {
-    UINT64 usTime = constime_getTimeBase();
-
-    usTime = usTime / consTimeInstance_l.consTimeFactor_m;
-
-    return (UINT32)usTime;
+    return consTimeInstance_l.currConsTime_m;
 }
 
 /*----------------------------------------------------------------------------*/
@@ -183,10 +184,7 @@ UINT64 constime_getTimeBase(void)
     UINT64 currentTime = 0;
     UINT64 newTime = 0;
 
-    util_enterCriticalSection(FALSE);    /* Disable global interrupts */
     currentTime = consTimeInstance_l.usTimeBase_m;
-    util_enterCriticalSection(TRUE);     /* Enable global interrupts */
-
     newTime = currentTime + (((UINT64)(timer_getTickCount()) - currentTime) & 0xffff);
 
     return newTime;
@@ -196,6 +194,8 @@ UINT64 constime_getTimeBase(void)
 /**
 \brief    Update the local time to a new value
 
+\note Only call this function once on system bootup
+
 \param[in] newTime_p    The new value of the time
 
 \ingroup module_constime
@@ -204,6 +204,41 @@ UINT64 constime_getTimeBase(void)
 void constime_setTimebase(UINT64 newTime_p)
 {
     consTimeInstance_l.usTimeBase_m = newTime_p;
+    timer_setTickCount((UINT16)newTime_p);
+
+}
+
+/*----------------------------------------------------------------------------*/
+/**
+\brief    Synchronize the local time with the remote time
+
+\param[in] pLocTime_p    Pointer to the local time
+\param[in] pRcvTime_p    Pointer to the received time
+
+\return TRUE on success; FALSE on error
+
+\ingroup module_constime
+*/
+/*----------------------------------------------------------------------------*/
+BOOLEAN constime_syncConsTime(UINT64 * pLocTime_p, UINT64 * pRcvTime_p)
+{
+    BOOLEAN fReturn = FALSE;
+    UINT64 avgVal = 0;
+
+    if(pLocTime_p != NULL && pRcvTime_p != NULL)
+    {
+        /* Calculate the average value of both times */
+        avgVal = (((*pLocTime_p) / 2) + ((*pRcvTime_p) / 2) + (((*pLocTime_p) & (*pRcvTime_p)) & 1));
+
+        consTimeInstance_l.currConsTime_m = (UINT32)(avgVal / consTimeInstance_l.consTimeFactor_m);
+        fReturn = TRUE;
+    }
+    else
+    {
+        errh_postFatalError(kErrSourceShnf, kErrorInvalidParameter, 0);
+    }
+
+    return fReturn;
 }
 
 /*----------------------------------------------------------------------------*/
@@ -220,10 +255,7 @@ void constime_process(void)
 {
     UINT64 usTimeBase = 0;
 
-    util_enterCriticalSection(FALSE);    /* Disable global interrupts */
     usTimeBase = consTimeInstance_l.usTimeBase_m;
-    util_enterCriticalSection(TRUE);     /* Enable global interrupts */
-
     consTimeInstance_l.usTimeBase_m = usTimeBase + (((UINT64)(timer_getTickCount())
                                       - consTimeInstance_l.usTimeBase_m) & 0xffff);
 }

@@ -60,6 +60,7 @@ BOOLEAN timer_init(void);
 void timer_close(void);
 
 UINT16 timer_getTickCount(void);
+void timer_setTickCount(UINT16 newVal_p);
 
 #endif /* _INC_sn_timer_H_ */
 
