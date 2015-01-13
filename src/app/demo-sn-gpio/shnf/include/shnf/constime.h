@@ -65,7 +65,8 @@ UINT32 constime_getTime(void);
 UINT64 constime_getTimeBase(void);
 void constime_setTimebase(UINT64 newTime_p);
 BOOLEAN constime_syncConsTime(UINT64 * pLocTime_p, UINT64 * pRcvTime_p);
-void constime_process(void);
+BOOLEAN constime_setConsTime(UINT64 * pNewTime_p);
+UINT64 * constime_process(void);
 
 #ifdef __cplusplus
     }

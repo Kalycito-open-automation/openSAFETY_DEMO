@@ -60,6 +60,8 @@ stack and processes the background task.
 #if (defined SYSTEM_PATH) & (SYSTEM_PATH > ID_ID_TARG_SINGLE )
 #include <sn/upserial.h>
 #include <sn/handshake.h>
+
+#include <shnf/xcom.h>
 #endif /* #if (defined SYSTEM_PATH) && (SYSTEM_PATH > ID_TARG_SINGLE) */
 
 #include <SNMTSapi.h>
@@ -127,6 +129,7 @@ static char *strSnStates[] = { "SNMTS_k_ST_BOOTING",
 static BOOLEAN initOpenSafety(void);
 #if (defined SYSTEM_PATH) && (SYSTEM_PATH > ID_TARG_SINGLE)
 static BOOLEAN initXCom(void);
+static BOOLEAN setXComParameters(UINT64 * pCurrTime_p);
 #endif /* #if (defined SYSTEM_PATH) && (SYSTEM_PATH > ID_TARG_SINGLE) */
 
 static BOOLEAN processAsync(void);
@@ -326,7 +329,11 @@ static BOOLEAN initXCom(void)
         /* Carry out the boot-up handshake of uP-Master and uP-Slave */
         if(hands_perfHandshake())
         {
-            fReturn = TRUE;
+            /* Enable the receiver to get the first XCom image from the other processor */
+            if(xcom_init())
+            {
+                fReturn = TRUE;
+            }
         }   /* no else: Error is reported in called function */
     }
     else
@@ -336,6 +343,37 @@ static BOOLEAN initXCom(void)
 
     return fReturn;
 }
+
+/*----------------------------------------------------------------------------*/
+/**
+\brief    Set cross communication parameters on cycle start
+
+This function sets the current timestamp in the xcom module and also enables
+the cross communication checks.
+
+\param[in] pCurrTime_p      Pointer to the current time
+
+\return TRUE on success; FALSE on error
+
+\ingroup module_main
+*/
+/*----------------------------------------------------------------------------*/
+static BOOLEAN setXComParameters(UINT64 * pCurrTime_p)
+{
+    BOOLEAN fReturn = FALSE;
+
+    /* Set a flag to ensure a cross communication in each cycle */
+    if(xcom_enableReceiveCheck())
+    {
+        /* Forward the current time to the xcom module */
+        xcom_setCurrentTimebase(pCurrTime_p);
+
+        fReturn = TRUE;
+    }
+
+    return fReturn;
+}
+
 #endif /* #if (defined SYSTEM_PATH) && (SYSTEM_PATH > ID_TARG_SINGLE) */
 
 /*----------------------------------------------------------------------------*/
@@ -477,14 +515,32 @@ monitors the cycle time and processes the consecutive time.
 static BOOLEAN syncCycle(void)
 {
     BOOLEAN fReturn = FALSE;
+    UINT64 * pCurrTime = NULL;
 
     /* Call the consecutive time process function in each cycle */
-    constime_process();
-
-    /* Call the cycle monitoring process function */
-    if(cyclemon_process())
+    pCurrTime = constime_process();
+    if(pCurrTime != NULL)
     {
-        fReturn = TRUE;
+        /* Call the cycle monitoring process function */
+        if(cyclemon_process())
+        {
+#if (defined SYSTEM_PATH) && (SYSTEM_PATH > ID_TARG_SINGLE)
+            if(setXComParameters(pCurrTime))
+            {
+                fReturn = TRUE;
+            }
+#else
+            /* For single channeled demos perform sync with one value */
+            if(constime_setConsTime(pCurrTime))
+            {
+                fReturn = TRUE;
+            }   /* no else: Error is handled in the called function */
+#endif /* #if (defined SYSTEM_PATH) && (SYSTEM_PATH > ID_TARG_SINGLE) */
+        }
+    }
+    else
+    {
+        errh_postFatalError(kErrSourcePeriph, kErrorInvalidTimeBase, 0);
     }
 
     return fReturn;
@@ -686,6 +742,7 @@ static void shutdown(void)
 
 #if (defined SYSTEM_PATH) && (SYSTEM_PATH > ID_TARG_SINGLE)
     upserial_exit();
+    xcom_exit();
 #endif /* #if (defined SYSTEM_PATH) && (SYSTEM_PATH > ID_TARG_SINGLE) */
 
     constime_exit();

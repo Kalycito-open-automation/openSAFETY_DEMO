@@ -122,12 +122,24 @@ IF(${CURRENT_DEMO_CONTEXT} STREQUAL "ups")
     SET(DEMO_SRCS
                   ${DEMO_SRCS}
                   ${PROJECT_SOURCE_DIR}/handshake-sl.c
+                  ${SHNF_DIR}/xcom.c
+                  ${SHNF_DIR}/xcom-sl.c
+                  ${SHNF_DIR}/shnftx-dual.c
     )
 ELSEIF(${CURRENT_DEMO_CONTEXT} STREQUAL "upm")
     # This project is for the processor up-master
     SET(DEMO_SRCS
                   ${DEMO_SRCS}
                   ${PROJECT_SOURCE_DIR}/handshake-ma.c
+                  ${SHNF_DIR}/xcom.c
+                  ${SHNF_DIR}/xcom-ma.c
+                  ${SHNF_DIR}/shnftx-dual.c
+    )
+ELSE()
+    # This project is single channeled
+    SET(DEMO_SRCS
+                  ${DEMO_SRCS}
+                  ${SHNF_DIR}/shnftx-single.c
     )
 ENDIF()
 

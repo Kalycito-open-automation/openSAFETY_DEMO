@@ -96,6 +96,10 @@ typedef enum
     kErrorSodStoreCrcError                  = 0x62,
 
     kErrorCycleMonStateInvalid              = 0x70,     /**< Invalid cycle monitoring state */
+    kErrorInvalidTimeBase                   = 0x71,     /**< The time module returned an invalid time */
+    kErrorInvalidFlowCount                  = 0x72,     /**< The flow count returned an invalid value */
+    kErrorInvalidCrcValue                   = 0x73,     /**< The CRC returned an invalid value */
+    kErrorInvalidMsgFormatValue             = 0x74,     /**< Failed to retrieve message format field */
 
     kErrorSerialInitFailed                  = 0x80,     /**< Unable to initialize the serial device */
     kErrorSerialTransferFailed              = 0x81,     /**< Error during the serial transfer */
@@ -104,6 +108,14 @@ typedef enum
 
     kHandSWelcomeMsgInvalid                 = 0x90,     /**< Unable to verify the welcome message */
     kHandSResponseMsgInvalid                = 0x91,     /**< Unable to create of verify the response message */
+
+    kXComTimeDeviationTooHigh               = 0xA0,     /**< The deviation of the local time and the time from the other processor is too high */
+    kXComFlowCountMissmatch                 = 0xA1,     /**< The flow counter on the target is not matching */
+    kXComMissingCrossCommunication          = 0xA2,     /**< There was no cross communication in the last cycle */
+    kXComIdValueInvalid                     = 0xA3,     /**< The id value of the incoming message is not valid */
+    kXComSpdoCrcMissmatch                   = 0xA4,     /**< The SPDO CRC is different on uP-Master and uP-Slave */
+    kXComSsdoSnmtCrcMissmatch               = 0xA5,     /**< The SSDO/SNMT CRC is different on uP-Master and uP-Slave */
+    kXComFrameMissing                       = 0xA6,     /**< A frame was produced on the remote processor but locally non is available */
 } tErrorTypes;
 
 
@@ -118,6 +130,7 @@ typedef enum
     kErrSourceShnf         = 0x3,   /**< Error source = SHNF managing module */
     kErrSourceSapl         = 0x4,   /**< Error source = Safe application */
     kErrSourcePeriph       = 0x5,   /**< Error source = Managing module */
+    kErrSourceXCom         = 0x6,   /**< Error source = Cross communication module */
 } tErrSource;
 
 /**

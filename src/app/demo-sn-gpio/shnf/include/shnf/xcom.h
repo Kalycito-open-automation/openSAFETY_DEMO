@@ -1,8 +1,8 @@
 /**
 ********************************************************************************
-\file   shnf/shnf.h
+\file   shnf/xcom.h
 
-\brief  TODO
+\brief  This header provides the interface to the cross communication module
 
 *******************************************************************************/
 
@@ -33,8 +33,8 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
 
-#ifndef _INC_shnf_shnf_H_
-#define _INC_shnf_shnf_H_
+#ifndef _INC_shnf_xcom_H_
+#define _INC_shnf_xcom_H_
 
 /*----------------------------------------------------------------------------*/
 /* includes                                                                   */
@@ -44,24 +44,24 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /*----------------------------------------------------------------------------*/
 /* const defines                                                              */
 /*----------------------------------------------------------------------------*/
+#define TSPDO_SUB2_LEN          0x10       /**< Length of the SPDO transmit frame (TODO: Exchange this define with a global header) */
+#define TSSDO_SNMT_SUB2_LEN     0x10       /**< Length of the SSDO/SNMT transmit frame (TODO: Exchange this define with a global header) */
+
+#define MSG_FORMAT_SPDO_SET     0       /**< Id of the SPDO bit set */
+#define MSG_FORMAT_SSDO_SET     1       /**< Id of the SSDO/SNMT bit set */
 
 /*----------------------------------------------------------------------------*/
 /* typedef                                                                    */
 /*----------------------------------------------------------------------------*/
 
 /**
- * \brief Type of the synchronous process function
- */
-typedef BOOLEAN (*tShnfProcSync)(void);
-
-/**
- * \brief Shnf module initialization parameters
+ * \brief Defines the sub frame parameters
  */
 typedef struct
 {
-    tShnfProcSync pfnProcSync_m;    /**< Pointer to the process sync callback */
-    tSyncCycle pfnSyncronize_m;     /**< Pointer to the sync cycle callback function */
-} tShnfInitParam;
+    UINT8 * pSubBase_m;     /**< Pointer to the base address of the subframe */
+    UINT32 subLen_m;        /**< The length of the subframe */
+} tSubFrameParams;
 
 /*----------------------------------------------------------------------------*/
 /* function prototypes                                                        */
@@ -71,18 +71,27 @@ typedef struct
     extern "C" {
 #endif
 
-BOOLEAN shnf_init(tShnfInitParam * pInitParam_p);
-void shnf_exit(void);
+BOOLEAN xcom_init(void);
+void xcom_exit(void);
 
-void shnf_reset(void);
+BOOLEAN xcom_setCurrentTimebase(UINT64 * p_currTime);
+BOOLEAN xcom_enableReceiveCheck(void);
 
-BOOLEAN shnf_process(void);
+void xcom_setSsdoSnmtCrc(UINT16 crcSub1_p, UINT16 crcSub2_p);
+BOOLEAN xcom_postSsdoSnmtFrame(tSubFrameParams * pSub1Params_p,
+                               tSubFrameParams * pSub2Params_p,
+                               UINT8 * pTargBuff_p, UINT32 targLen_p);
 
-void shnf_enableSyncIr(void);
+void xcom_setSpdoCrc(UINT16 crcSub1_p, UINT16 crcSub2_p);
+BOOLEAN xcom_postSpdoFrame(tSubFrameParams * pSub1Params_p,
+                           tSubFrameParams * pSub2Params_p,
+                           UINT8 * pTargBuff_p, UINT32 targLen_p);
+
+BOOLEAN xcom_transmit(UINT32 flowCount_p);
 
 #ifdef __cplusplus
     }
 #endif
 
 
-#endif /* _INC_shnf_shnf_H_ */
+#endif /* _INC_shnf_xcom_H_ */

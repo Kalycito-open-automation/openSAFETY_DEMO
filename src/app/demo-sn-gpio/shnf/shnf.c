@@ -49,6 +49,7 @@ to the HNF. Also the frame CRCs are calculated inside this module.
 /*----------------------------------------------------------------------------*/
 #include <shnf/shnf.h>
 
+#include <shnf/shnftx.h>
 #include <shnf/hnf.h>
 #include <shnf/statehandler.h>
 
@@ -88,10 +89,6 @@ to the HNF. Also the frame CRCs are calculated inside this module.
 #define SNMT_FRAME_TYPE        0xA0
 #define SSDO_FRAME_TYPE        0xE0
 #define SSDOSLIM_FRAME_TYPE    0xE8
-
-/* Position of subframe 1 in slim frame */
-#define SLIM_FRAME_SUB1_POS_CRC8     6
-#define SLIM_FRAME_SUB1_POS_CRC16    7
 
 /*----------------------------------------------------------------------------*/
 /* module global vars                                                         */
@@ -137,6 +134,7 @@ typedef struct
 {
     tSsdoSnmtRxStatus  ssdoRxStatus_m;                  /**< Status of the receive state machine */
     tTxDescriptor      txDesc_m[TX_CHANNEL_COUNT];      /**< Transmit descriptor of each transmit channel */
+    tShnfProcSync      pfnProcSync_m;                   /**< Process sync callback function (Called at the end of the cycle) */
 } tShnfInstance;
 
 static tShnfInstance shnfInstance_l SAFE_INIT_SEKTOR;
@@ -159,11 +157,9 @@ UINT32 SHNF_aaulConnValidBit[EPLS_cfg_MAX_INSTANCES][(SPDO_cfg_MAX_NO_RX_SPDO + 
 static void buildTxSpdoFrame(void);
 static BOOLEAN processRxSsdoSnmtFrame(UINT8* pPayload_p, UINT16 paylLen_p);
 static void processRxSpdoFrame(UINT8* pPayload_p, UINT16 paylLen_p);
+static BOOLEAN processSync(void);
 
 static UINT16 getFrameLength(const UINT8 * pPaylLen_p);
-static BOOLEAN prepareTransmitFrame(UINT8 * pTargBuffer_p, UINT16 targBuffLen_p,
-                                   UINT8 * pSrcBuffer_p, UINT16 srcBuffLen_p,
-                                   BOOLEAN fIsSlim_p);
 
 /*============================================================================*/
 /*            P U B L I C   F U N C T I O N S                                 */
@@ -199,12 +195,13 @@ BOOLEAN shnf_init(tShnfInitParam * pInitParam_p)
         {
             /* Initialize the local instance structure */
             shnfInstance_l.ssdoRxStatus_m = kSsdoRxStatusReady;
+            shnfInstance_l.pfnProcSync_m = pInitParam_p->pfnProcSync_m;
 
             /* Setup the HNF initialization parameters */
             hnfInitParam.asyncRcvChan0Handler_m = processRxSsdoSnmtFrame;
             hnfInitParam.syncRcvHandler_m = processRxSpdoFrame;
             hnfInitParam.syncTxBuild_m = buildTxSpdoFrame;
-            hnfInitParam.pfnProcSync_m = pInitParam_p->pfnProcSync_m;
+            hnfInitParam.pfnProcSync_m = processSync;
             hnfInitParam.pfnSyncronize_m = pInitParam_p->pfnSyncronize_m;
 
             /* Initialize the slim interface HNF */
@@ -441,25 +438,13 @@ BOOLEAN SHNF_MarkTxMemBlock(BYTE_B_INSTNUM_ const UINT8 *pb_memBlock)
         /* Get transmit buffer from HNF */
         if(hnf_getSyncTxBuffer(&pTargBuffer, &targBuffLen))
         {
-            if(prepareTransmitFrame(pTargBuffer, targBuffLen,
-                                    pTxDesc->txBuffer_m, pTxDesc->frameLen_m,
-                                    FALSE))
-            {
-                DEBUG_TRACE(DEBUG_LVL_SHNF, "Snd TPDO\n");
+            DEBUG_TRACE(DEBUG_LVL_SHNF, "Snd TPDO\n");
 
-                /* Forward filled buffer to HNF */
-                if(hnf_postSyncTx(pTargBuffer, targBuffLen))
-                {
-                    fReturn = TRUE;
-                }
-                else
-                {
-                    errh_postFatalError(kErrSourceShnf, kErrorSyncFramePostingFailed, 0);
-                }
-            }
-            else
+            /* Forward SPDO frame to underlying layer */
+            if(shnftx_postSpdoFrame(pTxDesc->txBuffer_m, pTxDesc->frameLen_m,
+                                    pTargBuffer, targBuffLen))
             {
-                errh_postFatalError(kErrSourceShnf, kErrorSyncFrameCopyFailed, 0);
+                fReturn = TRUE;
             }
         }
         else
@@ -475,26 +460,14 @@ BOOLEAN SHNF_MarkTxMemBlock(BYTE_B_INSTNUM_ const UINT8 *pb_memBlock)
         /* Get asynchronous target buffer from hnf */
         if(hnf_getAsyncTxBufferChannel0(&pTargBuffer, &targBuffLen))
         {
-            /* Prepare asynchronous target buffer and swap frame */
-            if(prepareTransmitFrame(pTargBuffer, targBuffLen,
-                                    pTxDesc->txBuffer_m, pTxDesc->frameLen_m,
-                                    pTxDesc->isSlim))
-            {
-                DEBUG_TRACE(DEBUG_LVL_SHNF, "Snd SSDO/SNMT\n");
+            DEBUG_TRACE(DEBUG_LVL_SHNF, "Snd SSDO/SNMT\n");
 
-                /* Post transmit frame to hnf */
-                if(hnf_postAsyncTxChannel0(pTargBuffer, pTxDesc->frameLen_m))
-                {
-                    fReturn = TRUE;
-                }
-                else
-                {
-                    errh_postFatalError(kErrSourceShnf, kErrorAsyncFramePostingFailed, 0);
-                }
-            }
-            else
+            /* Forward SSDO/SNMT frame to underlying layer */
+            if(shnftx_postSsdoSnmtFrame(pTxDesc->txBuffer_m, pTxDesc->frameLen_m,
+                                        pTargBuffer, targBuffLen,
+                                        pTxDesc->isSlim))
             {
-                errh_postFatalError(kErrSourceShnf, kErrorAsyncFrameCopyFailed, 0);
+                fReturn = TRUE;
             }
         }
         else
@@ -702,6 +675,41 @@ static void processRxSpdoFrame(UINT8* pPayload_p, UINT16 paylLen_p)
 
 /*----------------------------------------------------------------------------*/
 /**
+\brief    Process the SHNF synchronous task
+
+This function processes the synchronous task at the end of the cycle.
+
+\return TRUE on success; FALSE on error
+
+\ingroup module_shnf
+*/
+/*----------------------------------------------------------------------------*/
+static BOOLEAN processSync(void)
+{
+    BOOLEAN fReturn = FALSE;
+
+    if(shnfInstance_l.pfnProcSync_m != NULL)
+    {
+        /* Call the main module syncronous task */
+        if(shnfInstance_l.pfnProcSync_m())
+        {
+            /* Process the SHNF transmit parts */
+            if(shnftx_process())
+            {
+                fReturn = TRUE;
+            }
+        }
+    }
+    else
+    {
+        errh_postFatalError(kErrSourceShnf, kErrorCallbackNotInitialized, 0);
+    }
+
+    return fReturn;
+}
+
+/*----------------------------------------------------------------------------*/
+/**
 \brief    Returns the length of a frame by it's payload length
 
 \param pPaylLen_p   Pointer to the length field of the payload
@@ -727,69 +735,6 @@ static UINT16 getFrameLength(const UINT8 * pPaylLen_p)
     }
 
     return payLenRes;
-}
-
-/*----------------------------------------------------------------------------*/
-/**
-\brief    Prepare transmit frame for transmission
-
-This function swaps subframe1 and subframe2 and provides the result in the
-target buffer.
-
-\param pTargBuffer_p   Pointer to the target buffer
-\param targBuffLen_p   Length of the target buffer
-\param pSrcBuffer_p    Pointer to the source frame
-\param srcBuffLen_p    Length of the frame
-\param fIsSlim_p       TRUE if the frame is an SSDO slim frame
-
-\return TRUE if the target buffer is valid; FALSE otherwise
-
-\ingroup module_shnf
-*/
-/*----------------------------------------------------------------------------*/
-static BOOLEAN prepareTransmitFrame(UINT8 * pTargBuffer_p, UINT16 targBuffLen_p,
-                                   UINT8 * pSrcBuffer_p, UINT16 srcBuffLen_p,
-                                   BOOLEAN fIsSlim_p)
-{
-    BOOLEAN fReturn = FALSE;
-    UINT16 subFrame1Pos = 0;
-    UINT16 subFrame2Targ = 0;
-    UINT16 subFrame1Len = 0;
-    UINT16 subFrame2Len = 0;
-
-    /* Check if frame fits into target buffer */
-    if(srcBuffLen_p <= targBuffLen_p)
-    {
-        if(fIsSlim_p)
-        {
-            /* Calculate frame positions and lengths for slim frames */
-            if(srcBuffLen_p < 20)
-                subFrame1Pos = SLIM_FRAME_SUB1_POS_CRC8;
-            else
-                subFrame1Pos = SLIM_FRAME_SUB1_POS_CRC16;
-
-            subFrame2Targ = srcBuffLen_p - subFrame1Pos;
-        }
-        else
-        {
-            /* Calculate frame positions and lengths for normal frames */
-            subFrame1Pos = (srcBuffLen_p>>1) + 1;
-            subFrame2Targ = subFrame1Pos - 1;
-        }
-
-        /* Get length of sub frames */
-        subFrame1Len = srcBuffLen_p - subFrame1Pos;
-        subFrame2Len = srcBuffLen_p - subFrame1Len;
-
-        /* Copy subframe1 to start of target buffer */
-        MEMCOPY(pTargBuffer_p, &pSrcBuffer_p[subFrame1Pos], subFrame1Len);
-        /* Add subframe2 to end of subframe1 */
-        MEMCOPY(&pTargBuffer_p[subFrame2Targ], pSrcBuffer_p, subFrame2Len);
-
-        fReturn = TRUE;
-    }
-
-    return fReturn;
 }
 
 /* \} */

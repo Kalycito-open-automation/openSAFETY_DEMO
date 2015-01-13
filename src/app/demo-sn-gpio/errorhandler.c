@@ -103,7 +103,7 @@ typedef struct
 static tErrhInstance errHanInstance_l SAFE_INIT_SEKTOR;
 
 #ifdef _DEBUG
-static char *errSource[] = { "Invalid", "EPS", "HNF", "SHNF", "SAPL", "Periph" };
+static char *errSource[] = { "Invalid", "EPS", "HNF", "SHNF", "SAPL", "Periph", "XCom" };
 #endif
 
 /*----------------------------------------------------------------------------*/

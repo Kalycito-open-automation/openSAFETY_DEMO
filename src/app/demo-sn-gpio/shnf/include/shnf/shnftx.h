@@ -1,8 +1,11 @@
 /**
 ********************************************************************************
-\file   shnf/shnf.h
+\file   shnf/shnftx.h
 
-\brief  TODO
+\brief  Interface header to the SHNF transmit part
+
+This header provides the interface to the SHNF transmit functions. It provides
+different implementations for single and dual channeled demos.
 
 *******************************************************************************/
 
@@ -33,8 +36,8 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
 
-#ifndef _INC_shnf_shnf_H_
-#define _INC_shnf_shnf_H_
+#ifndef _INC_shnf_shnftx_H_
+#define _INC_shnf_shnftx_H_
 
 /*----------------------------------------------------------------------------*/
 /* includes                                                                   */
@@ -44,24 +47,15 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /*----------------------------------------------------------------------------*/
 /* const defines                                                              */
 /*----------------------------------------------------------------------------*/
+#define SLIM_FRAME_MAX_CRC8_LEN           19
+
+/* Position of subframe 1 in slim frame */
+#define SLIM_FRAME_SUB1_POS_CRC8           6
+#define SLIM_FRAME_SUB1_POS_CRC16          7
 
 /*----------------------------------------------------------------------------*/
 /* typedef                                                                    */
 /*----------------------------------------------------------------------------*/
-
-/**
- * \brief Type of the synchronous process function
- */
-typedef BOOLEAN (*tShnfProcSync)(void);
-
-/**
- * \brief Shnf module initialization parameters
- */
-typedef struct
-{
-    tShnfProcSync pfnProcSync_m;    /**< Pointer to the process sync callback */
-    tSyncCycle pfnSyncronize_m;     /**< Pointer to the sync cycle callback function */
-} tShnfInitParam;
 
 /*----------------------------------------------------------------------------*/
 /* function prototypes                                                        */
@@ -71,18 +65,18 @@ typedef struct
     extern "C" {
 #endif
 
-BOOLEAN shnf_init(tShnfInitParam * pInitParam_p);
-void shnf_exit(void);
+BOOLEAN shnftx_postSpdoFrame(UINT8 * pSrcBase_p, UINT32 srcLen_p,
+                             UINT8 * pDstBase_p, UINT32 dstLen_p);
 
-void shnf_reset(void);
+BOOLEAN shnftx_postSsdoSnmtFrame(UINT8 * pSrcBase_p, UINT32 srcLen_p,
+                                 UINT8 * pDstBase_p, UINT32 dstLen_p,
+                                 BOOLEAN isSlim_p);
 
-BOOLEAN shnf_process(void);
-
-void shnf_enableSyncIr(void);
+BOOLEAN shnftx_process(void);
 
 #ifdef __cplusplus
     }
 #endif
 
 
-#endif /* _INC_shnf_shnf_H_ */
+#endif /* _INC_shnf_shnftx_H_ */

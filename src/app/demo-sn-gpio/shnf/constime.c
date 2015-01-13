@@ -243,21 +243,54 @@ BOOLEAN constime_syncConsTime(UINT64 * pLocTime_p, UINT64 * pRcvTime_p)
 
 /*----------------------------------------------------------------------------*/
 /**
+\brief    Set the consecutive time to a new value
+
+\param[in] pNewTime_p    Pointer to the new timebase
+
+\return TRUE on success; FALSE on error
+
+\ingroup module_constime
+*/
+/*----------------------------------------------------------------------------*/
+BOOLEAN constime_setConsTime(UINT64 * pNewTime_p)
+{
+    BOOLEAN fReturn = FALSE;
+
+    if(pNewTime_p != NULL)
+    {
+        consTimeInstance_l.currConsTime_m = (UINT32)(*pNewTime_p / consTimeInstance_l.consTimeFactor_m);
+
+        fReturn = TRUE;
+    }
+    else
+    {
+        errh_postFatalError(kErrSourceShnf, kErrorInvalidParameter, 0);
+    }
+
+    return fReturn;
+}
+
+/*----------------------------------------------------------------------------*/
+/**
 \brief    Process the system microsecond timer
 
 This function needs to be called at least each 65ms in order to update the
 local microsecond counter of the system.
 
+\return Pointer to the new current time
+
 \ingroup module_constime
 */
 /*----------------------------------------------------------------------------*/
-void constime_process(void)
+UINT64 * constime_process(void)
 {
     UINT64 usTimeBase = 0;
 
     usTimeBase = consTimeInstance_l.usTimeBase_m;
     consTimeInstance_l.usTimeBase_m = usTimeBase + (((UINT64)(timer_getTickCount())
                                       - consTimeInstance_l.usTimeBase_m) & 0xffff);
+
+    return &consTimeInstance_l.usTimeBase_m;
 }
 
 

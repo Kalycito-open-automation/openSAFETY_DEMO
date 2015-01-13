@@ -54,6 +54,11 @@ typedef void (*tSyncRxHandler)(UINT8 * pPayload_p, UINT16 paylLen_p);
 typedef void (*tSyncTxCreate)(void);
 
 /**
+ * \brief Type of the synchronous process function
+ */
+typedef BOOLEAN (*tProcSync)(void);
+
+/**
  * \brief Module initialization parameters
  */
 typedef struct
@@ -61,8 +66,8 @@ typedef struct
     tAsyncRxHandler asyncRcvChan0Handler_m;       /**< Asynchronous receive handler */
     tSyncRxHandler syncRcvHandler_m;              /**< Synchronous receive handler */
     tSyncTxCreate syncTxBuild_m;                  /**< Trigger the build of synchronous transmit frames */
-    tProcSync pfnProcSync_m;                      /**< Process the synchronous task */
-    tSyncCycle pfnSyncronize_m;                   /**< Callback to synchronize to the current cycle*/
+    tProcSync pfnProcSync_m;                      /**< Process the synchronous task at the end of the cycle */
+    tSyncCycle pfnSyncronize_m;                   /**< Callback to synchronize to the current cycle (Beginning of the cycle) */
 } tHnfInit;
 
 /*----------------------------------------------------------------------------*/
