@@ -95,7 +95,6 @@ SET(DEMO_ARCH_LIBS "${DEMO_BSP_NAME}")
 
 #################################################################################
 # Set compile flags
-SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DCFG_SAPL_SN_UDID=${CFG_SAPL_SN_UDID}")
 STRING (REPLACE "-pedantic" "" CMAKE_C_FLAGS ${CMAKE_C_FLAGS})
 
 ################################################################################

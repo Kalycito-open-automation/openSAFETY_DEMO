@@ -61,7 +61,7 @@ PROJECT(demo-${CFG_DEMO_TYPE}-${CURRENT_DEMO_CONTEXT} C)
 ########################################################################
 # Define the CN unique id
 ########################################################################
-SET(CFG_SAPL_SN_UDID "\"{0x00U,0x60U,0x65U,0x01U,0x14U,0x9BU}\"" CACHE STRING "Unique id of this SN")
+SET(CFG_SAPL_SN_UDID "{0x00U,0x60U,0x65U,0x01U,0x14U,0x9BU}" CACHE STRING "Unique id of this SN")
 
 # Enable rotated CRCs in oschecksum
 SET(CRC_ROTATED_ENABLE ON)

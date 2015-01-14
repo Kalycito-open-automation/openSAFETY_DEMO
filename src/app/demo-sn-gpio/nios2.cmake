@@ -123,7 +123,7 @@ MESSAGE ( STATUS  "Generate board support package: ${GEN_BSP_STDOUT}" )
 # Application Makefile
 ########################################################################
 
-SET( APP_CFLAGS "${CMAKE_C_FLAGS} -DBENCHMARK_MODULES=0xEE800043L -DCFG_SAPL_SN_UDID=\"${CFG_SAPL_SN_UDID}\"" )
+SET( APP_CFLAGS "${CMAKE_C_FLAGS} -DBENCHMARK_MODULES=0xEE800043L" )
 
 SET( ALT_LIB_GEN_ARGS
                       "--bsp-dir ${ALT_APP_BSP_DIR}"

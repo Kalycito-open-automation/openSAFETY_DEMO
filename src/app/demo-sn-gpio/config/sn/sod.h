@@ -5,9 +5,7 @@
 
 #include <stdint.h>
 
-#include <EPLScfg.h>
-#include <EPLStarget.h>
-#include <EPLStypes.h>
+#include <sn/global.h>
 #include <sod_helper.h>
 
 #include <powerlink.h>

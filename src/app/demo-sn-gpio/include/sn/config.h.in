@@ -47,6 +47,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #cmakedefine ID_TARG_UP_MASTER      @ID_TARG_UP_MASTER@       /**< This target is the uP-Master processor */
 #cmakedefine ID_TARG_UP_SLAVE       @ID_TARG_UP_SLAVE@       /**< This target is the uP-Slave processor */
 
+#cmakedefine CFG_SAPL_SN_UDID       @CFG_SAPL_SN_UDID@      /**< The UDID of this SN */
 
 /*----------------------------------------------------------------------------*/
 /* typedef                                                                    */
