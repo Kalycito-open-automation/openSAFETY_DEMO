@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   sapl/parametercrc.h
+\file   demo-sn-gpio/sapl/include/sapl/parametercrc.h
 
 \brief  This module calculates the parameter CRC over the SOD
 

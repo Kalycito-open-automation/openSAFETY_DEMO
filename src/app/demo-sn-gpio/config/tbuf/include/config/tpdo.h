@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   config/tpdo.h
+\file   demo-sn-gpio/config/tbuf/include/config/tpdo.h
 
 \brief  This header defines the configurable parameters of the tpdo module
 

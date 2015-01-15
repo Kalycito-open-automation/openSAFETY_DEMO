@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   sapl/saplapi.h
+\file   demo-sn-gpio/sapl/include/sapl/saplapi.h
 
 \brief  Provides access to SAPL functions which can be used by the user application
 

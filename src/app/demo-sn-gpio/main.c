@@ -1,19 +1,23 @@
 /**
 ********************************************************************************
-\file   main.c
+\file   demo-sn-gpio/main.c
+
+\defgroup module_sn_main Main module
+\{
 
 \brief Safety node firmware main instance
 
 Entry point of the safety node firmware. Initializes all submodules and the
 stack and processes the background task.
 
-\ingroup module_main
+\ingroup group_app_sn
+
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
 * License Agreement
 *
-* Copyright 2013 BERNECKER + RAINER, AUSTRIA, 5142 EGGELSBERG, B&R STRASSE 1
+* Copyright 2014 BERNECKER + RAINER, AUSTRIA, 5142 EGGELSBERG, B&R STRASSE 1
 * All rights reserved.
 *
 * Redistribution and use in source and binary forms,
@@ -142,7 +146,7 @@ static void shutdown(void);
 
 /*----------------------------------------------------------------------------*/
 /**
-\brief    Entry function of CN API example
+\brief    Entry function of SN example example
 
 main() implements the main program function of the CN API example.
 First all initialization is done, then the program runs in a loop where the
@@ -150,8 +154,6 @@ APs state machine will be updated and input/output ports will be processed.
 
 \retval 0          On successful shutdown
 \retval -1         Shutdown on error
-
-\ingroup module_main
 */
 /*----------------------------------------------------------------------------*/
 int main (void)
@@ -246,8 +248,8 @@ int main (void)
 /*============================================================================*/
 /*            P R I V A T E   F U N C T I O N S                               */
 /*============================================================================*/
-/* \name Private Functions */
-/* \{ */
+/** \name Private Functions */
+/** \{ */
 
 /*----------------------------------------------------------------------------*/
 /**
@@ -257,8 +259,6 @@ Initialize the openSAFETY stack and switch the SN to the Pre-operational state.
 
 \retval TRUE    Stack initialization was successful
 \retval FALSE   Error during stack initialization
-
-\ingroup module_main
 */
 /*----------------------------------------------------------------------------*/
 static BOOLEAN initOpenSafety(void)
@@ -296,8 +296,6 @@ static BOOLEAN initOpenSafety(void)
 
 \retval TRUE    XCom initialization successful
 \retval FALSE   Error on initialization
-
-\ingroup module_main
 */
 /*----------------------------------------------------------------------------*/
 static BOOLEAN initXCom(void)
@@ -347,8 +345,6 @@ the cross communication checks.
 \param[in] pCurrTime_p      Pointer to the current time
 
 \return TRUE on success; FALSE on error
-
-\ingroup module_main
 */
 /*----------------------------------------------------------------------------*/
 static BOOLEAN setXComParameters(UINT64 * pCurrTime_p)
@@ -379,8 +375,6 @@ called in this context.
 
 \retval TRUE    Shutdown is triggered
 \retval FALSE   Processing failed due to error
-
-\ingroup module_main
 */
 /*----------------------------------------------------------------------------*/
 static BOOLEAN processAsync(void)
@@ -434,8 +428,6 @@ time this tasks are multiplexed over multiple cycles.
 
 \retval TRUE    Processing of sync task successful
 \retval FALSE   Processing failed due to error
-
-\ingroup module_main
 */
 /*----------------------------------------------------------------------------*/
 static BOOLEAN processSync(void)
@@ -499,8 +491,6 @@ monitors the cycle time and processes the consecutive time.
 
 \retval TRUE    Processing of sync cycle successful
 \retval FALSE   Processing failed due to error
-
-\ingroup module_main
 */
 /*----------------------------------------------------------------------------*/
 static BOOLEAN syncCycle(void)
@@ -540,8 +530,6 @@ static BOOLEAN syncCycle(void)
 /*----------------------------------------------------------------------------*/
 /**
 \brief    Poll the connection valid bit and forward the value to the hardware
-
-\ingroup module_main
 */
 /*----------------------------------------------------------------------------*/
 static void checkConnectionValid(void)
@@ -563,8 +551,6 @@ static void checkConnectionValid(void)
 /*----------------------------------------------------------------------------*/
 /**
 \brief    On a cycle time violation a reset needs to be performed
-
-\ingroup module_main
 */
 /*----------------------------------------------------------------------------*/
 static void enterReset(void)
@@ -579,8 +565,6 @@ static void enterReset(void)
 /*----------------------------------------------------------------------------*/
 /**
 \brief    Shutdown the SN and cleanup all structures
-
-\ingroup module_main
 */
 /*----------------------------------------------------------------------------*/
 static void shutdown(void)
@@ -602,4 +586,7 @@ static void shutdown(void)
     platform_exit();
 }
 
-/* \} */
+/**
+ * \}
+ * \}
+ */

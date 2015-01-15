@@ -1,8 +1,8 @@
 /**
 ********************************************************************************
-\file   shnf/shnf.h
+\file   demo-sn-gpio/shnf/include/shnf/shnf.h
 
-\brief  TODO
+\brief  This header implements the interface to the SHNF module
 
 *******************************************************************************/
 

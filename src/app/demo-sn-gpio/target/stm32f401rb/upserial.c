@@ -1,18 +1,22 @@
 /**
 ********************************************************************************
-\file   upserial.c
+\file   demo-sn-gpio/target/stm32f401rb/upserial.c
+
+\defgroup module_sn_stm32f401_upserial Cross communication serial module
+\{
 
 \brief  Implements the driver for the uP interconnect serial device
 
 Defines the platform specific functions for the serial to interconnect the
 uP-Master with the uP-Slave. (Target is the stm32f401re board)
 
+\ingroup group_app_sn_targ_stm32f401
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
 * License Agreement
 *
-* Copyright 2013 BERNECKER + RAINER, AUSTRIA, 5142 EGGELSBERG, B&R STRASSE 1
+* Copyright 2014 BERNECKER + RAINER, AUSTRIA, 5142 EGGELSBERG, B&R STRASSE 1
 * All rights reserved.
 *
 * Redistribution and use in source and binary forms,
@@ -149,8 +153,6 @@ the uP-Slave.
 
 \retval TRUE    On success
 \retval FALSE   USART initialization failed
-
-\ingroup module_serial
 */
 /*----------------------------------------------------------------------------*/
 BOOLEAN upserial_init(void)
@@ -171,8 +173,6 @@ BOOLEAN upserial_init(void)
 /*----------------------------------------------------------------------------*/
 /**
 \brief  Close the USART serial
-
-\ingroup module_serial
 */
 /*----------------------------------------------------------------------------*/
 void upserial_exit(void)
@@ -192,8 +192,6 @@ void upserial_exit(void)
 \param pfnTransfFin_p     Pointer to the transfer finished callback
 \param pfnReceivefFin_p   Pointer to the receive finished callback
 \param pfnTransfError_p   Pointer to the transfer error callback
-
-\ingroup module_serial
 */
 /*----------------------------------------------------------------------------*/
 void upserial_registerCb(tUpSerialTransferFin pfnTransfFin_p,
@@ -208,8 +206,6 @@ void upserial_registerCb(tUpSerialTransferFin pfnTransfFin_p,
 /*----------------------------------------------------------------------------*/
 /**
 \brief  Deregister serial callback functions
-
-\ingroup module_serial
 */
 /*----------------------------------------------------------------------------*/
 void upserial_deRegisterCb(void)
@@ -232,8 +228,6 @@ This function starts an USART transfer to send data to the second processor.
 
 \retval TRUE        On success
 \retval FALSE       USART send failed
-
-\ingroup module_serial
 */
 /*----------------------------------------------------------------------------*/
 BOOLEAN upserial_transmitBlock(volatile UINT8 * pData_p, UINT32 size_p)
@@ -272,14 +266,14 @@ BOOLEAN upserial_transmitBlock(volatile UINT8 * pData_p, UINT32 size_p)
 This function blocks until the desired amount of bytes is received from the uart
 serial.
 
+\note This function is blocking
+
 \param[in] pData_p       Pointer to the received data
 \param[in] size_p        Size of the received data
 \param[in] timeoutMs_p   The timeout in ms
 
 \retval TRUE        On success
 \retval FALSE       USART receive failed
-
-\ingroup module_serial
 */
 /*----------------------------------------------------------------------------*/
 BOOLEAN upserial_receiveBlock(volatile UINT8 * pData_p, UINT32 size_p, UINT32 timeoutMs_p)
@@ -322,8 +316,6 @@ serial device.
 
 \retval TRUE        On success
 \retval FALSE       USART receive failed
-
-\ingroup module_serial
 */
 /*----------------------------------------------------------------------------*/
 BOOLEAN upserial_enableReceive(volatile UINT8 * pData_p, UINT32 size_p)
@@ -356,8 +348,6 @@ processor.
 
 \retval TRUE        On success
 \retval FALSE       USART send failed
-
-\ingroup module_serial
 */
 /*----------------------------------------------------------------------------*/
 BOOLEAN upserial_transmit(volatile UINT8 * pData_p, UINT32 size_p)
@@ -381,8 +371,8 @@ BOOLEAN upserial_transmit(volatile UINT8 * pData_p, UINT32 size_p)
 /*============================================================================*/
 /*            P R I V A T E   F U N C T I O N S                               */
 /*============================================================================*/
-/* \name Private Functions */
-/* \{ */
+/** \name Private Functions */
+/** \{ */
 
 /*----------------------------------------------------------------------------*/
 /**
@@ -392,8 +382,6 @@ This function is called in the call of HAL_UART_Init and initializes all
 peripherals needed to carry out the transfer with DMA.
 
 \param pUsartHandler_p    Pointer to the USART handler
-
-\ingroup module_serial
 */
 /*----------------------------------------------------------------------------*/
 void HAL_UART_MspInit(UART_HandleTypeDef* pUsartHandler_p)
@@ -416,8 +404,6 @@ This function is called in the call of HAL_UART_DeInit and closes all
 peripherals needed by the USART core.
 
 \param pUsartHandler_p    Pointer to the USART handler
-
-\ingroup module_serial
 */
 /*----------------------------------------------------------------------------*/
 void HAL_UART_MspDeInit(UART_HandleTypeDef* pUsartHandler_p)
@@ -440,8 +426,6 @@ void HAL_UART_MspDeInit(UART_HandleTypeDef* pUsartHandler_p)
 \brief  Initialize the SPI GPIO pins
 
 Enable SCK and MOSI as outputs and MISO as input.
-
-\ingroup module_serial
 */
 /*----------------------------------------------------------------------------*/
 static void initGpio(void)
@@ -463,8 +447,6 @@ static void initGpio(void)
 Setup USART core for receive and transmit
 
 \return TRUE on success; FALSE on error
-
-\ingroup module_serial
 */
 /*----------------------------------------------------------------------------*/
 static BOOLEAN initUsart(void)
@@ -497,8 +479,6 @@ static BOOLEAN initUsart(void)
 Setup the DMA for receive from USART to RAM and back!
 
 \param pUsartHandler_p    Pointer to the USART handler
-
-\ingroup module_serial
 */
 /*----------------------------------------------------------------------------*/
 static BOOLEAN initDma(UART_HandleTypeDef* pUsartHandler_p)
@@ -559,8 +539,6 @@ static BOOLEAN initDma(UART_HandleTypeDef* pUsartHandler_p)
 
 Setupt transfer finished and transfer error interrupts for both DMA
 channels.
-
-\ingroup module_serial
 */
 /*----------------------------------------------------------------------------*/
 static void initNvic(void)
@@ -579,8 +557,6 @@ static void initNvic(void)
 \brief  USART transfer completed callback.
 
 \param pUsartHandle_p     Pointer to the USART handle
-
-\ingroup module_serial
 */
 /*----------------------------------------------------------------------------*/
 void HAL_UART_TxCpltCallback(UART_HandleTypeDef * pUsartHandle_p)
@@ -600,8 +576,6 @@ void HAL_UART_TxCpltCallback(UART_HandleTypeDef * pUsartHandle_p)
 \brief  USART reception completed callback.
 
 \param pUsartHandle_p     Pointer to the USART handle
-
-\ingroup module_serial
 */
 /*----------------------------------------------------------------------------*/
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef * pUsartHandle_p)
@@ -621,8 +595,6 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef * pUsartHandle_p)
 \brief  DMA error callback
 
 \param pUsartHandle_p     Pointer to the USART handle
-
-\ingroup module_serial
 */
 /*----------------------------------------------------------------------------*/
 void HAL_UART_ErrorCallback(UART_HandleTypeDef * pUsartHandle_p)
@@ -638,8 +610,6 @@ void HAL_UART_ErrorCallback(UART_HandleTypeDef * pUsartHandle_p)
 /*----------------------------------------------------------------------------*/
 /**
 \brief  This function handles DMA Rx interrupt request
-
-\ingroup module_serial
 */
 /*----------------------------------------------------------------------------*/
 void USARTx_DMA_RX_IRQHandler(void)
@@ -651,8 +621,6 @@ void USARTx_DMA_RX_IRQHandler(void)
 /*----------------------------------------------------------------------------*/
 /**
 \brief  This function handles DMA Tx interrupt request.
-
-\ingroup module_serial
 */
 /*----------------------------------------------------------------------------*/
 void USARTx_DMA_TX_IRQHandler(void)
@@ -667,8 +635,6 @@ void USARTx_DMA_TX_IRQHandler(void)
 
 \param[in] pTransFin_p      Pointer to the transfer finished flag
 \param[in] timeoutMs_p      Time in ms until timeout
-
-\ingroup module_serial
 */
 /*----------------------------------------------------------------------------*/
 static BOOLEAN waitForTransferFinished(BOOLEAN * pTransFin_p, UINT32 timeoutMs_p)
@@ -695,8 +661,6 @@ static BOOLEAN waitForTransferFinished(BOOLEAN * pTransFin_p, UINT32 timeoutMs_p
 The HAL library sometimes enables the FIFO error interrupt. As the FIFO is
 disabled and not used this error has no meaning. Therefore the FE interrupt
 needs to be always disabled!
-
-\ingroup module_serial
 */
 /*----------------------------------------------------------------------------*/
 static void disableFifoErrorIr(void)
@@ -706,4 +670,7 @@ static void disableFifoErrorIr(void)
     __HAL_DMA_DISABLE_IT(&DmaRxHandle_l, DMA_IT_FE);
 }
 
-/* \} */
+/**
+ * \}
+ * \}
+ */

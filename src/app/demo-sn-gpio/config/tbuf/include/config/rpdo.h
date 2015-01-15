@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   config/rpdo.h
+\file   demo-sn-gpio/config/tbuf/include/config/rpdo.h
 
 \brief  This header defines the configurable parameters of the rpdo module
 

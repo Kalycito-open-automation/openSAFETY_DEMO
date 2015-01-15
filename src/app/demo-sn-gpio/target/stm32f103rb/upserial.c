@@ -1,18 +1,22 @@
 /**
 ********************************************************************************
-\file   upserial.c
+\file   demo-sn-gpio/target/stm32f103rb/upserial.c
+
+\defgroup module_sn_stm32f103_upserial Cross communication serial module
+\{
 
 \brief  Implements the driver for the uP interconnect serial device
 
 Defines the platform specific functions for the serial to interconnect the
 uP-Master with the uP-Slave. (Target is the stm32f103rb board)
 
+\ingroup group_app_sn_targ_stm32f103
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
 * License Agreement
 *
-* Copyright 2013 BERNECKER + RAINER, AUSTRIA, 5142 EGGELSBERG, B&R STRASSE 1
+* Copyright 2014 BERNECKER + RAINER, AUSTRIA, 5142 EGGELSBERG, B&R STRASSE 1
 * All rights reserved.
 *
 * Redistribution and use in source and binary forms,
@@ -153,8 +157,6 @@ the uP-Slave.
 
 \retval TRUE    On success
 \retval FALSE   USART initialization failed
-
-\ingroup module_serial
 */
 /*----------------------------------------------------------------------------*/
 BOOLEAN upserial_init(void)
@@ -178,8 +180,6 @@ BOOLEAN upserial_init(void)
 /*----------------------------------------------------------------------------*/
 /**
 \brief  Close the USART serial
-
-\ingroup module_serial
 */
 /*----------------------------------------------------------------------------*/
 void upserial_exit(void)
@@ -204,8 +204,6 @@ void upserial_exit(void)
 \param pfnTransfFin_p     Pointer to the transfer finished callback
 \param pfnReceivefFin_p   Pointer to the receive finished callback
 \param pfnTransfError_p   Pointer to the transfer error callback
-
-\ingroup module_serial
 */
 /*----------------------------------------------------------------------------*/
 void upserial_registerCb(tUpSerialTransferFin pfnTransfFin_p,
@@ -220,8 +218,6 @@ void upserial_registerCb(tUpSerialTransferFin pfnTransfFin_p,
 /*----------------------------------------------------------------------------*/
 /**
 \brief  Deregister serial callback functions
-
-\ingroup module_serial
 */
 /*----------------------------------------------------------------------------*/
 void upserial_deRegisterCb(void)
@@ -244,8 +240,6 @@ This function starts an USART transfer to send data to the second processor.
 
 \retval TRUE        On success
 \retval FALSE       USART send failed
-
-\ingroup module_serial
 */
 /*----------------------------------------------------------------------------*/
 BOOLEAN upserial_transmitBlock(volatile UINT8 * pData_p, UINT32 size_p)
@@ -282,14 +276,14 @@ BOOLEAN upserial_transmitBlock(volatile UINT8 * pData_p, UINT32 size_p)
 This function blocks until the desired amount of bytes is received from the uart
 serial.
 
+\note This function is blocking
+
 \param[in] pData_p       Pointer to the received data
 \param[in] size_p        Size of the received data
 \param[in] timeoutMs_p   The timeout in ms
 
 \retval TRUE        On success
 \retval FALSE       USART receive failed
-
-\ingroup module_serial
 */
 /*----------------------------------------------------------------------------*/
 BOOLEAN upserial_receiveBlock(volatile UINT8 * pData_p, UINT32 size_p, UINT32 timeoutMs_p)
@@ -331,8 +325,6 @@ serial device.
 
 \retval TRUE        On success
 \retval FALSE       USART receive failed
-
-\ingroup module_serial
 */
 /*----------------------------------------------------------------------------*/
 BOOLEAN upserial_enableReceive(volatile UINT8 * pData_p, UINT32 size_p)
@@ -361,8 +353,6 @@ processor.
 
 \retval TRUE        On success
 \retval FALSE       USART send failed
-
-\ingroup module_serial
 */
 /*----------------------------------------------------------------------------*/
 BOOLEAN upserial_transmit(volatile UINT8 * pData_p, UINT32 size_p)
@@ -382,14 +372,12 @@ BOOLEAN upserial_transmit(volatile UINT8 * pData_p, UINT32 size_p)
 /*============================================================================*/
 /*            P R I V A T E   F U N C T I O N S                               */
 /*============================================================================*/
-/* \name Private Functions */
-/* \{ */
+/** \name Private Functions */
+/** \{ */
 
 /*----------------------------------------------------------------------------*/
 /**
 \brief  Initialize the USART GPIO pins
-
-\ingroup module_serial
 */
 /*----------------------------------------------------------------------------*/
 static void initGpio(void)
@@ -419,8 +407,6 @@ static void initGpio(void)
 \brief  Initialize the USART core
 
 Setup USART core for receive and transmit
-
-\ingroup module_serial
 */
 /*----------------------------------------------------------------------------*/
 static void initUsart(void)
@@ -451,8 +437,6 @@ Setup the DMA for receive from USART to RAM.
 
 \param[in] pTargBase_p      Pointer to the base address of the target buffer
 \param[in] targLen_p        The length of the target buffer
-
-\ingroup module_serial
 */
 /*----------------------------------------------------------------------------*/
 static void initDmaRx(volatile UINT8 * pTargBase_p, UINT32 targLen_p)
@@ -485,8 +469,6 @@ Setup the DMA for transmit from RAM to USART.
 
 \param[in] pSrcBase_p      Pointer to the base address of the source buffer
 \param[in] srcLen_p        The length of the source buffer
-
-\ingroup module_serial
 */
 /*----------------------------------------------------------------------------*/
 static void initDmaTx(volatile UINT8 * pSrcBase_p, UINT32 srcLen_p)
@@ -514,8 +496,6 @@ static void initDmaTx(volatile UINT8 * pSrcBase_p, UINT32 srcLen_p)
 /*----------------------------------------------------------------------------*/
 /**
 \brief  Close the DMA channels
-
-\ingroup module_serial
 */
 /*----------------------------------------------------------------------------*/
 static void closeDma(void)
@@ -535,8 +515,6 @@ static void closeDma(void)
 
 Setup transfer finished and transfer error interrupts for both DMA
 channels.
-
-\ingroup module_serial
 */
 /*----------------------------------------------------------------------------*/
 static void initNvic(void)
@@ -566,8 +544,6 @@ static void initNvic(void)
 
 \param[in] pData_p      Pointer to the base address of the target buffer
 \param[in] size_p       The length of the target buffer
-
-\ingroup module_serial
 */
 /*----------------------------------------------------------------------------*/
 static void usartReceive(volatile UINT8 * pData_p, UINT32 size_p)
@@ -588,8 +564,6 @@ static void usartReceive(volatile UINT8 * pData_p, UINT32 size_p)
 
 \param[in] pData_p      Pointer to the base address of the source buffer
 \param[in] size_p       The length of the source buffer
-
-\ingroup module_serial
 */
 /*----------------------------------------------------------------------------*/
 static void usartTransmit(volatile UINT8 * pData_p, UINT32 size_p)
@@ -607,8 +581,6 @@ static void usartTransmit(volatile UINT8 * pData_p, UINT32 size_p)
 /*----------------------------------------------------------------------------*/
 /**
 \brief  DMA receive channel interrupt handler (USART -> memory)
-
-\ingroup module_serial
 */
 /*----------------------------------------------------------------------------*/
 void DMAx_ChannelRx_IRQHandler(void)
@@ -643,8 +615,6 @@ void DMAx_ChannelRx_IRQHandler(void)
 /*----------------------------------------------------------------------------*/
 /**
 \brief  DMA transmit channel interrupt handler (memory -> USART)
-
-\ingroup module_serial
 */
 /*----------------------------------------------------------------------------*/
 void DMAx_ChannelTx_IRQHandler(void)
@@ -679,8 +649,6 @@ void DMAx_ChannelTx_IRQHandler(void)
 
 \param[in] pTransFin_p      Pointer to the transfer finished flag
 \param[in] timeoutMs_p      Time in ms until timeout
-
-\ingroup module_serial
 */
 /*----------------------------------------------------------------------------*/
 static BOOLEAN waitForTransferFinished(volatile BOOLEAN * pTransFin_p, UINT32 timeoutMs_p)
@@ -700,4 +668,7 @@ static BOOLEAN waitForTransferFinished(volatile BOOLEAN * pTransFin_p, UINT32 ti
     return fTransFin;
 }
 
-/* \} */
+/**
+ * \}
+ * \}
+ */

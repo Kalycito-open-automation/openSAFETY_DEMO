@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   common/syncir.h
+\file   common/include/common/syncir.h
 
 \brief  Interface to the target specific sync ISR handler
 

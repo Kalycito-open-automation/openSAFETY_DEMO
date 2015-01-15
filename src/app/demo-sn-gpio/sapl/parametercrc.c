@@ -1,19 +1,22 @@
 /**
 ********************************************************************************
-\file   parametercrc.c
+\file   demo-sn-gpio/sapl/parametercrc.c
+
+\defgroup module_sn_sapl_paramcrc Parameter CRC module
+\{
 
 \brief  This module calculates the parameter CRC over the SOD
 
 This module iterates over the whole SOD and calculates the checksum for all
 CRC relevant objects.
 
-\ingroup module_sapl
+\ingroup group_app_sn_sapl
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
 * License Agreement
 *
-* Copyright 2013 BERNECKER + RAINER, AUSTRIA, 5142 EGGELSBERG, B&R STRASSE 1
+* Copyright 2014 BERNECKER + RAINER, AUSTRIA, 5142 EGGELSBERG, B&R STRASSE 1
 * All rights reserved.
 *
 * Redistribution and use in source and binary forms,
@@ -142,8 +145,6 @@ static void resetParamCrcModule(void);
 
 \retval TRUE        Init of the module successful
 \retval FALSE       Error on initialization
-
-\ingroup module_sapl
 */
 /*----------------------------------------------------------------------------*/
 BOOLEAN paramcrc_init(void)
@@ -160,8 +161,6 @@ BOOLEAN paramcrc_init(void)
 /*----------------------------------------------------------------------------*/
 /**
 \brief    Close the parameter CRC module
-
-\ingroup module_sapl
 */
 /*----------------------------------------------------------------------------*/
 void paramcrc_exit(void)
@@ -176,8 +175,6 @@ void paramcrc_exit(void)
 \retval kParamCrcProcError      Error on processing of the parameter CRC
 \retval kParamCrcProcBusy       Calculation of the parameter CRC is busy
 \retval kParamCrcProcFinished   Finished to calculate the parameter CRC
-
-\ingroup module_sapl
 */
 /*----------------------------------------------------------------------------*/
 tProcCrcRet paramcrc_process(void)
@@ -269,8 +266,6 @@ tProcCrcRet paramcrc_process(void)
 /*----------------------------------------------------------------------------*/
 /**
 \brief    Start the processing of the CRC calculator
-
-\ingroup module_sapl
 */
 /*----------------------------------------------------------------------------*/
 void paramcrc_startProcessing(void)
@@ -281,8 +276,8 @@ void paramcrc_startProcessing(void)
 /*============================================================================*/
 /*            P R I V A T E   F U N C T I O N S                               */
 /*============================================================================*/
-/* \name Private Functions */
-/* \{ */
+/** \name Private Functions */
+/** \{ */
 
 /*----------------------------------------------------------------------------*/
 /**
@@ -294,8 +289,6 @@ void paramcrc_startProcessing(void)
 
 \retval TRUE    CRC calculation for this object successful
 \retval FALSE   Failed to calculate the CRC for this object
-
-\ingroup module_sapl
 */
 /*----------------------------------------------------------------------------*/
 static BOOLEAN calculateObjectCrc(SOD_t_OBJECT * pSodObject_p,
@@ -363,8 +356,6 @@ static BOOLEAN calculateObjectCrc(SOD_t_OBJECT * pSodObject_p,
 
 \retval Address     The address of the current CRC32 field
 \retval NULL        On error
-
-\ingroup module_sapl
 */
 /*----------------------------------------------------------------------------*/
 static UINT32 * getCurrentActiveCrc32(UINT32 currObjLen_p, UINT32 * pRemObjLen_p)
@@ -416,8 +407,6 @@ CRCs.
 
 \retval TRUE     Calculated CRCs match the SOD
 \retval FALSE    CRCs are invalid
-
-\ingroup module_sapl
 */
 /*----------------------------------------------------------------------------*/
 static BOOLEAN verifyCrc32Values(void)
@@ -477,8 +466,6 @@ static BOOLEAN verifyCrc32Values(void)
 /*----------------------------------------------------------------------------*/
 /**
 \brief    Reset parameter CRC instance to initial state
-
-\ingroup module_sapl
 */
 /*----------------------------------------------------------------------------*/
 static void resetParamCrcModule(void)
@@ -495,5 +482,8 @@ static void resetParamCrcModule(void)
         paramCrcInstance_l.crc32Entries_m[i] = 0x0;
 }
 
-/* \} */
+/**
+ * \}
+ * \}
+ */
 

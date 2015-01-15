@@ -1,18 +1,22 @@
 /**
 ********************************************************************************
-\file   pcpserial-ma.c
+\file   target/stm32f103rb/pcpserial-ma.c
+
+\defgroup module_targ_stm32f103_serial_ma PCP serial module (Master Mode)
+\{
 
 \brief  Implements the driver for the serial device in master mode
 
 Defines the platform specific functions for the serial to interconnect the app
 with the POWERLINK processor. (Target is the stm32f103rb board)
 
+\ingroup group_app_targ_stm32f103
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
 * License Agreement
 *
-* Copyright 2013 BERNECKER + RAINER, AUSTRIA, 5142 EGGELSBERG, B&R STRASSE 1
+* Copyright 2014 BERNECKER + RAINER, AUSTRIA, 5142 EGGELSBERG, B&R STRASSE 1
 * All rights reserved.
 *
 * Redistribution and use in source and binary forms,
@@ -133,18 +137,17 @@ static void initNvic(void);
 
 /*----------------------------------------------------------------------------*/
 /**
-\brief  Initialize the PCP serial in master mode
+\brief  Initialize the PCP serial
 
-This function init's the SPI serial device which connects the uP-Master with the
-POWERLINK processor in master mode.
+This function init's the serial device which connects the application processor
+with the POWERLINK processor. The transfer can either be carried out in
+slave or master mode.
 
 \param pTransParam_p    The transfer parameters (rx/tx base and size)
 \param pfnTransfFin_p   Pointer to the transfer finished interrupt
 
 \retval TRUE    On success
 \retval FALSE   Error during initialization
-
-\ingroup module_serial
 */
 /*----------------------------------------------------------------------------*/
 BOOL pcpserial_init(tHandlerParam * pTransParam_p, tPcpSerialTransferFin pfnTransfFin_p)
@@ -184,8 +187,6 @@ BOOL pcpserial_init(tHandlerParam * pTransParam_p, tPcpSerialTransferFin pfnTran
 /*----------------------------------------------------------------------------*/
 /**
 \brief  Close the serial device
-
-\ingroup module_serial
 */
 /*----------------------------------------------------------------------------*/
 void pcpserial_exit(void)
@@ -209,17 +210,15 @@ void pcpserial_exit(void)
 
 /*----------------------------------------------------------------------------*/
 /**
-\brief  Start an SPI transfer
+\brief  Start an serial transfer
 
-pcpserial_transfer() starts an SPI DMA transfer to exchange the process
+pcpserial_transfer() starts an serial transfer to exchange the process
 image with the PCP.
 
-\param[in] pHandlParam_p       The parameters of the SPI transfer handler
+\param[in] pHandlParam_p       The parameters of the serial transfer handler
 
 \retval TRUE        On success
-\retval FALSE       SPI send or receive failed
-
-\ingroup module_serial
+\retval FALSE       Error on sending or receiving
 */
 /*----------------------------------------------------------------------------*/
 BOOL pcpserial_transfer(tHandlerParam* pHandlParam_p)
@@ -244,16 +243,14 @@ BOOL pcpserial_transfer(tHandlerParam* pHandlParam_p)
 /*============================================================================*/
 /*            P R I V A T E   F U N C T I O N S                               */
 /*============================================================================*/
-/* \name Private Functions */
-/* \{ */
+/** \name Private Functions */
+/** \{ */
 
 /*----------------------------------------------------------------------------*/
 /**
 \brief  Initialize the SPI GPIO pins
 
 Enable SCK, MOSI and NSS as outputs and MISO as input.
-
-\ingroup module_serial
 */
 /*----------------------------------------------------------------------------*/
 static void initGpio(void)
@@ -289,8 +286,6 @@ static void initGpio(void)
 \brief  Initialize the SPI core as master
 
 Setup SPI core as full duplex 8bit data with CPOL, CPHA = (0,0)
-
-\ingroup module_serial
 */
 /*----------------------------------------------------------------------------*/
 static void initSpi(void)
@@ -326,8 +321,6 @@ static void initSpi(void)
 Setup the DMA for receive from SPI to RAM and back!
 
 \param pTransParam_p The transfer parameters
-
-\ingroup module_serial
 */
 /*----------------------------------------------------------------------------*/
 static void initDma(tHandlerParam * pTransParam_p)
@@ -384,8 +377,6 @@ static void initDma(tHandlerParam * pTransParam_p)
 
 Setupt transfer finished and transfer error interrupts for both DMA
 channels.
-
-\ingroup module_serial
 */
 /*----------------------------------------------------------------------------*/
 static void initNvic(void)
@@ -412,8 +403,6 @@ static void initNvic(void)
 /*----------------------------------------------------------------------------*/
 /**
 \brief  DMA receive channel interrupt handler (SPI -> memory)
-
-\ingroup module_serial
 */
 /*----------------------------------------------------------------------------*/
 void DMAx_ChannelRx_IRQHandler(void)
@@ -452,8 +441,6 @@ void DMAx_ChannelRx_IRQHandler(void)
 /*----------------------------------------------------------------------------*/
 /**
 \brief  DMA transmit channel interrupt handler (memory -> SPI)
-
-\ingroup module_serial
 */
 /*----------------------------------------------------------------------------*/
 void DMAx_ChannelTx_IRQHandler(void)
@@ -480,4 +467,7 @@ void DMAx_ChannelTx_IRQHandler(void)
     }
 }
 
-/* \} */
+/**
+ * \}
+ * \}
+ */

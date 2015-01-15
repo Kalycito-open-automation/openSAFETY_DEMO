@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   common/platform.h
+\file   common/include/common/platform.h
 
 \brief  Application interface system components implementation
 

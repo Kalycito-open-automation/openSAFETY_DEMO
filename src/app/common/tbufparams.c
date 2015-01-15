@@ -1,19 +1,23 @@
 /**
 ********************************************************************************
-\file   tbufparams.c
+\file   common/tbufparams.c
+
+\defgroup module_com_tbufp Triple buffer settings generator module
+\{
 
 \brief  Implements helper functions for tbuf parameter handling
 
 This helper functions generate buffer lists which can be used in the libpsi
 or by the serial interface.
 
-\ingroup module_tbufp
+\ingroup group_app_common
+
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
 * License Agreement
 *
-* Copyright 2013 BERNECKER + RAINER, AUSTRIA, 5142 EGGELSBERG, B&R STRASSE 1
+* Copyright 2014 BERNECKER + RAINER, AUSTRIA, 5142 EGGELSBERG, B&R STRASSE 1
 * All rights reserved.
 *
 * Redistribution and use in source and binary forms,
@@ -101,10 +105,7 @@ static UINT32 getInitOffset(INT8 isProducer_p, BOOL isFirstAck_p);
 \param[in]  tbufCount_m      Count of buffers in the image
 \param[out] pBuffDescList_p     Buffer descriptor list in library format
 
-\return TRUE on success; FALSE on error
-
-\ingroup module_tbufp
-*/
+\return TRUE on success; FALSE on error*/
 /*----------------------------------------------------------------------------*/
 BOOL tbufp_genDescList(UINT8 * pTbufBase_m, UINT16 tbufCount_m, tBuffDescriptor* pBuffDescList_p)
 {
@@ -141,10 +142,7 @@ BOOL tbufp_genDescList(UINT8 * pTbufBase_m, UINT16 tbufCount_m, tBuffDescriptor*
 \param[in]  pTbufBase_m      Base address of the triple buffer image
 \param[out] p_transParam     Pointer to the transfer parameters
 
-\return TRUE on success; FALSE on error
-
-\ingroup module_tbufp
-*/
+\return TRUE on success; FALSE on error*/
 /*----------------------------------------------------------------------------*/
 BOOL tbufp_genTransferParams(UINT8 * pTbufBase_m, tHandlerParam * p_transParam)
 {
@@ -174,8 +172,8 @@ BOOL tbufp_genTransferParams(UINT8 * pTbufBase_m, tHandlerParam * p_transParam)
 /*============================================================================*/
 /*            P R I V A T E   F U N C T I O N S                               */
 /*============================================================================*/
-/* \name Private Functions */
-/* \{ */
+/** \name Private Functions */
+/** \{ */
 
 /*----------------------------------------------------------------------------*/
 /**
@@ -185,13 +183,10 @@ The SPI protocol always needs 4 byte initialization data. This function
 details if this buffer needs 4 byte offset (app consuming buffers) or
 8 byte offset. (app producing)
 
-\param[in] isConsumer    Is this buffer a consuming buffer
-\param[in] isFirstAck    Is this buffer the first ACK register
+\param[in] isProducer_p    Is this buffer a producing buffer
+\param[in] isFirstAck_p    Is this buffer the first ACK register
 
-\return The offset of this buffer
-
-\ingroup module_tbufp
-*/
+\return The offset of this buffer*/
 /*----------------------------------------------------------------------------*/
 static UINT32 getInitOffset(INT8 isProducer_p, BOOL isFirstAck_p)
 {
@@ -221,4 +216,7 @@ static UINT32 getInitOffset(INT8 isProducer_p, BOOL isFirstAck_p)
     return offset;
 }
 
-/* \} */
+/**
+ * \}
+ * \}
+ */

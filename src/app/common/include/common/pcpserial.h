@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   common/pcpserial.h
+\file   common/include/common/pcpserial.h
 
 \brief  Interface to the target specific serial handler
 

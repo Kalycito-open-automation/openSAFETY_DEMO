@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   config/triplebuffer.h
+\file   demo-sn-gpio/config/tbuf/include/config/triplebuffer.h
 
 \brief  Global header file for the triple buffers layout
 

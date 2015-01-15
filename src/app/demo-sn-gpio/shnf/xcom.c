@@ -1,19 +1,22 @@
 /**
 ********************************************************************************
-\file   xcom.c
+\file   demo-sn-gpio/shnf/xcom.c
+
+\defgroup module_sn_shnf_xcom Cross communication module
+\{
 
 \brief  uP-Master <-> uP-Slave cross communication
 
 This module implements the functions of the cross communication which are
 needed on the uP-Master and uP-Slave processor.
 
-\ingroup module_xcom
+\ingroup group_app_sn_shnf
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
 * License Agreement
 *
-* Copyright 2013 BERNECKER + RAINER, AUSTRIA, 5142 EGGELSBERG, B&R STRASSE 1
+* Copyright 2014 BERNECKER + RAINER, AUSTRIA, 5142 EGGELSBERG, B&R STRASSE 1
 * All rights reserved.
 *
 * Redistribution and use in source and binary forms,
@@ -125,8 +128,6 @@ static BOOLEAN isSsdoSnmtSet(void);
 Initialize the cross communication module for both processors.
 
 \return TRUE on success; FALSE on error
-
-\ingroup module_xcom
 */
 /*----------------------------------------------------------------------------*/
 BOOLEAN xcom_init(void)
@@ -160,8 +161,6 @@ BOOLEAN xcom_init(void)
 /*----------------------------------------------------------------------------*/
 /**
 \brief    Close the cross communication module
-
-\ingroup module_xcom
 */
 /*----------------------------------------------------------------------------*/
 void xcom_exit(void)
@@ -176,8 +175,6 @@ void xcom_exit(void)
 /*----------------------------------------------------------------------------*/
 /**
 \brief    Set the current time to the output data stream
-
-\ingroup module_xcom
 */
 /*----------------------------------------------------------------------------*/
 BOOLEAN xcom_setCurrentTimebase(UINT64 * p_currTime)
@@ -204,8 +201,6 @@ BOOLEAN xcom_setCurrentTimebase(UINT64 * p_currTime)
 \brief    Enable the cross communication receive check
 
 \return TRUE on success; FALSE on error
-
-\ingroup module_xcom
 */
 /*----------------------------------------------------------------------------*/
 BOOLEAN xcom_enableReceiveCheck(void)
@@ -231,8 +226,6 @@ BOOLEAN xcom_enableReceiveCheck(void)
 
 \param[in] crcSub1_p   The new CRC value of subframe one
 \param[in] crcSub2_p   The new CRC value of subframe two
-
-\ingroup module_xcom
 */
 /*----------------------------------------------------------------------------*/
 void xcom_setSsdoSnmtCrc(UINT16 crcSub1_p, UINT16 crcSub2_p)
@@ -250,8 +243,6 @@ void xcom_setSsdoSnmtCrc(UINT16 crcSub1_p, UINT16 crcSub2_p)
 \param[in] targLen_p       The length of the target buffer
 
 \return TRUE on success; FALSE on error
-
-\ingroup module_xcom
 */
 /*----------------------------------------------------------------------------*/
 BOOLEAN xcom_postSsdoSnmtFrame(tSubFrameParams * pSub1Params_p,
@@ -305,8 +296,6 @@ BOOLEAN xcom_postSsdoSnmtFrame(tSubFrameParams * pSub1Params_p,
 
 \param[in] crcSub1_p   The new CRC value of subframe one
 \param[in] crcSub2_p   The new CRC value of subframe two
-
-\ingroup module_xcom
 */
 /*----------------------------------------------------------------------------*/
 void xcom_setSpdoCrc(UINT16 crcSub1_p, UINT16 crcSub2_p)
@@ -324,8 +313,6 @@ void xcom_setSpdoCrc(UINT16 crcSub1_p, UINT16 crcSub2_p)
 \param[in] targLen_p     The length of the target buffer
 
 \return TRUE on success; FALSE on error
-
-\ingroup module_xcom
 */
 /*----------------------------------------------------------------------------*/
 BOOLEAN xcom_postSpdoFrame(tSubFrameParams * pSub1Params_p,
@@ -379,8 +366,6 @@ BOOLEAN xcom_postSpdoFrame(tSubFrameParams * pSub1Params_p,
 \brief    Send the current data stream to the other processor
 
 \return TRUE on success; FALSE on error
-
-\ingroup module_xcom
 */
 /*----------------------------------------------------------------------------*/
 BOOLEAN xcom_transmit(UINT32 flowCount_p)
@@ -407,15 +392,13 @@ BOOLEAN xcom_transmit(UINT32 flowCount_p)
 /*============================================================================*/
 /*            P R I V A T E   F U N C T I O N S                               */
 /*============================================================================*/
-/* \name Private Functions */
-/* \{ */
+/** \name Private Functions */
+/** \{ */
 
 
 /*----------------------------------------------------------------------------*/
 /**
 \brief    This function is called if the serial transfer is finished
-
-\ingroup module_xcom
 */
 /*----------------------------------------------------------------------------*/
 static void transferFinished(void)
@@ -426,8 +409,6 @@ static void transferFinished(void)
 /*----------------------------------------------------------------------------*/
 /**
 \brief    This function is called if a new frame is received
-
-\ingroup module_xcom
 */
 /*----------------------------------------------------------------------------*/
 static void frameReceived(void)
@@ -486,8 +467,6 @@ static void frameReceived(void)
 /*----------------------------------------------------------------------------*/
 /**
 \brief    This function is called if the serial device encounters an error
-
-\ingroup module_xcom
 */
 /*----------------------------------------------------------------------------*/
 static void transferError(void)
@@ -501,8 +480,6 @@ static void transferError(void)
 \brief    Enable the serial receive task
 
 \return TRUE on success; FALSE on error
-
-\ingroup module_xcom
 */
 /*----------------------------------------------------------------------------*/
 static BOOLEAN serialEnableReceive(void)
@@ -528,8 +505,6 @@ static BOOLEAN serialEnableReceive(void)
 \brief    Verify the local time with the received time
 
 \return TRUE on success; FALSE otherwise
-
-\ingroup module_xcom
 */
 /*----------------------------------------------------------------------------*/
 static BOOLEAN verifyTime(void)
@@ -566,8 +541,6 @@ static BOOLEAN verifyTime(void)
 \brief    Verify the flow local flow count value with the received value
 
 \return TRUE if flow count matches; FALSE otherwise
-
-\ingroup module_xcom
 */
 /*----------------------------------------------------------------------------*/
 static BOOLEAN verifyFlowCount(void)
@@ -610,8 +583,6 @@ static BOOLEAN verifyFlowCount(void)
 \brief    Verify the SPDO CRC with the received value
 
 \return TRUE if CRC matches; FALSE otherwise
-
-\ingroup module_xcom
 */
 /*----------------------------------------------------------------------------*/
 static BOOLEAN verifySpdoCrcs(void)
@@ -671,8 +642,6 @@ static BOOLEAN verifySpdoCrcs(void)
 \brief    Verify the SSDO/SNMT CRC with the received value
 
 \return TRUE if CRC matches; FALSE otherwise
-
-\ingroup module_xcom
 */
 /*----------------------------------------------------------------------------*/
 static BOOLEAN verifySsdoSnmtCrcs(void)
@@ -730,11 +699,7 @@ static BOOLEAN verifySsdoSnmtCrcs(void)
 /**
 \brief    Check if the SPDO flag is set in the message format field
 
-\param[in] timeDiff_p       The time difference to check
-
 \return TRUE if flag is set; FALSE otherwise
-
-\ingroup module_xcom
 */
 /*----------------------------------------------------------------------------*/
 static BOOLEAN isSpdoSet(void)
@@ -770,11 +735,7 @@ static BOOLEAN isSpdoSet(void)
 /**
 \brief    Check if the SSDO/SNMT flag is set in the message format field
 
-\param[in] timeDiff_p       The time difference to check
-
 \return TRUE if flag is set; FALSE otherwise
-
-\ingroup module_xcom
 */
 /*----------------------------------------------------------------------------*/
 static BOOLEAN isSsdoSnmtSet(void)
@@ -806,4 +767,7 @@ static BOOLEAN isSsdoSnmtSet(void)
     return fSsdoSet;
 }
 
-/* \} */
+/**
+ * \}
+ * \}
+ */

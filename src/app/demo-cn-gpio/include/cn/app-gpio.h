@@ -1,8 +1,8 @@
 /**
 ********************************************************************************
-\file   cn/app-gpio.h
+\file   demo-cn-gpio/include/cn/app-gpio.h
 
-\brief  Implements a GPIO application for target altera nios2
+\brief  Implements the interface to the GPIO application
 
 This application simply reads inputs and outputs from common GPIO pins and
 forwards it to the user application.

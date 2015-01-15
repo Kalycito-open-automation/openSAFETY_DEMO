@@ -1,19 +1,23 @@
 /**
 ********************************************************************************
-\file   statehandler.c
+\file   demo-sn-gpio/statehandler.c
+
+\defgroup module_sn_stateh State handler module
+\{
 
 \brief  This module handles the current SN state
 
 This module consists of the current CN state which. It provides access
 to this state in the whole firmware.
 
-\ingroup module_stateh
+\ingroup group_app_sn
+
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
 * License Agreement
 *
-* Copyright 2013 BERNECKER + RAINER, AUSTRIA, 5142 EGGELSBERG, B&R STRASSE 1
+* Copyright 2014 BERNECKER + RAINER, AUSTRIA, 5142 EGGELSBERG, B&R STRASSE 1
 * All rights reserved.
 *
 * Redistribution and use in source and binary forms,
@@ -117,8 +121,6 @@ static BOOLEAN enterOperational(void);
 \param[in] snInitState_p    The initial state of the SN
 
 \return TRUE on success; FALSE on error
-
-\ingroup module_stateh
 */
 /*----------------------------------------------------------------------------*/
 BOOLEAN stateh_init(tSnState snInitState_p)
@@ -141,8 +143,6 @@ BOOLEAN stateh_init(tSnState snInitState_p)
 /*----------------------------------------------------------------------------*/
 /**
 \brief    Close the state handler module
-
-\ingroup module_stateh
 */
 /*----------------------------------------------------------------------------*/
 void stateh_exit(void)
@@ -155,8 +155,6 @@ void stateh_exit(void)
 \brief    Set the SN state variable to a new value
 
 \param[in] newState_p       The new state of the SN
-
-\ingroup module_stateh
 */
 /*----------------------------------------------------------------------------*/
 void stateh_setSnState(tSnState newState_p)
@@ -169,8 +167,6 @@ void stateh_setSnState(tSnState newState_p)
 \brief    Get the current value of the SN state variables
 
 \return   The current state of the SN
-
-\ingroup module_stateh
 */
 /*----------------------------------------------------------------------------*/
 tSnState stateh_getSnState(void)
@@ -183,8 +179,6 @@ tSnState stateh_getSnState(void)
 \brief    Set the enter operational flag to a new value
 
 \param[in] newVal_p       The new value of the enter op flag
-
-\ingroup module_stateh
 */
 /*----------------------------------------------------------------------------*/
 void stateh_setEnterOpFlag(BOOLEAN newVal_p)
@@ -197,8 +191,6 @@ void stateh_setEnterOpFlag(BOOLEAN newVal_p)
 \brief    Get the new value of the enter operational flag
 
 \return   The current value of the enter operational flag
-
-\ingroup module_stateh
 */
 /*----------------------------------------------------------------------------*/
 BOOLEAN stateh_getEnterOpFlag(void)
@@ -211,8 +203,6 @@ BOOLEAN stateh_getEnterOpFlag(void)
 \brief    Set the enter pre-operational flag to a new value
 
 \param[in] newVal_p       The new value of the enter preop flag
-
-\ingroup module_stateh
 */
 /*----------------------------------------------------------------------------*/
 void stateh_setEnterPreOpFlag(BOOLEAN newVal_p)
@@ -225,8 +215,6 @@ void stateh_setEnterPreOpFlag(BOOLEAN newVal_p)
 \brief    Get the new value of the enter pre-operational flag
 
 \return   The current value of the enter pre-operational flag
-
-\ingroup module_stateh
 */
 /*----------------------------------------------------------------------------*/
 BOOLEAN stateh_getEnterPreOpFlag(void)
@@ -239,8 +227,6 @@ BOOLEAN stateh_getEnterPreOpFlag(void)
 \brief    Set the enter shutdown flag to a new value
 
 \param[in] newVal_p       The new value of the enter shutdown flag
-
-\ingroup module_stateh
 */
 /*----------------------------------------------------------------------------*/
 void stateh_setShutdownFlag(BOOLEAN newVal_p)
@@ -253,8 +239,6 @@ void stateh_setShutdownFlag(BOOLEAN newVal_p)
 \brief    Get the new value of the enter shutdown flag
 
 \return   The current value of the enter shutdown flag
-
-\ingroup module_stateh
 */
 /*----------------------------------------------------------------------------*/
 BOOLEAN stateh_getShutdownFlag(void)
@@ -269,8 +253,7 @@ BOOLEAN stateh_getShutdownFlag(void)
 
 If changed this function prints the current state of the SN to stdout.
 
-\ingroup module_main
-*/
+\ingroup module_sn_main*/
 /*----------------------------------------------------------------------------*/
 void stateh_printSNState(void)
 {
@@ -300,8 +283,6 @@ void stateh_printSNState(void)
 \brief    Handle state changes of the openSAFETY stack
 
 \return Processing successful; Error on state change
-
-\ingroup module_stateh
 */
 /*----------------------------------------------------------------------------*/
 BOOLEAN stateh_handleStateChange(void)
@@ -340,8 +321,6 @@ BOOLEAN stateh_handleStateChange(void)
 
 \retval TRUE    Change to pre operational successful
 \retval FALSE   Failed to change the state
-
-\ingroup module_stateh
 */
 /*----------------------------------------------------------------------------*/
 BOOLEAN stateh_enterPreOperational(void)
@@ -372,8 +351,8 @@ BOOLEAN stateh_enterPreOperational(void)
 /*============================================================================*/
 /*            P R I V A T E   F U N C T I O N S                               */
 /*============================================================================*/
-/* \name Private Functions */
-/* \{ */
+/** \name Private Functions */
+/** \{ */
 
 /*----------------------------------------------------------------------------*/
 /**
@@ -381,8 +360,6 @@ BOOLEAN stateh_enterPreOperational(void)
 
 \retval TRUE    Change to operational successful
 \retval FALSE   Failed to change the state
-
-\ingroup module_stateh
 */
 /*----------------------------------------------------------------------------*/
 static BOOLEAN enterOperational(void)
@@ -410,4 +387,7 @@ static BOOLEAN enterOperational(void)
     return fReturn;
 }
 
-/* \} */
+/**
+ * \}
+ * \}
+ */

@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   common/debug.h
+\file   common/include/common/debug.h
 
 \brief  Header file for debugging
 

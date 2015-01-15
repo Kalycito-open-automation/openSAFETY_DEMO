@@ -1,19 +1,22 @@
 /**
 ********************************************************************************
-\file   app-gpio.c
+\file   target/stm32f401re/app-gpio.c
 
-\brief  Implements a GPIO application for target altera nios2
+\defgroup module_targ_stm32f401_app GPIO application module
+\{
+
+\brief  Implements a GPIO application for target stm32f401 (Cortex-M4)
 
 This application simply reads inputs and outputs from common GPIO pins and
 forwards it to the user application.
 
-\ingroup module_app
+\ingroup group_app_targ_stm32f401
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
 * License Agreement
 *
-* Copyright 2013 BERNECKER + RAINER, AUSTRIA, 5142 EGGELSBERG, B&R STRASSE 1
+* Copyright 2014 BERNECKER + RAINER, AUSTRIA, 5142 EGGELSBERG, B&R STRASSE 1
 * All rights reserved.
 *
 * Redistribution and use in source and binary forms,
@@ -93,8 +96,6 @@ forwards it to the user application.
 /*----------------------------------------------------------------------------*/
 /**
 \brief  Initialize the GPIO application
-
-\ingroup module_app
 */
 /*----------------------------------------------------------------------------*/
 void app_init(void)
@@ -105,8 +106,6 @@ void app_init(void)
 /*----------------------------------------------------------------------------*/
 /**
 \brief  Cleanup the GPIO application
-
-\ingroup module_app
 */
 /*----------------------------------------------------------------------------*/
 void app_exit(void)
@@ -122,8 +121,6 @@ void app_exit(void)
 This function writes a value to the output port of the AP
 
 \param[in] value_p       the value to write
-
-\ingroup module_app
 */
 /*----------------------------------------------------------------------------*/
 void app_writeOutputPort(UINT32 value_p)
@@ -141,8 +138,6 @@ This function reads a value from the input port of the AP
 
 \return  UINT32
 \retval  value              the value of the input port
-
-\ingroup module_app
 */
 /*----------------------------------------------------------------------------*/
 UINT8 app_readInputPort(void)
@@ -157,9 +152,12 @@ UINT8 app_readInputPort(void)
 /*============================================================================*/
 /*            P R I V A T E   F U N C T I O N S                               */
 /*============================================================================*/
-/* \name Private Functions */
-/* \{ */
+/** \name Private Functions */
+/** \{ */
 
 
-/* \} */
+/**
+ * \}
+ * \}
+ */
 

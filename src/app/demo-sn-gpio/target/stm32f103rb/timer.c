@@ -1,19 +1,22 @@
 /**
 ********************************************************************************
-\file   timer.c
+\file   demo-sn-gpio/target/stm32f103rb/timer.c
+
+\defgroup module_sn_stm32f103_timer Timer module
+\{
 
 \brief  Target specific functions of the system timer
 
 This module implements the hardware near target specific functions of the
 system timer for stm32f103rb (Cortex-M3).
 
-\ingroup module_timer
+\ingroup group_app_sn_targ_stm32f103
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
 * License Agreement
 *
-* Copyright 2013 BERNECKER + RAINER, AUSTRIA, 5142 EGGELSBERG, B&R STRASSE 1
+* Copyright 2014 BERNECKER + RAINER, AUSTRIA, 5142 EGGELSBERG, B&R STRASSE 1
 * All rights reserved.
 *
 * Redistribution and use in source and binary forms,
@@ -104,8 +107,6 @@ static void initTimer(void);
 \brief    Initialize the timer module
 
 \return 0 on success; 1 on error
-
-\ingroup module_timer
 */
 /*----------------------------------------------------------------------------*/
 BOOLEAN timer_init(void)
@@ -121,8 +122,6 @@ BOOLEAN timer_init(void)
 /*----------------------------------------------------------------------------*/
 /**
 \brief    Close the timer module
-
-\ingroup module_timer
 */
 /*----------------------------------------------------------------------------*/
 void timer_close(void)
@@ -138,8 +137,6 @@ void timer_close(void)
 This function returns the current system tick determined by the system timer.
 
 \return Returns the system tick in milliseconds
-
-\ingroup module_timer
 */
 /*----------------------------------------------------------------------------*/
 UINT16 timer_getTickCount(void)
@@ -156,8 +153,6 @@ UINT16 timer_getTickCount(void)
 \brief    Set the current system tick to a desired value
 
 \param[in] newVal_p     The new value for the timer
-
-\ingroup module_timer
 */
 /*----------------------------------------------------------------------------*/
 void timer_setTickCount(UINT16 newVal_p)
@@ -169,14 +164,12 @@ void timer_setTickCount(UINT16 newVal_p)
 /*============================================================================*/
 /*            P R I V A T E   F U N C T I O N S                               */
 /*============================================================================*/
-/* \name Private Functions */
-/* \{ */
+/** \name Private Functions */
+/** \{ */
 
 /*----------------------------------------------------------------------------*/
 /**
 \brief  Initialize the timer core
-
-\ingroup module_timer
 */
 /*----------------------------------------------------------------------------*/
 static void initTimer(void)
@@ -196,4 +189,7 @@ static void initTimer(void)
     TIM_TimeBaseInit(TIMx, &TIM_TimeBaseStructure);
 }
 
-/* \} */
+/**
+ * \}
+ * \}
+ */

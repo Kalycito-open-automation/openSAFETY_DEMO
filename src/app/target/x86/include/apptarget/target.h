@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   apptarget/target.h
+\file   x86/include/apptarget/target.h
 
 \brief  x86 target specific header file of the slim interface module
 

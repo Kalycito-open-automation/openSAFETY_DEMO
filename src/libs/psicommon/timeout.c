@@ -2,18 +2,21 @@
 ********************************************************************************
 \file   psicommon/timeout.c
 
+\defgroup module_psicom_timeout Timeout module
+\{
+
 \brief  Module for internal timeout generation
 
 This module generates a timeout for asynchronous transmissions by simply counting
 the synchronous interrupts. If a limit is reached the timeout is generated.
 
-\ingroup module_timeout
+\ingroup group_libpsicommon
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
 * License Agreement
 *
-* Copyright 2013 BERNECKER + RAINER, AUSTRIA, 5142 EGGELSBERG, B&R STRASSE 1
+* Copyright 2014 BERNECKER + RAINER, AUSTRIA, 5142 EGGELSBERG, B&R STRASSE 1
 * All rights reserved.
 *
 * Redistribution and use in source and binary forms,
@@ -97,10 +100,6 @@ static struct  eTimeoutInstance       timeoutInstance_l[TIMEOUT_MAX_INSTANCES];
 /*----------------------------------------------------------------------------*/
 /**
 \brief    Initialize the timeout module
-
-\return kPsiSuccessful
-
-\ingroup module_timeout
 */
 /*----------------------------------------------------------------------------*/
 void timeout_init(void)
@@ -114,11 +113,8 @@ void timeout_init(void)
 
 \param[in]  cycleLimit_p    Cycle time limit counter
 
-\return tTimeoutInstance
 \retval Address              Pointer to the instance of the channel
 \retval Null                 Unable to allocate instance
-
-\ingroup module_timeout
 */
 /*----------------------------------------------------------------------------*/
 tTimeoutInstance timeout_create(UINT16 cycleLimit_p)
@@ -155,8 +151,6 @@ tTimeoutInstance timeout_create(UINT16 cycleLimit_p)
 \brief    Destroy the timer instance
 
 \param[in]  pInstance_p     Timeout module instance
-
-\ingroup module_timeout
 */
 /*----------------------------------------------------------------------------*/
 void timeout_destroy(tTimeoutInstance pInstance_p)
@@ -176,13 +170,10 @@ void timeout_destroy(tTimeoutInstance pInstance_p)
 
 \param[in]  pInstance_p     Timeout module instance
 
-\return tTimerStatus
 \retval kTimerStateInvalid    Error occurred
 \retval kTimerStateRunning    Timer is running
 \retval kTimerStateStopped    Timer is stopped
 \retval kTimerStateExpired    Timer is expired
-
-\ingroup module_timeout
 */
 /*----------------------------------------------------------------------------*/
 tTimerStatus timeout_checkExpire(tTimeoutInstance pInstance_p)
@@ -213,8 +204,6 @@ tTimerStatus timeout_checkExpire(tTimeoutInstance pInstance_p)
 \brief    Increment the local cycle counter
 
 \param[in]  pInstance_p     Timeout module instance
-
-\ingroup module_timeout
 */
 /*----------------------------------------------------------------------------*/
 void timeout_incrementCounter(tTimeoutInstance pInstance_p)
@@ -230,8 +219,6 @@ void timeout_incrementCounter(tTimeoutInstance pInstance_p)
 \brief    Start the timer for this instance
 
 \param[in]  pInstance_p     Timeout module instance
-
-\ingroup module_timeout
 */
 /*----------------------------------------------------------------------------*/
 void timeout_startTimer(tTimeoutInstance pInstance_p)
@@ -245,8 +232,6 @@ void timeout_startTimer(tTimeoutInstance pInstance_p)
 \brief    Stop the timer for this instance
 
 \param[in]  pInstance_p     Timeout module instance
-
-\ingroup module_timeout
 */
 /*----------------------------------------------------------------------------*/
 void timeout_stopTimer(tTimeoutInstance pInstance_p)
@@ -261,11 +246,8 @@ void timeout_stopTimer(tTimeoutInstance pInstance_p)
 
 \param[in]  pInstance_p     Timeout module instance
 
-\return tTimerStatus
 \retval kTimerStateRunning       Timer is running
 \retval kTimerStateStopped       Timer is stopped
-
-\ingroup module_timeout
 */
 /*----------------------------------------------------------------------------*/
 tTimerStatus timeout_isRunning(tTimeoutInstance pInstance_p)
@@ -287,7 +269,10 @@ tTimerStatus timeout_isRunning(tTimeoutInstance pInstance_p)
 /*============================================================================*/
 /*            P R I V A T E   F U N C T I O N S                               */
 /*============================================================================*/
-/* \name Private Functions */
-/* \{ */
+/** \name Private Functions */
+/** \{ */
 
-/* \} */
+/**
+ * \}
+ * \}
+ */

@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   config/logbook.h
+\file   demo-sn-gpio/config/tbuf/include/config/logbook.h
 
 \brief  This header provides the configuration parameters of the logbook module
 

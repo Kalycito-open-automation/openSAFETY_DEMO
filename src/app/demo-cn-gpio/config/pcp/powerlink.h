@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   config/powerlink.h
+\file   demo-cn-gpio/config/pcp/powerlink.h
 
 \brief  This header defines some configurable parameters of the POWERLINk stack
 

@@ -2,18 +2,21 @@
 ********************************************************************************
 \file   pdo.c
 
+\defgroup module_psi_pdo Process data objects (PDO) module
+\{
+
 \brief  Module for handling of incoming and outgoing pdo buffers
 
 This module forwards the mapped PDO's from the incoming buffers to the user
 application and back.
 
-\ingroup module_pdo
+\ingroup group_libpsi
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
 * License Agreement
 *
-* Copyright 2013 BERNECKER + RAINER, AUSTRIA, 5142 EGGELSBERG, B&R STRASSE 1
+* Copyright 2014 BERNECKER + RAINER, AUSTRIA, 5142 EGGELSBERG, B&R STRASSE 1
 * All rights reserved.
 *
 * Redistribution and use in source and binary forms,
@@ -121,11 +124,8 @@ static BOOL pdo_processRpdo(UINT8* pBuffer_p, UINT16 bufSize_p, void * pUserArg_
 \param[in]  pfnPdoCb_p          PDO process user callback function
 \param[in]  pPdoInitParam_p     Initialization structure of the PDO buffers
 
-\return  BOOL
 \retval  TRUE       Successfully initialized the PDO module
 \retval  FALSE      Error while initializing the PDO module
-
-\ingroup module_pdo
 */
 /*----------------------------------------------------------------------------*/
 BOOL pdo_init(tPsiPdoCb pfnPdoCb_p, tPdoInitParam* pPdoInitParam_p)
@@ -202,8 +202,6 @@ BOOL pdo_init(tPsiPdoCb pfnPdoCb_p, tPdoInitParam* pPdoInitParam_p)
 /*----------------------------------------------------------------------------*/
 /**
 \brief    Cleanup pdo module
-
-\ingroup module_pdo
 */
 /*----------------------------------------------------------------------------*/
 void pdo_exit(void)
@@ -216,8 +214,6 @@ void pdo_exit(void)
 \brief    Get the base address of the Tpdo image
 
 \return Base address of the Tpdo image
-
-\ingroup module_pdo
 */
 /*----------------------------------------------------------------------------*/
 tTpdoMappedObj * pdo_getTpdoImage(void)
@@ -230,8 +226,6 @@ tTpdoMappedObj * pdo_getTpdoImage(void)
 \brief    Get the base address of the Rpdo image
 
 \return Base address of the Rpdo image
-
-\ingroup module_pdo
 */
 /*----------------------------------------------------------------------------*/
 tRpdoMappedObj * pdo_getRpdoImage(void)
@@ -242,8 +236,8 @@ tRpdoMappedObj * pdo_getRpdoImage(void)
 /*============================================================================*/
 /*            P R I V A T E   F U N C T I O N S                               */
 /*============================================================================*/
-/* \name Private Functions */
-/* \{ */
+/** \name Private Functions */
+/** \{ */
 
 /*----------------------------------------------------------------------------*/
 /**
@@ -251,11 +245,8 @@ tRpdoMappedObj * pdo_getRpdoImage(void)
 
 \param[in] rpdoId_p               Id of the RPDO buffer
 
-\return BOOL
 \retval TRUE        Successfully initializing the rpdo buffer
 \retval FALSE       Error while initializing the rpdo buffer
-
-\ingroup module_pdo
 */
 /*----------------------------------------------------------------------------*/
 static BOOL pdo_initRpdoBuffer(tTbufNumLayout rpdoId_p)
@@ -297,11 +288,8 @@ static BOOL pdo_initRpdoBuffer(tTbufNumLayout rpdoId_p)
 
 \param[in] tpdoId_p               Id of the TPDO buffer
 
-\return BOOL
 \retval TRUE        Successfully initializing the tpdo buffer
 \retval FALSE       Error while initializing the tpdo buffer
-
-\ingroup module_pdo
 */
 /*----------------------------------------------------------------------------*/
 static BOOL pdo_initTpdoBuffer(tTbufNumLayout tpdoId_p)
@@ -336,11 +324,8 @@ static BOOL pdo_initTpdoBuffer(tTbufNumLayout tpdoId_p)
 /**
 \brief    Process the PDO user callback function
 
-\return BOOL
 \retval TRUE        Successfully processed synchronous task
 \retval FALSE       Error while processing the synchronous task
-
-\ingroup module_pdo
 */
 /*----------------------------------------------------------------------------*/
 static BOOL pdo_process(void)
@@ -402,10 +387,8 @@ static BOOL pdo_process(void)
 \param[in] bufSize_p        Size of the buffer
 \param[in] pUserArg_p       User defined argument
 
-\return BOOL
 \retval TRUE     Processing of RPDO buffer successful
-
-\ingroup module_pdo
+\retval FALSE    On error
 */
 /*----------------------------------------------------------------------------*/
 static BOOL pdo_processRpdo(UINT8* pBuffer_p, UINT16 bufSize_p, void * pUserArg_p)
@@ -424,6 +407,12 @@ static BOOL pdo_processRpdo(UINT8* pBuffer_p, UINT16 bufSize_p, void * pUserArg_
     return TRUE;
 }
 
-/* \} */
+/**
+ * \}
+ */
 
 #endif /* #if(((PSI_MODULE_INTEGRATION) & (PSI_MODULE_PDO)) != 0) */
+
+/**
+ * \}
+ */

@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   sn/nvs.h
+\file   demo-sn-gpio/include/sn/nvs.h
 
 \brief  Interface to the non volatile storage
 

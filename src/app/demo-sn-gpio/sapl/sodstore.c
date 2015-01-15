@@ -1,19 +1,22 @@
 /**
 ********************************************************************************
-\file   sodstore.c
+\file   demo-sn-gpio/sapl/sodstore.c
+
+\defgroup module_sn_sapl_sodstore SOD store module
+\{
 
 \brief  Stores and restores the SOD to non volatile memory
 
 This module stores the whole parameter set to non volatile memory which enables
 a fast bootup on SN start.
 
-\ingroup module_sapl
+\ingroup group_app_sn_sapl
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
 * License Agreement
 *
-* Copyright 2013 BERNECKER + RAINER, AUSTRIA, 5142 EGGELSBERG, B&R STRASSE 1
+* Copyright 2014 BERNECKER + RAINER, AUSTRIA, 5142 EGGELSBERG, B&R STRASSE 1
 * All rights reserved.
 *
 * Redistribution and use in source and binary forms,
@@ -137,8 +140,6 @@ static BOOLEAN verifyParamSetCrc(UINT32 paramSetLen_p);
 
 \retval TRUE    Successfully initialized the SOD storage
 \retval FALSE   Error on init
-
-\ingroup module_sodstore
 */
 /*----------------------------------------------------------------------------*/
 BOOLEAN sodstore_init(void)
@@ -165,8 +166,6 @@ BOOLEAN sodstore_init(void)
 /*----------------------------------------------------------------------------*/
 /**
 \brief    Close the SOD storage
-
-\ingroup module_sodstore
 */
 /*----------------------------------------------------------------------------*/
 void sodstore_close(void)
@@ -180,8 +179,6 @@ void sodstore_close(void)
 \brief    Prepare the SOD storage
 
 \return TRUE on success; FALSE on error
-
-\ingroup module_sodstore
 */
 /*----------------------------------------------------------------------------*/
 BOOLEAN sodstore_prepareStorage(void)
@@ -207,8 +204,6 @@ BOOLEAN sodstore_prepareStorage(void)
 \retval kSodStoreProcError      Error on processing
 \retval kSodStoreProcBusy       Processing is currently busy
 \retval kSodStoreProcFinished   Finished processing
-
-\ingroup module_sodstore
 */
 /*----------------------------------------------------------------------------*/
 tProcStoreRet sodstore_process(UINT8* pParamSetBase_p, UINT32 paramSetLen_p)
@@ -349,8 +344,6 @@ tProcStoreRet sodstore_process(UINT8* pParamSetBase_p, UINT32 paramSetLen_p)
 
 \retval TRUE    The image is valid and can be restored
 \retval FALSE   No valid image available
-
-\ingroup module_sodstore
 */
 /*----------------------------------------------------------------------------*/
 BOOLEAN sodstore_getSodImage(UINT8** ppParamSetBase_p, UINT32* pParamSetLen_p)
@@ -392,8 +385,8 @@ BOOLEAN sodstore_getSodImage(UINT8** ppParamSetBase_p, UINT32* pParamSetLen_p)
 /*============================================================================*/
 /*            P R I V A T E   F U N C T I O N S                               */
 /*============================================================================*/
-/* \name Private Functions */
-/* \{ */
+/** \name Private Functions */
+/** \{ */
 
 /*----------------------------------------------------------------------------*/
 /**
@@ -403,8 +396,6 @@ BOOLEAN sodstore_getSodImage(UINT8** ppParamSetBase_p, UINT32* pParamSetLen_p)
 
 \retval TRUE    Success on erase
 \retval FALSE   Error on erase
-
-\ingroup module_sodstore
 */
 /*----------------------------------------------------------------------------*/
 static BOOLEAN eraseNvsSector(UINT32 offset_p)
@@ -427,8 +418,6 @@ static BOOLEAN eraseNvsSector(UINT32 offset_p)
 
 \retval TRUE    Success on erase
 \retval FALSE   Error on erase
-
-\ingroup module_sodstore
 */
 /*----------------------------------------------------------------------------*/
 static BOOLEAN storeHeaderToNvs(UINT32 paramSetLen_p)
@@ -467,8 +456,6 @@ static BOOLEAN storeHeaderToNvs(UINT32 paramSetLen_p)
 
 \retval TRUE    The magic word in the NVS is valid
 \retval FALSE   No magic word in the NVS
-
-\ingroup module_sodstore
 */
 /*----------------------------------------------------------------------------*/
 static BOOLEAN verifyMagic(void)
@@ -495,8 +482,6 @@ static BOOLEAN verifyMagic(void)
 
 \retval TRUE    The CRC was successfully verified
 \retval FALSE   CRC error -> The image is not valid
-
-\ingroup module_sodstore
 */
 /*----------------------------------------------------------------------------*/
 static BOOLEAN verifyParamSetCrc(UINT32 paramSetLen_p)
@@ -520,5 +505,8 @@ static BOOLEAN verifyParamSetCrc(UINT32 paramSetLen_p)
     return fCrcValid;
 }
 
-/* \} */
+/**
+ * \}
+ * \}
+ */
 

@@ -1,19 +1,22 @@
 /**
 ********************************************************************************
-\file   shnftx-single.c
+\file   demo-sn-gpio/shnf/shnftx-single.c
+
+\defgroup module_sn_shnf_txsingle SHNF transmit module (Single channel)
+\{
 
 \brief  SHNF transmit functions for single channeled demos
 
 This module implements the transmit parts of the SHNF for single channeled
 demos. It prepares the frames for transmission to the underlying fieldbus.
 
-\ingroup module_shnf
+\ingroup group_app_sn_shnf
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
 * License Agreement
 *
-* Copyright 2013 BERNECKER + RAINER, AUSTRIA, 5142 EGGELSBERG, B&R STRASSE 1
+* Copyright 2014 BERNECKER + RAINER, AUSTRIA, 5142 EGGELSBERG, B&R STRASSE 1
 * All rights reserved.
 *
 * Redistribution and use in source and binary forms,
@@ -99,13 +102,11 @@ static BOOLEAN swapSubFrames(UINT8 * pTargBuffer_p, UINT16 targBuffLen_p,
 
 \param[in] pSrcBase_p   Pointer to the source buffer
 \param[in] srcLen_p     The length of the source buffer
-\param[in] pSrcBase_p   Pointer to the destination buffer
-\param[in] srcLen_p     The length of the destination buffer
+\param[in] pDstBase_p   Pointer to the destination buffer
+\param[in] dstLen_p     The length of the destination buffer
 
 \retval TRUE    Successfully processed the transmit frame
 \retval FALSE   Error on posting the frame
-
-\ingroup module_shnf
 */
 /*----------------------------------------------------------------------------*/
 BOOLEAN shnftx_postSpdoFrame(UINT8 * pSrcBase_p, UINT32 srcLen_p,
@@ -148,13 +149,12 @@ BOOLEAN shnftx_postSpdoFrame(UINT8 * pSrcBase_p, UINT32 srcLen_p,
 
 \param[in] pSrcBase_p   Pointer to the source buffer
 \param[in] srcLen_p     The length of the source buffer
-\param[in] pSrcBase_p   Pointer to the destination buffer
-\param[in] srcLen_p     The length of the destination buffer
+\param[in] pDstBase_p   Pointer to the destination buffer
+\param[in] dstLen_p     The length of the destination buffer
+\param[in] isSlim_p     TRUE if the frame is a slim frame
 
 \retval TRUE    Successfully processed the transmit frame
 \retval FALSE   Error on posting the frame
-
-\ingroup module_shnf
 */
 /*----------------------------------------------------------------------------*/
 BOOLEAN shnftx_postSsdoSnmtFrame(UINT8 * pSrcBase_p, UINT32 srcLen_p,
@@ -198,8 +198,6 @@ BOOLEAN shnftx_postSsdoSnmtFrame(UINT8 * pSrcBase_p, UINT32 srcLen_p,
 
 \retval TRUE    Successfully processed the transmit frame
 \retval FALSE   Error on posting the frame
-
-\ingroup module_shnf
 */
 /*----------------------------------------------------------------------------*/
 BOOLEAN shnftx_process(void)
@@ -212,8 +210,8 @@ BOOLEAN shnftx_process(void)
 /*============================================================================*/
 /*            P R I V A T E   F U N C T I O N S                               */
 /*============================================================================*/
-/* \name Private Functions */
-/* \{ */
+/** \name Private Functions */
+/** \{ */
 
 
 /*----------------------------------------------------------------------------*/
@@ -230,8 +228,6 @@ target buffer.
 \param fIsSlim_p       TRUE if the frame is an SSDO slim frame
 
 \return TRUE if the target buffer is valid; FALSE otherwise
-
-\ingroup module_shnf
 */
 /*----------------------------------------------------------------------------*/
 static BOOLEAN swapSubFrames(UINT8 * pTargBuffer_p, UINT16 targBuffLen_p,
@@ -279,4 +275,7 @@ static BOOLEAN swapSubFrames(UINT8 * pTargBuffer_p, UINT16 targBuffLen_p,
     return fReturn;
 }
 
-/* \} */
+/**
+ * \}
+ * \}
+ */

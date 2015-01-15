@@ -1,19 +1,22 @@
 /**
 ********************************************************************************
-\file   parameterset.c
+\file   demo-sn-gpio/sapl/parameterset.c
+
+\defgroup module_sn_sapl_paramset Parameter parser module
+\{
 
 \brief  This module handles the parameter download
 
 This module forwards the parameter stream from object 0x10A1 to the object
 dictionary and performs checks of the stream.
 
-\ingroup module_sapl
+\ingroup group_app_sn_sapl
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
 * License Agreement
 *
-* Copyright 2013 BERNECKER + RAINER, AUSTRIA, 5142 EGGELSBERG, B&R STRASSE 1
+* Copyright 2014 BERNECKER + RAINER, AUSTRIA, 5142 EGGELSBERG, B&R STRASSE 1
 * All rights reserved.
 *
 * Redistribution and use in source and binary forms,
@@ -175,8 +178,6 @@ static BOOLEAN writeDomainToSod(void);
 
 \retval TRUE        Init of the module successful
 \retval FALSE       Error on init
-
-\ingroup module_sapl
 */
 /*----------------------------------------------------------------------------*/
 BOOLEAN paramset_init(void)
@@ -197,8 +198,6 @@ BOOLEAN paramset_init(void)
 /*----------------------------------------------------------------------------*/
 /**
 \brief    Close the parameter set module
-
-\ingroup module_sapl
 */
 /*----------------------------------------------------------------------------*/
 void paramset_exit(void)
@@ -219,8 +218,6 @@ over all objects and forwards them to the SOD.
 \retval kParamProcFinished     Parameter set processing finished
 \retval kParamProcBusy         Parameter processing is busy
 \retval kParamProcError        Error during parameter processing
-
-\ingroup module_sapl
 */
 /*----------------------------------------------------------------------------*/
 tProcParamRet paramset_process(UINT8* pParamSetBase_p, UINT32 paramSetLen_p)
@@ -326,8 +323,8 @@ tProcParamRet paramset_process(UINT8* pParamSetBase_p, UINT32 paramSetLen_p)
 /*============================================================================*/
 /*            P R I V A T E   F U N C T I O N S                               */
 /*============================================================================*/
-/* \name Private Functions */
-/* \{ */
+/** \name Private Functions */
+/** \{ */
 
 /*----------------------------------------------------------------------------*/
 /**
@@ -344,8 +341,6 @@ to the corresponding SOD entry.
 \retval kParseObjBusy        Object processing state machine is currently busy
 \retval kParseObjFinished    Current object processing is finished
 \retval kParseObjError       Error during processing
-
-\ingroup module_sapl
 */
 /*----------------------------------------------------------------------------*/
 static tParseObjStatus processParameterSetObject(UINT8 * pObjData_p,
@@ -474,8 +469,6 @@ static tParseObjStatus processParameterSetObject(UINT8 * pObjData_p,
 
 \retval TRUE    Write to the SOD successful
 \retval FALSE   Unable to write to the SOD
-
-\ingroup module_sapl
 */
 /*----------------------------------------------------------------------------*/
 static BOOLEAN writeDomainToSod(void)
@@ -504,4 +497,7 @@ static BOOLEAN writeDomainToSod(void)
     return fReturn;
 }
 
-/* \} */
+/**
+ * \}
+ * \}
+ */

@@ -1,6 +1,9 @@
 /**
 ********************************************************************************
-\file   main.c
+\file   demo-cn-gpio/main.c
+
+\defgroup module_cn_main Main module
+\{
 
 \brief  Example application of the POWERLINK slim interface basic CN demo
 
@@ -8,13 +11,17 @@ This module demonstrates an exemplary use of the libpsi library as a simple
 input/output GPIO demo. It initializes the library and all needed modules and
 sends/receives exemplary data from and to the PCP.
 
-\ingroup module_main
+\ingroup group_app_cn
+
+\see group_libpsi
+\see group_libpsicommon
+
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
 * License Agreement
 *
-* Copyright 2013 BERNECKER + RAINER, AUSTRIA, 5142 EGGELSBERG, B&R STRASSE 1
+* Copyright 2014 BERNECKER + RAINER, AUSTRIA, 5142 EGGELSBERG, B&R STRASSE 1
 * All rights reserved.
 *
 * Redistribution and use in source and binary forms,
@@ -138,8 +145,6 @@ APs state machine will be updated and input/output ports will be processed.
 
 \return int
 \retval 0          On successful shutdown
-
-\ingroup module_main
 */
 /*----------------------------------------------------------------------------*/
 int main (void)
@@ -277,18 +282,15 @@ Exit:
 /*============================================================================*/
 /*            P R I V A T E   F U N C T I O N S                               */
 /*============================================================================*/
-/* \name Private Functions */
-/* \{ */
+/** \name Private Functions */
+/** \{ */
 
 /*----------------------------------------------------------------------------*/
 /**
 \brief    Initialize slim interface modules
 
-\return BOOL
 \retval TRUE    Library module initialization successful
 \retval FALSE   Error during library module initialization
-
-\ingroup module_main
 */
 /*----------------------------------------------------------------------------*/
 static BOOL initModules(void)
@@ -348,8 +350,6 @@ Exit:
 /*----------------------------------------------------------------------------*/
 /**
 \brief    Destroy slim interface modules
-
-\ingroup module_main
 */
 /*----------------------------------------------------------------------------*/
 static void exitModules(void)
@@ -373,9 +373,7 @@ static void exitModules(void)
 
  \param[in] pTimeStamp_p             Time information of the last interrupt.
 
- \return TRUE
-
-\ingroup module_main
+ \return Always TRUE
 */
 /*----------------------------------------------------------------------------*/
 static BOOL processSync(tPsiTimeStamp* pTimeStamp_p )
@@ -396,9 +394,7 @@ static BOOL processSync(tPsiTimeStamp* pTimeStamp_p )
 \param[in] pRpdoImage_p         Pointer to the RPDO objects
 \param[in] pTpdoImage_p         Pointer to the TPDO objects
 
- \return TRUE
-
-\ingroup module_main
+\return TRUE on success; FALSE on error
 */
 /*----------------------------------------------------------------------------*/
 static BOOL workInputOutput(UINT32 rpdoRelTimeLow_p,
@@ -452,8 +448,6 @@ static BOOL workInputOutput(UINT32 rpdoRelTimeLow_p,
 
  syncIntHandler() implements the synchronous data interrupt. The PCP asserts
  the interrupt when periodic data is ready to transfer.
-
-\ingroup module_main
 */
 /*----------------------------------------------------------------------------*/
 static void syncIntHandler(void* pArg_p)
@@ -483,8 +477,6 @@ static void syncIntHandler(void* pArg_p)
 This function is called after a serial transfer from the PCP to the application.
 
 \param[in] fError_p       True if the transfer had an error
-
-\ingroup module_hnf
 */
 /*----------------------------------------------------------------------------*/
 static void serialTransferFinished(BOOL fError_p)
@@ -515,8 +507,6 @@ static void serialTransferFinished(BOOL fError_p)
 \brief    Error handler callback function
 
 \param pErrorInfo_p     Pointer to the first error in the list
-
-\ingroup module_main
 */
 /*----------------------------------------------------------------------------*/
 static void errorHandler(tPsiErrorInfo* pErrorInfo_p)
@@ -536,8 +526,11 @@ static void errorHandler(tPsiErrorInfo* pErrorInfo_p)
 /**
 \brief    Write an object of the configuration channel
 
+This function writes the object \b 0x2000 subindex \b 0x1. If this write successds
+if calls the function \ref ccReadObject and reads back the data of this
+object. In the next call of the function it performs the same action
+with the next subindex of object \b 0x2000 and an incremented payload value.
 
-\ingroup module_main
 */
 /*----------------------------------------------------------------------------*/
 static void ccWriteObject(void)
@@ -569,8 +562,10 @@ static void ccWriteObject(void)
 /**
 \brief    Read an object from the configuration channel
 
+This function is used to read data from object \b 0x2000 subindex \b 0x1 at the first
+call. On each next call the subindex gets incremented until \b 0x4 is reached.
+Then it starts to read again from the first index.
 
-\ingroup module_main
 */
 /*----------------------------------------------------------------------------*/
 static void ccReadObject(void)
@@ -602,4 +597,7 @@ static void ccReadObject(void)
 
 #endif
 
-/* \} */
+/**
+ * \}
+ * \}
+ */

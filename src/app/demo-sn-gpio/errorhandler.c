@@ -1,20 +1,24 @@
 /**
 ********************************************************************************
-\file   errorhandler.c
+\file   demo-sn-gpio/errorhandler.c
+
+\defgroup module_sn_errorhandler Error handler module
+\{
 
 \brief  This module implements the error handler of the SN
 
-This module is the center point of all errors in the whole firmware. All
+This module is the main point of all errors in the whole firmware. All
 errors which are reported to this module are forwarded via the logbook
 channel to the PLC.
 
-\ingroup module_errorhandler
+\ingroup group_app_sn
+
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
 * License Agreement
 *
-* Copyright 2013 BERNECKER + RAINER, AUSTRIA, 5142 EGGELSBERG, B&R STRASSE 1
+* Copyright 2014 BERNECKER + RAINER, AUSTRIA, 5142 EGGELSBERG, B&R STRASSE 1
 * All rights reserved.
 *
 * Redistribution and use in source and binary forms,
@@ -119,8 +123,6 @@ static BOOLEAN enterPreopOnError(tErrorDesc * pErrDesc_p);
 /*----------------------------------------------------------------------------*/
 /**
 \brief    Initialize the error handler module
-
-\ingroup module_errorhandler
 */
 /*----------------------------------------------------------------------------*/
 void errh_init(void)
@@ -131,8 +133,6 @@ void errh_init(void)
 /*----------------------------------------------------------------------------*/
 /**
 \brief    Close the error handler module
-
-\ingroup module_errorhandler
 */
 /*----------------------------------------------------------------------------*/
 void errh_exit(void)
@@ -147,8 +147,6 @@ void errh_exit(void)
 \param[in] source_p     The source module of the error
 \param[in] code_p       The error code
 \param[in] addInfo_p    Additional error info
-
-\ingroup module_errorhandler
 */
 /*----------------------------------------------------------------------------*/
 void errh_postInfo(tErrSource source_p, tErrorTypes code_p, UINT32 addInfo_p)
@@ -173,8 +171,6 @@ void errh_postInfo(tErrSource source_p, tErrorTypes code_p, UINT32 addInfo_p)
 \param[in] source_p     The source module of the error
 \param[in] code_p       The error code
 \param[in] addInfo_p    Additional error info
-
-\ingroup module_errorhandler
 */
 /*----------------------------------------------------------------------------*/
 void errh_postMinorError(tErrSource source_p, tErrorTypes code_p, UINT32 addInfo_p)
@@ -200,8 +196,6 @@ Posting an error of this kind produces a shutdown of the SN.
 \param[in] source_p     The source module of the error
 \param[in] code_p       The error code
 \param[in] addInfo_p    Additional error info
-
-\ingroup module_errorhandler
 */
 /*----------------------------------------------------------------------------*/
 void errh_postFatalError(tErrSource source_p, tErrorTypes code_p, UINT32 addInfo_p)
@@ -223,8 +217,6 @@ void errh_postFatalError(tErrSource source_p, tErrorTypes code_p, UINT32 addInfo
 \brief    Post and error to the error handler
 
 \param[in] pErrDesc_p   Pointer to the error description
-
-\ingroup module_errorhandler
 */
 /*----------------------------------------------------------------------------*/
 void errh_postError(tErrorDesc * pErrDesc_p)
@@ -273,8 +265,6 @@ This function is called in the background loop to print the error messages.
 This is needed because error message printing can take very long.
 
 \note No error FIFO is implemented. A possible loss of an error shall be expected!
-
-\ingroup module_errorhandler
 */
 /*----------------------------------------------------------------------------*/
 void errh_proccessError(void)
@@ -326,8 +316,8 @@ void errh_proccessError(void)
 /*============================================================================*/
 /*            P R I V A T E   F U N C T I O N S                               */
 /*============================================================================*/
-/* \name Private Functions */
-/* \{ */
+/** \name Private Functions */
+/** \{ */
 
 /*----------------------------------------------------------------------------*/
 /**
@@ -335,8 +325,7 @@ void errh_proccessError(void)
 
 \param[in] pErrDesc_p   Pointer to the error description
 
-\ingroup module_sapl
-*/
+\ingroup module_sn_sapl*/
 /*----------------------------------------------------------------------------*/
 static BOOLEAN enterPreopOnError(tErrorDesc * pErrDesc_p)
 {
@@ -353,4 +342,7 @@ static BOOLEAN enterPreopOnError(tErrorDesc * pErrDesc_p)
     return fEnterPreop;
 }
 
-/* \} */
+/**
+ * \}
+ * \}
+ */

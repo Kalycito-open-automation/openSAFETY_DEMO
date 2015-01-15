@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   boot/sync.h
+\file   demo-sn-gpio/boot/include/boot/sync.h
 
 \brief  Interface to the synchronization module.
 

@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   sn/errorhandler.h
+\file   demo-sn-gpio/include/sn/errorhandler.h
 
 \brief  Error handler of the SN firmware
 

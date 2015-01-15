@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   sn/timer.h
+\file   demo-sn-gpio/include/sn/timer.h
 
 \brief  Provides the interface to the target specific system timer
 

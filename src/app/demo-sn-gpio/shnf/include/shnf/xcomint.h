@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   shnf/xcomint.h
+\file   demo-sn-gpio/shnf/include/shnf/xcomint.h
 
 \brief  Internal header of the cross communication module
 

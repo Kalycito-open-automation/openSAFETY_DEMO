@@ -1,6 +1,6 @@
 /**
   ******************************************************************************
-  * @file    system_stm32f10x.c
+  * @file    target/stm32f103rb/system_stm32f10x.c
   * @author  MCD Application Team
   * @version V1.2.0
   * @date    11-April-2014
@@ -72,19 +72,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f10x.h"
 
-/** @addtogroup Projects
-  * @{
-  */
-
-/** @addtogroup stm32f10x_system
-  * @{
-  */
-
 /* Private typedef -----------------------------------------------------------*/
-
-/** @addtogroup STM32F10x_System_Private_Defines
-  * @{
-  */
 
 /*!< Uncomment the line corresponding to the desired System clock (SYSCLK)
    frequency (after reset the HSI is used as SYSCLK source)
@@ -123,35 +111,16 @@ uint32_t SystemCoreClock = 72000000;
 
 __I uint8_t AHBPrescTable[16] = {0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 3, 4, 6, 7, 8, 9};
 
-
-/**
-  * @}
-  */
-
 /* Private macro -------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
 
-/** @addtogroup STM32F10x_System_Private_FunctionPrototypes
-  * @{
-  */
-
 static void SetSysClock(void);
-
-/**
-  * @}
-  */
-
-/** @addtogroup STM32F10x_System_Private_Functions
-  * @{
-  */
 
 /**
   * @brief  Setup the microcontroller system
   *         Initialize the Embedded Flash Interface, the PLL and update the
   *         SystemCoreClock variable.
   * @note   This function should be used only after reset.
-  * @param  None
-  * @retval None
   */
 void SystemInit (void)
 {
@@ -217,8 +186,6 @@ void SystemInit (void)
   *
   *         - The result of this function could be not correct when using fractional
   *           value for HSE crystal.
-  * @param  None
-  * @retval None
   */
 void SystemCoreClockUpdate (void)
 {
@@ -276,8 +243,6 @@ void SystemCoreClockUpdate (void)
   * @brief  Sets System clock frequency to 72MHz and configure HCLK, PCLK2
   *         and PCLK1 prescalers.
   * @note   This function should be used only after reset.
-  * @param  None
-  * @retval None
   */
 static void SetSysClock(void)
 {
@@ -361,17 +326,5 @@ static void SetSysClock(void)
     {
     }
 }
-
-/**
-  * @}
-  */
-
-/**
-  * @}
-  */
-
-/**
-  * @}
-  */
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

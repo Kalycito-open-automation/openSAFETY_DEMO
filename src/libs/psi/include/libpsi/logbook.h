@@ -4,7 +4,8 @@
 
 \brief  Application interface logbook module header
 
-This header provides the user API for the logbook module.
+This header provides the user API for the logbook module. It provides all
+public functions are types needed by the user application.
 
 *******************************************************************************/
 

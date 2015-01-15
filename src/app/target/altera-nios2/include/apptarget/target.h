@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   apptarget/target.h
+\file   altera-nios2/include/apptarget/target.h
 
 \brief  Target specific header file of the slim interface module
 

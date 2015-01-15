@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   sn/cyclemon.h
+\file   demo-sn-gpio/include/sn/cyclemon.h
 
 \brief  Cycle monitoring module header
 

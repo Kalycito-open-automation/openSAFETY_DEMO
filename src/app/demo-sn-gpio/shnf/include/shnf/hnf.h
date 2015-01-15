@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   shnf/hnf.h
+\file   demo-sn-gpio/shnf/include/shnf/hnf.h
 
 \brief  Hardware near firmware interface to the grey channel
 

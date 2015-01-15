@@ -1,19 +1,22 @@
 /**
 ********************************************************************************
-\file   nvs.c
+\file   demo-sn-gpio/target/stm32f401rb/nvs.c
+
+\defgroup module_sn_nios2_stm32f401 Non volatile storage (NVS) module
+\{
 
 \brief  Target specific functions to access the non volatile storage.
 
 This module implements the hardware near target specific functions of the
 flash memory for target stm32f103.
 
-\ingroup module_nvs
+\ingroup group_app_sn_targ_stm32f401
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
 * License Agreement
 *
-* Copyright 2013 BERNECKER + RAINER, AUSTRIA, 5142 EGGELSBERG, B&R STRASSE 1
+* Copyright 2014 BERNECKER + RAINER, AUSTRIA, 5142 EGGELSBERG, B&R STRASSE 1
 * All rights reserved.
 *
 * Redistribution and use in source and binary forms,
@@ -114,8 +117,6 @@ static UINT32 getSector(UINT32 address_p);
 \brief    Initialize the non volatile storage
 
 \return TRUE on success; FALSE on error
-
-\ingroup module_nvs
 */
 /*----------------------------------------------------------------------------*/
 BOOLEAN nvs_init(void)
@@ -129,8 +130,6 @@ BOOLEAN nvs_init(void)
 /*----------------------------------------------------------------------------*/
 /**
 \brief    Close the non volatile storage
-
-\ingroup module_nvs
 */
 /*----------------------------------------------------------------------------*/
 void nvs_close(void)
@@ -147,8 +146,6 @@ void nvs_close(void)
 \param length_p  The length of the data to write
 
 \return TRUE on success; FALSE on error
-
-\ingroup module_nvs
 */
 /*----------------------------------------------------------------------------*/
 BOOLEAN nvs_write(UINT32 offset_p, UINT8 * pData_p, UINT32 length_p)
@@ -221,8 +218,6 @@ BOOLEAN nvs_write(UINT32 offset_p, UINT8 * pData_p, UINT32 length_p)
 \param ppReadData_p   Pointer to the resulting read data
 
 \return TRUE on success; FALSE on error
-
-\ingroup module_nvs
 */
 /*----------------------------------------------------------------------------*/
 BOOLEAN nvs_readUint32(UINT32 offset_p, UINT32 ** ppReadData_p)
@@ -245,8 +240,6 @@ BOOLEAN nvs_readUint32(UINT32 offset_p, UINT32 ** ppReadData_p)
 \param offset_p  The offset of the sector to erase
 
 \return TRUE on success; FALSE on error
-
-\ingroup module_nvs
 */
 /*----------------------------------------------------------------------------*/
 BOOLEAN nvs_erase(UINT32 offset_p)
@@ -282,8 +275,6 @@ directly. This can be done on parallel flashes where no command is needed
 to read data from the flash.
 
 \return Pointer to the offset address
-
-\ingroup module_nvs
 */
 /*----------------------------------------------------------------------------*/
 UINT8* nvs_getAddress(UINT32 offset_p)
@@ -295,8 +286,8 @@ UINT8* nvs_getAddress(UINT32 offset_p)
 /*============================================================================*/
 /*            P R I V A T E   F U N C T I O N S                               */
 /*============================================================================*/
-/* \name Private Functions */
-/* \{ */
+/** \name Private Functions */
+/** \{ */
 
 /*----------------------------------------------------------------------------*/
 /**
@@ -306,8 +297,6 @@ UINT8* nvs_getAddress(UINT32 offset_p)
 \param pData_p      Pointer to the data to write
 
 \return TRUE on success; FALSE on error
-
-\ingroup module_nvs
 */
 /*----------------------------------------------------------------------------*/
 static BOOLEAN progUint32(UINT32 address_p, UINT32 * pData_p)
@@ -330,8 +319,6 @@ static BOOLEAN progUint32(UINT32 address_p, UINT32 * pData_p)
 \param pData_p      Pointer to the data to write
 
 \return TRUE on success; FALSE on error
-
-\ingroup module_nvs
 */
 /*----------------------------------------------------------------------------*/
 static BOOLEAN progUint16(UINT32 address_p, UINT16 * pData_p)
@@ -354,8 +341,6 @@ static BOOLEAN progUint16(UINT32 address_p, UINT16 * pData_p)
 \param pData_p      Pointer to the data to write
 
 \return TRUE on success; FALSE on error
-
-\ingroup module_nvs
 */
 /*----------------------------------------------------------------------------*/
 static BOOLEAN progUint8(UINT32 address_p, UINT8 * pData_p)
@@ -371,13 +356,6 @@ static BOOLEAN progUint8(UINT32 address_p, UINT8 * pData_p)
     return retVal;
 }
 
-
-/**
-  * @brief
-  * @param  None
-  * @retval The sector of a given address
-  */
-
 /*----------------------------------------------------------------------------*/
 /**
 \brief    Gets the sector of a given address
@@ -385,8 +363,6 @@ static BOOLEAN progUint8(UINT32 address_p, UINT8 * pData_p)
 \param address_p    An address in the sector
 
 \return The id of the sector
-
-\ingroup module_nvs
 */
 /*----------------------------------------------------------------------------*/
 static UINT32 getSector(UINT32 address_p)
@@ -429,4 +405,7 @@ static UINT32 getSector(UINT32 address_p)
     return sector;
 }
 
-/* \} */
+/**
+ * \}
+ * \}
+ */

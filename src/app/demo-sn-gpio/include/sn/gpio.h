@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   sn/gpio.h
+\file   demo-sn-gpio/include/sn/gpio.h
 
 \brief  Provides the interface to the hardware gpio pins
 

@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   sapl/parameterset.h
+\file   demo-sn-gpio/sapl/include/sapl/parameterset.h
 
 \brief  This module handles the parameterset forwarding to the SOD
 

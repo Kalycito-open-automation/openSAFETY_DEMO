@@ -1,19 +1,22 @@
 /**
 ********************************************************************************
-\file   stackerrorhandler.c
+\file   demo-sn-gpio/sapl/stackerrorhandler.c
+
+\defgroup module_sn_sapl_errh Error handler module
+\{
 
 \brief  This module implements the error handler of the openSAFETY stack.
 
 Implements the error handler of the openSAFETY stack and forwards error
 information.
 
-\ingroup module_errorhandler
+\ingroup group_app_sn_sapl
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
 * License Agreement
 *
-* Copyright 2013 BERNECKER + RAINER, AUSTRIA, 5142 EGGELSBERG, B&R STRASSE 1
+* Copyright 2014 BERNECKER + RAINER, AUSTRIA, 5142 EGGELSBERG, B&R STRASSE 1
 * All rights reserved.
 *
 * Redistribution and use in source and binary forms,
@@ -164,7 +167,10 @@ void SAPL_SERR_SignalErrorClbk(BYTE_B_INSTNUM_ UINT16 w_errorCode,
 /*============================================================================*/
 /*            P R I V A T E   F U N C T I O N S                               */
 /*============================================================================*/
-/* \name Private Functions */
-/* \{ */
+/** \name Private Functions */
+/** \{ */
 
-/* \} */
+/**
+ * \}
+ * \}
+ */

@@ -1,18 +1,22 @@
 /**
 ********************************************************************************
-\file   pcpserial-ma.c
+\file   target/altera-nios2/pcpserial-ma.c
+
+\defgroup module_targ_nios2_serial_ma PCP serial module (Master Mode)
+\{
 
 \brief  Implements the driver for the serial device in master mode
 
 Defines the platform specific functions for the serial to interconnect the app
 with the POWERLINK processor. (Target is Altera Nios2)
 
+\ingroup group_app_targ_nios2
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
 * License Agreement
 *
-* Copyright 2013 BERNECKER + RAINER, AUSTRIA, 5142 EGGELSBERG, B&R STRASSE 1
+* Copyright 2014 BERNECKER + RAINER, AUSTRIA, 5142 EGGELSBERG, B&R STRASSE 1
 * All rights reserved.
 *
 * Redistribution and use in source and binary forms,
@@ -107,23 +111,22 @@ static tPcpSerialTransferFin pfnTransfFin_l = NULL;
 
 /*----------------------------------------------------------------------------*/
 /**
-\brief  Initialize the serial
+\brief  Initialize the PCP serial
 
-This function init's the peripherals of the AP like cache and the interrupt
-controller.
+This function init's the serial device which connects the application processor
+with the POWERLINK processor. The transfer can either be carried out in
+slave or master mode.
 
-\param[in] pHandlParam_p    Pointer to the transfer parameters with 4 byte init
-\param[in] pfnTransfFin_p   Pointer to the transfer finished callback function
+\param pTransParam_p    The transfer parameters (rx/tx base and size)
+\param pfnTransfFin_p   Pointer to the transfer finished interrupt
 
-\retval TRUE On successful init
-\retval FALSE On error
-
-\ingroup module_serial
+\retval TRUE    On success
+\retval FALSE   Error during initialization
 */
 /*----------------------------------------------------------------------------*/
-BOOL pcpserial_init(tHandlerParam* pHandlParam_p, tPcpSerialTransferFin pfnTransfFin_p)
+BOOL pcpserial_init(tHandlerParam * pTransParam_p, tPcpSerialTransferFin pfnTransfFin_p)
 {
-    UNUSED_PARAMETER(pHandlParam_p);
+    UNUSED_PARAMETER(pTransParam_p);
 
     /* No initialization needed for Nios2 (Done in ipcore configuration!) */
     pfnTransfFin_l = pfnTransfFin_p;
@@ -133,9 +136,7 @@ BOOL pcpserial_init(tHandlerParam* pHandlParam_p, tPcpSerialTransferFin pfnTrans
 
 /*----------------------------------------------------------------------------*/
 /**
-\brief  Close the serial
-
-\ingroup module_serial
+\brief  Close the serial device
 */
 /*----------------------------------------------------------------------------*/
 void pcpserial_exit(void)
@@ -145,17 +146,15 @@ void pcpserial_exit(void)
 
 /*----------------------------------------------------------------------------*/
 /**
-\brief  Start a SPI transfer
+\brief  Start an serial transfer
 
-serial_transfer() sends an SPI command to the SPI master by using the
-avalon_spi driver
+pcpserial_transfer() starts an serial transfer to exchange the process
+image with the PCP.
 
-\param[in] pHandlParam_p       The parameters of the SPI command handler without init
+\param[in] pHandlParam_p       The parameters of the serial transfer handler
 
 \retval TRUE        On success
-\retval FALSE       SPI send or receive failed
-
-\ingroup module_serial
+\retval FALSE       Error on sending or receiving
 */
 /*----------------------------------------------------------------------------*/
 BOOL pcpserial_transfer(tHandlerParam* pHandlParam_p)
@@ -199,9 +198,12 @@ BOOL pcpserial_transfer(tHandlerParam* pHandlParam_p)
 /*============================================================================*/
 /*            P R I V A T E   F U N C T I O N S                               */
 /*============================================================================*/
-/* \name Private Functions  */
-/* \{ */
+/** \name Private Functions  */
+/** \{ */
 
 
-/* \} */
+/**
+ * \}
+ * \}
+ */
 

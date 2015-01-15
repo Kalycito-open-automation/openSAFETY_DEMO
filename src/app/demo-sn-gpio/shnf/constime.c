@@ -1,19 +1,22 @@
 /**
 ********************************************************************************
-\file   constime.c
+\file   demo-sn-gpio/shnf/constime.c
+
+\defgroup module_sn_shnf_constime Consecutive timebase module
+\{
 
 \brief  This module provides the consecutive timebase
 
 This module provides the consecutive timebase. It acts as an interface to the
 target specific module of the hardware timer.
 
-\ingroup module_constime
+\ingroup group_app_sn_shnf
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
 * License Agreement
 *
-* Copyright 2013 BERNECKER + RAINER, AUSTRIA, 5142 EGGELSBERG, B&R STRASSE 1
+* Copyright 2014 BERNECKER + RAINER, AUSTRIA, 5142 EGGELSBERG, B&R STRASSE 1
 * All rights reserved.
 *
 * Redistribution and use in source and binary forms,
@@ -114,8 +117,6 @@ static tConsTimeInstance consTimeInstance_l;
 
 \retval TRUE    CT initialization successful
 \retval FALSE   Error during CT initialization
-
-\ingroup module_constime
 */
 /*----------------------------------------------------------------------------*/
 BOOLEAN constime_init(void)
@@ -142,8 +143,6 @@ BOOLEAN constime_init(void)
 /*----------------------------------------------------------------------------*/
 /**
 \brief    Disable the consecutive time
-
-\ingroup module_constime
 */
 /*----------------------------------------------------------------------------*/
 void constime_exit(void)
@@ -158,8 +157,6 @@ void constime_exit(void)
 \brief    Get the current consecutive time
 
 \return The current consecutive time
-
-\ingroup module_constime
 */
 /*----------------------------------------------------------------------------*/
 UINT32 constime_getTime(void)
@@ -175,8 +172,6 @@ The system generates a microsecond timebase as a basis value for the consecutive
 time.
 
 \return The current timebase of the system
-
-\ingroup module_constime
 */
 /*----------------------------------------------------------------------------*/
 UINT64 constime_getTimeBase(void)
@@ -197,8 +192,6 @@ UINT64 constime_getTimeBase(void)
 \note Only call this function once on system bootup
 
 \param[in] newTime_p    The new value of the time
-
-\ingroup module_constime
 */
 /*----------------------------------------------------------------------------*/
 void constime_setTimebase(UINT64 newTime_p)
@@ -216,8 +209,6 @@ void constime_setTimebase(UINT64 newTime_p)
 \param[in] pRcvTime_p    Pointer to the received time
 
 \return TRUE on success; FALSE on error
-
-\ingroup module_constime
 */
 /*----------------------------------------------------------------------------*/
 BOOLEAN constime_syncConsTime(UINT64 * pLocTime_p, UINT64 * pRcvTime_p)
@@ -248,8 +239,6 @@ BOOLEAN constime_syncConsTime(UINT64 * pLocTime_p, UINT64 * pRcvTime_p)
 \param[in] pNewTime_p    Pointer to the new timebase
 
 \return TRUE on success; FALSE on error
-
-\ingroup module_constime
 */
 /*----------------------------------------------------------------------------*/
 BOOLEAN constime_setConsTime(UINT64 * pNewTime_p)
@@ -278,8 +267,6 @@ This function needs to be called at least each 65ms in order to update the
 local microsecond counter of the system.
 
 \return Pointer to the new current time
-
-\ingroup module_constime
 */
 /*----------------------------------------------------------------------------*/
 UINT64 * constime_process(void)
@@ -399,7 +386,10 @@ BOOLEAN SHNF_SOD_ConsTimeBase_CLBK(BYTE_B_INSTNUM_ SOD_t_SERVICE e_srvc,
 /*============================================================================*/
 /*            P R I V A T E   F U N C T I O N S                               */
 /*============================================================================*/
-/* \name Private Functions */
-/* \{ */
+/** \name Private Functions */
+/** \{ */
 
-/* \} */
+/**
+ * \}
+ * \}
+ */

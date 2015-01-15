@@ -1,6 +1,9 @@
 /**
 ********************************************************************************
-\file   pingpong-sl.c
+\file   demo-sn-gpio/boot/pingpong-sl.c
+
+\defgroup module_sn_boot_pipo_sl Ping pong module (Slave side)
+\{
 
 \brief  Implements a ping pong message transfer between two processors
 
@@ -8,13 +11,13 @@ This module implements the a ping pong message transfer by using the
 local serial device to send and receive messages. This file implements
 the ping pong slave which sends a message and waits for the response
 
-\ingroup module_hands
+\ingroup group_app_sn_boot
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
 * License Agreement
 *
-* Copyright 2013 BERNECKER + RAINER, AUSTRIA, 5142 EGGELSBERG, B&R STRASSE 1
+* Copyright 2014 BERNECKER + RAINER, AUSTRIA, 5142 EGGELSBERG, B&R STRASSE 1
 * All rights reserved.
 *
 * Redistribution and use in source and binary forms,
@@ -123,8 +126,6 @@ static tReceiveState receivePong(volatile UINT8 * pPongBase_p, UINT16 pongSize_p
 
 \retval TRUE        Ping pong was successful
 \retval FALSE       Error on transfer
-
-\ingroup module_hands
 */
 /*----------------------------------------------------------------------------*/
 BOOLEAN pipo_doTransfer(volatile UINT8 * pPingBase_p, UINT16 pingSize_p,
@@ -176,8 +177,8 @@ BOOLEAN pipo_doTransfer(volatile UINT8 * pPingBase_p, UINT16 pingSize_p,
 /*============================================================================*/
 /*            P R I V A T E   F U N C T I O N S                               */
 /*============================================================================*/
-/* \name Private Functions */
-/* \{ */
+/** \name Private Functions */
+/** \{ */
 
 /*----------------------------------------------------------------------------*/
 /**
@@ -189,8 +190,6 @@ BOOLEAN pipo_doTransfer(volatile UINT8 * pPingBase_p, UINT16 pingSize_p,
 
 \retval TRUE        Successfully sent the ping message
 \retval FALSE       Error on sending
-
-\ingroup module_hands
 */
 /*----------------------------------------------------------------------------*/
 static BOOLEAN sendPing(volatile UINT8 * pPingBase_p, UINT16 pingSize_p,
@@ -229,8 +228,6 @@ static BOOLEAN sendPing(volatile UINT8 * pPingBase_p, UINT16 pingSize_p,
 \param[in] pongTimeout_p  Time until a pong should be retried
 
 \return The receive state of the pong message
-
-\ingroup module_hands
 */
 /*----------------------------------------------------------------------------*/
 static tReceiveState receivePong(volatile UINT8 * pPongBase_p, UINT16 pongSize_p,
@@ -254,4 +251,7 @@ static tReceiveState receivePong(volatile UINT8 * pPongBase_p, UINT16 pongSize_p
     return rcvState;
 }
 
-/* \} */
+/**
+ * \}
+ * \}
+ */

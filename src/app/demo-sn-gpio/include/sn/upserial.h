@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   sn/upserial.h
+\file   demo-sn-gpio/include/sn/upserial.h
 
 \brief  Interface to the target specific serial handler
 

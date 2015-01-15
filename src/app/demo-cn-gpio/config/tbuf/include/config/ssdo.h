@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   config/ssdo.h
+\file   demo-cn-gpio/config/tbuf/include/config/ssdo.h
 
 \brief  This header provides the configuration parameters of the ssdo module
 

@@ -1,6 +1,6 @@
 /**
   ******************************************************************************
-  * @file    stm32f1xx_it.h
+  * @file    target/stm32f103rb/stm32f1xx_it.h
   * @author  MCD Application Team
   * @version V1.2.0
   * @date    11-April-2014

@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   shnf/shnftx.h
+\file   demo-sn-gpio/shnf/include/shnf/shnftx.h
 
 \brief  Interface header to the SHNF transmit part
 

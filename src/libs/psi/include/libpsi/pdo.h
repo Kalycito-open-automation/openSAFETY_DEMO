@@ -4,7 +4,8 @@
 
 \brief  Application interface pdo module header
 
-TODO
+This header provides all public functions or types of the pdo module. It
+is the user interface to the pdo module.
 
 *******************************************************************************/
 

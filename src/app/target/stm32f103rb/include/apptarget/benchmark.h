@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   apptarget/benchmark.h
+\file   target/stm32f103rb/include/apptarget/benchmark.h
 
 \brief  Header file for debugging. Enables setting of benchmark pins
 

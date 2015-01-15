@@ -2,18 +2,21 @@
 ********************************************************************************
 \file   cc.c
 
+\defgroup module_psi_cc Configuration channel module
+\{
+
 \brief  Handles the configuration channel for incoming and outgoing objects
 
 This modules forwards incoming object data from the occ to the local object list
 and forwards objects from the user application to the PCP.
 
-\ingroup module_cc
+\ingroup group_libpsi
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
 * License Agreement
 *
-* Copyright 2013 BERNECKER + RAINER, AUSTRIA, 5142 EGGELSBERG, B&R STRASSE 1
+* Copyright 2014 BERNECKER + RAINER, AUSTRIA, 5142 EGGELSBERG, B&R STRASSE 1
 * All rights reserved.
 *
 * Redistribution and use in source and binary forms,
@@ -157,11 +160,8 @@ Initialize the input and output configuration channel
 
 \param[in]  pCcInitParam_p         Configuration channel initialization structure
 
-\return BOOL
 \retval kPsiSuccessful           On success
 \retval kPsiConfChanInitError    Unable to initialize the configuration channel
-
-\ingroup module_cc
 */
 /*----------------------------------------------------------------------------*/
 BOOL cc_init(tCcInitParam* pCcInitParam_p)
@@ -222,8 +222,6 @@ BOOL cc_init(tCcInitParam* pCcInitParam_p)
 /*----------------------------------------------------------------------------*/
 /**
 \brief    Close the configuration channel
-
-\ingroup module_cc
 */
 /*----------------------------------------------------------------------------*/
 void cc_exit(void)
@@ -242,11 +240,8 @@ void cc_exit(void)
 \param[in]  objIdx_p           Index of the to read object
 \param[in]  objSubIdx_p        Subindex of the to read object
 
-\return tConfChanObject
 \retval Address     Success while reading object
 \retval Null        Unable to read object
-
-\ingroup module_cc
 */
 /*----------------------------------------------------------------------------*/
 tConfChanObject* cc_readObject(UINT16 objIdx_p, UINT8 objSubIdx_p)
@@ -269,12 +264,9 @@ tConfChanObject* cc_readObject(UINT16 objIdx_p, UINT8 objSubIdx_p)
 
 \param[in] pObject_p         The object to write
 
-\return tCcWriteStatus
 \retval kCcWriteStatusSuccessfull   Writing to the Cc object successful
 \retval kCcWriteStatusError         Error while writing the Cc object
 \retval kCcWriteStatusBusy          Unable to write the Cc object! Channel is busy!
-
-\ingroup module_cc
 */
 /*----------------------------------------------------------------------------*/
 tCcWriteStatus cc_writeObject(tConfChanObject* pObject_p)
@@ -336,8 +328,6 @@ tCcWriteStatus cc_writeObject(tConfChanObject* pObject_p)
 /*----------------------------------------------------------------------------*/
 /**
 \brief    Process configuration channel module
-
-\ingroup module_cc
 */
 /*----------------------------------------------------------------------------*/
 void cc_process(void)
@@ -350,8 +340,8 @@ void cc_process(void)
 /*============================================================================*/
 /*            P R I V A T E   F U N C T I O N S                               */
 /*============================================================================*/
-/* \name Private Functions */
-/* \{ */
+/** \name Private Functions */
+/** \{ */
 
 /*----------------------------------------------------------------------------*/
 /**
@@ -359,8 +349,6 @@ void cc_process(void)
 
 Forward the object to the ICC buffer to update the object dictionary of the
 PCP.
-
-\ingroup module_cc
 */
 /*----------------------------------------------------------------------------*/
 static void cc_processTxObject(void)
@@ -406,11 +394,8 @@ static void cc_processTxObject(void)
 
 \param[in] iccId_p               Id of the Icc transmit buffer
 
-\return BOOL
 \retval TRUE        Successfully initialized the input configuration channel
 \retval FALSE       Error on initialization
-
-\ingroup module_cc
 */
 /*----------------------------------------------------------------------------*/
 static BOOL cc_initIccTxBuffer(tTbufNumLayout iccId_p)
@@ -458,11 +443,8 @@ static BOOL cc_initIccTxBuffer(tTbufNumLayout iccId_p)
 
 \param[in] occId_p               Id of the Icc receive buffer
 
-\return BOOL
 \retval TRUE        Successfully initialized the output configuration channel
 \retval FALSE       Error on initialization
-
-\ingroup module_cc
 */
 /*----------------------------------------------------------------------------*/
 static BOOL cc_initOccRxBuffer(tTbufNumLayout occId_p)
@@ -502,8 +484,6 @@ static BOOL cc_initOccRxBuffer(tTbufNumLayout occId_p)
 /*----------------------------------------------------------------------------*/
 /**
 \brief    Initialize the list of configuration channel objects
-
-\ingroup module_cc
 */
 /*----------------------------------------------------------------------------*/
 static void cc_initCcObjects(void)
@@ -533,8 +513,6 @@ static void cc_initCcObjects(void)
 \brief    Change local sequence number
 
 \param[out] pSeqNr_p        Changed sequence number
-
-\ingroup module_cc
 */
 /*----------------------------------------------------------------------------*/
 static void cc_changeLocalSeqNr(tSeqNrValue* pSeqNr_p)
@@ -556,8 +534,6 @@ static void cc_changeLocalSeqNr(tSeqNrValue* pSeqNr_p)
 \return tCcChanStatus
 \retval kChanStatusFree    Channel is free for transmission
 \retval kChanStatusBusy    Channel is currently transmitting
-
-\ingroup module_cc
 */
 /*----------------------------------------------------------------------------*/
 static tCcChanStatus cc_checkIccStatus(void)
@@ -590,11 +566,8 @@ static tCcChanStatus cc_checkIccStatus(void)
 \param[in] bufSize_p        Size of the buffer
 \param[in] pUserArg_p       The user argument
 
-\return BOOL
 \retval TRUE        Successfully written to object list
 \retval FALSE       Error while writing to object list
-
-\ingroup module_cc
 */
 /*----------------------------------------------------------------------------*/
 static BOOL cc_handleOccRxObjects(UINT8* pBuffer_p, UINT16 bufSize_p,
@@ -632,6 +605,12 @@ static BOOL cc_handleOccRxObjects(UINT8* pBuffer_p, UINT16 bufSize_p,
     return fReturn;
 }
 
-/* \} */
+/**
+ * \}
+ */
 
 #endif /* #if (((PSI_MODULE_INTEGRATION) & (PSI_MODULE_CC)) != 0) */
+
+/**
+ * \}
+ */

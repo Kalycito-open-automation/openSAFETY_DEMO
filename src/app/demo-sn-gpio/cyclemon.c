@@ -1,6 +1,9 @@
 /**
 ********************************************************************************
-\file   cyclemon.c
+\file   demo-sn-gpio/cyclemon.c
+
+\defgroup module_sn_cyclemon Cycle monitoring module
+\{
 
 \brief  This module implements the cycle monitoring
 
@@ -8,13 +11,14 @@ This module checks if the synchronous interrupt is called periodically. If
 a timeout occurs the firmware switches to asynchronous mode until the sync
 interrupt occurs again.
 
-\ingroup module_cyclemon
+\ingroup group_app_sn
+
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
 * License Agreement
 *
-* Copyright 2013 BERNECKER + RAINER, AUSTRIA, 5142 EGGELSBERG, B&R STRASSE 1
+* Copyright 2014 BERNECKER + RAINER, AUSTRIA, 5142 EGGELSBERG, B&R STRASSE 1
 * All rights reserved.
 *
 * Redistribution and use in source and binary forms,
@@ -117,8 +121,6 @@ static void resetCycleMon(void);
 \brief    Initialize the cycle monitoring module
 
 \return TRUE on success; FALSE on error
-
-\ingroup module_cyclemon
 */
 /*----------------------------------------------------------------------------*/
 BOOLEAN cyclemon_init(void)
@@ -131,8 +133,6 @@ BOOLEAN cyclemon_init(void)
 /*----------------------------------------------------------------------------*/
 /**
 \brief    Close the cycle monitoring
-
-\ingroup module_cyclemon
 */
 /*----------------------------------------------------------------------------*/
 void cyclemon_exit(void)
@@ -146,8 +146,6 @@ void cyclemon_exit(void)
 
 \retval TRUE        Successfully processed the state machine
 \retval FALSE       Error on processing
-
-\ingroup module_cyclemon
 */
 /*----------------------------------------------------------------------------*/
 BOOLEAN cyclemon_process(void)
@@ -203,8 +201,6 @@ BOOLEAN cyclemon_process(void)
 
 \retval TRUE        A timeout has occurred
 \retval FALSE       No timeout occurred
-
-\ingroup module_cyclemon
 */
 /*----------------------------------------------------------------------------*/
 BOOLEAN cyclemon_checkTimeout(void)
@@ -234,8 +230,8 @@ BOOLEAN cyclemon_checkTimeout(void)
 /*============================================================================*/
 /*            P R I V A T E   F U N C T I O N S                               */
 /*============================================================================*/
-/* \name Private Functions */
-/* \{ */
+/** \name Private Functions */
+/** \{ */
 
 /*----------------------------------------------------------------------------*/
 /**
@@ -243,8 +239,6 @@ BOOLEAN cyclemon_checkTimeout(void)
 
 \retval TRUE        Found valid cycle time
 \retval FALSE       Currently no cycle time known
-
-\ingroup module_cyclemon
 */
 /*----------------------------------------------------------------------------*/
 static BOOLEAN calculateCycleTime(void)
@@ -290,8 +284,6 @@ static BOOLEAN calculateCycleTime(void)
 
 \retval TRUE        Cycle time is inside the known range
 \retval FALSE       Cycle time out of bounds
-
-\ingroup module_cyclemon
 */
 /*----------------------------------------------------------------------------*/
 static BOOLEAN verifyCycleTime(void)
@@ -310,8 +302,6 @@ static BOOLEAN verifyCycleTime(void)
 /*----------------------------------------------------------------------------*/
 /**
 \brief    Reset the cycle monitoring
-
-\ingroup module_cyclemon
 */
 /*----------------------------------------------------------------------------*/
 static void resetCycleMon(void)
@@ -321,4 +311,7 @@ static void resetCycleMon(void)
     cycMonInstance_l.cycMonState_m = kCycleMonStateInit;
 }
 
-/* \} */
+/**
+ * \}
+ * \}
+ */

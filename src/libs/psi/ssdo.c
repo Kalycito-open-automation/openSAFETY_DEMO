@@ -2,19 +2,22 @@
 ********************************************************************************
 \file   ssdo.c
 
+\defgroup module_psi_ssdo Secure Service Data Objects (SSDO) module
+\{
+
 \brief  Creates an SSDO channel for receive and transmit
 
 This module handles the SSDO channels between the PCP and the application.
 For each channel a receive and a transmit buffer needs to be determined.
 It forwards the received data to the application.
 
-\ingroup module_ssdo
+\ingroup group_libpsi
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
 * License Agreement
 *
-* Copyright 2013 BERNECKER + RAINER, AUSTRIA, 5142 EGGELSBERG, B&R STRASSE 1
+* Copyright 2014 BERNECKER + RAINER, AUSTRIA, 5142 EGGELSBERG, B&R STRASSE 1
 * All rights reserved.
 *
 * Redistribution and use in source and binary forms,
@@ -123,8 +126,6 @@ static tSsdoChanStatus ssdo_checkChannelStatus(tSsdoInstance pInstance_p);
 /*----------------------------------------------------------------------------*/
 /**
 \brief    Initialize the SSDO channel module
-
-\ingroup module_ssdo
 */
 /*----------------------------------------------------------------------------*/
 void ssdo_init(void)
@@ -143,11 +144,8 @@ functionality for the upper and lower layers.
 \param[in]  chanId_p         Id of the SSDO channel
 \param[in]  pInitParam_p     SSDO module initialization structure
 
-\return tSsdoInstance
 \retval Address              Pointer to the instance of the channel
 \retval Null                 Unable to allocate instance
-
-\ingroup module_ssdo
 */
 /*----------------------------------------------------------------------------*/
 tSsdoInstance ssdo_create(tSsdoChanNum chanId_p, tSsdoInitParam* pInitParam_p)
@@ -202,8 +200,6 @@ tSsdoInstance ssdo_create(tSsdoChanNum chanId_p, tSsdoInitParam* pInitParam_p)
 \brief    Destroy an SSDO channel
 
 \param[in]  pInstance_p       The instance to destroy
-
-\ingroup module_ssdo
 */
 /*----------------------------------------------------------------------------*/
 void ssdo_destroy(tSsdoInstance pInstance_p)
@@ -224,11 +220,8 @@ void ssdo_destroy(tSsdoInstance pInstance_p)
 \param[out] ppPayload_p     Pointer to the result address of the payload
 \param[out]  pPaylLen_p      Pointer to the size of the buffer
 
-\return BOOL
 \retval TRUE    Success on getting the buffer
 \retval FALSE   Invalid parameter passed to function
-
-\ingroup module_ssdo
 */
 /*----------------------------------------------------------------------------*/
 BOOL ssdo_getCurrentTxBuffer(tSsdoInstance pInstance_p, UINT8 ** ppPayload_p, UINT16 * pPaylLen_p)
@@ -256,12 +249,9 @@ BOOL ssdo_getCurrentTxBuffer(tSsdoInstance pInstance_p, UINT8 ** ppPayload_p, UI
 \param[in]  pPayload_p      Pointer to the payload to send
 \param[in]  paylSize_p      Size of the payload to send
 
-\return tSsdoTxStatus
 \retval tSsdoTxStatusSuccessfull    Successfully posted payload to buffer
 \retval tSsdoTxStatusBusy           Unable to post payload to SSDO channel
 \retval tSsdoTxStatusError          Error while posting payload to the transmit channel
-
-\ingroup module_ssdo
 */
 /*----------------------------------------------------------------------------*/
 tSsdoTxStatus ssdo_postPayload(tSsdoInstance pInstance_p, UINT8* pPayload_p,
@@ -318,11 +308,8 @@ tSsdoTxStatus ssdo_postPayload(tSsdoInstance pInstance_p, UINT8* pPayload_p,
 
 \param[in]  pInstance_p     SSDO module instance
 
-\return BOOL
 \retval TRUE        SSDO frames processed successfully
 \retval FALSE       Error while processing SSDO frames
-
-\ingroup module_ssdo
 */
 /*----------------------------------------------------------------------------*/
 BOOL ssdo_process(tSsdoInstance pInstance_p)
@@ -346,8 +333,6 @@ BOOL ssdo_process(tSsdoInstance pInstance_p)
 \brief    This function finishes a receive message and frees the channel
 
 \param[in]  pInstance_p     SSDO module instance
-
-\ingroup module_ssdo
 */
 /*----------------------------------------------------------------------------*/
 void ssdo_receiveMsgFinished(tSsdoInstance pInstance_p)
@@ -358,8 +343,8 @@ void ssdo_receiveMsgFinished(tSsdoInstance pInstance_p)
 /*============================================================================*/
 /*            P R I V A T E   F U N C T I O N S                               */
 /*============================================================================*/
-/* \name Private Functions */
-/* \{ */
+/** \name Private Functions */
+/** \{ */
 
 /*----------------------------------------------------------------------------*/
 /**
@@ -368,11 +353,8 @@ void ssdo_receiveMsgFinished(tSsdoInstance pInstance_p)
 \param[in] chanId_p                 Id of the SSDO channel
 \param[in] rxBuffId_p               Id of the SSDO receive buffer
 
-\return BOOL
 \retval TRUE    Initialization successful
 \retval FALSE   Error while initializing
-
-\ingroup module_ssdo
 */
 /*----------------------------------------------------------------------------*/
 static BOOL ssdo_initReceiveBuffer(tSsdoChanNum chanId_p,
@@ -417,11 +399,8 @@ static BOOL ssdo_initReceiveBuffer(tSsdoChanNum chanId_p,
 \param[in] chanId_p                 Id of the SSDO channel
 \param[in] txBuffId_p               Id of the SSDO transmit buffer
 
-\return BOOL
 \retval TRUE    Initialization successful
 \retval FALSE   Error while initializing
-
-\ingroup module_ssdo
 */
 /*----------------------------------------------------------------------------*/
 static BOOL ssdo_initTransmitBuffer(tSsdoChanNum chanId_p,
@@ -470,11 +449,8 @@ static BOOL ssdo_initTransmitBuffer(tSsdoChanNum chanId_p,
 
 \param[in] pInstance_p     SSDO module instance
 
-\return BOOL
 \retval TRUE       Successfully processed SSDO receive frame
 \retval FALSE      Error while processing
-
-\ingroup module_ssdo
 */
 /*----------------------------------------------------------------------------*/
 static BOOL ssdo_handleRxFrame(tSsdoInstance pInstance_p)
@@ -517,8 +493,6 @@ static BOOL ssdo_handleRxFrame(tSsdoInstance pInstance_p)
 \brief    Free the receive channel to enable transmission of the next frame
 
 \param[in]  pInstance_p     SSDO module instance
-
-\ingroup module_ssdo
 */
 /*----------------------------------------------------------------------------*/
 static void ssdo_freeRxChannel(tSsdoInstance pInstance_p)
@@ -535,8 +509,6 @@ static void ssdo_freeRxChannel(tSsdoInstance pInstance_p)
 \brief    Process SSDO transmit frames
 
 \param[in]  pInstance_p     SSDO module instance
-
-\ingroup module_ssdo
 */
 /*----------------------------------------------------------------------------*/
 static void ssdo_handleTxFrame(tSsdoInstance pInstance_p)
@@ -583,10 +555,7 @@ static void ssdo_handleTxFrame(tSsdoInstance pInstance_p)
 \param[in] bufSize_p        Size of the buffer
 \param[in] pUserArg_p       The user argument
 
-\return BOOL
 \retval TRUE          Successfully processed receive frame
-
-\ingroup module_ssdo
 */
 /*----------------------------------------------------------------------------*/
 static BOOL ssdo_receiveFrame(UINT8* pBuffer_p, UINT16 bufSize_p,
@@ -632,8 +601,6 @@ static BOOL ssdo_receiveFrame(UINT8* pBuffer_p, UINT16 bufSize_p,
 \brief    Change local sequence number
 
 \param[inout] pSeqNr_p        Changed sequence number
-
-\ingroup module_ssdo
 */
 /*----------------------------------------------------------------------------*/
 static void ssdo_changeLocalSeqNr(tSeqNrValue* pSeqNr_p)
@@ -654,11 +621,8 @@ static void ssdo_changeLocalSeqNr(tSeqNrValue* pSeqNr_p)
 
 \param[in]  pInstance_p             Pointer to the local instance
 
-\return tChanStatus
 \retval tChanStatusFree       Channel is free for transmission
 \retval tChanStatusBusy       Channel is currently transmitting
-
-\ingroup module_ssdo
 */
 /*----------------------------------------------------------------------------*/
 static tSsdoChanStatus ssdo_checkChannelStatus(tSsdoInstance pInstance_p)
@@ -683,6 +647,12 @@ static tSsdoChanStatus ssdo_checkChannelStatus(tSsdoInstance pInstance_p)
     return chanStatus;
 }
 
-/* \} */
+/**
+ * \}
+ */
 
 #endif /* #if (((PSI_MODULE_INTEGRATION) & (PSI_MODULE_SSDO)) != 0) */
+
+/**
+ * \}
+ */

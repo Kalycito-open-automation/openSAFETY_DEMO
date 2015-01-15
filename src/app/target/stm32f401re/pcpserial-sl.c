@@ -1,18 +1,22 @@
 /**
 ********************************************************************************
-\file   pcpserial-sl.c
+\file   target/stm32f401re/pcpserial-sl.c
+
+\defgroup module_targ_stm32f401_serial_sl PCP serial module (Slave Mode)
+\{
 
 \brief  Implements the driver for the serial device in slave mode
 
 Defines the platform specific functions for the serial to interconnect the app
 with the POWERLINK processor. (Target is the stm32f401re board)
 
+\ingroup group_app_targ_stm32f401
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
 * License Agreement
 *
-* Copyright 2013 BERNECKER + RAINER, AUSTRIA, 5142 EGGELSBERG, B&R STRASSE 1
+* Copyright 2014 BERNECKER + RAINER, AUSTRIA, 5142 EGGELSBERG, B&R STRASSE 1
 * All rights reserved.
 *
 * Redistribution and use in source and binary forms,
@@ -132,19 +136,17 @@ static BOOL receiveInputStream(SPI_HandleTypeDef * pSpiHandle_p, tHandlerParam *
 
 /*----------------------------------------------------------------------------*/
 /**
-\brief  Initialize the PCP serial in slave mode
+\brief  Initialize the PCP serial
 
-This function init's the SPI serial device which connects the uP-Slave with the
-POWERLINK processor in slave mode. It simply sniffs the incoming data from
-the uP-Master <-> PCP connection.
+This function init's the serial device which connects the application processor
+with the POWERLINK processor. The transfer can either be carried out in
+slave or master mode.
 
 \param pTransParam_p    The transfer parameters (rx/tx base and size)
 \param pfnTransfFin_p   Pointer to the transfer finished interrupt
 
 \retval TRUE    On success
 \retval FALSE   Error during initialization
-
-\ingroup module_serial
 */
 /*----------------------------------------------------------------------------*/
 BOOL pcpserial_init(tHandlerParam * pTransParam_p, tPcpSerialTransferFin pfnTransfFin_p)
@@ -176,8 +178,6 @@ BOOL pcpserial_init(tHandlerParam * pTransParam_p, tPcpSerialTransferFin pfnTran
 /*----------------------------------------------------------------------------*/
 /**
 \brief  Close the serial device
-
-\ingroup module_serial
 */
 /*----------------------------------------------------------------------------*/
 void pcpserial_exit(void)
@@ -187,17 +187,15 @@ void pcpserial_exit(void)
 
 /*----------------------------------------------------------------------------*/
 /**
-\brief  Start an SPI transfer
+\brief  Start an serial transfer
 
-In slave mode no SPI transfer is started! Only the DMA finished interrupt
-signals that an input stream was incoming.
+pcpserial_transfer() starts an serial transfer to exchange the process
+image with the PCP.
 
-\param[in] pHandlParam_p       The parameters of the SPI transfer handler
+\param[in] pHandlParam_p       The parameters of the serial transfer handler
 
 \retval TRUE        On success
-\retval FALSE       SPI send or receive failed
-
-\ingroup module_serial
+\retval FALSE       Error on sending or receiving
 */
 /*----------------------------------------------------------------------------*/
 BOOL pcpserial_transfer(tHandlerParam* pHandlParam_p)
@@ -210,8 +208,8 @@ BOOL pcpserial_transfer(tHandlerParam* pHandlParam_p)
 /*============================================================================*/
 /*            P R I V A T E   F U N C T I O N S                               */
 /*============================================================================*/
-/* \name Private Functions */
-/* \{ */
+/** \name Private Functions */
+/** \{ */
 
 /*----------------------------------------------------------------------------*/
 /**
@@ -221,8 +219,6 @@ This function is called in the call of HAL_SPI_Init and initializes all
 peripherals needed to carry out the transfer with DMA.
 
 \param pSpiHandler_p    Pointer to the SPI handler
-
-\ingroup module_serial
 */
 /*----------------------------------------------------------------------------*/
 void HAL_SPI_MspInit(SPI_HandleTypeDef* pSpiHandler_p)
@@ -245,8 +241,6 @@ This function is called in the call of HAL_SPI_DeInit and closes all
 peripherals needed by the SPI core.
 
 \param pSpiHandler_p    Pointer to the SPI handler
-
-\ingroup module_serial
 */
 /*----------------------------------------------------------------------------*/
 void HAL_SPI_MspDeInit(SPI_HandleTypeDef* pSpiHandler_p)
@@ -271,8 +265,6 @@ void HAL_SPI_MspDeInit(SPI_HandleTypeDef* pSpiHandler_p)
 \brief  Initialize the SPI GPIO pins
 
 Enable SCK, MOSI and NSS as input.
-
-\ingroup module_serial
 */
 /*----------------------------------------------------------------------------*/
 static void initGpio(void)
@@ -294,8 +286,6 @@ static void initGpio(void)
 Setup SPI core as half duplex 8bit data with CPOL, CPHA = (0,0)
 
 \return TRUE on success; FALSE on error
-
-\ingroup module_serial
 */
 /*----------------------------------------------------------------------------*/
 static BOOL initSpi(void)
@@ -332,8 +322,6 @@ static BOOL initSpi(void)
 Setup the DMA for to receive from SPIx to RAM!
 
 \param pSpiHandler_p    Pointer to the SPI handler
-
-\ingroup module_serial
 */
 /*----------------------------------------------------------------------------*/
 static BOOL initDma(SPI_HandleTypeDef* pSpiHandler_p)
@@ -374,8 +362,6 @@ static BOOL initDma(SPI_HandleTypeDef* pSpiHandler_p)
 
 Setup transfer finished and transfer error interrupts for the DMA
 channel.
-
-\ingroup module_serial
 */
 /*----------------------------------------------------------------------------*/
 static void initNvic(void)
@@ -391,8 +377,6 @@ static void initNvic(void)
 
 \param pSpiHandle_p     Pointer to the SPI handle
 \param pTransParam_p    Pointer to the transfer parameters
-
-\ingroup module_serial
 */
 /*----------------------------------------------------------------------------*/
 static BOOL receiveInputStream(SPI_HandleTypeDef * pSpiHandle_p, tHandlerParam * pTransParam_p)
@@ -414,8 +398,6 @@ static BOOL receiveInputStream(SPI_HandleTypeDef * pSpiHandle_p, tHandlerParam *
 \brief  Receive transfer completed.
 
 \param pSpiHandle_p     Pointer to the SPI handle
-
-\ingroup module_serial
 */
 /*----------------------------------------------------------------------------*/
 void HAL_SPI_RxCpltCallback(SPI_HandleTypeDef *pSpiHandle_p)
@@ -457,8 +439,6 @@ void HAL_SPI_RxCpltCallback(SPI_HandleTypeDef *pSpiHandle_p)
 \brief  DMA error callback
 
 \param pSpiHandle_p     Pointer to the SPI handle
-
-\ingroup module_serial
 */
 /*----------------------------------------------------------------------------*/
 void HAL_SPI_ErrorCallback(SPI_HandleTypeDef *pSpiHandle_p)
@@ -474,8 +454,6 @@ void HAL_SPI_ErrorCallback(SPI_HandleTypeDef *pSpiHandle_p)
 /*----------------------------------------------------------------------------*/
 /**
 \brief  This function handles DMA Rx interrupt request
-
-\ingroup module_serial
 */
 /*----------------------------------------------------------------------------*/
 void SPIx_DMA_RX_IRQHandler(void)
@@ -484,4 +462,7 @@ void SPIx_DMA_RX_IRQHandler(void)
     HAL_DMA_IRQHandler(SpiHandle_l.hdmarx);
 }
 
-/* \} */
+/**
+ * \}
+ * \}
+ */

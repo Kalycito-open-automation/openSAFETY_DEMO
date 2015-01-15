@@ -1,6 +1,6 @@
 /**
   ******************************************************************************
-  * @file    system_stm32f4xx.c
+  * @file    target/stm32f401re/system_stm32f4xx.c
   * @author  MCD Application Team
   * @version V1.1.0
   * @date    26-June-2014
@@ -51,18 +51,6 @@
   ******************************************************************************
   */
 
-/** @addtogroup CMSIS
-  * @{
-  */
-
-/** @addtogroup stm32f4xx_system
-  * @{
-  */
-
-/** @addtogroup STM32F4xx_System_Private_Includes
-  * @{
-  */
-
 #include "stm32f4xx.h"
 
 #if !defined  (HSE_VALUE)
@@ -73,22 +61,6 @@
   #define HSI_VALUE    ((uint32_t)16000000) /*!< Value of the Internal oscillator in Hz*/
 #endif /* HSI_VALUE */
 
-/**
-  * @}
-  */
-
-/** @addtogroup STM32F4xx_System_Private_TypesDefinitions
-  * @{
-  */
-
-/**
-  * @}
-  */
-
-/** @addtogroup STM32F4xx_System_Private_Defines
-  * @{
-  */
-
 /************************* Miscellaneous Configuration ************************/
 
 /*!< Uncomment the following line if you need to relocate your vector Table in
@@ -98,21 +70,6 @@
                                    This value must be a multiple of 0x200. */
 /******************************************************************************/
 
-/**
-  * @}
-  */
-
-/** @addtogroup STM32F4xx_System_Private_Macros
-  * @{
-  */
-
-/**
-  * @}
-  */
-
-/** @addtogroup STM32F4xx_System_Private_Variables
-  * @{
-  */
   /* This variable is updated in three ways:
       1) by calling CMSIS function SystemCoreClockUpdate()
       2) by calling HAL API function HAL_RCC_GetHCLKFreq()
@@ -125,27 +82,9 @@
   __I uint8_t AHBPrescTable[16] = {0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 3, 4, 6, 7, 8, 9};
 
 /**
-  * @}
-  */
-
-/** @addtogroup STM32F4xx_System_Private_FunctionPrototypes
-  * @{
-  */
-
-/**
-  * @}
-  */
-
-/** @addtogroup STM32F4xx_System_Private_Functions
-  * @{
-  */
-
-/**
   * @brief  Setup the microcontroller system
   *         Initialize the FPU setting, vector table location and External memory
   *         configuration.
-  * @param  None
-  * @retval None
   */
 void SystemInit(void)
 {
@@ -213,9 +152,6 @@ void SystemInit(void)
   *
   *         - The result of this function could be not correct when using fractional
   *           value for HSE crystal.
-  *
-  * @param  None
-  * @retval None
   */
 void SystemCoreClockUpdate(void)
 {
@@ -267,15 +203,4 @@ void SystemCoreClockUpdate(void)
     SystemCoreClock >>= tmp;
 }
 
-/**
-  * @}
-  */
-
-/**
-  * @}
-  */
-
-/**
-  * @}
-  */
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

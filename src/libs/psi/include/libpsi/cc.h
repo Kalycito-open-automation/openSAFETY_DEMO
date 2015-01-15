@@ -4,7 +4,8 @@
 
 \brief  Application interface configuration channel module header
 
-TODO
+This header provides all public functions or types of the cc module. It
+is the user interface to the cc module.
 
 *******************************************************************************/
 

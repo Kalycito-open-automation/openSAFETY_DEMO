@@ -4,7 +4,8 @@
 
 \brief  Application interface status module header
 
-TODO
+This header provides all public functions or types of the status module. It
+is the user interface to the status module.
 
 *******************************************************************************/
 

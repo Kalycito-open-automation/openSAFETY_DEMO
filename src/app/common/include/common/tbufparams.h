@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   common/tbufparams.h
+\file   common/include/common/tbufparams.h
 
 \brief  Implements helper functions for tbuf parameter handling
 

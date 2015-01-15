@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   sn/debug.h
+\file   demo-sn-gpio/include/sn/debug.h
 
 \brief  Debug header of the SN firmware
 

@@ -2,18 +2,21 @@
 ********************************************************************************
 \file   status.c
 
+\defgroup module_psi_status Status module
+\{
+
 \brief  Status module for synchronization information forwarding
 
 This module forwards the time information to the user application.
 It also provides the SSDO channel status information.
 
-\ingroup module_status
+\ingroup group_libpsi
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
 * License Agreement
 *
-* Copyright 2013 BERNECKER + RAINER, AUSTRIA, 5142 EGGELSBERG, B&R STRASSE 1
+* Copyright 2014 BERNECKER + RAINER, AUSTRIA, 5142 EGGELSBERG, B&R STRASSE 1
 * All rights reserved.
 *
 * Redistribution and use in source and binary forms,
@@ -129,11 +132,8 @@ static BOOL status_updateInStatusReg(UINT8* pBuffer_p, UINT16 bufSize_p,
 
 \param[in]  pInitParam_p     Initialization structure of the status module
 
-\return  BOOL
 \retval  TRUE      Successfully initialized the status module
 \retval  FALSE     Error during initialization
-
-\ingroup module_status
 */
 /*----------------------------------------------------------------------------*/
 BOOL status_init(tStatusInitParam* pInitParam_p)
@@ -189,8 +189,6 @@ BOOL status_init(tStatusInitParam* pInitParam_p)
 /*----------------------------------------------------------------------------*/
 /**
 \brief    Cleanup status module
-
-\ingroup module_status
 */
 /*----------------------------------------------------------------------------*/
 void status_exit(void)
@@ -203,8 +201,6 @@ void status_exit(void)
 \brief    Get Icc status register
 
 \param[out]  pSeqNr_p        The current status of the channel
-
-\ingroup module_status
 */
 /*----------------------------------------------------------------------------*/
 void status_getIccStatus(tSeqNrValue* pSeqNr_p)
@@ -227,8 +223,6 @@ void status_getIccStatus(tSeqNrValue* pSeqNr_p)
 
 \param[in] chanNum_p     Id of the channel to mark as busy
 \param[in] seqNr_p       The value of the sequence number
-
-\ingroup module_status
 */
 /*----------------------------------------------------------------------------*/
 void status_setSsdoRxChanFlag(UINT8 chanNum_p, tSeqNrValue seqNr_p)
@@ -250,8 +244,6 @@ void status_setSsdoRxChanFlag(UINT8 chanNum_p, tSeqNrValue seqNr_p)
 
 \param[in]  chanNum_p     Id of the channel to mark as busy
 \param[out] pSeqNr_p      The value of the sequence number
-
-\ingroup module_status
 */
 /*----------------------------------------------------------------------------*/
 void status_getSsdoTxChanFlag(UINT8 chanNum_p, tSeqNrValue* pSeqNr_p)
@@ -273,8 +265,6 @@ void status_getSsdoTxChanFlag(UINT8 chanNum_p, tSeqNrValue* pSeqNr_p)
 
 \param[in]  chanNum_p     Id of the channel to mark as busy
 \param[out] pSeqNr_p      The value of the sequence number
-
-\ingroup module_status
 */
 /*----------------------------------------------------------------------------*/
 void status_getLogTxChanFlag(UINT8 chanNum_p, tSeqNrValue* pSeqNr_p)
@@ -293,8 +283,8 @@ void status_getLogTxChanFlag(UINT8 chanNum_p, tSeqNrValue* pSeqNr_p)
 /*============================================================================*/
 /*            P R I V A T E   F U N C T I O N S                               */
 /*============================================================================*/
-/* \name Private Functions */
-/* \{ */
+/** \name Private Functions */
+/** \{ */
 
 /*----------------------------------------------------------------------------*/
 /**
@@ -302,11 +292,8 @@ void status_getLogTxChanFlag(UINT8 chanNum_p, tSeqNrValue* pSeqNr_p)
 
 \param[in] statOutId_p         Id of the buffer to initialize
 
-\return BOOL
 \retval TRUE        Successfully initialized the output buffer
 \retval FALSE       Unable to initialize the output buffer
-
-\ingroup module_status
 */
 /*----------------------------------------------------------------------------*/
 static BOOL status_initOutBuffer( tTbufNumLayout statOutId_p)
@@ -353,11 +340,8 @@ static BOOL status_initOutBuffer( tTbufNumLayout statOutId_p)
 
 \param[in] statInId_p         Id of the buffer to initialize
 
-\return BOOL
 \retval TRUE        Successfully initialized the input buffer
 \retval FALSE       Unable to initialize the input buffer
-
-\ingroup module_status
 */
 /*----------------------------------------------------------------------------*/
 static BOOL status_initInBuffer(tTbufNumLayout statInId_p)
@@ -408,11 +392,8 @@ static BOOL status_initInBuffer(tTbufNumLayout statInId_p)
 \param[in] bufSize_p        Size of the buffer
 \param[in] pUserArg_p       User defined argument
 
-\return BOOL
 \retval TRUE        Successfully processed synchronous task
 \retval FALSE       Error while processing sync task
-
-\ingroup module_status
 */
 /*----------------------------------------------------------------------------*/
 static BOOL status_processSync(UINT8* pBuffer_p, UINT16 bufSize_p,
@@ -452,11 +433,8 @@ static BOOL status_processSync(UINT8* pBuffer_p, UINT16 bufSize_p,
 \param[in] bufSize_p        Size of the buffer
 \param[in] pUserArg_p       User defined argument
 
-\return BOOL
 \retval TRUE        Successfully updated the status register
 \retval FALSE       Error while updating the status register
-
-\ingroup module_status
 */
 /*----------------------------------------------------------------------------*/
 static BOOL status_updateOutStatusReg(UINT8* pBuffer_p, UINT16 bufSize_p,
@@ -490,11 +468,8 @@ static BOOL status_updateOutStatusReg(UINT8* pBuffer_p, UINT16 bufSize_p,
 \param[in] bufSize_p        Size of the buffer
 \param[in] pUserArg_p       User defined argument
 
-\return BOOL
 \retval TRUE        Successfully updated the status register
 \retval FALSE       Error while updating the status register
-
-\ingroup module_status
 */
 /*----------------------------------------------------------------------------*/
 static BOOL status_updateInStatusReg(UINT8* pBuffer_p, UINT16 bufSize_p,
@@ -514,6 +489,9 @@ static BOOL status_updateInStatusReg(UINT8* pBuffer_p, UINT16 bufSize_p,
     return TRUE;
 }
 
-/* \} */
+/**
+ * \}
+ * \}
+ */
 
 

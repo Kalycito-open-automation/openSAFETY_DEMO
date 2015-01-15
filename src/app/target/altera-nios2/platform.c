@@ -1,18 +1,22 @@
 /**
 ********************************************************************************
-\file   platform.c
+\file   target/altera-nios2/platform.c
+
+\defgroup module_targ_nios2_platform Platform module
+\{
 
 \brief  Application interface target handling
 
 Defines the platform specific functions of the slim interface example
 implementation.
 
+\ingroup group_app_targ_nios2
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
 * License Agreement
 *
-* Copyright 2013 BERNECKER + RAINER, AUSTRIA, 5142 EGGELSBERG, B&R STRASSE 1
+* Copyright 2014 BERNECKER + RAINER, AUSTRIA, 5142 EGGELSBERG, B&R STRASSE 1
 * All rights reserved.
 *
 * Redistribution and use in source and binary forms,
@@ -100,8 +104,6 @@ This function init's the peripherals of the AP like cache and the interrupt
 controller.
 
 \return TRUE on success; FALSE on error
-
-\ingroup module_platform
 */
 /*----------------------------------------------------------------------------*/
 BOOL platform_init(void)
@@ -117,8 +119,6 @@ BOOL platform_init(void)
 /*----------------------------------------------------------------------------*/
 /**
 \brief  Close all peripherals of the target
-
-\ingroup module_platform
 */
 /*----------------------------------------------------------------------------*/
 void platform_exit(void)
@@ -129,8 +129,11 @@ void platform_exit(void)
 /*============================================================================*/
 /*            P R I V A T E   F U N C T I O N S                               */
 /*============================================================================*/
-/* \name Private Functions */
-/* \{ */
+/** \name Private Functions */
+/** \{ */
 
-/* \} */
+/**
+ * \}
+ * \}
+ */
 

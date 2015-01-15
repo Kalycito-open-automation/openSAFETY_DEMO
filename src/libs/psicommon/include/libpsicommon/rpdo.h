@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   config/rpdo.h
+\file   libpsicommon/rpdo.h
 
 \brief  This header defines the layout of the rpdo triple buffers
 

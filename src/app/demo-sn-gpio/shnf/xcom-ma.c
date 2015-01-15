@@ -1,19 +1,22 @@
 /**
 ********************************************************************************
-\file   xcom-ma.c
+\file   demo-sn-gpio/shnf/xcom-ma.c
+
+\defgroup module_sn_shnf_xcom_ma Cross communication module (Master side)
+\{
 
 \brief  uP-Master <-> uP-Slave cross communication (uP-Master version)
 
 This module implements the cross communication between uP-Master and uP-Slave
 in the uP-Master version.
 
-\ingroup module_xcom
+\ingroup group_app_sn_shnf
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
 * License Agreement
 *
-* Copyright 2013 BERNECKER + RAINER, AUSTRIA, 5142 EGGELSBERG, B&R STRASSE 1
+* Copyright 2014 BERNECKER + RAINER, AUSTRIA, 5142 EGGELSBERG, B&R STRASSE 1
 * All rights reserved.
 *
 * Redistribution and use in source and binary forms,
@@ -128,8 +131,6 @@ static tXComIntInstance xcomIntInstance_l SAFE_INIT_SEKTOR;
 \param[out] pTransParam_p   The transmit parameters of the uP-Master
 
 \return TRUE on success; FALSE on error
-
-\ingroup module_xcom
 */
 /*----------------------------------------------------------------------------*/
 BOOLEAN xcomint_init(tXComTransParams * pTransParam_p)
@@ -161,8 +162,6 @@ BOOLEAN xcomint_init(tXComTransParams * pTransParam_p)
 /*----------------------------------------------------------------------------*/
 /**
 \brief    Close the xcom module
-
-\ingroup module_xcom
 */
 /*----------------------------------------------------------------------------*/
 void xcomint_exit(void)
@@ -175,8 +174,6 @@ void xcomint_exit(void)
 \brief    Verify the ID value of the receive image
 
 \return TRUE if the id value is correct; FALSE otherwise
-
-\ingroup module_xcom
 */
 /*----------------------------------------------------------------------------*/
 BOOLEAN xcomint_verifyIdValue(void)
@@ -197,8 +194,6 @@ BOOLEAN xcomint_verifyIdValue(void)
 
 \param[in] paylType_p      The direction of the message format to get
 \param[out] pMsgForm_p     Pointer to the message format data
-
-\ingroup module_xcom
 */
 /*----------------------------------------------------------------------------*/
 BOOLEAN xcomint_getMsgFormat(tPaylType paylType_p, UINT8 * pMsgForm_p)
@@ -228,8 +223,6 @@ BOOLEAN xcomint_getMsgFormat(tPaylType paylType_p, UINT8 * pMsgForm_p)
 
 \param[in] paylType_p      The direction of the message format to get
 \param[in] msgForm_p       The new value to set
-
-\ingroup module_xcom
 */
 /*----------------------------------------------------------------------------*/
 BOOLEAN xcomint_setMsgFormat(tPaylType paylType_p, UINT8 msgForm_p)
@@ -255,8 +248,6 @@ BOOLEAN xcomint_setMsgFormat(tPaylType paylType_p, UINT8 msgForm_p)
 \brief    Set the flow count to the transmit image
 
 \param[in] flowCount_p      The new flow count value
-
-\ingroup module_xcom
 */
 /*----------------------------------------------------------------------------*/
 void xcomint_setFlowCount(UINT32 flowCount_p)
@@ -273,8 +264,6 @@ void xcomint_setFlowCount(UINT32 flowCount_p)
 \param[out] pFlowCount_p   The resulting value of the flow counter
 
 \return TRUE on success; FALSE on error
-
-\ingroup module_xcom
 */
 /*----------------------------------------------------------------------------*/
 BOOLEAN xcomint_getFlowCnt(tPaylType paylType_p, UINT32 * pFlowCount_p)
@@ -303,8 +292,6 @@ BOOLEAN xcomint_getFlowCnt(tPaylType paylType_p, UINT32 * pFlowCount_p)
 \brief    Set the current timebase to the transmit image
 
 \param[in] pCurrTime_p      Pointer to the value of the current timebase
-
-\ingroup module_xcom
 */
 /*----------------------------------------------------------------------------*/
 void xcomint_setTransTimebase(UINT64 * pCurrTime_p)
@@ -321,8 +308,6 @@ void xcomint_setTransTimebase(UINT64 * pCurrTime_p)
 \param[out] pRetTime       The current value of the time field
 
 \return TRUE on success; FALSE on error
-
-\ingroup module_xcom
 */
 /*----------------------------------------------------------------------------*/
 BOOLEAN xcomint_getTimeBase(tPaylType paylType_p, UINT64 * pRetTime)
@@ -351,8 +336,6 @@ BOOLEAN xcomint_getTimeBase(tPaylType paylType_p, UINT64 * pRetTime)
 
 \param[in] crcSub1_p   The new CRC value of subframe one
 \param[in] crcSub2_p   The new CRC value of subframe two
-
-\ingroup module_xcom
 */
 /*----------------------------------------------------------------------------*/
 void xcomint_setSsdoSnmtCrc(UINT16 crcSub1_p, UINT16 crcSub2_p)
@@ -370,8 +353,6 @@ void xcomint_setSsdoSnmtCrc(UINT16 crcSub1_p, UINT16 crcSub2_p)
 \param[out] pSub2Crc_p     Pointer the resulting CRC value of subframe two
 
 \return TRUE on success; FALSE on error
-
-\ingroup module_xcom
 */
 /*----------------------------------------------------------------------------*/
 BOOLEAN xcomint_getSsdoSnmtCrc(tPaylType paylType_p, UINT16 * pSub1Crc_p,
@@ -406,8 +387,6 @@ BOOLEAN xcomint_getSsdoSnmtCrc(tPaylType paylType_p, UINT16 * pSub1Crc_p,
 \param[in] targLen_p       The length of the target buffer
 
 \return TRUE on success; FALSE on error
-
-\ingroup module_xcom
 */
 /*----------------------------------------------------------------------------*/
 BOOLEAN xcomint_postSsdoSnmtFrame(tSubFrameParams * pSub1Params_p,
@@ -444,8 +423,6 @@ BOOLEAN xcomint_postSsdoSnmtFrame(tSubFrameParams * pSub1Params_p,
 \brief    Handle incoming SSDO/SNMT payload
 
 \return TRUE on success; FALSE on error
-
-\ingroup module_xcom
 */
 /*----------------------------------------------------------------------------*/
 BOOLEAN xcomint_handleSsdoSnmtPayload(void)
@@ -506,8 +483,6 @@ BOOLEAN xcomint_handleSsdoSnmtPayload(void)
 
 \param[in] crcSub1_p   The new CRC value of subframe one
 \param[in] crcSub2_p   The new CRC value of subframe two
-
-\ingroup module_xcom
 */
 /*----------------------------------------------------------------------------*/
 void xcomint_setSpdoCrc(UINT16 crcSub1_p, UINT16 crcSub2_p)
@@ -526,8 +501,6 @@ void xcomint_setSpdoCrc(UINT16 crcSub1_p, UINT16 crcSub2_p)
 \param[out] pSub2Crc_p     Pointer the resulting CRC value of subframe two
 
 \return TRUE on success; FALSE on error
-
-\ingroup module_xcom
 */
 /*----------------------------------------------------------------------------*/
 BOOLEAN xcomint_getSpdoCrc(tPaylType paylType_p, UINT16 * pSub1Crc_p,
@@ -562,8 +535,6 @@ BOOLEAN xcomint_getSpdoCrc(tPaylType paylType_p, UINT16 * pSub1Crc_p,
 \param[in] targLen_p       The length of the target buffer
 
 \return TRUE on success; FALSE on error
-
-\ingroup module_xcom
 */
 /*----------------------------------------------------------------------------*/
 BOOLEAN xcomint_postSpdoFrame(tSubFrameParams * pSub1Params_p,
@@ -600,8 +571,6 @@ BOOLEAN xcomint_postSpdoFrame(tSubFrameParams * pSub1Params_p,
 \brief    Handle incoming SPDO payload
 
 \return TRUE on success; FALSE on error
-
-\ingroup module_xcom
 */
 /*----------------------------------------------------------------------------*/
 BOOLEAN xcomint_handleSpdoPayload(void)
@@ -656,7 +625,10 @@ BOOLEAN xcomint_handleSpdoPayload(void)
 /*============================================================================*/
 /*            P R I V A T E   F U N C T I O N S                               */
 /*============================================================================*/
-/* \name Private Functions */
-/* \{ */
+/** \name Private Functions */
+/** \{ */
 
-/* \} */
+/**
+ * \}
+ * \}
+ */

@@ -1,6 +1,9 @@
 /**
 ********************************************************************************
-\file   pingpong-ma.c
+\file   demo-sn-gpio/boot/pingpong-ma.c
+
+\defgroup module_sn_boot_pipo_ma Ping pong module (Master side)
+\{
 
 \brief  Implements a ping pong message transfer between two processors
 
@@ -8,13 +11,13 @@ This module implements the a ping pong message transfer by using the
 local serial device to send and receive messages. This file implements
 the ping pong master which waits for an incoming message and sends a response.
 
-\ingroup module_hands
+\ingroup group_app_sn_boot
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
 * License Agreement
 *
-* Copyright 2013 BERNECKER + RAINER, AUSTRIA, 5142 EGGELSBERG, B&R STRASSE 1
+* Copyright 2014 BERNECKER + RAINER, AUSTRIA, 5142 EGGELSBERG, B&R STRASSE 1
 * All rights reserved.
 *
 * Redistribution and use in source and binary forms,
@@ -109,8 +112,6 @@ static BOOLEAN sendPong(volatile UINT8 * pTargBase_p, UINT16 targSize_p);
 
 \retval TRUE        Ping pong was successful
 \retval FALSE       Error on transfer
-
-\ingroup module_hands
 */
 /*----------------------------------------------------------------------------*/
 BOOLEAN pipo_doTransfer(volatile UINT8 * pPingBase_p, UINT16 pingSize_p,
@@ -146,8 +147,8 @@ BOOLEAN pipo_doTransfer(volatile UINT8 * pPingBase_p, UINT16 pingSize_p,
 /*============================================================================*/
 /*            P R I V A T E   F U N C T I O N S                               */
 /*============================================================================*/
-/* \name Private Functions */
-/* \{ */
+/** \name Private Functions */
+/** \{ */
 
 /*----------------------------------------------------------------------------*/
 /**
@@ -160,8 +161,6 @@ BOOLEAN pipo_doTransfer(volatile UINT8 * pPingBase_p, UINT16 pingSize_p,
 
 \retval TRUE        Successfully received the ping message
 \retval FALSE       Error on receiving
-
-\ingroup module_hands
 */
 /*----------------------------------------------------------------------------*/
 static BOOLEAN receivePing(volatile UINT8 * pPingBase_p, UINT16 pingSize_p,
@@ -203,8 +202,6 @@ static BOOLEAN receivePing(volatile UINT8 * pPingBase_p, UINT16 pingSize_p,
 
 \retval TRUE        Response sent to the slave processor
 \retval FALSE       Error on sending
-
-\ingroup module_hands
 */
 /*----------------------------------------------------------------------------*/
 static BOOLEAN sendPong(volatile UINT8 * pPongBase_p, UINT16 pongSize_p)
@@ -224,4 +221,7 @@ static BOOLEAN sendPong(volatile UINT8 * pPongBase_p, UINT16 pongSize_p)
     return fReturn;
 }
 
-/* \} */
+/**
+ * \}
+ * \}
+ */

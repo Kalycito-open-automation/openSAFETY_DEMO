@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   shnf/constime.h
+\file   demo-sn-gpio/shnf/include/shnf/constime.h
 
 \brief  Provides access to the consecutive time
 

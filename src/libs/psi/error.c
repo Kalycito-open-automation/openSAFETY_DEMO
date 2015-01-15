@@ -2,18 +2,21 @@
 ********************************************************************************
 \file   error.c
 
+\defgroup module_psi_error Error handler module
+\{
+
 \brief  Library internal error handler
 
 Application interface error handler module. Handles each occurred error and
 forwards a trace to the user layer.
 
-\ingroup module_error
+\ingroup group_libpsi
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
 * License Agreement
 *
-* Copyright 2013 BERNECKER + RAINER, AUSTRIA, 5142 EGGELSBERG, B&R STRASSE 1
+* Copyright 2014 BERNECKER + RAINER, AUSTRIA, 5142 EGGELSBERG, B&R STRASSE 1
 * All rights reserved.
 *
 * Redistribution and use in source and binary forms,
@@ -105,11 +108,8 @@ static tErrorInstance        errorInstance_l;
 /**
 \brief    Initialize the error handler module
 
-\return BOOL
 \retval TRUE         Module initialization successful
 \retval FALSE        Error on module initialization
-
-\ingroup module_error
 */
 /*----------------------------------------------------------------------------*/
 BOOL error_init(tErrorHandler pfnErrorHandler_p)
@@ -133,8 +133,6 @@ BOOL error_init(tErrorHandler pfnErrorHandler_p)
 /*----------------------------------------------------------------------------*/
 /**
 \brief    Destroy the error handler module
-
-\ingroup module_error
 */
 /*----------------------------------------------------------------------------*/
 void error_exit(void)
@@ -148,8 +146,6 @@ void error_exit(void)
 
 \param  srcModule_p     Module source of the error
 \param  errCode_p       Code of the error
-
-\ingroup module_error
 */
 /*----------------------------------------------------------------------------*/
 void error_setError(tPsiModules srcModule_p, tPsiStatus errCode_p)
@@ -170,7 +166,10 @@ void error_setError(tPsiModules srcModule_p, tPsiStatus errCode_p)
 /*============================================================================*/
 /*            P R I V A T E   F U N C T I O N S                               */
 /*============================================================================*/
-/* \name Private Functions */
-/* \{ */
+/** \name Private Functions */
+/** \{ */
 
-/* \} */
+/**
+ * \}
+ * \}
+ */

@@ -2,18 +2,21 @@
 ********************************************************************************
 \file   stream.c
 
+\defgroup module_psi_stream Stream module
+\{
+
 \brief  Streaming module for receiving/transmitting the input and output buffers
 
 This module handles the transfer of the input of output buffers via the steam
 handler. It enables to insert pre- and post actions before and after transfer.
 
-\ingroup module_stream
+\ingroup group_libpsi
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
 * License Agreement
 *
-* Copyright 2013 BERNECKER + RAINER, AUSTRIA, 5142 EGGELSBERG, B&R STRASSE 1
+* Copyright 2014 BERNECKER + RAINER, AUSTRIA, 5142 EGGELSBERG, B&R STRASSE 1
 * All rights reserved.
 *
 * Redistribution and use in source and binary forms,
@@ -128,11 +131,8 @@ static BOOL stream_callSyncCb(void);
 
 \param[in]  pInitParam_p  Stream module initialization parameters
 
-\return BOOL
 \retval TRUE      On successful initialization
 \retval FALSE     Unable to initialize the stream module
-
-\ingroup module_stream
 */
 /*----------------------------------------------------------------------------*/
 BOOL stream_init(tStreamInitParam* pInitParam_p)
@@ -183,8 +183,6 @@ BOOL stream_init(tStreamInitParam* pInitParam_p)
 /*----------------------------------------------------------------------------*/
 /**
 \brief   Destroy stream module
-
-\ingroup module_stream
 */
 /*----------------------------------------------------------------------------*/
 void stream_exit(void)
@@ -198,11 +196,8 @@ void stream_exit(void)
 
 \param[in]  buffId_p            Id of buffer
 
-\return tBuffDescriptor*
 \retval Address                 Pointer to buffer descriptor parameters
 \retval NULL                    Unable to find buffer in list
-
-\ingroup module_stream
 */
 /*----------------------------------------------------------------------------*/
 tBuffDescriptor* stream_getBufferParam(tTbufNumLayout buffId_p)
@@ -226,11 +221,8 @@ tBuffDescriptor* stream_getBufferParam(tTbufNumLayout buffId_p)
 \param[in]  pfnBuffAct_p     Pointer to the action function
 \param[in]  pUserArg_p       User argument to pass to function
 
-\return BOOL
 \retval TRUE         Successfully registered action to buffer
 \retval FALSE        Invalid buffer! Can't register
-
-\ingroup module_stream
 */
 /*----------------------------------------------------------------------------*/
 BOOL stream_registerAction(tActionType actType_p, UINT8 buffId_p,
@@ -283,8 +275,6 @@ BOOL stream_registerAction(tActionType actType_p, UINT8 buffId_p,
 \brief   Register synchronous callback function
 
 \param[in]  pfnSyncCb_p     Pointer to synchronous callback function
-
-\ingroup module_stream
 */
 /*----------------------------------------------------------------------------*/
 void stream_registerSyncCb(tBuffSyncCb pfnSyncCb_p)
@@ -299,11 +289,8 @@ void stream_registerSyncCb(tBuffSyncCb pfnSyncCb_p)
 This procedure starts the transfer of the local buffers and starts pre- or post
 actions for each type of buffer.
 
-\return BOOL
 \retval TRUE      Successfully processed the synchronous task
 \retval FALSE     Unable to transfer data or call user action
-
-\ingroup module_stream
 */
 /*----------------------------------------------------------------------------*/
 BOOL stream_processSync(void)
@@ -335,11 +322,8 @@ BOOL stream_processSync(void)
 This procedure triggers all post actions of the libpsi. A post action
 are all tasks which are after the exchange of the input/output image.
 
-\return BOOL
 \retval TRUE      Successfully processed the post actions
 \retval FALSE     Unable to process post actions
-
-\ingroup module_stream
 */
 /*----------------------------------------------------------------------------*/
 BOOL stream_processPostActions(void)
@@ -362,8 +346,8 @@ BOOL stream_processPostActions(void)
 /*============================================================================*/
 /*            P R I V A T E   F U N C T I O N S                               */
 /*============================================================================*/
-/* \name Private Functions */
-/* \{ */
+/** \name Private Functions */
+/** \{ */
 
 /*----------------------------------------------------------------------------*/
 /**
@@ -371,11 +355,8 @@ BOOL stream_processPostActions(void)
 
 \param[in] actType_p               Pre- or post filling actions
 
-\return BOOL
 \retval TRUE         Successfully called all buffer actions
 \retval FALSE        Error while processing a buffer action
-
-\ingroup module_stream
 */
 /*----------------------------------------------------------------------------*/
 static BOOL stream_callActions(tActionType actType_p)
@@ -430,10 +411,7 @@ static BOOL stream_callActions(tActionType actType_p)
 \param[in] firstId_p               First descriptor id of the image
 \param[in] lastId_p                Last descriptor id of the image
 
-\return UINT16
-\retval Size            Size of the transfer image
-
-\ingroup module_stream
+\retval UINT16            Size of the transfer image
 */
 /*----------------------------------------------------------------------------*/
 static UINT16 stream_calcImageSize(tTbufNumLayout firstId_p, tTbufNumLayout lastId_p)
@@ -455,11 +433,8 @@ static UINT16 stream_calcImageSize(tTbufNumLayout firstId_p, tTbufNumLayout last
 
 \param[in] actType_p               Type of the action
 
-\return tBuffActionElem
 \retval Address            Pointer to the action list
 \retval Null               Invalid action type for action list
-
-\ingroup module_stream
 */
 /*----------------------------------------------------------------------------*/
 static tBuffActionElem* stream_getActionList(tActionType actType_p)
@@ -492,11 +467,8 @@ static tBuffActionElem* stream_getActionList(tActionType actType_p)
 /**
 \brief   Call the sync callback if initialized
 
-\return BOOL
 \retval TRUE           Success on calling the synchronization callback
 \retval FALSE          Error will calling the synchronization callback
-
-\ingroup module_stream
 */
 /*----------------------------------------------------------------------------*/
 static BOOL stream_callSyncCb(void)
@@ -523,4 +495,7 @@ static BOOL stream_callSyncCb(void)
     return fReturn;
 }
 
-/* \} */
+/**
+ * \}
+ * \}
+ */

@@ -1,6 +1,6 @@
 /**
   ******************************************************************************
-  * @file    Templates/Inc/stm32f4xx_it.h
+  * @file    target/stm32f401re/stm32f4xx_it.h
   * @author  MCD Application Team
   * @version V1.1.0
   * @date    26-June-2014

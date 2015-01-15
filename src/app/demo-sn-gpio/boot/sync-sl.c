@@ -1,19 +1,23 @@
 /**
 ********************************************************************************
-\file   sync-sl.c
+\file   demo-sn-gpio/boot/sync-sl.c
+
+\defgroup module_sn_boot_sync_sl Synchronization module (Slave side)
+\{
 
 \brief  Implements the synchronization of uP-Master and uP-Slave
 
 This module implements the synchronization of both safe processors on the uP-Slave
-side. It sends out t
+side. It sends out the ready message and waits for the sync message to arrive.
+In addition it overtakes the current time of the sync timebase.
 
-\ingroup module_hands
+\ingroup group_app_sn_boot
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
 * License Agreement
 *
-* Copyright 2013 BERNECKER + RAINER, AUSTRIA, 5142 EGGELSBERG, B&R STRASSE 1
+* Copyright 2014 BERNECKER + RAINER, AUSTRIA, 5142 EGGELSBERG, B&R STRASSE 1
 * All rights reserved.
 *
 * Redistribution and use in source and binary forms,
@@ -113,8 +117,6 @@ static BOOLEAN verifySyncMessage(volatile tSyncMsg * pSyncMsg_p);
 
 \retval TRUE        Synchronization was successful
 \retval FALSE       Error on sync
-
-\ingroup module_hands
 */
 /*----------------------------------------------------------------------------*/
 BOOLEAN sync_perform(void)
@@ -141,18 +143,17 @@ BOOLEAN sync_perform(void)
 /*============================================================================*/
 /*            P R I V A T E   F U N C T I O N S                               */
 /*============================================================================*/
-/* \name Private Functions */
-/* \{ */
+/** \name Private Functions */
+/** \{ */
 
 /*----------------------------------------------------------------------------*/
 /**
 \brief    This function is called when the sync message is received
 
-\param[inout] pRespBase_p    Pointer to the SOD restore flag
+\param[in] pSyncBase_p    The base address of the sync message
+\param[in] syncSize_p     The size of the synchronization message
 
-\return The receive state of the response message
-
-\ingroup module_hands
+\return TRUE on success; FALSE on error
 */
 /*----------------------------------------------------------------------------*/
 static BOOLEAN syncReceived(volatile UINT8* pSyncBase_p, UINT16 syncSize_p)
@@ -190,8 +191,6 @@ static BOOLEAN syncReceived(volatile UINT8* pSyncBase_p, UINT16 syncSize_p)
 
 \retval TRUE    The sync message is correct
 \retval FALSE   Invalid response received
-
-\ingroup module_hands
 */
 /*----------------------------------------------------------------------------*/
 static BOOLEAN verifySyncMessage(volatile tSyncMsg * pSyncMsg_p)
@@ -214,4 +213,7 @@ static BOOLEAN verifySyncMessage(volatile tSyncMsg * pSyncMsg_p)
     return fMsgCorrect;
 }
 
-/* \} */
+/**
+ * \}
+ * \}
+ */

@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   config/ccobjectlist.h
+\file   demo-sn-gpio/config/tbuf/include/config/ccobjectlist.h
 
 \brief  Object list for ccobjects module
 

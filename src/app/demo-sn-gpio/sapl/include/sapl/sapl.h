@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   sapl/sapl.h
+\file   demo-sn-gpio/sapl/include/sapl/sapl.h
 
 \brief  Interface to the application near firmware module.
 

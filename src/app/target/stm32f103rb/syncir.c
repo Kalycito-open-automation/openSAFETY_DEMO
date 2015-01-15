@@ -1,18 +1,22 @@
 /**
 ********************************************************************************
-\file   syncir.c
+\file   target/stm32f103rb/syncir.c
+
+\defgroup module_targ_stm32f103_syncir Synchronous interrupt module
+\{
 
 \brief  Implements the driver for the synchronous interrupt
 
 Defines the platform specific functions for the synchronous interrupt for target
 stm32f103rb (Cortex-M3).
 
+\ingroup group_app_targ_stm32f103
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
 * License Agreement
 *
-* Copyright 2013 BERNECKER + RAINER, AUSTRIA, 5142 EGGELSBERG, B&R STRASSE 1
+* Copyright 2014 BERNECKER + RAINER, AUSTRIA, 5142 EGGELSBERG, B&R STRASSE 1
 * All rights reserved.
 *
 * Redistribution and use in source and binary forms,
@@ -104,18 +108,15 @@ static tPlatformSyncIrq pfnSyncIrq_l = NULL;
 
 /*----------------------------------------------------------------------------*/
 /**
-\brief  initialize synchronous interrupt
+\brief  Initialize the synchronous interrupt
 
 syncir_init() initializes the synchronous interrupt. The timing parameters
 will be initialized, the interrupt handler will be connected to the ISR.
 
 \param[in] pfnSyncIrq_p       The callback of the sync interrupt
 
-\return BOOL
 \retval TRUE        Synchronous interrupt initialization successful
 \retval FALSE       Error while initializing the synchronous interrupt
-
-\ingroup module_syncir
 */
 /*----------------------------------------------------------------------------*/
 BOOL syncir_init(tPlatformSyncIrq pfnSyncIrq_p)
@@ -161,8 +162,6 @@ BOOL syncir_init(tPlatformSyncIrq pfnSyncIrq_p)
 /*----------------------------------------------------------------------------*/
 /**
 \brief  Shutdown the synchronous interrupt
-
-\ingroup module_syncir
 */
 /*----------------------------------------------------------------------------*/
 void syncir_exit(void)
@@ -175,9 +174,7 @@ void syncir_exit(void)
 
 /*----------------------------------------------------------------------------*/
 /**
-\brief  Acknowledge synchronous interrupt
-
-\ingroup module_syncir
+\brief  Acknowledge the synchronous interrupt
 */
 /*----------------------------------------------------------------------------*/
 void syncir_acknowledge(void)
@@ -187,11 +184,9 @@ void syncir_acknowledge(void)
 
 /*----------------------------------------------------------------------------*/
 /**
-\brief  Enable synchronous interrupt
+\brief  Enable the synchronous interrupt
 
 syncir_enable() enables the synchronous interrupt.
-
-\ingroup module_syncir
 */
 /*----------------------------------------------------------------------------*/
 void syncir_enable(void)
@@ -208,11 +203,9 @@ void syncir_enable(void)
 
 /*----------------------------------------------------------------------------*/
 /**
-\brief  Disable synchronous interrupt
+\brief  Disable the synchronous interrupt
 
 syncir_disable() disable the synchronous interrupt.
-
-\ingroup module_syncir
 */
 /*----------------------------------------------------------------------------*/
 void syncir_disable(void)
@@ -227,8 +220,6 @@ void syncir_disable(void)
 This function enables/disables the interrupts of the AP processor
 
 \param[in]  fEnable_p       TRUE = enable interrupts; FALSE = disable interrupts
-
-\ingroup module_syncir
 */
 /*----------------------------------------------------------------------------*/
 void syncir_enterCriticalSection(UINT8 fEnable_p)
@@ -244,8 +235,6 @@ void syncir_enterCriticalSection(UINT8 fEnable_p)
 \brief Get synchronous interrupt callback function
 
 \return The address of the synchronous interrupt callback function
-
-\ingroup module_syncir
 */
 /*----------------------------------------------------------------------------*/
 tPlatformSyncIrq syncir_getSyncCallback(void)
@@ -258,8 +247,6 @@ tPlatformSyncIrq syncir_getSyncCallback(void)
 \brief Set the synchronous interrupt callback function
 
 \param[in] pfnSyncCb_p      Pointer to the synchronous interrupt callback
-
-\ingroup module_syncir
 */
 /*----------------------------------------------------------------------------*/
 void syncir_setSyncCallback(tPlatformSyncIrq pfnSyncCb_p)
@@ -270,8 +257,8 @@ void syncir_setSyncCallback(tPlatformSyncIrq pfnSyncCb_p)
 /*============================================================================*/
 /*            P R I V A T E   F U N C T I O N S                               */
 /*============================================================================*/
-/* \name Private Functions */
-/* \{ */
+/** \name Private Functions */
+/** \{ */
 
 void EXTI9_5_IRQHandler(void)
 {
@@ -287,5 +274,8 @@ void EXTI9_5_IRQHandler(void)
     }
 }
 
-/* \} */
+/**
+ * \}
+ * \}
+ */
 

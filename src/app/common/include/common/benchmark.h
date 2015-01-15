@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   common/benchmark.h
+\file   common/include/common/benchmark.h
 
 \brief  Header file for debugging. Enables setting of benchmark pins
 

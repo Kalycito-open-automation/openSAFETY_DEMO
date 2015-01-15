@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   shnf/xcom.h
+\file   demo-sn-gpio/shnf/include/shnf/xcom.h
 
 \brief  This header provides the interface to the cross communication module
 

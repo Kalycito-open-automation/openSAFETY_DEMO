@@ -1,6 +1,9 @@
 /**
 ********************************************************************************
-\file   sync-ma.c
+\file   demo-sn-gpio/boot/sync-ma.c
+
+\defgroup module_sn_boot_sync_ma Synchronization module (Master side)
+\{
 
 \brief  Implements the synchronization of uP-Master and uP-Slave
 
@@ -9,13 +12,13 @@ side. The master waits until the uP-Slave is ready and the first synchronous
 interrupt has occurred. If this condition is met a response is sent to uP-Slave
 and the processing begins.
 
-\ingroup module_hands
+\ingroup group_app_sn_boot
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
 * License Agreement
 *
-* Copyright 2013 BERNECKER + RAINER, AUSTRIA, 5142 EGGELSBERG, B&R STRASSE 1
+* Copyright 2014 BERNECKER + RAINER, AUSTRIA, 5142 EGGELSBERG, B&R STRASSE 1
 * All rights reserved.
 *
 * Redistribution and use in source and binary forms,
@@ -120,8 +123,6 @@ static void syncInterruptCb(void *);
 
 \retval TRUE        Synchronization was successful
 \retval FALSE       Error on sync
-
-\ingroup module_hands
 */
 /*----------------------------------------------------------------------------*/
 BOOLEAN sync_perform(void)
@@ -145,8 +146,8 @@ BOOLEAN sync_perform(void)
 /*============================================================================*/
 /*            P R I V A T E   F U N C T I O N S                               */
 /*============================================================================*/
-/* \name Private Functions */
-/* \{ */
+/** \name Private Functions */
+/** \{ */
 
 /*----------------------------------------------------------------------------*/
 /**
@@ -157,8 +158,6 @@ BOOLEAN sync_perform(void)
 
 \retval TRUE    The ready message is correct
 \retval FALSE   Invalid message received
-
-\ingroup module_hands
 */
 /*----------------------------------------------------------------------------*/
 static BOOLEAN readyReceived(volatile UINT8* pReadyBase_p, UINT16 readySize_p)
@@ -204,8 +203,6 @@ static BOOLEAN readyReceived(volatile UINT8* pReadyBase_p, UINT16 readySize_p)
 
 \retval TRUE    The ready message is correct
 \retval FALSE   Invalid message received
-
-\ingroup module_hands
 */
 /*----------------------------------------------------------------------------*/
 static BOOLEAN verifyReadyMessage(volatile tReadyMsg * pReadyMsg_p)
@@ -224,8 +221,6 @@ static BOOLEAN verifyReadyMessage(volatile tReadyMsg * pReadyMsg_p)
 /*----------------------------------------------------------------------------*/
 /**
 \brief    Fill the synchronization response message buffer
-
-\ingroup module_hands
 */
 /*----------------------------------------------------------------------------*/
 static void fillSyncMsg(void)
@@ -245,8 +240,6 @@ static void fillSyncMsg(void)
 \brief    Wait until the synchronous interrupt from PCP occurred once
 
 \return TRUE on success; FALSE on error
-
-\ingroup module_hands
 */
 /*----------------------------------------------------------------------------*/
 static BOOLEAN waitForSyncIrq(void)
@@ -278,8 +271,6 @@ static BOOLEAN waitForSyncIrq(void)
 \brief    Local synchronous interrupt callback function
 
 \param[in] pArg_p       Pointer to the ir arguments
-
-\ingroup module_hands
 */
 /*----------------------------------------------------------------------------*/
 static void syncInterruptCb(void * pArg_p)
@@ -289,4 +280,7 @@ static void syncInterruptCb(void * pArg_p)
     syncInstance_l.fSyncIrOccured_m = TRUE;
 }
 
-/* \} */
+/**
+ * \}
+ * \}
+ */

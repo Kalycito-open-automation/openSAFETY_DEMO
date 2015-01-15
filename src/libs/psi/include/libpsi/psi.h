@@ -4,7 +4,9 @@
 
 \brief  Header file for slim interface module
 
-This file contains definitions for the slim interface module.
+This file contains definitions for the slim interface library. All public
+headers are included in this file which makes this file the only header which
+needs to be included by the user application.
 
 *******************************************************************************/
 

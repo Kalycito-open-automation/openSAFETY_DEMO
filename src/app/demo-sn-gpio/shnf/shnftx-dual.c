@@ -1,19 +1,22 @@
 /**
 ********************************************************************************
-\file   shnftx-dual.c
+\file   demo-sn-gpio/shnf/shnftx-dual.c
+
+\defgroup module_sn_shnf_txdual SHNF transmit module (Dual channel)
+\{
 
 \brief  SHNF transmit functions for dual channeled demos
 
 This module implements the transmit parts of the SHNF for dual channeled
 demos. It prepares the frames for transmission to the underlying fieldbus.
 
-\ingroup module_shnf
+\ingroup group_app_sn_shnf
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
 * License Agreement
 *
-* Copyright 2013 BERNECKER + RAINER, AUSTRIA, 5142 EGGELSBERG, B&R STRASSE 1
+* Copyright 2014 BERNECKER + RAINER, AUSTRIA, 5142 EGGELSBERG, B&R STRASSE 1
 * All rights reserved.
 *
 * Redistribution and use in source and binary forms,
@@ -109,13 +112,11 @@ static BOOLEAN getFrameDetails(UINT8 * pPayBase_p, UINT32 payLen_p, BOOLEAN isSl
 
 \param[in] pSrcBase_p   Pointer to the source buffer
 \param[in] srcLen_p     The length of the source buffer
-\param[in] pSrcBase_p   Pointer to the destination buffer
-\param[in] srcLen_p     The length of the destination buffer
+\param[in] pDstBase_p   Pointer to the destination buffer
+\param[in] dstLen_p     The length of the destination buffer
 
 \retval TRUE    Successfully processed the transmit frame
 \retval FALSE   Error on posting the frame
-
-\ingroup module_shnf
 */
 /*----------------------------------------------------------------------------*/
 BOOLEAN shnftx_postSpdoFrame(UINT8 * pSrcBase_p, UINT32 srcLen_p,
@@ -163,13 +164,12 @@ BOOLEAN shnftx_postSpdoFrame(UINT8 * pSrcBase_p, UINT32 srcLen_p,
 
 \param[in] pSrcBase_p   Pointer to the source buffer
 \param[in] srcLen_p     The length of the source buffer
-\param[in] pSrcBase_p   Pointer to the destination buffer
-\param[in] srcLen_p     The length of the destination buffer
+\param[in] pDstBase_p   Pointer to the destination buffer
+\param[in] dstLen_p     The length of the destination buffer
+\param[in] isSlim_p     TRUE if the frame is a slim frame
 
 \retval TRUE    Successfully processed the transmit frame
 \retval FALSE   Error on posting the frame
-
-\ingroup module_shnf
 */
 /*----------------------------------------------------------------------------*/
 BOOLEAN shnftx_postSsdoSnmtFrame(UINT8 * pSrcBase_p, UINT32 srcLen_p,
@@ -220,8 +220,6 @@ BOOLEAN shnftx_postSsdoSnmtFrame(UINT8 * pSrcBase_p, UINT32 srcLen_p,
 
 \retval TRUE    Successfully processed the transmit frame
 \retval FALSE   Error on posting the frame
-
-\ingroup module_shnf
 */
 /*----------------------------------------------------------------------------*/
 BOOLEAN shnftx_process(void)
@@ -239,8 +237,8 @@ BOOLEAN shnftx_process(void)
 /*============================================================================*/
 /*            P R I V A T E   F U N C T I O N S                               */
 /*============================================================================*/
-/* \name Private Functions */
-/* \{ */
+/** \name Private Functions */
+/** \{ */
 
 /*----------------------------------------------------------------------------*/
 /**
@@ -255,8 +253,6 @@ BOOLEAN shnftx_process(void)
 \param[out] pSub2Param_p    Pointer to the subframe two parameters
 
 \return TRUE on success; FALSE on error
-
-\ingroup module_shnf
 */
 /*----------------------------------------------------------------------------*/
 static BOOLEAN getFrameDetails(UINT8 * pPayBase_p, UINT32 payLen_p, BOOLEAN isSlim_p,
@@ -329,4 +325,7 @@ static BOOLEAN getFrameDetails(UINT8 * pPayBase_p, UINT32 payLen_p, BOOLEAN isSl
     return fReturn;
 }
 
-/* \} */
+/**
+ * \}
+ * \}
+ */

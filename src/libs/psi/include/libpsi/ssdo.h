@@ -4,7 +4,8 @@
 
 \brief  Application interface SSDO module header
 
-TODO
+This header provides all public functions or types of the ssdo module. It
+is the user interface to the ssdo module.
 
 *******************************************************************************/
 

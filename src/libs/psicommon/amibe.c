@@ -2,13 +2,16 @@
 ********************************************************************************
 \file   amibe.c
 
-\brief  Generic implementation of the Abstract Memory Interface (ami)
+\defgroup module_psicom_amibe Endian module (Big endian)
+\{
+
+\brief  Generic implementation of the Abstract Memory Interface (big endian)
 
 This file implements the AMI interface in big endian for architectures
 where access to unaligned addresses is not possible. (This implementation
 always copies bytewise)
 
-\ingroup module_ami
+\ingroup group_libpsicommon
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
@@ -92,8 +95,6 @@ Sets a 16 bit value to a buffer in big endian
 
 \param[out] pAddr_p         Pointer to the destination buffer
 \param[in]  uint16Val_p     The source value to convert
-
-\ingroup module_ami
 */
 /*----------------------------------------------------------------------------*/
 void ami_setUint16Be(void* pAddr_p, UINT16 uint16Val_p)
@@ -110,8 +111,6 @@ Sets a 16 bit value to a buffer in little endian
 
 \param[in]  pAddr_p         Pointer to the destination buffer
 \param[out] uint16Val_p     The source value to convert
-
-\ingroup module_ami
 */
 /*----------------------------------------------------------------------------*/
 void ami_setUint16Le(void* pAddr_p, UINT16 uint16Val_p)
@@ -130,8 +129,6 @@ Reads a 16 bit value from a buffer in big endian
 
 \return UINT16
 \retval Value       The data in platform endian
-
-\ingroup module_ami
 */
 /*----------------------------------------------------------------------------*/
 UINT16 ami_getUint16Be(void* pAddr_p)
@@ -154,8 +151,6 @@ Reads a 16 bit value from a buffer in little endian
 
 \return UINT16
 \retval Value       The data in platform endian
-
-\ingroup module_ami
 */
 /*----------------------------------------------------------------------------*/
 UINT16 ami_getUint16Le(void* pAddr_p)
@@ -176,8 +171,6 @@ Sets a 32 bit value to a buffer in big endian
 
 \param[out] pAddr_p         Pointer to the destination buffer
 \param[in]  uint32Val_p     The source value to convert
-
-\ingroup module_ami
 */
 /*----------------------------------------------------------------------------*/
 void ami_setUint32Be(void* pAddr_p, UINT32 uint32Val_p)
@@ -196,8 +189,6 @@ Sets a 32 bit value to a buffer in little endian
 
 \param[out] pAddr_p         Pointer to the destination buffer
 \param[in]  uint32Val_p     The source value to convert
-
-\ingroup module_ami
 */
 /*----------------------------------------------------------------------------*/
 void ami_setUint32Le(void* pAddr_p, UINT32 uint32Val_p)
@@ -218,8 +209,6 @@ Reads a 32 bit value from a buffer in big endian
 
 \return UINT32
 \retval Value       The data in platform endian
-
-\ingroup module_ami
 */
 /*----------------------------------------------------------------------------*/
 UINT32 ami_getUint32Be(void* pAddr_p)
@@ -244,8 +233,6 @@ Reads a 32 bit value from a buffer in little endian
 
 \return UINT32
 \retval Value       The data in platform endian
-
-\ingroup module_ami
 */
 /*----------------------------------------------------------------------------*/
 UINT32 ami_getUint32Le(void* pAddr_p)
@@ -268,8 +255,6 @@ Sets a 64 bit value to a buffer in big endian
 
 \param[out] pAddr_p         Pointer to the destination buffer
 \param[in]  uint64Val_p     The source value to convert
-
-\ingroup module_ami
 */
 /*----------------------------------------------------------------------------*/
 void ami_setUint64Be(void* pAddr_p, UINT64 uint64Val_p)
@@ -292,8 +277,6 @@ Sets a 64 bit value to a buffer in little endian
 
 \param[out] pAddr_p         Pointer to the destination buffer
 \param[in]  uint64Val_p     The source value to convert
-
-\ingroup module_ami
 */
 /*----------------------------------------------------------------------------*/
 void ami_setUint64Le(void* pAddr_p, UINT64 uint64Val_p)
@@ -318,8 +301,6 @@ Reads a 64 bit value from a buffer in big endian
 
 \return UINT64
 \retval Value       The data in platform endian
-
-\ingroup module_ami
 */
 /*----------------------------------------------------------------------------*/
 UINT64 ami_getUint64Be(void* pAddr_p)
@@ -348,8 +329,6 @@ Reads a 64 bit value from a buffer in little endian
 
 \return UINT64
 \retval Value       The data in platform endian
-
-\ingroup module_ami
 */
 /*----------------------------------------------------------------------------*/
 UINT64 ami_getUint64Le(void* pAddr_p)
@@ -371,7 +350,10 @@ UINT64 ami_getUint64Le(void* pAddr_p)
 /*============================================================================*/
 /*            P R I V A T E   F U N C T I O N S                               */
 /*============================================================================*/
-/* \name Private Functions */
-/* \{ */
+/** \name Private Functions */
+/** \{ */
 
-/* \} */
+/**
+ * \}
+ * \}
+ */

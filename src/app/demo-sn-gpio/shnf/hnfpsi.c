@@ -1,18 +1,24 @@
 /**
 ********************************************************************************
-\file   hnfpsi.c
+\file   demo-sn-gpio/shnf/hnfpsi.c
+
+\defgroup module_sn_shnf_hnfpsi Hardware near firmware module (PSI implementation)
+\{
 
 \brief  Implements the hardware near firmware for the psi interface
 
 Provides the interface from the SHNF to the slim interface library.
 
-\ingroup module_hnf
+\see group_libpsi
+\see group_libpsicommon
+
+\ingroup group_app_sn_shnf
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
 * License Agreement
 *
-* Copyright 2013 BERNECKER + RAINER, AUSTRIA, 5142 EGGELSBERG, B&R STRASSE 1
+* Copyright 2014 BERNECKER + RAINER, AUSTRIA, 5142 EGGELSBERG, B&R STRASSE 1
 * All rights reserved.
 *
 * Redistribution and use in source and binary forms,
@@ -155,8 +161,6 @@ provides an interface to POWERLINK by using the slim interface library.
 
 \retval TRUE    Init of the slim interface successfully
 \retval FALSE   Error on initialization
-
-\ingroup module_hnf
 */
 /*----------------------------------------------------------------------------*/
 BOOLEAN hnf_init(tHnfInit * pHnfInit_p)
@@ -203,8 +207,6 @@ BOOLEAN hnf_init(tHnfInit * pHnfInit_p)
 /*----------------------------------------------------------------------------*/
 /**
 \brief    Close the HNF slim interface driver
-
-\ingroup module_hnf
 */
 /*----------------------------------------------------------------------------*/
 void hnf_exit(void)
@@ -226,8 +228,6 @@ void hnf_exit(void)
 
 \retval TRUE    Processing of the asynchronous task failed
 \retval FALSE   Error during processing
-
-\ingroup module_hnf
 */
 /*----------------------------------------------------------------------------*/
 BOOLEAN hnf_processAsync(void)
@@ -288,8 +288,6 @@ channel 0 to the network.
 
 \retval TRUE    Transmit of the asynchronous frame successfully
 \retval FALSE   Transmit failed or channel is busy
-
-\ingroup module_hnf
 */
 /*----------------------------------------------------------------------------*/
 BOOLEAN hnf_postAsyncTxChannel0(const UINT8 * pPayload_p, UINT16 paylLen_p)
@@ -316,8 +314,6 @@ BOOLEAN hnf_postAsyncTxChannel0(const UINT8 * pPayload_p, UINT16 paylLen_p)
 
 \retval TRUE    Transmit buffer valid
 \retval FALSE   Error on getting the transmit buffer
-
-\ingroup module_hnf
 */
 /*----------------------------------------------------------------------------*/
 BOOLEAN hnf_getAsyncTxBufferChannel0(UINT8 ** ppTxBuffer_p, UINT16 * pBuffLen_p)
@@ -336,8 +332,6 @@ BOOLEAN hnf_getAsyncTxBufferChannel0(UINT8 ** ppTxBuffer_p, UINT16 * pBuffLen_p)
 /*----------------------------------------------------------------------------*/
 /**
 \brief    Call this function to free the receive message of async channel0
-
-\ingroup module_hnf
 */
 /*----------------------------------------------------------------------------*/
 void hnf_finishedAsyncRxChannel0(void)
@@ -354,8 +348,6 @@ void hnf_finishedAsyncRxChannel0(void)
 
 \retval TRUE    Post of the entry successful
 \retval FALSE   Error on posting
-
-\ingroup module_hnf
 */
 /*----------------------------------------------------------------------------*/
 BOOLEAN hnf_postLogChannel0(tErrorDesc * pErrDesc_p)
@@ -396,8 +388,6 @@ channel 0 to the network.
 
 \retval TRUE    Transmit of the synchronous frame successful
 \retval FALSE   Error on transmitting
-
-\ingroup module_hnf
 */
 /*----------------------------------------------------------------------------*/
 BOOLEAN hnf_postSyncTx(const UINT8 * pPayload_p, UINT16 paylLen_p)
@@ -417,8 +407,6 @@ BOOLEAN hnf_postSyncTx(const UINT8 * pPayload_p, UINT16 paylLen_p)
 
 \retval TRUE    Transmit buffer valid
 \retval FALSE   Error on getting the tx buffer
-
-\ingroup module_hnf
 */
 /*----------------------------------------------------------------------------*/
 BOOLEAN hnf_getSyncTxBuffer(UINT8 ** ppTxBuffer_p, UINT16 * pBuffLen_p)
@@ -439,8 +427,6 @@ BOOLEAN hnf_getSyncTxBuffer(UINT8 ** ppTxBuffer_p, UINT16 * pBuffLen_p)
 /*----------------------------------------------------------------------------*/
 /**
 \brief    Enable the syncronous interrupt
-
-\ingroup module_hnf
 */
 /*----------------------------------------------------------------------------*/
 void hnf_enableSyncIr(void)
@@ -452,8 +438,8 @@ void hnf_enableSyncIr(void)
 /*============================================================================*/
 /*            P R I V A T E   F U N C T I O N S                               */
 /*============================================================================*/
-/* \name Private Functions */
-/* \{ */
+/** \name Private Functions */
+/** \{ */
 
 /*----------------------------------------------------------------------------*/
 /**
@@ -461,8 +447,6 @@ void hnf_enableSyncIr(void)
 
 \retval TRUE    Transmit of the asynchronous frame successfully
 \retval FALSE   Transmit failed
-
-\ingroup module_hnf
 */
 /*----------------------------------------------------------------------------*/
 static BOOL initPsi(void)
@@ -546,8 +530,6 @@ static BOOL initPsi(void)
 
 \retval TRUE    Library module initialization successful
 \retval FALSE   Error during library module initialization
-
-\ingroup module_hnf
 */
 /*----------------------------------------------------------------------------*/
 static BOOL initModules(void)
@@ -646,8 +628,6 @@ static BOOL initModules(void)
 /*----------------------------------------------------------------------------*/
 /**
 \brief    Destroy slim interface modules
-
-\ingroup module_hnf
 */
 /*----------------------------------------------------------------------------*/
 static void exitModules(void)
@@ -688,8 +668,6 @@ static void exitModules(void)
  \param[in] pTimeStamp_p             Time information of the last interrupt.
 
  \return This function always succeeds
-
-\ingroup module_hnf
 */
 /*----------------------------------------------------------------------------*/
 static BOOL processSync(tPsiTimeStamp* pTimeStamp_p )
@@ -726,8 +704,6 @@ finished in one cycle. (This function is called at the end of the PSI tasks)
 \param[in] pTpdoImage_p         Pointer to the TPDO objects
 
  \return This function always succeeds
-
-\ingroup module_hnf
 */
 /*----------------------------------------------------------------------------*/
 static BOOL processApp(UINT32 rpdoRelTimeLow_p,
@@ -783,8 +759,6 @@ static BOOL processApp(UINT32 rpdoRelTimeLow_p,
 
  psi_syncIntH() implements the synchronous data interrupt. The PCP asserts
  the interrupt when periodic data is ready to transfer.
-
-\ingroup module_hnf
 */
 /*----------------------------------------------------------------------------*/
 static void syncHandler(void* pArg_p)
@@ -811,8 +785,6 @@ static void syncHandler(void* pArg_p)
 This function is called after a serial transfer from the PCP to the application.
 
 \param[in] fError_p       True if the transfer had an error
-
-\ingroup module_hnf
 */
 /*----------------------------------------------------------------------------*/
 static void serialTransferFinished(BOOL fError_p)
@@ -841,8 +813,6 @@ static void serialTransferFinished(BOOL fError_p)
 \brief    Error handler callback function
 
 \param pErrorInfo_p     Provides details about the occurred error
-
-\ingroup module_hnf
 */
 /*----------------------------------------------------------------------------*/
 static void errorHandler(tPsiErrorInfo* pErrorInfo_p)
@@ -880,8 +850,6 @@ static void errorHandler(tPsiErrorInfo* pErrorInfo_p)
 
 \retval TRUE        Processing of receive frame successful
 \retval FALSE       Error during processing
-
-\ingroup module_hnf
 */
 /*----------------------------------------------------------------------------*/
 static BOOL processRxAsyncChannel0(UINT8 * pPayload_p, UINT16 size_p)
@@ -927,8 +895,6 @@ static BOOL processRxAsyncChannel0(UINT8 * pPayload_p, UINT16 size_p)
 \param pLogData      The error message in interface form
 
 \return TRUE on success; FALSE on error
-
-\ingroup module_hnf
 */
 /*----------------------------------------------------------------------------*/
 static BOOL reformatErrorMessage(tErrorDesc * pErrDesc_p, tLogFormat * pLogData)
@@ -962,8 +928,6 @@ static BOOL reformatErrorMessage(tErrorDesc * pErrDesc_p, tLogFormat * pLogData)
 \param errLevel_p    The stack error level type
 
 \return The interface error level
-
-\ingroup module_hnf
 */
 /*----------------------------------------------------------------------------*/
 static tLogLevel reformatErrorInfo(tErrLevel errLevel_p)
@@ -990,4 +954,7 @@ static tLogLevel reformatErrorInfo(tErrLevel errLevel_p)
     return levelRet;
 }
 
-/* \} */
+/**
+ * \}
+ * \}
+ */

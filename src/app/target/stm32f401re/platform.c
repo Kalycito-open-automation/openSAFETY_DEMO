@@ -1,18 +1,22 @@
 /**
 ********************************************************************************
-\file   platform.c
+\file   target/stm32f401re/platform.c
+
+\defgroup module_targ_stm32f401_platform Platform module
+\{
 
 \brief  Application interface target handling
 
 Defines the platform specific functions of the slim interface example
 implementation.
 
+\ingroup group_app_targ_stm32f401
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
 * License Agreement
 *
-* Copyright 2013 BERNECKER + RAINER, AUSTRIA, 5142 EGGELSBERG, B&R STRASSE 1
+* Copyright 2014 BERNECKER + RAINER, AUSTRIA, 5142 EGGELSBERG, B&R STRASSE 1
 * All rights reserved.
 *
 * Redistribution and use in source and binary forms,
@@ -124,8 +128,6 @@ This function init's the peripherals of the AP like cache and the interrupt
 controller.
 
 \return TRUE on success; FALSE on error
-
-\ingroup module_platform
 */
 /*----------------------------------------------------------------------------*/
 BOOL platform_init(void)
@@ -160,8 +162,6 @@ BOOL platform_init(void)
 /*----------------------------------------------------------------------------*/
 /**
 \brief  Close all peripherals of the target
-
-\ingroup module_platform
 */
 /*----------------------------------------------------------------------------*/
 void platform_exit(void)
@@ -185,8 +185,6 @@ void platform_exit(void)
 \brief  Sleep for an amount of milliseconds
 
 \param[in] msec_p       The milliseconds to sleep
-
-\ingroup module_platform
 */
 /*----------------------------------------------------------------------------*/
 void platform_msleep(UINT32 msec_p)
@@ -197,8 +195,8 @@ void platform_msleep(UINT32 msec_p)
 /*============================================================================*/
 /*            P R I V A T E   F U N C T I O N S                               */
 /*============================================================================*/
-/* \name Private Functions */
-/* \{ */
+/** \name Private Functions */
+/** \{ */
 
 /*----------------------------------------------------------------------------*/
 /**
@@ -221,8 +219,6 @@ void platform_msleep(UINT32 msec_p)
          Flash Latency(WS)              = 2
 
  \return TRUE on success; FALSE on error
-
-\ingroup module_platform
 */
 /*----------------------------------------------------------------------------*/
 static BOOL systemClockInit(void)
@@ -274,8 +270,6 @@ The USART2 is used to forward characters from printf via the stdlib to the
 host PC terminal.
 
 \return TRUE on success; FALSE on error;
-
-\ingroup module_platform
 */
 /*----------------------------------------------------------------------------*/
 static BOOL uart2init(void)
@@ -327,8 +321,6 @@ static BOOL uart2init(void)
 /*----------------------------------------------------------------------------*/
 /**
 \brief  Initialize the benchmark pins used by benchmark.h
-
-\ingroup module_platform
 */
 /*----------------------------------------------------------------------------*/
 static void initBenchmark(void)
@@ -354,8 +346,6 @@ static void initBenchmark(void)
 \param char_p   The char to print
 
 \return The printed char on success; 0 otherweise
-
-\ingroup module_platform
 */
 /*----------------------------------------------------------------------------*/
 int __io_putchar(int char_p)
@@ -375,8 +365,6 @@ int __io_putchar(int char_p)
 \brief  Retargets the C library printf function to the USART.
 
 \return The read data from the UART
-
-\ingroup module_platform
 */
 /*----------------------------------------------------------------------------*/
 int __io_getchar(void)
@@ -392,4 +380,7 @@ int __io_getchar(void)
     return ret;
 }
 
-/* \} */
+/**
+ * \}
+ * \}
+ */

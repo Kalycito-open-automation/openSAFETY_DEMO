@@ -1,20 +1,26 @@
 /**
 ********************************************************************************
-\file   shnf.c
+\file   demo-sn-gpio/shnf/shnf.c
+
+\defgroup module_sn_shnf_main Main module
+\{
 
 \brief  Safety hardware near firmware managing module
 
-This module provides implements the interface to the underlying fieldbus.
+This module enables the sending and receiving of the openSAFETY frames.
 It forwards receive frames to the stack and transports the transmit frames
 to the HNF. Also the frame CRCs are calculated inside this module.
 
-\ingroup module_shnf
+\note In case of a dual channelled demo the cross communication is triggered in
+      this module.
+
+\ingroup group_app_sn_shnf
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
 * License Agreement
 *
-* Copyright 2013 BERNECKER + RAINER, AUSTRIA, 5142 EGGELSBERG, B&R STRASSE 1
+* Copyright 2014 BERNECKER + RAINER, AUSTRIA, 5142 EGGELSBERG, B&R STRASSE 1
 * All rights reserved.
 *
 * Redistribution and use in source and binary forms,
@@ -177,8 +183,6 @@ black channel.
 
 \retval TRUE    Init of the SHNF successfully
 \retval FALSE   Error on initialization
-
-\ingroup module_shnf
 */
 /*----------------------------------------------------------------------------*/
 BOOLEAN shnf_init(tShnfInitParam * pInitParam_p)
@@ -228,8 +232,6 @@ BOOLEAN shnf_init(tShnfInitParam * pInitParam_p)
 /*----------------------------------------------------------------------------*/
 /**
 \brief    Shutdown the SHNF managing module
-
-\ingroup module_shnf
 */
 /*----------------------------------------------------------------------------*/
 void shnf_exit(void)
@@ -242,8 +244,6 @@ void shnf_exit(void)
 \brief    Reset all SHNF internals
 
 \note This function is called on a cycle time violation
-
-\ingroup module_shnf
 */
 /*----------------------------------------------------------------------------*/
 void shnf_reset(void)
@@ -258,8 +258,6 @@ void shnf_reset(void)
 
 Needs to be called periodically and processes the asynchronous data of the
 hardware near firmware.
-
-\ingroup module_shnf
 */
 /*----------------------------------------------------------------------------*/
 BOOLEAN shnf_process(void)
@@ -316,8 +314,6 @@ BOOLEAN shnf_process(void)
 /*----------------------------------------------------------------------------*/
 /**
 \brief    Enable the synchronous interrupt
-
-\ingroup module_shnf
 */
 /*----------------------------------------------------------------------------*/
 void shnf_enableSyncIr(void)
@@ -538,8 +534,8 @@ UINT16 HNFiff_Crc16_755B_CalcSwp(UINT16 w_initCrc, INT32 l_subFrameLength,
 /*============================================================================*/
 /*            P R I V A T E   F U N C T I O N S                               */
 /*============================================================================*/
-/* \name Private Functions */
-/* \{ */
+/** \name Private Functions */
+/** \{ */
 
 /*----------------------------------------------------------------------------*/
 /**
@@ -547,8 +543,6 @@ UINT16 HNFiff_Crc16_755B_CalcSwp(UINT16 w_initCrc, INT32 l_subFrameLength,
 
 This function is called periodically in every cycle to ensure that a transmit
 spdo is created in every cycle.
-
-\ingroup module_shnf
 */
 /*----------------------------------------------------------------------------*/
 static void buildTxSpdoFrame(void)
@@ -576,8 +570,6 @@ static void buildTxSpdoFrame(void)
 
 \retval TRUE    Successfully processed the incoming frame
 \retval FALSE   Stack is currently busy
-
-\ingroup module_shnf
 */
 /*----------------------------------------------------------------------------*/
 static BOOLEAN processRxSsdoSnmtFrame(UINT8* pPayload_p, UINT16 paylLen_p)
@@ -624,8 +616,6 @@ static BOOLEAN processRxSsdoSnmtFrame(UINT8* pPayload_p, UINT16 paylLen_p)
 
 \param pPayload_p   Pointer to the incoming payload
 \param paylLen_p    Size of the incoming payload
-
-\ingroup module_shnf
 */
 /*----------------------------------------------------------------------------*/
 static void processRxSpdoFrame(UINT8* pPayload_p, UINT16 paylLen_p)
@@ -681,8 +671,6 @@ static void processRxSpdoFrame(UINT8* pPayload_p, UINT16 paylLen_p)
 This function processes the synchronous task at the end of the cycle.
 
 \return TRUE on success; FALSE on error
-
-\ingroup module_shnf
 */
 /*----------------------------------------------------------------------------*/
 static BOOLEAN processSync(void)
@@ -716,8 +704,6 @@ static BOOLEAN processSync(void)
 \param pPaylLen_p   Pointer to the length field of the payload
 
 \return The size of the whole frame
-
-\ingroup module_shnf
 */
 /*----------------------------------------------------------------------------*/
 static UINT16 getFrameLength(const UINT8 * pPaylLen_p)
@@ -738,4 +724,7 @@ static UINT16 getFrameLength(const UINT8 * pPaylLen_p)
     return payLenRes;
 }
 
-/* \} */
+/**
+ * \}
+ * \}
+ */

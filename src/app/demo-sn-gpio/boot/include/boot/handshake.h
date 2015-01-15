@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   boot/handshake.h
+\file   demo-sn-gpio/boot/include/boot/handshake.h
 
 \brief  Interface to the handshake module.
 

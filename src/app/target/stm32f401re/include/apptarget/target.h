@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   apptarget/target.h
+\file   stm32f401re/include/apptarget/target.h
 
 \brief  Target specific header file of the slim interface module
 

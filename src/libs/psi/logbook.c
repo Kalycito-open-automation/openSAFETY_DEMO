@@ -2,19 +2,22 @@
 ********************************************************************************
 \file   logbook.c
 
+\defgroup module_psi_log Logbook module
+\{
+
 \brief  Creates an instance of the logbook module
 
 This module handles the logbook channels between the PCP and the application.
 It simply tunnels the logbook information to the POWERLINK processor which
 forwards the data to the PLC.
 
-\ingroup module_log
+\ingroup group_libpsi
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
 * License Agreement
 *
-* Copyright 2013 BERNECKER + RAINER, AUSTRIA, 5142 EGGELSBERG, B&R STRASSE 1
+* Copyright 2014 BERNECKER + RAINER, AUSTRIA, 5142 EGGELSBERG, B&R STRASSE 1
 * All rights reserved.
 *
 * Redistribution and use in source and binary forms,
@@ -119,8 +122,6 @@ static tLogChanStatus log_checkChannelStatus(tLogInstance pInstance_p);
 /*----------------------------------------------------------------------------*/
 /**
 \brief    Initialize the logbook channel module
-
-\ingroup module_log
 */
 /*----------------------------------------------------------------------------*/
 void log_init(void)
@@ -139,11 +140,8 @@ logging data to the POWERLINK processor.
 \param[in]  chanId_p         Id of the logbook channel
 \param[in]  pInitParam_p     Logbook module initialization structure
 
-\return tLogInstance
 \retval Address              Pointer to the instance of the channel
 \retval NULL                 Unable to allocate instance
-
-\ingroup module_log
 */
 /*----------------------------------------------------------------------------*/
 tLogInstance log_create(tLogChanNum chanId_p, tLogInitParam* pInitParam_p)
@@ -188,8 +186,6 @@ tLogInstance log_create(tLogChanNum chanId_p, tLogInitParam* pInitParam_p)
 \brief    Destroy an logbook channel
 
 \param[in]  pInstance_p       The instance to destroy
-
-\ingroup module_log
 */
 /*----------------------------------------------------------------------------*/
 void log_destroy(tLogInstance pInstance_p)
@@ -209,11 +205,8 @@ void log_destroy(tLogInstance pInstance_p)
 \param[in]  pInstance_p      Logbook module instance
 \param[out] ppLogData_p      Pointer to the result address of the payload
 
-\return BOOL
 \retval TRUE    Success on getting the buffer
 \retval FALSE   Invalid parameter passed to function
-
-\ingroup module_log
 */
 /*----------------------------------------------------------------------------*/
 BOOL log_getCurrentLogBuffer(tLogInstance pInstance_p, tLogFormat ** ppLogData_p)
@@ -239,12 +232,9 @@ BOOL log_getCurrentLogBuffer(tLogInstance pInstance_p, tLogFormat ** ppLogData_p
 \param[in]  pInstance_p     Logbook module instance
 \param[in]  pLogData_p      Pointer to the logger data to send
 
-\return tLogTxStatus
 \retval kLogTxStatusSuccessful      Successfully posted payload to buffer
 \retval tLogTxStatusBusy            Unable to post payload to the logbook channel
 \retval kLogTxStatusError           Error while posting payload to the logbook channel
-
-\ingroup module_log
 */
 /*----------------------------------------------------------------------------*/
 tLogTxStatus log_postLogEntry(tLogInstance pInstance_p, tLogFormat* pLogData_p)
@@ -288,11 +278,8 @@ tLogTxStatus log_postLogEntry(tLogInstance pInstance_p, tLogFormat* pLogData_p)
 
 \param[in]  pInstance_p     Logbook module instance
 
-\return BOOL
 \retval TRUE        Logbook processed successfully
 \retval FALSE       Error while processing the logbook
-
-\ingroup module_log
 */
 /*----------------------------------------------------------------------------*/
 BOOL log_process(tLogInstance pInstance_p)
@@ -306,8 +293,8 @@ BOOL log_process(tLogInstance pInstance_p)
 /*============================================================================*/
 /*            P R I V A T E   F U N C T I O N S                               */
 /*============================================================================*/
-/* \name Private Functions */
-/* \{ */
+/** \name Private Functions */
+/** \{ */
 
 /*----------------------------------------------------------------------------*/
 /**
@@ -316,11 +303,8 @@ BOOL log_process(tLogInstance pInstance_p)
 \param[in] chanId_p                 Id of the logbook channel
 \param[in] txBuffId_p               Id of the logbook transmit buffer
 
-\return BOOL
 \retval TRUE    Initialization successful
 \retval FALSE   Error while initializing
-
-\ingroup module_log
 */
 /*----------------------------------------------------------------------------*/
 static BOOL log_initTransmitBuffer(tLogChanNum chanId_p,
@@ -373,8 +357,6 @@ static BOOL log_initTransmitBuffer(tLogChanNum chanId_p,
 \brief    Process logbook transmit frames
 
 \param[in]  pInstance_p     Logbook module instance
-
-\ingroup module_log
 */
 /*----------------------------------------------------------------------------*/
 static void log_handleTxFrame(tLogInstance pInstance_p)
@@ -422,8 +404,6 @@ static void log_handleTxFrame(tLogInstance pInstance_p)
 \param[in] pUserArg_p       The user argument
 
 \return Always returns success
-
-\ingroup module_log
 */
 /*----------------------------------------------------------------------------*/
 static BOOL log_incrTimeout(UINT8* pBuffer_p, UINT16 bufSize_p,
@@ -448,8 +428,6 @@ static BOOL log_incrTimeout(UINT8* pBuffer_p, UINT16 bufSize_p,
 \brief    Change local sequence number
 
 \param[inout] pSeqNr_p        Changed sequence number
-
-\ingroup module_log
 */
 /*----------------------------------------------------------------------------*/
 static void log_changeLocalSeqNr(tSeqNrValue* pSeqNr_p)
@@ -470,11 +448,8 @@ static void log_changeLocalSeqNr(tSeqNrValue* pSeqNr_p)
 
 \param[in]  pInstance_p             Pointer to the local instance
 
-\return tLogChanStatus
 \retval tChanStatusFree       Channel is free for transmission
 \retval tChanStatusBusy       Channel is currently transmitting
-
-\ingroup module_log
 */
 /*----------------------------------------------------------------------------*/
 static tLogChanStatus log_checkChannelStatus(tLogInstance pInstance_p)
@@ -499,6 +474,12 @@ static tLogChanStatus log_checkChannelStatus(tLogInstance pInstance_p)
     return chanStatus;
 }
 
-/* \} */
+/**
+ * \}
+ */
 
 #endif /* #if (((PSI_MODULE_INTEGRATION) & (PSI_MODULE_LOGBOOK)) != 0) */
+
+/**
+ * \}
+ */

@@ -1,18 +1,26 @@
 /**
 ********************************************************************************
-\file   sapl.c
+\file   demo-sn-gpio/sapl/sapl.c
+
+\defgroup module_sn_sapl_sapl Main module
+\{
 
 \brief  Safe application managing module
 
-This module manages the application near firmware parts.
+This module manages the application near firmware parts. It's main purpose is
+to trigger all SAPL submodules in a way to be as less time consuming as possible.
+Therefore the function sapl_processSync implements a task scheduler which enables
+to process any of the needed subtask of the SAPL. All subtasks are written in
+a way so that they are carried out in small pieces where the openSAFETY stack
+get's time to do some calculation between each piece.
 
-\ingroup module_sapl
+\ingroup group_app_sn_sapl
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
 * License Agreement
 *
-* Copyright 2013 BERNECKER + RAINER, AUSTRIA, 5142 EGGELSBERG, B&R STRASSE 1
+* Copyright 2014 BERNECKER + RAINER, AUSTRIA, 5142 EGGELSBERG, B&R STRASSE 1
 * All rights reserved.
 *
 * Redistribution and use in source and binary forms,
@@ -147,8 +155,6 @@ static tSaplInstance saplInstance_l SAFE_INIT_SEKTOR;
 
 \retval TRUE    Initialization was successful
 \retval FALSE   Error during initialization
-
-\ingroup module_sapl
 */
 /*----------------------------------------------------------------------------*/
 BOOLEAN sapl_init(void)
@@ -177,8 +183,6 @@ BOOLEAN sapl_init(void)
 /*----------------------------------------------------------------------------*/
 /**
 \brief    Shutdown the SAPL module
-
-\ingroup module_sapl
 */
 /*----------------------------------------------------------------------------*/
 void sapl_exit(void)
@@ -194,8 +198,6 @@ void sapl_exit(void)
 \brief    Reset all SAPL internals
 
 \note This function is called on a cycle time violation
-
-\ingroup module_shnf
 */
 /*----------------------------------------------------------------------------*/
 void sapl_reset(void)
@@ -212,8 +214,6 @@ background loop. (Shall not increment the flow counter)
 
 \retval TRUE    Processing of the SAPL successful
 \retval FALSE   Error during processing
-
-\ingroup module_sapl
 */
 /*----------------------------------------------------------------------------*/
 BOOLEAN sapl_process(void)
@@ -283,8 +283,6 @@ in the synchronous IR. (Stack functions increment the flow counter)
 
 \retval TRUE    Processing of the SAPL successful
 \retval FALSE   Error during processing
-
-\ingroup module_sapl
 */
 /*----------------------------------------------------------------------------*/
 BOOLEAN sapl_processSync(void)
@@ -361,8 +359,6 @@ BOOLEAN sapl_processSync(void)
 
 \retval TRUE    There is a valid SOD image in the storage
 \retval FALSE   No image available in the storage
-
-\ingroup module_sapl
 */
 /*----------------------------------------------------------------------------*/
 BOOLEAN sapl_checkSodStorage(void)
@@ -388,8 +384,6 @@ BOOLEAN sapl_checkSodStorage(void)
 
 \retval TRUE    Restore successful or nothing to restore
 \retval FALSE   Error during restore of the image
-
-\ingroup module_sapl
 */
 /*----------------------------------------------------------------------------*/
 BOOLEAN sapl_restoreSod(BOOLEAN fRestoreSod_p)
@@ -440,8 +434,6 @@ BOOLEAN sapl_restoreSod(BOOLEAN fRestoreSod_p)
 
 \retval TRUE    Connection valid bit is set
 \retval FALSE   Connection is not valid
-
-\ingroup module_sapl
 */
 /*----------------------------------------------------------------------------*/
 BOOLEAN sapl_getConnValidInst0(UINT16 spdoId_p)
@@ -645,8 +637,11 @@ UINT32 HNFiff_Crc32CalcSwp(UINT32 w_initCrc, INT32 l_length,
 /*============================================================================*/
 /*            P R I V A T E   F U N C T I O N S                               */
 /*============================================================================*/
-/* \name Private Functions */
-/* \{ */
+/** \name Private Functions */
+/** \{ */
 
-/* \} */
+/**
+ * \}
+ * \}
+ */
 

@@ -2,17 +2,22 @@
 ********************************************************************************
 \file   psicommon/ccobject.c
 
+\defgroup module_psicom_ccobject Configuration channel object list module
+\{
+
 \brief  Application interface configuration channel object list.
 
-Consists of the object list of the input and output configuration channel.
+This module implements a list of objects which can be accessed for reading and writing.
+This object list is used by the configuration channel to forward configuration data
+during runtime.
 
-\ingroup module-ccobject
+\ingroup group_libpsicommon
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
 * License Agreement
 *
-* Copyright 2013 BERNECKER + RAINER, AUSTRIA, 5142 EGGELSBERG, B&R STRASSE 1
+* Copyright 2014 BERNECKER + RAINER, AUSTRIA, 5142 EGGELSBERG, B&R STRASSE 1
 * All rights reserved.
 *
 * Redistribution and use in source and binary forms,
@@ -115,11 +120,8 @@ static tConfChanInstance          ccobjInstance_l;
 
 \param[in]  pfnCritSec_p       Pointer to the critical section entry function
 
-\return BOOL
 \retval TRUE        Object list successfully initialized
 \retval FALSE       Error while initializing
-
-\ingroup module_ccobject
 */
 /*----------------------------------------------------------------------------*/
 BOOL ccobject_init(tPsiCritSec pfnCritSec_p)
@@ -140,8 +142,6 @@ BOOL ccobject_init(tPsiCritSec pfnCritSec_p)
 /*----------------------------------------------------------------------------*/
 /**
 \brief    Destroy object list module
-
-\ingroup module_ccobject
 */
 /*----------------------------------------------------------------------------*/
 void ccobject_exit(void)
@@ -156,11 +156,8 @@ void ccobject_exit(void)
 \param[in]  objId_p         The id of the object
 \param[in]  pObjDef_p       Definition of the object
 
-\return  BOOL
 \retval  TRUE      Successfully initialized object
 \retval  FALSE     Invalid object initialization parameters
-
-\ingroup module_ccobject
 */
 /*----------------------------------------------------------------------------*/
 BOOL ccobject_initObject(UINT8 objId_p, tConfChanObject* pObjDef_p)
@@ -188,11 +185,8 @@ BOOL ccobject_initObject(UINT8 objId_p, tConfChanObject* pObjDef_p)
 
 \param[in] pObjDef_p        The object to write
 
-\return  BOOL
 \retval  TRUE      Write to object successful
 \retval  FALSE     Failed to update the object
-
-\ingroup module_ccobject
 */
 /*----------------------------------------------------------------------------*/
 BOOL ccobject_writeObject(tConfChanObject* pObjDef_p)
@@ -234,12 +228,9 @@ BOOL ccobject_writeObject(tConfChanObject* pObjDef_p)
 \param[in] objSubIdx_p     The subindex of the object to write
 \param[in] pData_p         Pointer to the payload of the object
 
-\return  tCcWriteState
 \retval  kCcWriteStateSuccessful     Successfully written to object list
 \retval  kCcWriteStateError          Error while writing to object list
 \retval  kCcWriteStateOutOfSync      Local object pointer out of sync
-
-\ingroup module_ccobject
 */
 /*----------------------------------------------------------------------------*/
 tCcWriteState ccobject_writeCurrObject(UINT16 objIdx_p, UINT8 objSubIdx_p,
@@ -303,11 +294,8 @@ tCcWriteState ccobject_writeCurrObject(UINT16 objIdx_p, UINT8 objSubIdx_p,
 \param[in]  objIdx_p          The object index to read
 \param[in]  objSubIdx_p       The object subindex to read
 
-\return  tConfChanObject
 \retval  Address    Object read successful
 \retval  Null       Unable to read object data
-
-\ingroup module_ccobject
 */
 /*----------------------------------------------------------------------------*/
 tConfChanObject* ccobject_readObject(UINT16 objIdx_p, UINT8 objSubIdx_p)
@@ -333,11 +321,8 @@ tConfChanObject* ccobject_readObject(UINT16 objIdx_p, UINT8 objSubIdx_p)
 /**
 \brief    Grab the current object from the object list
 
-\return  tConfChanObject*
 \retval  Address       Current object read successful
 \retval  Null          Unable to read current object data
-
-\ingroup module_ccobject
 */
 /*----------------------------------------------------------------------------*/
 tConfChanObject* ccobject_readCurrObject(void)
@@ -350,8 +335,6 @@ tConfChanObject* ccobject_readCurrObject(void)
 /*----------------------------------------------------------------------------*/
 /**
 \brief    Increment the current object read pointer
-
-\ingroup module_ccobject
 */
 /*----------------------------------------------------------------------------*/
 void ccobject_incObjReadPointer(void)
@@ -368,8 +351,6 @@ void ccobject_incObjReadPointer(void)
 /*----------------------------------------------------------------------------*/
 /**
 \brief    Increment the current object write pointer
-
-\ingroup module_ccobject
 */
 /*----------------------------------------------------------------------------*/
 void ccobject_incObjWritePointer(void)
@@ -391,11 +372,8 @@ void ccobject_incObjWritePointer(void)
 \param[in] objSubIdx_p      Subindex of the object
 \param[out] pSize_p         The resulting size of the object
 
-\return BOOL
 \retval TRUE     Size of object valid
 \retval FALSE    Unable to read the size of the object
-
-\ingroup module_ccobject
 */
 /*----------------------------------------------------------------------------*/
 BOOL ccobject_getObjectSize(UINT16 objIdx_p, UINT8 objSubIdx_p,
@@ -425,8 +403,11 @@ BOOL ccobject_getObjectSize(UINT16 objIdx_p, UINT8 objSubIdx_p,
 /*============================================================================*/
 /*            P R I V A T E   F U N C T I O N S                               */
 /*============================================================================*/
-/* \name Private Functions */
-/* \{ */
+/** \name Private Functions */
+/** \{ */
 
 
-/* \} */
+/**
+ * \}
+ * \}
+ */

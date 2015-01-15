@@ -1,19 +1,22 @@
 /**
 ********************************************************************************
-\file   handshake.c
+\file   demo-sn-gpio/boot/handshake.c
+
+\defgroup module_sn_boot_hands_com Handshake common module
+\{
 
 \brief  Handshake common module
 
-This module implements the common functions of the handhsake for uP-Master and
+This module implements the common functions of the handshake for uP-Master and
 uP-Slave.
 
-\ingroup module_hands
+\ingroup group_app_sn_boot
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
 * License Agreement
 *
-* Copyright 2013 BERNECKER + RAINER, AUSTRIA, 5142 EGGELSBERG, B&R STRASSE 1
+* Copyright 2014 BERNECKER + RAINER, AUSTRIA, 5142 EGGELSBERG, B&R STRASSE 1
 * All rights reserved.
 *
 * Redistribution and use in source and binary forms,
@@ -96,8 +99,6 @@ uP-Slave.
 
 \param[in]    snState_p        The value of the state field
 \param[inout] pRestoreSod_p    Pointer to the SOD restore flag
-
-\ingroup module_hands
 */
 /*----------------------------------------------------------------------------*/
 void hands_verifySnStateField(UINT16 snState_p, BOOLEAN * pRestoreSod_p)
@@ -129,8 +130,6 @@ void hands_verifySnStateField(UINT16 snState_p, BOOLEAN * pRestoreSod_p)
 
 \param[out]   pSnState_p       Pointer to the SN state field
 \param[inout] pRestoreSod_p    Pointer to the SOD restore flag
-
-\ingroup module_hands
 */
 /*----------------------------------------------------------------------------*/
 void hands_fillStateField(volatile UINT16* pSnState_p, BOOLEAN * pRestoreSod_p)
@@ -155,7 +154,10 @@ void hands_fillStateField(volatile UINT16* pSnState_p, BOOLEAN * pRestoreSod_p)
 /*============================================================================*/
 /*            P R I V A T E   F U N C T I O N S                               */
 /*============================================================================*/
-/* \name Private Functions */
-/* \{ */
+/** \name Private Functions */
+/** \{ */
 
-/* \} */
+/**
+ * \}
+ * \}
+ */

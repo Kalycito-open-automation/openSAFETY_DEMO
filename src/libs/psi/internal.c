@@ -2,18 +2,21 @@
 ********************************************************************************
 \file   internal.c
 
+\defgroup module_psi_int Internal module
+\{
+
 \brief  Application interface internal configuration module
 
 This module handlers library internals. It initializes internal modules and
 processes the synchronous and asynchronous task.
 
-\ingroup module_internal
+\ingroup group_libpsi
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
 * License Agreement
 *
-* Copyright 2013 BERNECKER + RAINER, AUSTRIA, 5142 EGGELSBERG, B&R STRASSE 1
+* Copyright 2014 BERNECKER + RAINER, AUSTRIA, 5142 EGGELSBERG, B&R STRASSE 1
 * All rights reserved.
 *
 * Redistribution and use in source and binary forms,
@@ -121,11 +124,8 @@ static tTbufAckRegister* psi_initAckRegister(tTbufNumLayout idAckReg_p);
 
 \param[in]  pInitParam_p       Initialization parameters
 
-\return BOOL
 \retval TRUE        Successfully initialized the internal module
 \retval FALSE       Error during initialization
-
-\ingroup module_internal
 */
 /*----------------------------------------------------------------------------*/
 BOOL psi_init(tPsiInitParam* pInitParam_p)
@@ -189,8 +189,6 @@ BOOL psi_init(tPsiInitParam* pInitParam_p)
 /*----------------------------------------------------------------------------*/
 /**
 \brief    Close the slim interface
-
-\ingroup module_internal
 */
 /*----------------------------------------------------------------------------*/
 void psi_exit(void)
@@ -206,11 +204,8 @@ void psi_exit(void)
 /**
 \brief    Process slim interface synchronous task
 
-\return  BOOL
 \retval  TRUE      Sync processing successful
 \retval  FALSE     Error while processing sync
-
-\ingroup module_internal
 */
 /*----------------------------------------------------------------------------*/
 BOOL psi_processSync(void)
@@ -232,11 +227,8 @@ BOOL psi_processSync(void)
 Process all library actions which shall be triggered after a successful
 exchange of the input/output image.
 
-\return  BOOL
 \retval  TRUE      Post action executed successfully
 \retval  FALSE     Error in post action
-
-\ingroup module_internal
 */
 /*----------------------------------------------------------------------------*/
 BOOL psi_processPostTransferActions(void)
@@ -255,11 +247,8 @@ BOOL psi_processPostTransferActions(void)
 /**
 \brief    Process slim interface asynchronous task
 
-\return  BOOL
 \retval  TRUE         Async processing successful
 \retval  FALSE        Error while processing async
-
-\ingroup module_internal
 */
 /*----------------------------------------------------------------------------*/
 BOOL psi_processAsync(void)
@@ -275,8 +264,8 @@ BOOL psi_processAsync(void)
 /*============================================================================*/
 /*            P R I V A T E   F U N C T I O N S                               */
 /*============================================================================*/
-/* \name Private Functions */
-/* \{ */
+/** \name Private Functions */
+/** \{ */
 
 /*----------------------------------------------------------------------------*/
 /**
@@ -284,11 +273,8 @@ BOOL psi_processAsync(void)
 
 \param[in]  pInitParam_p         Internal module initialization parameters
 
-\return  BOOL
 \retval  TRUE      Successfully initialized modules
 \retval  FALSE     Error while initializing internal modules
-
-\ingroup module_internal
 */
 /*----------------------------------------------------------------------------*/
 static BOOL psi_initIntModules(tPsiInitParam* pInitParam_p)
@@ -332,11 +318,8 @@ static BOOL psi_initIntModules(tPsiInitParam* pInitParam_p)
 
 \param[in]  idAckReg_p         Id of the acknowledge register
 
-\return tTbufAckRegister
 \retval Address      Address of the initialized ACK register
 \retval NULL         Error while initializing the acknowledge register
-
-\ingroup module_internal
 */
 /*----------------------------------------------------------------------------*/
 static tTbufAckRegister* psi_initAckRegister(tTbufNumLayout idAckReg_p)
@@ -360,4 +343,7 @@ static tTbufAckRegister* psi_initAckRegister(tTbufNumLayout idAckReg_p)
     return pAckRegBase;
 }
 
-/* \} */
+/**
+ * \}
+ * \}
+ */

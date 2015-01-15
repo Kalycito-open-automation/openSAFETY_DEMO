@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   sapl/sodstore.h
+\file   demo-sn-gpio/sapl/include/sapl/sodstore.h
 
 \brief  This module implements the store and restore mechanism of the SOD.
 

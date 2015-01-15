@@ -1,19 +1,22 @@
 /**
 ********************************************************************************
-\file   gpio.c
+\file   demo-sn-gpio/target/altera-nios2/gpio.c
+
+\defgroup module_sn_nios2_gpio GPIO pin's module
+\{
 
 \brief  Target specific functions of the system gpio pins
 
 This module implements the hardware near target specific functions of the
 system gpio pins for Altera Nios2 on TERASIC INK.
 
-\ingroup module_gpio
+\ingroup group_app_sn_targ_nios2
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
 * License Agreement
 *
-* Copyright 2013 BERNECKER + RAINER, AUSTRIA, 5142 EGGELSBERG, B&R STRASSE 1
+* Copyright 2014 BERNECKER + RAINER, AUSTRIA, 5142 EGGELSBERG, B&R STRASSE 1
 * All rights reserved.
 *
 * Redistribution and use in source and binary forms,
@@ -100,8 +103,6 @@ system gpio pins for Altera Nios2 on TERASIC INK.
 \brief    Initialize the gpio module
 
 \return 0 on success; 1 on error
-
-\ingroup module_gpio
 */
 /*----------------------------------------------------------------------------*/
 void gpio_init(void)
@@ -112,8 +113,6 @@ void gpio_init(void)
 /*----------------------------------------------------------------------------*/
 /**
 \brief    Close the gpio module
-
-\ingroup module_gpio
 */
 /*----------------------------------------------------------------------------*/
 void gpio_close(void)
@@ -127,8 +126,6 @@ void gpio_close(void)
 
 \param[in] spdoId_p       The id of the SPDO the connection valid should be set
 \param[in] isSet_p        TRUE if the connection valid is set
-
-\ingroup module_gpio
 */
 /*----------------------------------------------------------------------------*/
 void gpio_changeConValid(UINT16 spdoId_p, UINT8 isSet_p)
@@ -145,7 +142,10 @@ void gpio_changeConValid(UINT16 spdoId_p, UINT8 isSet_p)
 /*============================================================================*/
 /*            P R I V A T E   F U N C T I O N S                               */
 /*============================================================================*/
-/* \name Private Functions */
-/* \{ */
+/** \name Private Functions */
+/** \{ */
 
-/* \} */
+/**
+ * \}
+ * \}
+ */

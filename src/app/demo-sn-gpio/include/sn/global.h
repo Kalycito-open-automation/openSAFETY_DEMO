@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   sn/global.h
+\file   demo-sn-gpio/include/sn/global.h
 
 \brief  Global header of the safe node demo
 

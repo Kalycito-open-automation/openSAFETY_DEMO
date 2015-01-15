@@ -1,6 +1,9 @@
 /**
 ********************************************************************************
-\file   handshake-sl.c
+\file   demo-sn-gpio/boot/handshake-sl.c
+
+\defgroup module_sn_boot_hands_sl Handshake module (Slave side)
+\{
 
 \brief  Implements the handshake of uP-Master and uP-Slave
 
@@ -8,13 +11,13 @@ This module implements the handshake of both safe processors on the uP-Slave
 side. The slave sends the welcome message to the uP-Master and waits for the
 response.
 
-\ingroup module_hands
+\ingroup group_app_sn_boot
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
 * License Agreement
 *
-* Copyright 2013 BERNECKER + RAINER, AUSTRIA, 5142 EGGELSBERG, B&R STRASSE 1
+* Copyright 2014 BERNECKER + RAINER, AUSTRIA, 5142 EGGELSBERG, B&R STRASSE 1
 * All rights reserved.
 *
 * Redistribution and use in source and binary forms,
@@ -116,8 +119,6 @@ static void fillWelcomeMsg(BOOLEAN * pRestoreSod_p);
 
 \retval TRUE        Handshake was successful
 \retval FALSE       Error on handshake
-
-\ingroup module_hands
 */
 /*----------------------------------------------------------------------------*/
 BOOLEAN hands_perform(BOOLEAN * pRestoreSod_p)
@@ -154,18 +155,17 @@ BOOLEAN hands_perform(BOOLEAN * pRestoreSod_p)
 /*============================================================================*/
 /*            P R I V A T E   F U N C T I O N S                               */
 /*============================================================================*/
-/* \name Private Functions */
-/* \{ */
+/** \name Private Functions */
+/** \{ */
 
 /*----------------------------------------------------------------------------*/
 /**
 \brief    This function is called when the response is received
 
-\param[inout] pRespBase_p    Pointer to the SOD restore flag
+\param[in] pRespBase_p    Pointer to the SOD restore flag
+\param[in] respSize_p     The size of the response message
 
 \return The receive state of the response message
-
-\ingroup module_hands
 */
 /*----------------------------------------------------------------------------*/
 static BOOLEAN responseReceived(volatile UINT8* pRespBase_p, UINT16 respSize_p)
@@ -204,8 +204,6 @@ static BOOLEAN responseReceived(volatile UINT8* pRespBase_p, UINT16 respSize_p)
 
 \retval TRUE    The response message is correct
 \retval FALSE   Invalid response received
-
-\ingroup module_hands
 */
 /*----------------------------------------------------------------------------*/
 static BOOLEAN verifyResponseMessage(volatile tRespMsg * pRespMsg_p, BOOLEAN * pRestoreSod_p)
@@ -229,8 +227,6 @@ static BOOLEAN verifyResponseMessage(volatile tRespMsg * pRespMsg_p, BOOLEAN * p
 \brief    Fill the welcome message buffer
 
 \param[inout] pRestoreSod_p     Pointer to the SOD restore flag
-
-\ingroup module_hands
 */
 /*----------------------------------------------------------------------------*/
 static void fillWelcomeMsg(BOOLEAN * pRestoreSod_p)
@@ -245,4 +241,7 @@ static void fillWelcomeMsg(BOOLEAN * pRestoreSod_p)
     hands_fillStateField(&pWelcomeMsg->snState_m, pRestoreSod_p);
 }
 
-/* \} */
+/**
+ * \}
+ * \}
+ */
