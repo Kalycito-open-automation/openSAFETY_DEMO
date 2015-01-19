@@ -155,8 +155,6 @@ BOOL syncir_init(tPlatformSyncIrq pfnSyncIrq_p)
     NVIC_InitStructure.NVIC_IRQChannelCmd = DISABLE;
     NVIC_Init(&NVIC_InitStructure);
 
-    syncir_disable();
-
     return fReturn;
 }
 
@@ -198,6 +196,13 @@ syncir_enable() enables the synchronous interrupt.
 /*----------------------------------------------------------------------------*/
 void syncir_enable(void)
 {
+    /* Clear the EXTI line pending bit */
+    EXTI_ClearITPendingBit(EXTI_LINEx);
+
+    /* Clear pending interrupt in NVIC */
+    NVIC_ClearPendingIRQ(EXTIx_IRQn);
+
+    /* Really enable the synchronous interrupt */
     NVIC_EnableIRQ(EXTIx_IRQn);
 }
 
@@ -229,11 +234,38 @@ This function enables/disables the interrupts of the AP processor
 void syncir_enterCriticalSection(UINT8 fEnable_p)
 {
     if(fEnable_p)
-        syncir_enable();
+        NVIC_EnableIRQ(EXTIx_IRQn);
     else
-        syncir_disable();
+        NVIC_DisableIRQ(EXTIx_IRQn);
 }
 
+/*----------------------------------------------------------------------------*/
+/**
+\brief Get synchronous interrupt callback function
+
+\return The address of the synchronous interrupt callback function
+
+\ingroup module_syncir
+*/
+/*----------------------------------------------------------------------------*/
+tPlatformSyncIrq syncir_getSyncCallback(void)
+{
+    return pfnSyncIrq_l;
+}
+
+/*----------------------------------------------------------------------------*/
+/**
+\brief Set the synchronous interrupt callback function
+
+\param[in] pfnSyncCb_p      Pointer to the synchronous interrupt callback
+
+\ingroup module_syncir
+*/
+/*----------------------------------------------------------------------------*/
+void syncir_setSyncCallback(tPlatformSyncIrq pfnSyncCb_p)
+{
+    pfnSyncIrq_l = pfnSyncCb_p;
+}
 
 /*============================================================================*/
 /*            P R I V A T E   F U N C T I O N S                               */

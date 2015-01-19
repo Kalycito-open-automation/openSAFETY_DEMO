@@ -1,16 +1,17 @@
 /**
 ********************************************************************************
-\file   common/syncir.h
+\file   boot/internal/sync.h
 
-\brief  Interface to the target specific sync ISR handler
+\brief  Synchronization module internal header
 
-Interface to the driver for the synchronous interrupt for initialization
-handling and creating of a critical section.
+The synchronization module ensures a synchronous boot-up of both the uP-Master
+and the uP-Slave. It uses the upserial module to communicate with the other
+processor.
 
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -36,41 +37,52 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
 
-#ifndef _INC_common_syncir_H_
-#define _INC_common_syncir_H_
+#ifndef _INC_boot_internal_sync_H_
+#define _INC_boot_internal_sync_H_
 
 /*----------------------------------------------------------------------------*/
 /* includes                                                                   */
 /*----------------------------------------------------------------------------*/
-#include <libpsi/psi.h>
+#include <sn/global.h>
+
 
 /*----------------------------------------------------------------------------*/
 /* const defines                                                              */
 /*----------------------------------------------------------------------------*/
+#define READY_MSG_CONTENT     0xAA55AA55      /**< Header data of the ready message */
 
 /*----------------------------------------------------------------------------*/
 /* typedef                                                                    */
 /*----------------------------------------------------------------------------*/
 
 /**
- * \brief Synchronous interrupt callback function
+ * \brief Content of the ready message up-Slave -> up-Master
  */
-typedef void (*tPlatformSyncIrq)(void *);
+typedef struct
+{
+    UINT32 msgHeader_m;     /**< The header of the message (Filled with \ref READY_MSG_CONTENT) */
+} tReadyMsg;
+
+/**
+ * \brief Content of the synchronization message up-Master -> up-Slave
+ */
+typedef struct
+{
+    UINT32 msgHeader_m;     /**< The header of the message which was returned by uP-Master */
+    UINT64 consTime_m;      /**< The current value of the consecutive time on uP-Master */
+} tSyncMsg;
 
 /*----------------------------------------------------------------------------*/
 /* function prototypes                                                        */
 /*----------------------------------------------------------------------------*/
-BOOL syncir_init(tPlatformSyncIrq pfnSyncIrq_p);
-void syncir_exit(void);
 
-void syncir_acknowledge(void);
-void syncir_enable(void);
-void syncir_disable(void);
+#ifdef __cplusplus
+    extern "C" {
+#endif
 
-void syncir_enterCriticalSection(UINT8 fEnable_p);
+#ifdef __cplusplus
+    }
+#endif
 
-tPlatformSyncIrq syncir_getSyncCallback(void);
-void syncir_setSyncCallback(tPlatformSyncIrq pfnSyncCb_p);
 
-#endif /* _INC_common_syncir_H_ */
-
+#endif /* _INC_boot_internal_sync_H_ */

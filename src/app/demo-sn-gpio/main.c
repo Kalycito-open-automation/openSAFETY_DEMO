@@ -59,7 +59,8 @@ stack and processes the background task.
 
 #if (defined SYSTEM_PATH) & (SYSTEM_PATH > ID_ID_TARG_SINGLE )
 #include <sn/upserial.h>
-#include <sn/handshake.h>
+#include <boot/handshake.h>
+#include <boot/sync.h>
 
 #include <shnf/xcom.h>
 #endif /* #if (defined SYSTEM_PATH) && (SYSTEM_PATH > ID_TARG_SINGLE) */
@@ -202,34 +203,31 @@ int main (void)
                         {
                             DEBUG_TRACE(DEBUG_LVL_ALWAYS, "SUCCESS!\n");
 
-                            /* Restore the SOD from NVS if possible */
-                            if(sapl_restoreSod())
+#if (defined SYSTEM_PATH) && (SYSTEM_PATH > ID_TARG_SINGLE)
+                            /* Initialize the uP-Master <-> uP-Slave cross communication */
+                            if(initXCom())
                             {
-#if (defined SYSTEM_PATH) && (SYSTEM_PATH > ID_TARG_SINGLE)
-                                /* Initialize the uP-Master <-> uP-Slave cross communication */
-                                if(initXCom())
+#else
+                            /* Perform the SOD restore if needed (Single channeled only) */
+                            if(sapl_restoreSod(TRUE))
+                            {
+#endif /* #if (defined SYSTEM_PATH) && (SYSTEM_PATH > ID_TARG_SINGLE) */
+                                /* Change state of the openSAFETY stack to pre operational */
+                                if(stateh_enterPreOperational())
                                 {
-#endif /* #if (defined SYSTEM_PATH) && (SYSTEM_PATH > ID_TARG_SINGLE) */
+                                    /* Enable the synchronous interrupt */
+                                    shnf_enableSyncIr();
 
-                                    /* Change state of the openSAFETY stack to pre operational */
-                                    if(stateh_enterPreOperational())
+                                    DEBUG_TRACE(DEBUG_LVL_ALWAYS, "\nStart processing ... \n ");
+
+                                    if(processAsync())
                                     {
+                                        /* Shutdown triggered -> Terminate! */
+                                        retVal = 0;
+                                    }
+                                }   /* no else: Error is already reported in the called function */
 
-                                        /* Enable the synchronous interrupt */
-                                        shnf_enableSyncIr();
-
-                                        DEBUG_TRACE(DEBUG_LVL_ALWAYS, "\nStart processing ... \n ");
-
-                                        if(processAsync())
-                                        {
-                                            /* Shutdown triggered -> Terminate! */
-                                            retVal = 0;
-                                        }
-                                    }   /* no else: Error is already reported in the called function */
-#if (defined SYSTEM_PATH) && (SYSTEM_PATH > ID_TARG_SINGLE)
-                                }
-#endif /* #if (defined SYSTEM_PATH) && (SYSTEM_PATH > ID_TARG_SINGLE) */
-                            }   /* no else: Error is already reported in the called function */
+                           }   /* no else: Error is already reported in the called function */
                         }   /* no else: Error is already reported in the called function */
                     }   /* no else: Error is already reported in the called function */
                 }   /* no else: Error is already reported in the called function */
@@ -305,18 +303,30 @@ static BOOLEAN initOpenSafety(void)
 static BOOLEAN initXCom(void)
 {
     BOOLEAN fReturn = FALSE;
+    BOOLEAN fRestoreSod = FALSE;
 
     /* Initialize the uP-Master <-> uP-Slave serial device */
     if(upserial_init())
     {
+        /* Check if there is a valid SOD image */
+        fRestoreSod = sapl_checkSodStorage();
+
         /* Carry out the boot-up handshake of uP-Master and uP-Slave */
-        if(hands_perfHandshake())
+        if(hands_perform(&fRestoreSod))
         {
-            /* Enable the receiver to get the first XCom image from the other processor */
-            if(xcom_init())
+            /* Perform the SOD restore if needed (Dual channeled only) */
+            if(sapl_restoreSod(fRestoreSod))
             {
-                fReturn = TRUE;
-            }
+                /* Carry out the synchronization to ensure a synchronous bootup */
+                if(sync_perform())
+                {
+                    /* Initialize the cross communication module */
+                    if(xcom_init())
+                    {
+                        fReturn = TRUE;
+                    }   /* no else: Error is reported in the called function */
+                }   /* no else: Error is reported in the called function */
+            }   /* no else: Error is reported in called function */
         }   /* no else: Error is reported in called function */
     }
     else

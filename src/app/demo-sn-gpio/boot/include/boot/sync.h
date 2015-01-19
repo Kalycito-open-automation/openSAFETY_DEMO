@@ -1,11 +1,11 @@
 /**
 ********************************************************************************
-\file   sn/handshake.h
+\file   boot/sync.h
 
-\brief  Interface to the handshake module.
+\brief  Interface to the synchronization module.
 
-The handshake module ensures a synchronous boot-up of both the uP-Master and
-uP-Slave. It uses the upserial module to communicate with the other
+The synchronization module ensures a synchronous boot-up of both the uP-Master
+and the uP-Slave. It uses the upserial module to communicate with the other
 processor.
 
 *******************************************************************************/
@@ -37,8 +37,8 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
 
-#ifndef _INC_sn_handshake_H_
-#define _INC_sn_handshake_H_
+#ifndef _INC_boot_sync_H_
+#define _INC_boot_sync_H_
 
 /*----------------------------------------------------------------------------*/
 /* includes                                                                   */
@@ -49,10 +49,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /*----------------------------------------------------------------------------*/
 /* const defines                                                              */
 /*----------------------------------------------------------------------------*/
-#define WELCOME_MSG_LEN         4               /**< Length of the welcome message */
-#define WELCOME_MSG_CONTENT     0xDEADBEEF      /**< Data of the welcome message */
-
-#define RESPONSE_MSG_LEN        12              /**< Length of the response message */
 
 /*----------------------------------------------------------------------------*/
 /* typedef                                                                    */
@@ -66,11 +62,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     extern "C" {
 #endif
 
-BOOLEAN hands_perfHandshake(void);
+BOOLEAN sync_perform(void);
 
 #ifdef __cplusplus
     }
 #endif
 
 
-#endif /* _INC_sn_handshake_H_ */
+#endif /* _INC_boot_sync_H_ */

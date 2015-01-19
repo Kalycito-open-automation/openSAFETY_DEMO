@@ -1,12 +1,15 @@
 /**
 ********************************************************************************
-\file   syncir.c
+\file   sync-ma.c
 
-\brief  Implements the driver for the synchronous interrupt
+\brief  Implements the synchronization of uP-Master and uP-Slave
 
-Defines the platform specific functions for the synchronous interrupt for target
-stm32f103rb.
+This module implements the synchronization of both safe processors on the uP-Master
+side. The master waits until the uP-Slave is ready and the first synchronous
+interrupt has occurred. If this condition is met a response is sent to uP-Slave
+and the processing begins.
 
+\ingroup module_hands
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
@@ -45,13 +48,12 @@ stm32f103rb.
 /*----------------------------------------------------------------------------*/
 /* includes                                                                   */
 /*----------------------------------------------------------------------------*/
+#include <boot/sync.h>
+#include <boot/internal/sync.h>
+
+#include <boot/internal/pingpong-ma.h>
+
 #include <common/syncir.h>
-
-#include <stm32f4xx_hal_rcc.h>
-#include <stm32f4xx_hal_gpio.h>
-#include <stm32f4xx_hal_cortex.h>
-
-#include <stdio.h>
 
 /*============================================================================*/
 /*            G L O B A L   D E F I N I T I O N S                             */
@@ -61,14 +63,15 @@ stm32f103rb.
 /* const defines                                                              */
 /*----------------------------------------------------------------------------*/
 
+
 /*----------------------------------------------------------------------------*/
 /* module global vars                                                         */
 /*----------------------------------------------------------------------------*/
 
-
 /*----------------------------------------------------------------------------*/
 /* global function prototypes                                                 */
 /*----------------------------------------------------------------------------*/
+
 
 /*============================================================================*/
 /*            P R I V A T E   D E F I N I T I O N S                           */
@@ -77,26 +80,35 @@ stm32f103rb.
 /*----------------------------------------------------------------------------*/
 /* const defines                                                              */
 /*----------------------------------------------------------------------------*/
-#define IRx_SYNC_CLK_ENABLE()            __GPIOC_CLK_ENABLE()
-
-#define IRx_SYNC_PIN                     GPIO_PIN_7
-#define IRx_SYNC_GPIO_PORT               GPIOC
-
-#define Rx_SYNC_IRQn                     EXTI9_5_IRQn
 
 /*----------------------------------------------------------------------------*/
 /* local types                                                                */
 /*----------------------------------------------------------------------------*/
 
+/**
+ * \brief Synchronization module instance type
+ */
+typedef struct
+{
+    volatile tReadyMsg readyMsg_m;      /**< Buffer the uP-Slave ready message is stored */
+    volatile tSyncMsg syncMsg_m;        /**< Buffer the synchronization message is stored */
+    volatile BOOLEAN fSyncIrOccured_m;  /**< TRUE if the synchronous interrupt has occurred */
+} tSyncInstance;
+
 /*----------------------------------------------------------------------------*/
 /* local vars                                                                 */
 /*----------------------------------------------------------------------------*/
-static tPlatformSyncIrq pfnSyncIrq_l = NULL;
-
+static tSyncInstance syncInstance_l SAFE_INIT_SEKTOR;
 
 /*----------------------------------------------------------------------------*/
 /* local function prototypes                                                  */
 /*----------------------------------------------------------------------------*/
+static BOOLEAN readyReceived(volatile UINT8* pReadyBase_p, UINT16 readySize_p);
+static BOOLEAN verifyReadyMessage(volatile tReadyMsg * pReadyMsg_p);
+static void fillSyncMsg(void);
+
+static BOOLEAN waitForSyncIrq(void);
+static void syncInterruptCb(void *);
 
 /*============================================================================*/
 /*            P U B L I C   F U N C T I O N S                                 */
@@ -104,159 +116,30 @@ static tPlatformSyncIrq pfnSyncIrq_l = NULL;
 
 /*----------------------------------------------------------------------------*/
 /**
-\brief  initialize synchronous interrupt
+\brief    Carry out the synchronization between both processors
 
-syncir_init() initializes the synchronous interrupt. The timing parameters
-will be initialized, the interrupt handler will be connected to the ISR.
+\retval TRUE        Synchronization was successful
+\retval FALSE       Error on sync
 
-\param[in] pfnSyncIrq_p       The callback of the sync interrupt
-
-\return BOOL
-\retval TRUE        Synchronous interrupt initialization successful
-\retval FALSE       Error while initializing the synchronous interrupt
-
-\ingroup module_syncir
+\ingroup module_hands
 */
 /*----------------------------------------------------------------------------*/
-BOOL syncir_init(tPlatformSyncIrq pfnSyncIrq_p)
+BOOLEAN sync_perform(void)
 {
-    BOOL fReturn = TRUE;
-    GPIO_InitTypeDef   GPIO_InitStructure;
+    BOOLEAN fReturn = FALSE;
 
-    memset(&GPIO_InitStructure, 0, sizeof(GPIO_InitTypeDef));
+    /* Reset global variables */
+    MEMSET(&syncInstance_l, 0, sizeof(tSyncInstance));
 
-    /* Remember ISR handler callback */
-    pfnSyncIrq_l = pfnSyncIrq_p;
-
-    /* Enable GPIOC clock */
-    IRx_SYNC_CLK_ENABLE();
-
-    /* Configure SYNC interrupt pin */
-    GPIO_InitStructure.Pin = IRx_SYNC_PIN;
-    GPIO_InitStructure.Mode = GPIO_MODE_IT_RISING;
-    GPIO_InitStructure.Speed = GPIO_SPEED_MEDIUM;
-    GPIO_InitStructure.Pull = GPIO_PULLDOWN;
-    HAL_GPIO_Init(IRx_SYNC_GPIO_PORT, &GPIO_InitStructure);
-
-    /* Enable and set EXTI Line7 Interrupt to the lowest priority */
-    HAL_NVIC_SetPriority(Rx_SYNC_IRQn, 2, 0);
+    /* Call the ping/pong module transfer function to start the message exchange */
+    if(pipo_doTransfer((volatile UINT8*)&syncInstance_l.readyMsg_m, sizeof(tReadyMsg),
+                       (volatile UINT8*)&syncInstance_l.syncMsg_m, sizeof(tSyncMsg),
+                       readyReceived, "ready"))
+    {
+        fReturn = TRUE;
+    }   /* no else: Error is handled in the called function */
 
     return fReturn;
-}
-
-/*----------------------------------------------------------------------------*/
-/**
-\brief  Shutdown the synchronous interrupt
-
-\ingroup module_syncir
-*/
-/*----------------------------------------------------------------------------*/
-void syncir_exit(void)
-{
-    syncir_disable();
-
-    HAL_GPIO_DeInit(IRx_SYNC_GPIO_PORT, IRx_SYNC_PIN);
-
-    pfnSyncIrq_l = NULL;
-}
-
-/*----------------------------------------------------------------------------*/
-/**
-\brief  Acknowledge synchronous interrupt
-
-\ingroup module_syncir
-*/
-/*----------------------------------------------------------------------------*/
-void syncir_acknowledge(void)
-{
-    /* Acknowledge is done in ISR */
-}
-
-/*----------------------------------------------------------------------------*/
-/**
-\brief  Enable synchronous interrupt
-
-syncir_enable() enables the synchronous interrupt.
-
-\ingroup module_syncir
-*/
-/*----------------------------------------------------------------------------*/
-void syncir_enable(void)
-{
-    /* Clear EXTI pending interrupts */
-    __HAL_GPIO_EXTI_CLEAR_IT(IRx_SYNC_PIN);
-
-    /* Clear any IRQ pending from the last run */
-    HAL_NVIC_ClearPendingIRQ(Rx_SYNC_IRQn);
-
-    /* Really enable the synchronous interrupt */
-    NVIC_EnableIRQ(Rx_SYNC_IRQn);
-}
-
-/*----------------------------------------------------------------------------*/
-/**
-\brief  Disable synchronous interrupt
-
-syncir_disable() disable the synchronous interrupt.
-
-\ingroup module_syncir
-*/
-/*----------------------------------------------------------------------------*/
-void syncir_disable(void)
-{
-    NVIC_DisableIRQ(Rx_SYNC_IRQn);
-}
-
-/*----------------------------------------------------------------------------*/
-/**
-\brief Enter/leave the critical section
-
-This function enables/disables the interrupts of the AP processor
-
-\param[in]  fEnable_p       TRUE = enable interrupts; FALSE = disable interrupts
-
-\ingroup module_syncir
-*/
-/*----------------------------------------------------------------------------*/
-void syncir_enterCriticalSection(UINT8 fEnable_p)
-{
-    /* Toggle interrupt disable/enable */
-    if(fEnable_p)
-    {
-        __enable_irq();
-    }
-    else
-    {
-        __disable_irq();
-    }
-}
-
-/*----------------------------------------------------------------------------*/
-/**
-\brief Get synchronous interrupt callback function
-
-\return The address of the synchronous interrupt callback function
-
-\ingroup module_syncir
-*/
-/*----------------------------------------------------------------------------*/
-tPlatformSyncIrq syncir_getSyncCallback(void)
-{
-    return pfnSyncIrq_l;
-}
-
-/*----------------------------------------------------------------------------*/
-/**
-\brief Set the synchronous interrupt callback function
-
-\param[in] pfnSyncCb_p      Pointer to the synchronous interrupt callback
-
-\ingroup module_syncir
-*/
-/*----------------------------------------------------------------------------*/
-void syncir_setSyncCallback(tPlatformSyncIrq pfnSyncCb_p)
-{
-    pfnSyncIrq_l = pfnSyncCb_p;
 }
 
 /*============================================================================*/
@@ -267,35 +150,143 @@ void syncir_setSyncCallback(tPlatformSyncIrq pfnSyncCb_p)
 
 /*----------------------------------------------------------------------------*/
 /**
-\brief  External interrupt callback
+\brief    Callback which is called after the ready message is received
 
-\param gpioPin_p        The pin the callback is called for
+\param[in] pReadyBase_p   Pointer to the ready message base address
+\param[in] readySize_p    Size of the ready message
 
-\ingroup module_serial
+\retval TRUE    The ready message is correct
+\retval FALSE   Invalid message received
+
+\ingroup module_hands
 */
 /*----------------------------------------------------------------------------*/
-void HAL_GPIO_EXTI_Callback(uint16_t gpioPin_p)
+static BOOLEAN readyReceived(volatile UINT8* pReadyBase_p, UINT16 readySize_p)
 {
-  if(gpioPin_p == IRx_SYNC_PIN)
-  {
-      if(pfnSyncIrq_l != NULL)
-      {
-          pfnSyncIrq_l(NULL);
-      }
-  }
+    BOOLEAN fReturn = FALSE;
+
+    /* Check if the provided buffer is valid */
+    if(pReadyBase_p == (volatile UINT8*)&syncInstance_l.readyMsg_m &&
+       readySize_p == sizeof(tReadyMsg)            )
+    {
+        /* Verify the ready message validity */
+        if(verifyReadyMessage((volatile tReadyMsg *)pReadyBase_p))
+        {
+            /* Wait for the first synchronous interrupt from the PCP */
+            if(waitForSyncIrq())
+            {
+                /* Create the synchronization response message */
+                fillSyncMsg();
+
+                fReturn = TRUE;
+            }
+        }
+        else
+        {
+            /* Ready message is invalid */
+            errh_postFatalError(kErrSourcePeriph, kHandSReadyMsgInvalid, 0);
+        }
+    }
+    else
+    {
+        /* The provided receive buffer is invalid */
+        errh_postFatalError(kErrSourcePeriph, kHandSReceiveBufferInvalid, 0);
+    }
+
+    return fReturn;
 }
 
 /*----------------------------------------------------------------------------*/
 /**
-\brief  External interrupt handler for the synchronous interrupt
+\brief    Verify the ready message correctness
 
-\ingroup module_serial
+\param[in]    pReadyMsg_p    Pointer to the ready message
+
+\retval TRUE    The ready message is correct
+\retval FALSE   Invalid message received
+
+\ingroup module_hands
 */
 /*----------------------------------------------------------------------------*/
-void EXTI9_5_IRQHandler(void)
+static BOOLEAN verifyReadyMessage(volatile tReadyMsg * pReadyMsg_p)
 {
-    HAL_GPIO_EXTI_IRQHandler(IRx_SYNC_PIN);
+    BOOLEAN fMsgCorrect = FALSE;
+
+    /* Verify the correctness of the ready message */
+    if(pReadyMsg_p->msgHeader_m == (UINT32)READY_MSG_CONTENT)
+    {
+        fMsgCorrect = TRUE;
+    }
+
+    return fMsgCorrect;
+}
+
+/*----------------------------------------------------------------------------*/
+/**
+\brief    Fill the synchronization response message buffer
+
+\ingroup module_hands
+*/
+/*----------------------------------------------------------------------------*/
+static void fillSyncMsg(void)
+{
+    volatile tSyncMsg * pSyncMsg = &syncInstance_l.syncMsg_m;
+    UINT64 currTime = constime_getTimeBase();
+
+    /* Fill the sync response message header */
+    pSyncMsg->msgHeader_m = syncInstance_l.readyMsg_m.msgHeader_m;
+
+    /* Set the current consecutive timebase in the sync message */
+    MEMCOPY(&pSyncMsg->consTime_m, &currTime, sizeof(UINT64));
+}
+
+/*----------------------------------------------------------------------------*/
+/**
+\brief    Wait until the synchronous interrupt from PCP occurred once
+
+\return TRUE on success; FALSE on error
+
+\ingroup module_hands
+*/
+/*----------------------------------------------------------------------------*/
+static BOOLEAN waitForSyncIrq(void)
+{
+    BOOLEAN fReturn = TRUE;
+    tPlatformSyncIrq pfnSyncIrCb = syncir_getSyncCallback();
+
+    /* Set new local synchronous interrupt callback */
+    syncir_setSyncCallback(syncInterruptCb);
+
+    DEBUG_TRACE(DEBUG_LVL_ALWAYS, "\nWait for sync interrupt ... \n");
+
+    syncir_enable();
+
+    while(syncInstance_l.fSyncIrOccured_m == FALSE)
+        ;
+
+    /* Disable the synchronous interrupt */
+    syncir_disable();
+
+    /* Restore the old value of the synchronous interrupt */
+    syncir_setSyncCallback(pfnSyncIrCb);
+
+    return fReturn;
+}
+
+/*----------------------------------------------------------------------------*/
+/**
+\brief    Local synchronous interrupt callback function
+
+\param[in] pArg_p       Pointer to the ir arguments
+
+\ingroup module_hands
+*/
+/*----------------------------------------------------------------------------*/
+static void syncInterruptCb(void * pArg_p)
+{
+    UNUSED_PARAMETER(pArg_p);
+
+    syncInstance_l.fSyncIrOccured_m = TRUE;
 }
 
 /* \} */
-

@@ -1,12 +1,14 @@
 /**
 ********************************************************************************
-\file   syncir.c
+\file   handshake-sl.c
 
-\brief  Implements the driver for the synchronous interrupt
+\brief  Implements the handshake of uP-Master and uP-Slave
 
-Defines the platform specific functions for the synchronous interrupt for target
-stm32f103rb.
+This module implements the handshake of both safe processors on the uP-Slave
+side. The slave sends the welcome message to the uP-Master and waits for the
+response.
 
+\ingroup module_hands
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
@@ -45,13 +47,10 @@ stm32f103rb.
 /*----------------------------------------------------------------------------*/
 /* includes                                                                   */
 /*----------------------------------------------------------------------------*/
-#include <common/syncir.h>
+#include <boot/handshake.h>
+#include <boot/internal/handshake.h>
 
-#include <stm32f4xx_hal_rcc.h>
-#include <stm32f4xx_hal_gpio.h>
-#include <stm32f4xx_hal_cortex.h>
-
-#include <stdio.h>
+#include <boot/internal/pingpong-sl.h>
 
 /*============================================================================*/
 /*            G L O B A L   D E F I N I T I O N S                             */
@@ -60,15 +59,16 @@ stm32f103rb.
 /*----------------------------------------------------------------------------*/
 /* const defines                                                              */
 /*----------------------------------------------------------------------------*/
+#define RESPONSE_TIMEOUT_MS           (UINT32)0x2000      /**< Wait time until a timeout occurs */
 
 /*----------------------------------------------------------------------------*/
 /* module global vars                                                         */
 /*----------------------------------------------------------------------------*/
 
-
 /*----------------------------------------------------------------------------*/
 /* global function prototypes                                                 */
 /*----------------------------------------------------------------------------*/
+
 
 /*============================================================================*/
 /*            P R I V A T E   D E F I N I T I O N S                           */
@@ -77,26 +77,32 @@ stm32f103rb.
 /*----------------------------------------------------------------------------*/
 /* const defines                                                              */
 /*----------------------------------------------------------------------------*/
-#define IRx_SYNC_CLK_ENABLE()            __GPIOC_CLK_ENABLE()
-
-#define IRx_SYNC_PIN                     GPIO_PIN_7
-#define IRx_SYNC_GPIO_PORT               GPIOC
-
-#define Rx_SYNC_IRQn                     EXTI9_5_IRQn
 
 /*----------------------------------------------------------------------------*/
 /* local types                                                                */
 /*----------------------------------------------------------------------------*/
 
+/**
+ * \brief Handshake module instance type
+ */
+typedef struct
+{
+    volatile tWelcMsg welcMsg_m;      /**< Buffer the welcome message is stored */
+    volatile tRespMsg respMsg_m;      /**< Buffer the response message is stored */
+    BOOLEAN * pRestoreSod_m;         /**< Pointer to the SOD restore flag */
+} tHandsInstance;
+
 /*----------------------------------------------------------------------------*/
 /* local vars                                                                 */
 /*----------------------------------------------------------------------------*/
-static tPlatformSyncIrq pfnSyncIrq_l = NULL;
-
+static tHandsInstance handsInstance_l SAFE_INIT_SEKTOR;
 
 /*----------------------------------------------------------------------------*/
 /* local function prototypes                                                  */
 /*----------------------------------------------------------------------------*/
+static BOOLEAN responseReceived(volatile UINT8* pRespBase_p, UINT16 respSize_p);
+static BOOLEAN verifyResponseMessage(volatile tRespMsg * pRespMsg_p, BOOLEAN * pRestoreSod_p);
+static void fillWelcomeMsg(BOOLEAN * pRestoreSod_p);
 
 /*============================================================================*/
 /*            P U B L I C   F U N C T I O N S                                 */
@@ -104,159 +110,45 @@ static tPlatformSyncIrq pfnSyncIrq_l = NULL;
 
 /*----------------------------------------------------------------------------*/
 /**
-\brief  initialize synchronous interrupt
+\brief    Carry out the handshake between both processors
 
-syncir_init() initializes the synchronous interrupt. The timing parameters
-will be initialized, the interrupt handler will be connected to the ISR.
+\param[inout] pRestoreSod_p     Pointer to the SOD restore flag
 
-\param[in] pfnSyncIrq_p       The callback of the sync interrupt
+\retval TRUE        Handshake was successful
+\retval FALSE       Error on handshake
 
-\return BOOL
-\retval TRUE        Synchronous interrupt initialization successful
-\retval FALSE       Error while initializing the synchronous interrupt
-
-\ingroup module_syncir
+\ingroup module_hands
 */
 /*----------------------------------------------------------------------------*/
-BOOL syncir_init(tPlatformSyncIrq pfnSyncIrq_p)
+BOOLEAN hands_perform(BOOLEAN * pRestoreSod_p)
 {
-    BOOL fReturn = TRUE;
-    GPIO_InitTypeDef   GPIO_InitStructure;
+    BOOLEAN fReturn = FALSE;
 
-    memset(&GPIO_InitStructure, 0, sizeof(GPIO_InitTypeDef));
-
-    /* Remember ISR handler callback */
-    pfnSyncIrq_l = pfnSyncIrq_p;
-
-    /* Enable GPIOC clock */
-    IRx_SYNC_CLK_ENABLE();
-
-    /* Configure SYNC interrupt pin */
-    GPIO_InitStructure.Pin = IRx_SYNC_PIN;
-    GPIO_InitStructure.Mode = GPIO_MODE_IT_RISING;
-    GPIO_InitStructure.Speed = GPIO_SPEED_MEDIUM;
-    GPIO_InitStructure.Pull = GPIO_PULLDOWN;
-    HAL_GPIO_Init(IRx_SYNC_GPIO_PORT, &GPIO_InitStructure);
-
-    /* Enable and set EXTI Line7 Interrupt to the lowest priority */
-    HAL_NVIC_SetPriority(Rx_SYNC_IRQn, 2, 0);
-
-    return fReturn;
-}
-
-/*----------------------------------------------------------------------------*/
-/**
-\brief  Shutdown the synchronous interrupt
-
-\ingroup module_syncir
-*/
-/*----------------------------------------------------------------------------*/
-void syncir_exit(void)
-{
-    syncir_disable();
-
-    HAL_GPIO_DeInit(IRx_SYNC_GPIO_PORT, IRx_SYNC_PIN);
-
-    pfnSyncIrq_l = NULL;
-}
-
-/*----------------------------------------------------------------------------*/
-/**
-\brief  Acknowledge synchronous interrupt
-
-\ingroup module_syncir
-*/
-/*----------------------------------------------------------------------------*/
-void syncir_acknowledge(void)
-{
-    /* Acknowledge is done in ISR */
-}
-
-/*----------------------------------------------------------------------------*/
-/**
-\brief  Enable synchronous interrupt
-
-syncir_enable() enables the synchronous interrupt.
-
-\ingroup module_syncir
-*/
-/*----------------------------------------------------------------------------*/
-void syncir_enable(void)
-{
-    /* Clear EXTI pending interrupts */
-    __HAL_GPIO_EXTI_CLEAR_IT(IRx_SYNC_PIN);
-
-    /* Clear any IRQ pending from the last run */
-    HAL_NVIC_ClearPendingIRQ(Rx_SYNC_IRQn);
-
-    /* Really enable the synchronous interrupt */
-    NVIC_EnableIRQ(Rx_SYNC_IRQn);
-}
-
-/*----------------------------------------------------------------------------*/
-/**
-\brief  Disable synchronous interrupt
-
-syncir_disable() disable the synchronous interrupt.
-
-\ingroup module_syncir
-*/
-/*----------------------------------------------------------------------------*/
-void syncir_disable(void)
-{
-    NVIC_DisableIRQ(Rx_SYNC_IRQn);
-}
-
-/*----------------------------------------------------------------------------*/
-/**
-\brief Enter/leave the critical section
-
-This function enables/disables the interrupts of the AP processor
-
-\param[in]  fEnable_p       TRUE = enable interrupts; FALSE = disable interrupts
-
-\ingroup module_syncir
-*/
-/*----------------------------------------------------------------------------*/
-void syncir_enterCriticalSection(UINT8 fEnable_p)
-{
-    /* Toggle interrupt disable/enable */
-    if(fEnable_p)
+    if(pRestoreSod_p != NULL)
     {
-        __enable_irq();
+        /* Reset global variables */
+        MEMSET(&handsInstance_l, 0, sizeof(tHandsInstance));
+
+        /* Save location of restore SOD flag */
+        handsInstance_l.pRestoreSod_m = pRestoreSod_p;
+
+        /* Create the welcome message */
+        fillWelcomeMsg(pRestoreSod_p);
+
+        /* Call the ping/pong module transfer function to start the message exchange */
+        if(pipo_doTransfer((volatile UINT8 *)&handsInstance_l.welcMsg_m, sizeof(tWelcMsg),
+                           (volatile UINT8 *)&handsInstance_l.respMsg_m, sizeof(tRespMsg),
+                           responseReceived, "welcome", RESPONSE_TIMEOUT_MS))
+        {
+            fReturn = TRUE;
+        }   /* no else: Error is handled in the called function */
     }
     else
     {
-        __disable_irq();
+        errh_postFatalError(kErrSourcePeriph, kErrorInvalidParameter, 0);
     }
-}
 
-/*----------------------------------------------------------------------------*/
-/**
-\brief Get synchronous interrupt callback function
-
-\return The address of the synchronous interrupt callback function
-
-\ingroup module_syncir
-*/
-/*----------------------------------------------------------------------------*/
-tPlatformSyncIrq syncir_getSyncCallback(void)
-{
-    return pfnSyncIrq_l;
-}
-
-/*----------------------------------------------------------------------------*/
-/**
-\brief Set the synchronous interrupt callback function
-
-\param[in] pfnSyncCb_p      Pointer to the synchronous interrupt callback
-
-\ingroup module_syncir
-*/
-/*----------------------------------------------------------------------------*/
-void syncir_setSyncCallback(tPlatformSyncIrq pfnSyncCb_p)
-{
-    pfnSyncIrq_l = pfnSyncCb_p;
+    return fReturn;
 }
 
 /*============================================================================*/
@@ -267,35 +159,90 @@ void syncir_setSyncCallback(tPlatformSyncIrq pfnSyncCb_p)
 
 /*----------------------------------------------------------------------------*/
 /**
-\brief  External interrupt callback
+\brief    This function is called when the response is received
 
-\param gpioPin_p        The pin the callback is called for
+\param[inout] pRespBase_p    Pointer to the SOD restore flag
 
-\ingroup module_serial
+\return The receive state of the response message
+
+\ingroup module_hands
 */
 /*----------------------------------------------------------------------------*/
-void HAL_GPIO_EXTI_Callback(uint16_t gpioPin_p)
+static BOOLEAN responseReceived(volatile UINT8* pRespBase_p, UINT16 respSize_p)
 {
-  if(gpioPin_p == IRx_SYNC_PIN)
-  {
-      if(pfnSyncIrq_l != NULL)
-      {
-          pfnSyncIrq_l(NULL);
-      }
-  }
+    BOOLEAN fReturn = FALSE;
+
+    if((volatile UINT8*)&handsInstance_l.respMsg_m == pRespBase_p &&
+       respSize_p == sizeof(tRespMsg)             )
+    {
+        /* Check if the received data is correct */
+        if(verifyResponseMessage((volatile tRespMsg*)pRespBase_p, handsInstance_l.pRestoreSod_m))
+        {
+            fReturn = TRUE;
+        }
+        else
+        {
+            /* Response message is invalid */
+            errh_postFatalError(kErrSourcePeriph, kHandSResponseMsgInvalid, 0);
+        }
+    }
+    else
+    {
+        /* The provided receive buffer is invalid */
+        errh_postFatalError(kErrSourcePeriph, kHandSReceiveBufferInvalid, 0);
+    }
+
+    return fReturn;
 }
 
 /*----------------------------------------------------------------------------*/
 /**
-\brief  External interrupt handler for the synchronous interrupt
+\brief    Verify the response message correctness
 
-\ingroup module_serial
+\param[in]    pRespMsg_p           Pointer to the received response message
+\param[inout] pRestoreSod_p        Pointer to the SOD restore flag
+
+\retval TRUE    The response message is correct
+\retval FALSE   Invalid response received
+
+\ingroup module_hands
 */
 /*----------------------------------------------------------------------------*/
-void EXTI9_5_IRQHandler(void)
+static BOOLEAN verifyResponseMessage(volatile tRespMsg * pRespMsg_p, BOOLEAN * pRestoreSod_p)
 {
-    HAL_GPIO_EXTI_IRQHandler(IRx_SYNC_PIN);
+    BOOLEAN fMsgCorrect = FALSE;
+
+    /* Verify the correctness of the response message header */
+    if(pRespMsg_p->msgHeader_m ==  handsInstance_l.welcMsg_m.msgHeader_m)
+    {
+        /* Verify the SN state field and take action */
+        hands_verifySnStateField(pRespMsg_p->snState_m, pRestoreSod_p);
+
+        fMsgCorrect = TRUE;
+    }
+
+    return fMsgCorrect;
+}
+
+/*----------------------------------------------------------------------------*/
+/**
+\brief    Fill the welcome message buffer
+
+\param[inout] pRestoreSod_p     Pointer to the SOD restore flag
+
+\ingroup module_hands
+*/
+/*----------------------------------------------------------------------------*/
+static void fillWelcomeMsg(BOOLEAN * pRestoreSod_p)
+{
+    volatile tWelcMsg * pWelcomeMsg = &handsInstance_l.welcMsg_m;
+
+    /* Fill the welcome message header */
+    pWelcomeMsg->msgHeader_m = WELCOME_MSG_CONTENT;
+
+    /* Set the welcome message SN state variable */
+    /* Fill the SOD state field */
+    hands_fillStateField(&pWelcomeMsg->snState_m, pRestoreSod_p);
 }
 
 /* \} */
-

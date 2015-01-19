@@ -108,6 +108,9 @@ typedef enum
 
     kHandSWelcomeMsgInvalid                 = 0x90,     /**< Unable to verify the welcome message */
     kHandSResponseMsgInvalid                = 0x91,     /**< Unable to create of verify the response message */
+    kHandSReceiveBufferInvalid              = 0x92,     /**< The provided receive buffer is invalid */
+    kHandSReadyMsgInvalid                   = 0x93,     /**< Unable to verify the ready message */
+    kHandSSyncMsgInvalid                    = 0x94,     /**< Unable to verify the synchronization message */
 
     kXComTimeDeviationTooHigh               = 0xA0,     /**< The deviation of the local time and the time from the other processor is too high */
     kXComFlowCountMissmatch                 = 0xA1,     /**< The flow counter on the target is not matching */

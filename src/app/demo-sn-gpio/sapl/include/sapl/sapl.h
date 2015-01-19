@@ -67,7 +67,8 @@ void sapl_reset(void);
 BOOLEAN sapl_process(void);
 BOOLEAN sapl_processSync(void);
 
-BOOLEAN sapl_restoreSod(void);
+BOOLEAN sapl_checkSodStorage(void);
+BOOLEAN sapl_restoreSod(BOOLEAN fRestoreSod_p);
 
 #ifdef __cplusplus
     }

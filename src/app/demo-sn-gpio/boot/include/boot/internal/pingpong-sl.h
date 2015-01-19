@@ -1,16 +1,15 @@
 /**
 ********************************************************************************
-\file   common/syncir.h
+\file   boot/internal/pingpong-sl.h
 
-\brief  Interface to the target specific sync ISR handler
+\brief  Interface to the ping pong module.
 
-Interface to the driver for the synchronous interrupt for initialization
-handling and creating of a critical section.
+The file implements the interface to the ping pong module slave implementation.
 
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -36,13 +35,14 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
 
-#ifndef _INC_common_syncir_H_
-#define _INC_common_syncir_H_
+#ifndef _INC_boot_internal_pingpong_sl_H_
+#define _INC_boot_internal_pingpong_sl_H_
 
 /*----------------------------------------------------------------------------*/
 /* includes                                                                   */
 /*----------------------------------------------------------------------------*/
-#include <libpsi/psi.h>
+#include <sn/global.h>
+
 
 /*----------------------------------------------------------------------------*/
 /* const defines                                                              */
@@ -51,26 +51,24 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /*----------------------------------------------------------------------------*/
 /* typedef                                                                    */
 /*----------------------------------------------------------------------------*/
-
-/**
- * \brief Synchronous interrupt callback function
- */
-typedef void (*tPlatformSyncIrq)(void *);
+typedef BOOLEAN (*tPongRecv)(volatile UINT8* pPongBase_p, UINT16 pongSize_p);
 
 /*----------------------------------------------------------------------------*/
 /* function prototypes                                                        */
 /*----------------------------------------------------------------------------*/
-BOOL syncir_init(tPlatformSyncIrq pfnSyncIrq_p);
-void syncir_exit(void);
 
-void syncir_acknowledge(void);
-void syncir_enable(void);
-void syncir_disable(void);
+#ifdef __cplusplus
+    extern "C" {
+#endif
 
-void syncir_enterCriticalSection(UINT8 fEnable_p);
+BOOLEAN pipo_doTransfer(volatile UINT8 * pPingBase_p, UINT16 pingSize_p,
+                        volatile UINT8 * pPongBase_p, UINT16 pongSize_p,
+                        tPongRecv pfnPongRcv_p, char * pingName_p,
+                        UINT32 pongTimeout_p);
 
-tPlatformSyncIrq syncir_getSyncCallback(void);
-void syncir_setSyncCallback(tPlatformSyncIrq pfnSyncCb_p);
+#ifdef __cplusplus
+    }
+#endif
 
-#endif /* _INC_common_syncir_H_ */
 
+#endif /* _INC_boot_internal_pingpong_sl_H_ */

@@ -357,7 +357,34 @@ BOOLEAN sapl_processSync(void)
 
 /*----------------------------------------------------------------------------*/
 /**
+\brief    Check if there is an SOD image present in the NVM
+
+\retval TRUE    There is a valid SOD image in the storage
+\retval FALSE   No image available in the storage
+
+\ingroup module_sapl
+*/
+/*----------------------------------------------------------------------------*/
+BOOLEAN sapl_checkSodStorage(void)
+{
+    UINT8* pParamSetBase = NULL;
+    UINT32 paramSetLen = 0;
+    BOOLEAN fSodPresent = FALSE;
+
+    if(sodstore_getSodImage(&pParamSetBase, &paramSetLen))
+    {
+        fSodPresent = TRUE;
+    }
+
+    return fSodPresent;
+}
+
+
+/*----------------------------------------------------------------------------*/
+/**
 \brief    Check if there is an SOD image in the NVS and restore it if so
+
+\param[in] fRestoreSod_p    TRUE if the SOD needs to be restored
 
 \retval TRUE    Restore successful or nothing to restore
 \retval FALSE   Error during restore of the image
@@ -365,14 +392,15 @@ BOOLEAN sapl_processSync(void)
 \ingroup module_sapl
 */
 /*----------------------------------------------------------------------------*/
-BOOLEAN sapl_restoreSod(void)
+BOOLEAN sapl_restoreSod(BOOLEAN fRestoreSod_p)
 {
     BOOLEAN fReturn = FALSE;
     UINT8* pParamSetBase = NULL;
     UINT32 paramSetLen = 0;
     tProcParamRet procRet;
 
-    if(sodstore_getSodImage(&pParamSetBase, &paramSetLen))
+    if(sodstore_getSodImage(&pParamSetBase, &paramSetLen) &&
+       fRestoreSod_p == TRUE                               )
     {
         DEBUG_TRACE(DEBUG_LVL_ALWAYS, "\nRestore SOD -> ");
 
@@ -392,6 +420,8 @@ BOOLEAN sapl_restoreSod(void)
     }
     else
     {
+        DEBUG_TRACE(DEBUG_LVL_ALWAYS, "\nUnable to restore SOD from NVM ...\n");
+
         /* No image available -> Continue normal bootup */
         if(sodstore_prepareStorage())
         {

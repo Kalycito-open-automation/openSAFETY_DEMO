@@ -1,16 +1,17 @@
 /**
 ********************************************************************************
-\file   common/syncir.h
+\file   boot/internal/handshake.h
 
-\brief  Interface to the target specific sync ISR handler
+\brief  Internal header of the handshake module.
 
-Interface to the driver for the synchronous interrupt for initialization
-handling and creating of a critical section.
+The handshake module ensures a synchronous boot-up of both the uP-Master and
+uP-Slave. It uses the upserial module to communicate with the other
+processor.
 
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -36,41 +37,58 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
 
-#ifndef _INC_common_syncir_H_
-#define _INC_common_syncir_H_
+#ifndef _INC_boot_internal_handshake_H_
+#define _INC_boot_internal_handshake_H_
 
 /*----------------------------------------------------------------------------*/
 /* includes                                                                   */
 /*----------------------------------------------------------------------------*/
-#include <libpsi/psi.h>
+#include <sn/global.h>
+
 
 /*----------------------------------------------------------------------------*/
 /* const defines                                                              */
 /*----------------------------------------------------------------------------*/
+#define WELCOME_MSG_CONTENT     0xDEADBEEF      /**< Data of the welcome message */
+
+#define RESTORE_SOD_STATE_BIT   0               /**< Restore SOD bit offset */
 
 /*----------------------------------------------------------------------------*/
 /* typedef                                                                    */
 /*----------------------------------------------------------------------------*/
 
 /**
- * \brief Synchronous interrupt callback function
+ * \brief Content of the welcome message up-Slave -> up-Master
  */
-typedef void (*tPlatformSyncIrq)(void *);
+typedef struct
+{
+    UINT32 msgHeader_m;     /**< The header of the message (Filled with \ref WELCOME_MSG_CONTENT) */
+    UINT16 snState_m;       /**< The SN state parameter */
+} tWelcMsg;
+
+/**
+ * \brief Content of the response message up-Master -> up-Slave
+ */
+typedef struct
+{
+    UINT32 msgHeader_m;     /**< The header of the message which was returned by uP-Master */
+    UINT16 snState_m;       /**< The SN state parameter */
+} tRespMsg;
 
 /*----------------------------------------------------------------------------*/
 /* function prototypes                                                        */
 /*----------------------------------------------------------------------------*/
-BOOL syncir_init(tPlatformSyncIrq pfnSyncIrq_p);
-void syncir_exit(void);
 
-void syncir_acknowledge(void);
-void syncir_enable(void);
-void syncir_disable(void);
+#ifdef __cplusplus
+    extern "C" {
+#endif
 
-void syncir_enterCriticalSection(UINT8 fEnable_p);
+void hands_verifySnStateField(UINT16 snState_p, BOOLEAN * pRestoreSod_p);
+void hands_fillStateField(volatile UINT16* pSnState_p, BOOLEAN * pRestoreSod_p);
 
-tPlatformSyncIrq syncir_getSyncCallback(void);
-void syncir_setSyncCallback(tPlatformSyncIrq pfnSyncCb_p);
+#ifdef __cplusplus
+    }
+#endif
 
-#endif /* _INC_common_syncir_H_ */
 
+#endif /* _INC_boot_internal_handshake_H_ */

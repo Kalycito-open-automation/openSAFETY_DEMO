@@ -1,12 +1,12 @@
 /**
 ********************************************************************************
-\file   handshake-sl.c
+\file   handshake-ma.c
 
 \brief  Implements the handshake of uP-Master and uP-Slave
 
-This module implements the handshake of both safe processors on the uP-Slave
-side. The slave sends the welcome message to the uP-Master and waits for the
-response.
+This module implements the handshake of both safe processors on the uP-Master
+side. The master busy waits until the init arrives from the slave and sends
+back it's current consecutive timebase value.
 
 \ingroup module_hands
 *******************************************************************************/
@@ -47,11 +47,13 @@ response.
 /*----------------------------------------------------------------------------*/
 /* includes                                                                   */
 /*----------------------------------------------------------------------------*/
-#include <sn/handshake.h>
+#include <boot/handshake.h>
+#include <boot/internal/handshake.h>
 
-#include <sn/upserial.h>
+#include <boot/internal/pingpong-ma.h>
 
 #include <common/platform.h>
+
 /*============================================================================*/
 /*            G L O B A L   D E F I N I T I O N S                             */
 /*============================================================================*/
@@ -59,6 +61,7 @@ response.
 /*----------------------------------------------------------------------------*/
 /* const defines                                                              */
 /*----------------------------------------------------------------------------*/
+
 
 /*----------------------------------------------------------------------------*/
 /* module global vars                                                         */
@@ -76,31 +79,19 @@ response.
 /*----------------------------------------------------------------------------*/
 /* const defines                                                              */
 /*----------------------------------------------------------------------------*/
-#define BOOTUP_TIMEOUT_MS           (UINT32)0x2000      /**< Wait time until a timeout occurs */
-
 
 /*----------------------------------------------------------------------------*/
 /* local types                                                                */
 /*----------------------------------------------------------------------------*/
 
 /**
- * \brief Response message receive state
- */
-typedef enum
-{
-    kRcvStateInvalid    = 0x0,      /**< Invalid state reached */
-    kRcvStateSuccessful = 0x1,      /**< Receive was successful */
-    kRcvStateError      = 0x2,      /**< Error on receive */
-    kRcvStateRetry      = 0x3,      /**< Timeout occurred -> Retry */
-} tReceiveState;
-
-/**
- * \bried Handshake module instance type
+ * \brief Handshake module instance type
  */
 typedef struct
 {
-    volatile UINT8 welcomeMsg_m[WELCOME_MSG_LEN];        /**< Buffer the welcome message is stored */
-    volatile UINT8 responseMsg_m[RESPONSE_MSG_LEN];      /**< Buffer the response message is stored */
+    volatile tWelcMsg welcMsg_m;     /**< Buffer the welcome message is stored */
+    volatile tRespMsg respMsg_m;     /**< Buffer the response message is stored */
+    BOOLEAN * pRestoreSod_m;         /**< Pointer to the SOD restore flag */
 } tHandsInstance;
 
 /*----------------------------------------------------------------------------*/
@@ -111,10 +102,10 @@ static tHandsInstance handsInstance_l SAFE_INIT_SEKTOR;
 /*----------------------------------------------------------------------------*/
 /* local function prototypes                                                  */
 /*----------------------------------------------------------------------------*/
-static BOOLEAN sendWelcome(void);
-static tReceiveState receiveResponse(void);
-static BOOLEAN verifyResponseMessage(volatile UINT8 * pRespMsg_p, UINT32 respLen_p);
-static void fillWelcomeMsg(volatile UINT8 ** ppWelcMsg_p, UINT8 * pWelcLen_p);
+static BOOLEAN welcomeReceived(volatile UINT8* pRespBase_p, UINT16 respSize_p);
+static BOOLEAN verifyWelcomeMessage(volatile tWelcMsg * pWelcMsg_p,
+                                    BOOLEAN * pRestoreSod_p);
+static void fillResponseMsg(BOOLEAN * pRestoreSod_p);
 
 /*============================================================================*/
 /*            P U B L I C   F U N C T I O N S                                 */
@@ -124,44 +115,37 @@ static void fillWelcomeMsg(volatile UINT8 ** ppWelcMsg_p, UINT8 * pWelcLen_p);
 /**
 \brief    Carry out the handshake between both processors
 
+\param[inout] pRestoreSod_p    Pointer to the SOD restore flag
+
 \retval TRUE        Handshake was successful
 \retval FALSE       Error on handshake
 
 \ingroup module_hands
 */
 /*----------------------------------------------------------------------------*/
-BOOLEAN hands_perfHandshake(void)
+BOOLEAN hands_perform(BOOLEAN * pRestoreSod_p)
 {
     BOOLEAN fReturn = FALSE;
-    tReceiveState rcvState;
 
-    /* Reset global variables */
-    MEMSET(&handsInstance_l, 0, sizeof(tHandsInstance));
-
-    upserial_deRegisterCb();
-
-    /* Wait for uP-Master */
-    platform_msleep(100);
-
-    do
+    if(pRestoreSod_p != NULL)
     {
-        /* Send welcome message to uP-Master */
-        if(sendWelcome())
-        {
-            /* Wait for response */
-            rcvState = receiveResponse();
-        }
-        else
-        {
-            /* On send error -> Terminate! */
-            break;
-        }
-    } while(rcvState == kRcvStateRetry);
+        /* Reset global variables */
+        MEMSET(&handsInstance_l, 0, sizeof(tHandsInstance));
 
-    /* Set return value */
-    if(rcvState == kRcvStateSuccessful)
+        /* Remember the SOD restore flag location */
+        handsInstance_l.pRestoreSod_m = pRestoreSod_p;
+
+        /* Call the ping/pong module transfer function to start the message exchange */
+        if(pipo_doTransfer((volatile UINT8*)&handsInstance_l.welcMsg_m, sizeof(tWelcMsg),
+                           (volatile UINT8*)&handsInstance_l.respMsg_m, sizeof(tRespMsg),
+                           welcomeReceived, "welcome"))
+        {
+            fReturn = TRUE;
+        }   /* no else: Error is handled in the called function */
+    }
+    else
     {
-        fReturn = TRUE;
+        errh_postFatalError(kErrSourcePeriph, kErrorInvalidParameter, 0);
     }
 
     return fReturn;
@@ -175,35 +159,45 @@ BOOLEAN hands_perfHandshake(void)
 
 /*----------------------------------------------------------------------------*/
 /**
-\brief    Send the welcome message
+\brief    Callback function which is called after the welcome msg was received
 
-\retval TRUE        Successfully sent the welcome message
-\retval FALSE       Error on sending
+\param[in] pRespBase_p    Pointer to the response message
+\param[in] respSize_p     Size of the response message
+
+\retval TRUE    The welcome message is correct
+\retval FALSE   Invalid message received
 
 \ingroup module_hands
 */
 /*----------------------------------------------------------------------------*/
-static BOOLEAN sendWelcome(void)
+static BOOLEAN welcomeReceived(volatile UINT8* pWelcBase_p, UINT16 welcSize_p)
 {
     BOOLEAN fReturn = FALSE;
-    volatile UINT8 * pWelcomeMsg = NULL;
-    UINT8 welcomeSize = 0;
 
-    /* Create the welcome message */
-    fillWelcomeMsg(&pWelcomeMsg, &welcomeSize);
-
-    DEBUG_TRACE(DEBUG_LVL_ALWAYS, "\nSend welcome message -> ");
-
-    /* Forward the data to the serial module */
-    if(upserial_transmitBlock(pWelcomeMsg, welcomeSize))
+    /* Check if the provided buffer is valid */
+    if(pWelcBase_p == (volatile UINT8*)&handsInstance_l.welcMsg_m &&
+       welcSize_p == sizeof(tWelcMsg))
     {
-        DEBUG_TRACE(DEBUG_LVL_ALWAYS, "SUCCESS!\n");
+        if(verifyWelcomeMessage((volatile tWelcMsg*)pWelcBase_p, handsInstance_l.pRestoreSod_m))
+        {
+            /* Wait for some time */
+            platform_msleep(100);
 
-        fReturn = TRUE;
+            /* Create the response message */
+            fillResponseMsg(handsInstance_l.pRestoreSod_m);
+
+            fReturn = TRUE;
+        }
+        else
+        {
+            /* Welcome message is invalid */
+            errh_postFatalError(kErrSourcePeriph, kHandSWelcomeMsgInvalid, 0);
+        }
     }
     else
     {
-        errh_postFatalError(kErrSourcePeriph, kErrorSerialTransmitFailed, 0);
+        /* The provided receive buffer is invalid */
+        errh_postFatalError(kErrSourcePeriph, kHandSReceiveBufferInvalid, 0);
     }
 
     return fReturn;
@@ -211,72 +205,28 @@ static BOOLEAN sendWelcome(void)
 
 /*----------------------------------------------------------------------------*/
 /**
-\brief    Wait for the response from the uP-Master
+\brief    Verify the welcome message correctness
 
-\return The receive state of the response message
+\param[in]    pWelcomeMsg_p    Pointer to the message
+\param[inout] pRestoreSod_p    Pointer to the SOD restore flag
 
-\ingroup module_hands
-*/
-/*----------------------------------------------------------------------------*/
-static tReceiveState receiveResponse(void)
-{
-    tReceiveState rcvState = kRcvStateError;
-    volatile UINT8 * pResponseMsg = &handsInstance_l.responseMsg_m[0];
-    UINT32 respLen = (UINT32)RESPONSE_MSG_LEN;
-
-    if(upserial_receiveBlock(pResponseMsg, respLen, BOOTUP_TIMEOUT_MS))
-    {
-        /* Check if the received data is correct */
-        if(verifyResponseMessage(pResponseMsg, respLen))
-        {
-            rcvState = kRcvStateSuccessful;
-        }
-        else
-        {
-            /* Response message is invalid */
-            errh_postFatalError(kErrSourcePeriph, kHandSResponseMsgInvalid, 0);
-        }
-    }
-    else
-    {
-        rcvState = kRcvStateRetry;
-    }
-
-    return rcvState;
-}
-
-/*----------------------------------------------------------------------------*/
-/**
-\brief    Verify the response message correctness
-
-\param[in] pRespMsg_p           Pointer to the received response message
-\param[in] respLen_p            Size of the response message
-
-\retval TRUE    The response message is correct
-\retval FALSE   Invalid response received
+\retval TRUE    The welcome message is correct
+\retval FALSE   Invalid message received
 
 \ingroup module_hands
 */
 /*----------------------------------------------------------------------------*/
-static BOOLEAN verifyResponseMessage(volatile UINT8 * pRespMsg_p, UINT32 respLen_p)
+static BOOLEAN verifyWelcomeMessage(volatile tWelcMsg * pWelcMsg_p, BOOLEAN * pRestoreSod_p)
 {
     BOOLEAN fMsgCorrect = FALSE;
-    UINT64 currTime = 0;
 
-
-    if(respLen_p <= (UINT32)RESPONSE_MSG_LEN)
+    /* Verify the correctness of the welcome message */
+    if(pWelcMsg_p->msgHeader_m == (UINT32)WELCOME_MSG_CONTENT)
     {
-        /* Verify the correctness of the response message header */
-        if(MEMCOMP(pRespMsg_p, &handsInstance_l.welcomeMsg_m[0], WELCOME_MSG_LEN) == 0)
-        {
-            /* Overtake the new consecutive timebase value */
-            MEMCOPY(&currTime, &pRespMsg_p[WELCOME_MSG_LEN], sizeof(UINT64));
+        /* Verify the SN state field and take action */
+        hands_verifySnStateField(pWelcMsg_p->snState_m, pRestoreSod_p);
 
-            /* Forward the new time value to the consecutive time module */
-            constime_setTimebase(currTime);
-
-            fMsgCorrect = TRUE;
-        }
+        fMsgCorrect = TRUE;
     }
 
     return fMsgCorrect;
@@ -284,24 +234,22 @@ static BOOLEAN verifyResponseMessage(volatile UINT8 * pRespMsg_p, UINT32 respLen
 
 /*----------------------------------------------------------------------------*/
 /**
-\brief    Fill the welcome message buffer
+\brief    Fill the response message buffer
 
-\param[out] ppWelcMsg_p      Pointer to the welcome message
-\param[out] pWelcLen_p       Pointer to the resulting size of the message
+\param[inout] pRestoreSod_p     Pointer to the SOD restore flag
 
 \ingroup module_hands
 */
 /*----------------------------------------------------------------------------*/
-static void fillWelcomeMsg(volatile UINT8 ** ppWelcMsg_p, UINT8 * pWelcLen_p)
+static void fillResponseMsg(BOOLEAN * pRestoreSod_p)
 {
-    volatile UINT8 * pWelcomeMsg = &handsInstance_l.welcomeMsg_m[0];
-    UINT32 welcomeMsg = WELCOME_MSG_CONTENT;
+    volatile tRespMsg * pRespMsg = &handsInstance_l.respMsg_m;
 
-    MEMCOPY(pWelcomeMsg, &welcomeMsg, WELCOME_MSG_LEN);
+    /* Fill the response message header */
+    MEMCOPY(&pRespMsg->msgHeader_m, &handsInstance_l.welcMsg_m.msgHeader_m, sizeof(UINT32));
 
-    /* Set pointer to the result buffer */
-    *ppWelcMsg_p = pWelcomeMsg;
-    *pWelcLen_p = (UINT32)WELCOME_MSG_LEN;
+    /* Fill the SOD state field */
+    hands_fillStateField(&pRespMsg->snState_m, pRestoreSod_p);
 }
 
 /* \} */

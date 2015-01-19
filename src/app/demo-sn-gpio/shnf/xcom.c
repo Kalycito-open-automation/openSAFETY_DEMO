@@ -150,8 +150,8 @@ BOOLEAN xcom_init(void)
         if(serialEnableReceive())
         {
             fReturn = TRUE;
-        }
-    }
+        }   /* no else: Error is reported in the called function */
+    }   /* no else: Error is reported in the called function */
 
     return fReturn;
 }

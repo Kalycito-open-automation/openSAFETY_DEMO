@@ -74,6 +74,7 @@ SET(OSCHECKSUM_BASE_DIR ${OSFT_BASE_DIR}/src/tools/oschecksum)
 
 SET(SHNF_DIR ${PROJECT_SOURCE_DIR}/shnf)
 SET(SAPL_DIR ${PROJECT_SOURCE_DIR}/sapl)
+SET(BOOT_DIR ${PROJECT_SOURCE_DIR}/boot)
 
 SET(COMMON_SOURCE_DIR ${PROJECT_SOURCE_DIR}/../common)
 SET(SN_TARGET_SOURCE_DIR ${PROJECT_SOURCE_DIR}/target)
@@ -116,7 +117,6 @@ IF(${CURRENT_DEMO_CONTEXT} STREQUAL "ups")
     # This project is for the processor up-slave
     SET(SHNF_SRCS
                   ${SHNF_SRCS}
-                  ${PROJECT_SOURCE_DIR}/handshake-sl.c
                   ${SHNF_DIR}/xcom.c
                   ${SHNF_DIR}/xcom-sl.c
                   ${SHNF_DIR}/shnftx-dual.c
@@ -124,7 +124,10 @@ IF(${CURRENT_DEMO_CONTEXT} STREQUAL "ups")
 
     SET(SN_SRCS
                   ${SN_SRCS}
-                  ${PROJECT_SOURCE_DIR}/handshake-sl.c
+                  ${BOOT_DIR}/pingpong-sl.c
+                  ${BOOT_DIR}/handshake-sl.c
+                  ${BOOT_DIR}/handshake.c
+                  ${BOOT_DIR}/sync-sl.c
     )
 ELSEIF(${CURRENT_DEMO_CONTEXT} STREQUAL "upm")
     # This project is for the processor up-master
@@ -137,7 +140,10 @@ ELSEIF(${CURRENT_DEMO_CONTEXT} STREQUAL "upm")
 
     SET(SN_SRCS
                   ${SN_SRCS}
-                  ${PROJECT_SOURCE_DIR}/handshake-ma.c
+                  ${BOOT_DIR}/pingpong-ma.c
+                  ${BOOT_DIR}/handshake-ma.c
+                  ${BOOT_DIR}/handshake.c
+                  ${BOOT_DIR}/sync-ma.c
     )
 ELSE()
     # This project is single channeled
@@ -164,6 +170,7 @@ SET(DEMO_INCS
     ${COMMON_SOURCE_DIR}/include
     ${SHNF_DIR}/include
     ${SAPL_DIR}/include
+    ${BOOT_DIR}/include
     ${psi_SOURCE_DIR}/include
     ${psicommonapp_SOURCE_DIR}/include
     ${DEMO_CONFIG_DIR}/tbuf/include

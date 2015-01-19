@@ -1,12 +1,11 @@
 /**
 ********************************************************************************
-\file   handshake-ma.c
+\file   sync-sl.c
 
-\brief  Implements the handshake of uP-Master and uP-Slave
+\brief  Implements the synchronization of uP-Master and uP-Slave
 
-This module implements the handshake of both safe processors on the uP-Master
-side. The master busy waits until the init arrives from the slave and sends
-back it's current consecutive timebase value.
+This module implements the synchronization of both safe processors on the uP-Slave
+side. It sends out t
 
 \ingroup module_hands
 *******************************************************************************/
@@ -47,11 +46,12 @@ back it's current consecutive timebase value.
 /*----------------------------------------------------------------------------*/
 /* includes                                                                   */
 /*----------------------------------------------------------------------------*/
-#include <sn/handshake.h>
+#include <boot/sync.h>
+#include <boot/internal/sync.h>
 
-#include <sn/upserial.h>
+#include <boot/internal/pingpong-sl.h>
 
-#include <common/platform.h>
+#include <shnf/constime.h>
 
 /*============================================================================*/
 /*            G L O B A L   D E F I N I T I O N S                             */
@@ -60,7 +60,7 @@ back it's current consecutive timebase value.
 /*----------------------------------------------------------------------------*/
 /* const defines                                                              */
 /*----------------------------------------------------------------------------*/
-#define WELCOME_RCV_TIMEOUT_MS  0xFFFFF     /**< Receive timeout of the welcome message */
+#define SYNC_TIMEOUT_MS           (UINT32)0xFFFFF      /**< Wait time until a timeout occurs */
 
 /*----------------------------------------------------------------------------*/
 /* module global vars                                                         */
@@ -84,26 +84,24 @@ back it's current consecutive timebase value.
 /*----------------------------------------------------------------------------*/
 
 /**
- * \bried Handshake module instance type
+ * \brief Synchronization module instance type
  */
 typedef struct
 {
-    volatile UINT8 welcomeMsg_m[WELCOME_MSG_LEN];      /**< Buffer the welcome message is stored */
-    volatile UINT8 respMsg_m[RESPONSE_MSG_LEN];        /**< Buffer the response message is stored */
-} tHandsInstance;
+    volatile tReadyMsg readyMsg_m;    /**< Buffer the ready message is stored */
+    volatile tSyncMsg syncMsg_m;      /**< Buffer the synchronization message is stored */
+} tSyncInstance;
 
 /*----------------------------------------------------------------------------*/
 /* local vars                                                                 */
 /*----------------------------------------------------------------------------*/
-static tHandsInstance handsInstance_l SAFE_INIT_SEKTOR;
+static tSyncInstance syncInstance_l SAFE_INIT_SEKTOR;
 
 /*----------------------------------------------------------------------------*/
 /* local function prototypes                                                  */
 /*----------------------------------------------------------------------------*/
-static BOOLEAN receiveWelcome(void);
-static BOOLEAN sendResponse(void);
-static BOOLEAN verifyWelcomeMessage(volatile UINT8 * pWelcomeMsg_p, UINT32 msglen_p);
-static void fillResponseMsg(volatile UINT8 ** ppRespMsg_p, UINT8 * pRespLen_p);
+static BOOLEAN syncReceived(volatile UINT8* pSyncBase_p, UINT16 syncSize_p);
+static BOOLEAN verifySyncMessage(volatile tSyncMsg * pSyncMsg_p);
 
 /*============================================================================*/
 /*            P U B L I C   F U N C T I O N S                                 */
@@ -111,35 +109,31 @@ static void fillResponseMsg(volatile UINT8 ** ppRespMsg_p, UINT8 * pRespLen_p);
 
 /*----------------------------------------------------------------------------*/
 /**
-\brief    Carry out the handshake between both processors
+\brief    Carry out the synchronization between both processors
 
-\retval TRUE        Handshake was successful
-\retval FALSE       Error on handshake
+\retval TRUE        Synchronization was successful
+\retval FALSE       Error on sync
 
 \ingroup module_hands
 */
 /*----------------------------------------------------------------------------*/
-BOOLEAN hands_perfHandshake(void)
+BOOLEAN sync_perform(void)
 {
     BOOLEAN fReturn = FALSE;
 
     /* Reset global variables */
-    MEMSET(&handsInstance_l, 0, sizeof(tHandsInstance));
+    MEMSET(&syncInstance_l, 0, sizeof(tSyncInstance));
 
-    upserial_deRegisterCb();
+    /* Create the ready message */
+    syncInstance_l.readyMsg_m.msgHeader_m = READY_MSG_CONTENT;
 
-    /* Enable reception of welcome message */
-    if(receiveWelcome())
+    /* Call the ping/pong module transfer function to start the message exchange */
+    if(pipo_doTransfer((volatile UINT8 *)&syncInstance_l.readyMsg_m, sizeof(tReadyMsg),
+                       (volatile UINT8 *)&syncInstance_l.syncMsg_m, sizeof(tSyncMsg),
+                       syncReceived, "ready", SYNC_TIMEOUT_MS))
     {
-        /* Wait for some time */
-        platform_msleep(100);
-
-        /* Send a response back to uP-Slave */
-        if(sendResponse())
-        {
-            fReturn = TRUE;
-        }
-    }
+        fReturn = TRUE;
+    }   /* no else: Error is handled in the called function */
 
     return fReturn;
 }
@@ -152,40 +146,37 @@ BOOLEAN hands_perfHandshake(void)
 
 /*----------------------------------------------------------------------------*/
 /**
-\brief    Receive the welcome message
+\brief    This function is called when the sync message is received
 
-\retval TRUE        Successfully received and verified the welcome message
-\retval FALSE       Error on receiving the welcome message
+\param[inout] pRespBase_p    Pointer to the SOD restore flag
+
+\return The receive state of the response message
 
 \ingroup module_hands
 */
 /*----------------------------------------------------------------------------*/
-static BOOLEAN receiveWelcome(void)
+static BOOLEAN syncReceived(volatile UINT8* pSyncBase_p, UINT16 syncSize_p)
 {
     BOOLEAN fReturn = FALSE;
-    volatile UINT8 * pWelcomeMsg = &handsInstance_l.welcomeMsg_m[0];
 
-    DEBUG_TRACE(DEBUG_LVL_ALWAYS, "\nWait for welcome message -> ");
-
-    /* Enable receive channel */
-    if(upserial_receiveBlock(pWelcomeMsg, WELCOME_MSG_LEN, WELCOME_RCV_TIMEOUT_MS))
+    if((volatile UINT8 *)&syncInstance_l.syncMsg_m == pSyncBase_p &&
+       syncSize_p == sizeof(tSyncMsg)                              )
     {
-        /* Check if the received data is correct */
-        if(verifyWelcomeMessage(pWelcomeMsg, WELCOME_MSG_LEN))
+        /* Check if the synchronization message is correct */
+        if(verifySyncMessage((volatile tSyncMsg *)pSyncBase_p))
         {
-            DEBUG_TRACE(DEBUG_LVL_ALWAYS, "SUCCESS!\n");
-
             fReturn = TRUE;
         }
         else
         {
-            /* Welcome message is invalid */
-            errh_postFatalError(kErrSourcePeriph, kHandSWelcomeMsgInvalid, 0);
+            /* Response message is invalid */
+            errh_postFatalError(kErrSourcePeriph, kHandSSyncMsgInvalid, 0);
         }
     }
     else
     {
-        errh_postFatalError(kErrSourcePeriph, kErrorSerialReceiveFailed, 0);
+        /* The provided receive buffer is invalid */
+        errh_postFatalError(kErrSourcePeriph, kHandSReceiveBufferInvalid, 0);
     }
 
     return fReturn;
@@ -193,84 +184,34 @@ static BOOLEAN receiveWelcome(void)
 
 /*----------------------------------------------------------------------------*/
 /**
-\brief    Send a response to uP-Slave
+\brief    Verify the synchronization message correctness
 
-\retval TRUE        Response sent to uP-Slave
-\retval FALSE       Error on sending
+\param[in]    pSyncMsg_p           Pointer to the sync response message
 
-\ingroup module_hands
-*/
-/*----------------------------------------------------------------------------*/
-static BOOLEAN sendResponse(void)
-{
-    BOOLEAN fReturn = FALSE;
-    volatile UINT8 * pRespMsg = NULL;
-    UINT8 respSize = 0;
-
-    /* Create the response message */
-    fillResponseMsg(&pRespMsg, &respSize);
-
-    /* Forward the data to the serial module */
-    if(upserial_transmitBlock(pRespMsg, respSize))
-    {
-        fReturn = TRUE;
-    }
-    else
-    {
-        errh_postFatalError(kErrSourcePeriph, kErrorSerialTransmitFailed, 0);
-    }
-
-    return fReturn;
-}
-
-/*----------------------------------------------------------------------------*/
-/**
-\brief    Verify the welcome message correctness
-
-\param[in] pWelcomeMsg_p    Pointer to the message
-\param[in] msglen_p         Size of the message
-
-\retval TRUE    The welcome message is correct
-\retval FALSE   Invalid message received
+\retval TRUE    The sync message is correct
+\retval FALSE   Invalid response received
 
 \ingroup module_hands
 */
 /*----------------------------------------------------------------------------*/
-static BOOLEAN verifyWelcomeMessage(volatile UINT8 * pWelcomeMsg_p, UINT32 msglen_p)
+static BOOLEAN verifySyncMessage(volatile tSyncMsg * pSyncMsg_p)
 {
     BOOLEAN fMsgCorrect = FALSE;
-    UINT32 msgContent = (UINT32)WELCOME_MSG_CONTENT;
+    UINT64 currTime = 0;
 
-    /* Verify the correctness of the welcome message */
-    if(MEMCOMP(pWelcomeMsg_p, &msgContent, msglen_p) == 0)
+    /* Verify the correctness of the response message header */
+    if(pSyncMsg_p->msgHeader_m == syncInstance_l.syncMsg_m.msgHeader_m)
     {
+        /* Overtake the new consecutive timebase value */
+        MEMCOPY(&currTime, &pSyncMsg_p->consTime_m, sizeof(UINT64));
+
+        /* Forward the new time value to the consecutive time module */
+        constime_setTimebase(currTime);
+
         fMsgCorrect = TRUE;
     }
 
     return fMsgCorrect;
-}
-
-/*----------------------------------------------------------------------------*/
-/**
-\brief    Fill the response message buffer
-
-\param[out] ppRespMsg_p      Pointer to the response message
-\param[out] msglen_p         Pointer to the resulting size of the message
-
-\ingroup module_hands
-*/
-/*----------------------------------------------------------------------------*/
-static void fillResponseMsg(volatile UINT8 ** ppRespMsg_p, UINT8 * pRespLen_p)
-{
-    volatile UINT8 * pRespMsg = &handsInstance_l.respMsg_m[0];
-    UINT64 currTime = constime_getTimeBase();
-
-    MEMCOPY(pRespMsg, &handsInstance_l.welcomeMsg_m[0], sizeof(UINT32));
-    MEMCOPY(&pRespMsg[WELCOME_MSG_LEN], &currTime, sizeof(UINT64));
-
-    /* Set pointer to the result buffer */
-    *ppRespMsg_p = pRespMsg;
-    *pRespLen_p = (UINT32)RESPONSE_MSG_LEN;
 }
 
 /* \} */
