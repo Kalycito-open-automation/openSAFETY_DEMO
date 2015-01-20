@@ -1,8 +1,8 @@
 ################################################################################
 #
-# Cortex-Mx configuration options for POWERLINK Slim Interface
+# Macros for handling the st-link utility (See https://github.com/texane/stlink)
 #
-# Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+# Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -28,41 +28,30 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ################################################################################
 
-################################################################################
-# Handle target specific includes
-SET(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/../cmake/cortex-mx" ${CMAKE_MODULE_PATH})
+MACRO(FindStLink)
+    FIND_PROGRAM(STLINK_FLASH_LOC NAMES st-flash
+                 DOC "Location of the st-link flashing utility"
+                )
 
-INCLUDE(AppPostAction)
-INCLUDE(FindStLink)
+    FIND_PROGRAM(STLINK_UTIL_LOC NAMES st-util
+                 DOC "Location of the st-link utility"
+                )
+ENDMACRO(FindStLink)
 
-################################################################################
-# Create user options
-IF(CFG_DEMO_TYPE STREQUAL "sn-gpio")
-    IF(NOT CFG_DUAL_CHANNEL)
-        SET(CFG_DUAL_CHANNEL ${SN_PROC_SINGLE_CHAN} CACHE STRING
-            "Enable dual channel openSAFETY demo"
-            FORCE
+MACRO(CreateProgFlash TARGET_NAME FLASH_BASE_ADDR)
+    IF(STLINK_UTIL_LOC AND STLINK_FLASH_LOC)
+        # Target to write the executable to the local flash
+        ADD_CUSTOM_TARGET(
+            download-${TARGET_NAME}
+            COMMAND ${CMAKE_OBJCOPY} -O binary ${TARGET_NAME}.elf ${TARGET_NAME}.bin
+            COMMAND ${STLINK_FLASH_LOC} write ${TARGET_NAME}.bin ${FLASH_BASE_ADDR}
         )
-        SET_PROPERTY(CACHE CFG_DUAL_CHANNEL PROPERTY STRINGS "${SN_PROC_SINGLE_CHAN};${SN_PROC_DUAL_CHAN};${SN_PROC_UP_MASTER};${SN_PROC_UP_SLAVE}")
-    ENDIF(NOT CFG_DUAL_CHANNEL)
-ELSE()
-    UNSET(CFG_DUAL_CHANNEL CACHE)
-ENDIF()
 
-OPTION(CFG_BENCHMARK_ENABLED "Enable application benchmark module" ON)
+        ADD_DEPENDENCIES(download-${TARGET_NAME} ${TARGET_NAME}.elf)
+    ELSE()
+        MESSAGE(FATAL_ERROR "The tool st-util was not found! The 'download target was not created for '${TARGET_NAME}'")
+    ENDIF()
+ENDMACRO(CreateProgFlash)
 
-OPTION(CFG_PROG_FLASH_ENABLE "Enable the program to flash target" OFF)
-
-################################################################################
-# This target only supports application style projects
-SET(CFG_INCLUDE_SUBPROJECTS "application")
-
-################################################################################
-# Set compiler flags
-SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -mthumb -ffunction-sections -fdata-sections ")
-
-################################################################################
-# Enable benchmarking
-IF(CFG_BENCHMARK_ENABLED)
-    SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DBENCHMARK_ENABLED -DBENCHMARK_MODULES=0xEE800043L")
-ENDIF()
+# Initially call the FindStLink macro
+FindStLink()

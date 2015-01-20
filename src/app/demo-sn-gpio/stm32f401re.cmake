@@ -101,3 +101,9 @@ STRING (REPLACE "-pedantic" "" CMAKE_C_FLAGS ${CMAKE_C_FLAGS})
 ################################################################################
 # Set architecture specific compile flags
 SET(DEMO_ARCH_LINKER_FLAGS "-T${DEMO_LINKER_SCRIPT} -Wl,--start-group -lc -lm -Wl,--end-group -static -Wl,-cref,-u,Reset_Handler -Wl,-Map=${PROJECT_NAME}.map -Wl,--gc-sections -Wl,--defsym=malloc_getpagesize_P=0x1000")
+
+################################################################################
+# Create program flash target
+IF(CFG_PROG_FLASH_ENABLE)
+    CreateProgFlash(${PROJECT_NAME} 0x08000000)
+ENDIF()
