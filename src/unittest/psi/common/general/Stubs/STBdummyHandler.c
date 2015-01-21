@@ -126,6 +126,8 @@ BOOL stb_dummySyncCbFail(void)
 
 BOOL stb_dummySyncHandlerSuccess(tPsiTimeStamp* pTimeStamp_p)
 {
+    UNUSED_PARAMETER(pTimeStamp_p);
+
     return TRUE;
 }
 
@@ -141,6 +143,8 @@ BOOL stb_dummySyncHandlerSuccess(tPsiTimeStamp* pTimeStamp_p)
 
 BOOL stb_dummySyncHandlerFail(tPsiTimeStamp* pTimeStamp_p)
 {
+    UNUSED_PARAMETER(pTimeStamp_p);
+
     return FALSE;
 }
 
@@ -157,6 +161,8 @@ BOOL stb_dummySyncHandlerFail(tPsiTimeStamp* pTimeStamp_p)
 //------------------------------------------------------------------------------
 BOOL stb_streamHandlerSuccess(tHandlerParam* pHandlParam_p)
 {
+    UNUSED_PARAMETER(pHandlParam_p);
+
     return TRUE;
 }
 
@@ -173,6 +179,8 @@ BOOL stb_streamHandlerSuccess(tHandlerParam* pHandlParam_p)
 //------------------------------------------------------------------------------
 BOOL stb_streamHandlerFail(tHandlerParam* pHandlParam_p)
 {
+    UNUSED_PARAMETER(pHandlParam_p);
+
     return FALSE;
 }
 
@@ -191,6 +199,10 @@ BOOL stb_streamHandlerFail(tHandlerParam* pHandlParam_p)
 //------------------------------------------------------------------------------
 BOOL stb_dummyActionSuccess (UINT8* pBuffer_p, UINT16 bufSize_p, void * pUserArg_p)
 {
+    UNUSED_PARAMETER(pBuffer_p);
+    UNUSED_PARAMETER(bufSize_p);
+    UNUSED_PARAMETER(pUserArg_p);
+
     return TRUE;
 }
 
@@ -209,6 +221,10 @@ BOOL stb_dummyActionSuccess (UINT8* pBuffer_p, UINT16 bufSize_p, void * pUserArg
 //------------------------------------------------------------------------------
 BOOL stb_dummyActionFail (UINT8* pBuffer_p, UINT16 bufSize_p, void * pUserArg_p)
 {
+    UNUSED_PARAMETER(pBuffer_p);
+    UNUSED_PARAMETER(bufSize_p);
+    UNUSED_PARAMETER(pUserArg_p);
+
     return FALSE;
 }
 
@@ -226,8 +242,12 @@ BOOL stb_dummyActionFail (UINT8* pBuffer_p, UINT16 bufSize_p, void * pUserArg_p)
 */
 //------------------------------------------------------------------------------
 BOOL stb_dummyPdoCbSuccess ( UINT32 rpdoRelTimeLow_p, tRpdoMappedObj* pRpdoImage_p,
-        tTpdoMappedObj* pTpdoImage_p )
+                             tTpdoMappedObj* pTpdoImage_p )
 {
+    UNUSED_PARAMETER(rpdoRelTimeLow_p);
+    UNUSED_PARAMETER(pRpdoImage_p);
+    UNUSED_PARAMETER(pTpdoImage_p);
+
     return TRUE;
 }
 
@@ -245,8 +265,12 @@ BOOL stb_dummyPdoCbSuccess ( UINT32 rpdoRelTimeLow_p, tRpdoMappedObj* pRpdoImage
 */
 //------------------------------------------------------------------------------
 BOOL stb_dummyPdoCbFail ( UINT32 rpdoRelTimeLow_p, tRpdoMappedObj* pRpdoImage_p,
-        tTpdoMappedObj* pTpdoImage_p )
+                          tTpdoMappedObj* pTpdoImage_p )
 {
+    UNUSED_PARAMETER(rpdoRelTimeLow_p);
+    UNUSED_PARAMETER(pRpdoImage_p);
+    UNUSED_PARAMETER(pTpdoImage_p);
+
     return FALSE;
 }
 
@@ -261,7 +285,7 @@ BOOL stb_dummyPdoCbFail ( UINT32 rpdoRelTimeLow_p, tRpdoMappedObj* pRpdoImage_p,
 //------------------------------------------------------------------------------
 void stb_dummyCriticalSection(UINT8 fEnable_p)
 {
-    // empty function
+    UNUSED_PARAMETER(fEnable_p);
 }
 
 //------------------------------------------------------------------------------
@@ -279,6 +303,9 @@ void stb_dummyCriticalSection(UINT8 fEnable_p)
 //------------------------------------------------------------------------------
 BOOL stb_dummySsdoReceiveHandlerSuccess (UINT8* pPayload_p, UINT16 size_p)
 {
+    UNUSED_PARAMETER(pPayload_p);
+    UNUSED_PARAMETER(size_p);
+
     return TRUE;
 }
 
@@ -297,5 +324,8 @@ BOOL stb_dummySsdoReceiveHandlerSuccess (UINT8* pPayload_p, UINT16 size_p)
 //------------------------------------------------------------------------------
 BOOL stb_dummySsdoReceiveHandlerFail (UINT8* pPayload_p, UINT16 size_p)
 {
+    UNUSED_PARAMETER(pPayload_p);
+    UNUSED_PARAMETER(size_p);
+
     return FALSE;
 }

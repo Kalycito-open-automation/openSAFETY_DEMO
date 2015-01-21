@@ -246,7 +246,9 @@ void TST_ccWriteObject(void)
     for(i=0; i < CC_TX_TIMEOUT_CYCLE_COUNT + 1; i++)
     {
         fReturn = stream_processSync();
+        CU_ASSERT_TRUE( fReturn );
 
+        fReturn = stream_processPostActions();
         CU_ASSERT_TRUE( fReturn );
     }
 
@@ -267,7 +269,9 @@ void TST_ccWriteObject(void)
     for(i=0; i < CONF_CHAN_NUM_OBJECTS; i++)
     {
         fReturn = stream_processSync();
+        CU_ASSERT_TRUE( fReturn );
 
+        fReturn = stream_processPostActions();
         CU_ASSERT_TRUE( fReturn );
     }
 

@@ -176,9 +176,16 @@ static void actionFailTest(tActionType action_p)
 
     CU_ASSERT_TRUE ( fReturn );
 
-    fReturn = stream_processSync();
-
-    CU_ASSERT_FALSE ( fReturn );
+    if(action_p == kStreamActionPre)
+    {
+        fReturn = stream_processSync();
+        CU_ASSERT_FALSE ( fReturn );
+    }
+    else
+    {
+        fReturn = stream_processPostActions();
+        CU_ASSERT_FALSE ( fReturn );
+    }
 }
 
 /// \}

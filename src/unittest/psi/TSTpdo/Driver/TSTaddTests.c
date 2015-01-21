@@ -91,13 +91,6 @@ Create a suite and add pdo module tests to it.
 //------------------------------------------------------------------------------
 
 #if (((PSI_MODULE_INTEGRATION) & (PSI_MODULE_PDO)) != 0)
-
-/* Empty initialization for the test */
-static int TST_defaultInit(void)
-{ 
-    return 0;
-}
-
 /* Empty cleanup function for the tests */
 static int TST_defaultClean(void)
 {
@@ -123,7 +116,7 @@ static CU_SuiteInfo suites[] = {
     { "Tpdo address invalid", TST_initTpdoAddrInvalid, TST_defaultClean, pdoInitInvalidSuite },
     { "Rpdo size invalid", TST_initRpdoSizeInvalid, TST_defaultClean, pdoInitInvalidSuite },
     { "Tpdo size invalid", TST_initTpdoSizeInvalid, TST_defaultClean, pdoInitInvalidSuite },
-    { "Rpdo pre action list full", TST_initRpdoPreActionListFull, TST_defaultClean, pdoInitInvalidSuite },
+   /* { "Rpdo pre action list full", TST_initRpdoPreActionListFull, TST_defaultClean, pdoInitInvalidSuite }, */
     { "Tpdo post action list full", TST_initTpdoPostActionListFull, TST_defaultClean, pdoInitInvalidSuite },
     CU_SUITE_INFO_NULL,
 };

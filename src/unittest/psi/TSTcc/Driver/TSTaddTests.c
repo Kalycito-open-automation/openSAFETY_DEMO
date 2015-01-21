@@ -91,13 +91,6 @@ Create a suite and add cc module tests to it.
 //------------------------------------------------------------------------------
 
 #if (((PSI_MODULE_INTEGRATION) & (PSI_MODULE_CC)) != 0)
-
-/* Empty initialization for the test */
-static int TST_defaultInit(void)
-{ 
-    return 0;
-}
-
 /* Empty cleanup function for the tests */
 static int TST_defaultClean(void)
 {

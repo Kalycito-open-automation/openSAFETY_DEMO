@@ -92,12 +92,6 @@ Create a suite and add ssdo module tests to it.
 
 #if (((PSI_MODULE_INTEGRATION) & (PSI_MODULE_SSDO)) != 0)
 
-/* Empty initialization for the test */
-static int TST_defaultInit(void)
-{ 
-    return 0;
-}
-
 /* Empty cleanup function for the tests */
 static int TST_defaultClean(void)
 {
@@ -142,7 +136,7 @@ static CU_SuiteInfo suites[] = {
 };
 #else
   // Pass empty suite to cunit
-  static CU_SuiteInfo suites[] = { NULL };
+  static CU_SuiteInfo suites[] = { { NULL, NULL, NULL, NULL } };
 #endif // #if (((PSI_MODULE_INTEGRATION) & (PSI_MODULE_SSDO)) != 0)
 
 //============================================================================//

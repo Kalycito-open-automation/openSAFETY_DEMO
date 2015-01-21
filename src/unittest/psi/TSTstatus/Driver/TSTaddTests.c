@@ -90,12 +90,6 @@ Create a suite and add status module tests to it.
 // local function prototypes
 //------------------------------------------------------------------------------
 
-/* Empty initialization for the test */
-static int TST_defaultInit(void)
-{ 
-    return 0;
-}
-
 /* Empty cleanup function for the tests */
 static int TST_defaultClean(void)
 {

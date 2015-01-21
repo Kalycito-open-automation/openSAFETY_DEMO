@@ -189,7 +189,7 @@ void TST_pdoProcessBoth(void)
 
     CU_ASSERT_TRUE( fReturn );
 
-    fReturn = stream_processSync();
+    fReturn = stream_processPostActions();
 
     CU_ASSERT_FALSE( fReturn );
 }
@@ -223,7 +223,7 @@ void TST_pdoProcessRpdoOnly(void)
 
     CU_ASSERT_TRUE( fReturn );
 
-    fReturn = stream_processSync();
+    fReturn = stream_processPostActions();
 
     CU_ASSERT_FALSE( fReturn );
 }
@@ -257,7 +257,7 @@ void TST_pdoProcessTpdoOnly(void)
 
     CU_ASSERT_TRUE( fReturn );
 
-    fReturn = stream_processSync();
+    fReturn = stream_processPostActions();
 
     CU_ASSERT_FALSE( fReturn );
 }

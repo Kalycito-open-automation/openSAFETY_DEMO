@@ -139,7 +139,7 @@ void TST_error(void)
 //------------------------------------------------------------------------------
 void dummyErrorHandler (tPsiErrorInfo* pErrorInfo_p)
 {
-    // empty handler
+    UNUSED_PARAMETER(pErrorInfo_p);
 }
 
 /// \}

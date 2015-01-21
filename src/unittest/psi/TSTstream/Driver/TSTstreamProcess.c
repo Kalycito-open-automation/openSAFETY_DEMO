@@ -190,20 +190,18 @@ void TST_process(void)
 {
     BOOL fReturn;
 
-    fReturn = stream_processSync();
+    fReturn = stream_processPostActions();
 
     CU_ASSERT_TRUE ( fReturn );
 
     stream_registerSyncCb(stb_dummySyncCbSuccess);
 
-    fReturn = stream_processSync();
-
+    fReturn = stream_processPostActions();
     CU_ASSERT_TRUE ( fReturn );
 
     stream_registerSyncCb(stb_dummySyncCbFail);
 
-    fReturn = stream_processSync();
-
+    fReturn = stream_processPostActions();
     CU_ASSERT_FALSE ( fReturn );
 }
 

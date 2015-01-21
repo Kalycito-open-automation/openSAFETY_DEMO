@@ -162,7 +162,9 @@ void TST_statusChangeAsyncStatus(void)
 
     // Call process function (calls stream handler)
     fReturn = stream_processSync();
+    CU_ASSERT_TRUE_FATAL( fReturn );
 
+    fReturn = stream_processPostActions();
     CU_ASSERT_TRUE_FATAL( fReturn );
 
     // Run tests with changed settings
@@ -194,6 +196,8 @@ static BOOL streamHandler(tHandlerParam* pHandlParam_p)
 {
     tBuffDescriptor* pBuffDesc;
     tTbufStatusOutStructure* pStatOutStruct;
+
+    UNUSED_PARAMETER(pHandlParam_p);
 
     // Set icc status busy flag
     pBuffDesc = stb_getDescElement(kTbufNumStatusOut);
