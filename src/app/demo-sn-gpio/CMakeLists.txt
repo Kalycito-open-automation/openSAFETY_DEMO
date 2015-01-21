@@ -63,6 +63,9 @@ PROJECT(demo-${CFG_DEMO_TYPE}-${CURRENT_DEMO_CONTEXT} C)
 ########################################################################
 SET(CFG_SAPL_SN_UDID "\"{0x00U,0x60U,0x65U,0x01U,0x14U,0x9BU}\"" CACHE STRING "Unique id of this SN")
 
+# Enable rotated CRCs in oschecksum
+SET(CRC_ROTATED_ENABLE ON)
+
 ########################################################################
 # Set paths
 SET(OSFT_BASE_DIR ${CMAKE_SOURCE_DIR}/stacks/openSAFETY)
@@ -175,6 +178,7 @@ SET(DEMO_INCS
 # Generate demo configuration header file
 ########################################################################
 CONFIGURE_FILE(${PROJECT_SOURCE_DIR}/include/sn/config.h.in ${PROJECT_BINARY_DIR}/include/sn/config.h)
+CONFIGURE_FILE(${OSCHECKSUM_BASE_DIR}/include/oschecksum/config.h.in ${PROJECT_BINARY_DIR}/include/oschecksum/config.h)
 
 ########################################################################
 # Set CFLAGS depending on build type
