@@ -58,11 +58,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /*----------------------------------------------------------------------------*/
 
 /**
- * \brief Type of the synchronous process function
- */
-typedef BOOLEAN (*tProcSync)(void);
-
-/**
  * \brief Type of the synchronization callback function
  */
 typedef BOOLEAN (*tSyncCycle)(void);
