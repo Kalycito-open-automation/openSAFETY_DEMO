@@ -85,7 +85,7 @@ MACRO(ConnectCMakeAlteraExeTargets PROJ_NAME BUILD_DIR)
         download-elf-${PROJ_NAME}
         COMMAND make download-elf
         WORKING_DIRECTORY ${BUILD_DIR}
-        COMMENT "Download the executeable"
+        COMMENT "Download the executable"
     )
 
     ADD_CUSTOM_TARGET(
@@ -95,17 +95,17 @@ MACRO(ConnectCMakeAlteraExeTargets PROJ_NAME BUILD_DIR)
         COMMENT "Download the FPGA configuration"
     )
     ADD_CUSTOM_TARGET(
-        program-epcs-${PROJ_NAME}
-        COMMAND make program-epcs
+        program-nvm-${PROJ_NAME}
+        COMMAND make program-nvm
         WORKING_DIRECTORY ${BUILD_DIR}
-        COMMENT "Program the local EPCS flash"
+        COMMENT "Program the local NVM storage (Can be either an epcs or parallel flash)"
     )
 
     ADD_CUSTOM_TARGET(
-        erase-epcs-${PROJ_NAME}
-        COMMAND make erase-epcs
+        erase-nvm-${PROJ_NAME}
+        COMMAND make erase-nvm
         WORKING_DIRECTORY ${BUILD_DIR}
-        COMMENT "Erase the local EPCS flash"
+        COMMENT "Erase the local NVM storage (Can be either an epcs or parallel flash)"
     )
 
     SET( ADD_CLEAN_FILES ${ADD_CLEAN_FILES}
