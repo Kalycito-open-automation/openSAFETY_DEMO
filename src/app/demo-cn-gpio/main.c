@@ -114,6 +114,9 @@ static tMainInstance mainInstance_l;            /**< Instance of main module */
 /*----------------------------------------------------------------------------*/
 /* local function prototypes                                                  */
 /*----------------------------------------------------------------------------*/
+static BOOL initPeripherals(UINT8 * pTbufMemBase_p);
+static BOOL processAsync(void);
+
 static BOOL initModules(void);
 static void exitModules(void);
 static BOOL processSync(tPsiTimeStamp* pTimeStamp_p );
@@ -130,6 +133,8 @@ static void errorHandler(tPsiErrorInfo* pErrorInfo_p);
 static void ccWriteObject(void);
 static void ccReadObject(void);
 #endif
+
+static void shutdown(void);
 
 /*============================================================================*/
 /*            P U B L I C   F U N C T I O N S                                 */
@@ -149,9 +154,9 @@ APs state machine will be updated and input/output ports will be processed.
 /*----------------------------------------------------------------------------*/
 int main (void)
 {
+    int ret = -1;
     tPsiInitParam     initParam;
     tBuffDescriptor   buffDescList[kTbufCount];
-    tHandlerParam     transferParam;
     UINT8 * pTbufMemBase = (UINT8 *)(&mainInstance_l.tbufMemLayout_m[0]);
 #ifdef _DEBUG
     UINT8             macAddr[] = MAC_ADDR;
@@ -159,7 +164,6 @@ int main (void)
 
     PSI_MEMSET(&mainInstance_l, 0, sizeof(mainInstance_l));
     PSI_MEMSET(&buffDescList, 0, sizeof(buffDescList));
-    PSI_MEMSET(&transferParam, 0, sizeof(tHandlerParam));
 
     /* Init the target platform */
     platform_init();
@@ -175,71 +179,123 @@ int main (void)
 #endif
 
     /* Generate buffer descriptor list */
-    if(tbufp_genDescList(pTbufMemBase, kTbufCount, &buffDescList[0]) == FALSE)
+    if(tbufp_genDescList(pTbufMemBase, kTbufCount, &buffDescList[0]))
     {
-        DEBUG_TRACE(DEBUG_LVL_ERROR," ERROR: Unable to generate tbuf descriptor list!\n");
-        goto Exit;
+        /* Enable test of configuration channel */
+        mainInstance_l.fCcWriteObjTestEnable_m = TRUE;
+
+        /* initialize and start the slim interface internals */
+        DEBUG_TRACE(DEBUG_LVL_ALWAYS,"\n\nInitialize psi internals -> ");
+
+        initParam.pBuffDescList_m = &buffDescList[0];
+        initParam.pfnStreamHandler_m = pcpserial_transfer;
+        initParam.pfnErrorHandler_m = errorHandler;
+        initParam.idConsAck_m = kTbufAckRegisterCons;
+        initParam.idProdAck_m = kTbufAckRegisterProd;
+        initParam.idFirstProdBuffer_m = TBUF_NUM_CON + 1;   /* Add one buffer for the consumer ACK register */
+        if(psi_init(&initParam))
+        {
+            DEBUG_TRACE(DEBUG_LVL_ALWAYS, "SUCCESS!\n");
+
+            /* initialize and start the slim interface modules */
+            DEBUG_TRACE(DEBUG_LVL_ALWAYS,"\n\nInitialize psi modules -> ");
+            if(initModules())
+            {
+                DEBUG_TRACE(DEBUG_LVL_ALWAYS, "SUCCESS!\n");
+
+                if(initPeripherals(pTbufMemBase))
+                {
+                    /* Now enable the synchronous interrupt */
+                    syncir_enable();
+
+                    /* Start periodic main loop */
+                    if(processAsync())
+                    {
+                        ret = 0;
+                    }   /* no else: Error is already reported in the called function */
+                }   /* no else: Error is already reported in the called function */
+            }   /* no else: Error is already reported in the called function */
+        }   /* no else: Error is already reported in the called function */
+    }
+    else
+    {
+        DEBUG_TRACE(DEBUG_LVL_ERROR,"\nERROR: Unable to generate tbuf descriptor list!\n");
     }
 
-    /* Enable test of configuration channel */
-    mainInstance_l.fCcWriteObjTestEnable_m = TRUE;
+    shutdown();
 
-    /* initialize and start the slim interface internals */
-    DEBUG_TRACE(DEBUG_LVL_ALWAYS,"\n\nInitialize slim interface internals...\n");
+    return ret;
+}
 
-    initParam.pBuffDescList_m = &buffDescList[0];
-    initParam.pfnStreamHandler_m = pcpserial_transfer;
-    initParam.pfnErrorHandler_m = errorHandler;
-    initParam.idConsAck_m = kTbufAckRegisterCons;
-    initParam.idProdAck_m = kTbufAckRegisterProd;
-    initParam.idFirstProdBuffer_m = TBUF_NUM_CON + 1;   /* Add one buffer for the consumer ACK register */
+/*============================================================================*/
+/*            P R I V A T E   F U N C T I O N S                               */
+/*============================================================================*/
+/** \name Private Functions */
+/** \{ */
 
-    if(psi_init(&initParam) == FALSE)
-    {
-        DEBUG_TRACE(DEBUG_LVL_ERROR," ... error!\n");
-        goto Exit;
-    }
-    DEBUG_TRACE(DEBUG_LVL_ALWAYS," ... ok!\n");
+/*----------------------------------------------------------------------------*/
+/**
+\brief    Initialize the hardware peripherals
 
-    /* initialize and start the slim interface modules */
-    DEBUG_TRACE(DEBUG_LVL_ALWAYS,"\n\nInitialize slim interface modules...\n");
-    if(initModules() == FALSE)
-    {
-        DEBUG_TRACE(DEBUG_LVL_ERROR," ... error!\n");
-        goto Exit;
-    }
-    DEBUG_TRACE(DEBUG_LVL_ALWAYS,"... ok!\n");
+\param[in] pTbufMemBase_p       Pointer to the tbuf base address
+
+\retval TRUE    Successfully initialize the peripherals
+\retval FALSE   Error during initialization
+*/
+/*----------------------------------------------------------------------------*/
+static BOOL initPeripherals(UINT8 * pTbufMemBase_p)
+{
+    BOOL fReturn = FALSE;
+    tHandlerParam transferParam;
+
+    PSI_MEMSET(&transferParam, 0, sizeof(tHandlerParam));
 
     /* Setup consumer/producer transfer parameters with initialization fields */
-    if(tbufp_genTransferParams(pTbufMemBase, &transferParam) == FALSE)
+    if(tbufp_genTransferParams(pTbufMemBase_p, &transferParam))
     {
-        DEBUG_TRACE(DEBUG_LVL_ERROR,"ERROR: Unable to generate transfer parameters!\n");
-        goto Exit;
+        /* Init the serial device */
+        DEBUG_TRACE(DEBUG_LVL_ALWAYS,"\n\nInitialize serial device -> ");
+        if(pcpserial_init(&transferParam, serialTransferFinished))
+        {
+            DEBUG_TRACE(DEBUG_LVL_ALWAYS, "SUCCESS!\n");
+
+            /* initialize PCP interrupt handler */
+            DEBUG_TRACE(DEBUG_LVL_ALWAYS,"\n\nInitialize sync interrupt -> ");
+            if(syncir_init(syncIntHandler))
+            {
+                DEBUG_TRACE(DEBUG_LVL_ALWAYS, "SUCCESS!\n");
+                fReturn = TRUE;
+            }
+            else
+            {
+                DEBUG_TRACE(DEBUG_LVL_ERROR,"\nERROR: Unable to initialize the sync interrupt!\n");
+            }
+        }
+        else
+        {
+            DEBUG_TRACE(DEBUG_LVL_ERROR,"\nERROR: Unable to initialize the serial device!\n");
+        }
+    }
+    else
+    {
+        DEBUG_TRACE(DEBUG_LVL_ERROR,"\nERROR: Unable to generate transfer parameters!\n");
     }
 
-    /* Init the serial device */
-    DEBUG_TRACE(DEBUG_LVL_ALWAYS,"\n\nInitialize serial device...\n");
-    if(pcpserial_init(&transferParam, serialTransferFinished) == FALSE)
-    {
-        DEBUG_TRACE(DEBUG_LVL_ERROR," ... error!\n");
-        goto Exit;
-    }
-    DEBUG_TRACE(DEBUG_LVL_ALWAYS,"... ok!\n");
+    return fReturn;
+}
 
+/*----------------------------------------------------------------------------*/
+/**
+\brief    Process the CN demo background loop
 
-    /* initialize PCP interrupt handler */
-    DEBUG_TRACE(DEBUG_LVL_ALWAYS,"\n\nInitialize synchronous interrupt...\n");
-    if(syncir_init(syncIntHandler) == FALSE)
-    {
-        DEBUG_TRACE(DEBUG_LVL_ERROR," ... error!\n");
-        goto Exit;
-    }
-    DEBUG_TRACE(DEBUG_LVL_ALWAYS,"... ok!\n");
+\retval TRUE    Processing terminated successfully
+\retval FALSE   Error during processing
+*/
+/*----------------------------------------------------------------------------*/
+static BOOL processAsync(void)
+{
+    BOOL fReturn = FALSE;
 
-    /* Now enable the synchronous interrupt */
-    syncir_enable();
-
-    /* Start periodic main loop */
     DEBUG_TRACE(DEBUG_LVL_ALWAYS,"\n\nStart processing...\n");
 
     while (TRUE)
@@ -260,30 +316,13 @@ int main (void)
 
         if(mainInstance_l.fShutdown_m != FALSE)
         {
+            fReturn = TRUE;
             break;
         }
     }
 
-Exit:
-    DEBUG_TRACE(DEBUG_LVL_ALWAYS,"\n\nPerform system shutdown...\n");
-
-    /* Shutdown platform specific parts */
-    syncir_exit();
-    pcpserial_exit();
-    platform_exit();
-
-    /* Shutdown slim interface */
-    exitModules();
-    psi_exit();
-
-    return 0;
+    return fReturn;
 }
-
-/*============================================================================*/
-/*            P R I V A T E   F U N C T I O N S                               */
-/*============================================================================*/
-/** \name Private Functions */
-/** \{ */
 
 /*----------------------------------------------------------------------------*/
 /**
@@ -596,6 +635,28 @@ static void ccReadObject(void)
 }
 
 #endif
+
+/*----------------------------------------------------------------------------*/
+/**
+\brief    Shutdown the CN and cleanup all structures
+*/
+/*----------------------------------------------------------------------------*/
+static void shutdown(void)
+{
+    DEBUG_TRACE(DEBUG_LVL_ALWAYS, "\n\nShutdown ...\n");
+
+    /* Disable synchronous interrupt */
+    syncir_disable();
+
+    /* Shutdown PSI interface */
+    exitModules();
+    psi_exit();
+
+    /* Shutdown platform specific parts */
+    syncir_exit();
+    pcpserial_exit();
+    platform_exit();
+}
 
 /**
  * \}
