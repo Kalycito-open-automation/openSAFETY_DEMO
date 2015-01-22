@@ -1,0 +1,72 @@
+//==============================================================================
+//==============================================================================
+/**
+\defgroup group_applications Example Applications
+
+This page provides an overview of all example applications of the software
+distribution. As the PSI hosts two different kind of demos the CN and the SN
+demo there need to be four groups of modules. Two for the demos, one for the
+generic files which are shared by both demos and one for the target specific
+files which are shared by both demos.
+
+*/
+//==============================================================================
+//==============================================================================
+
+//==============================================================================
+//==============================================================================
+/**
+\defgroup group_app_cn Controlled Node - Demo
+
+This group consists of all modules which are part of the CN demo. The CN
+demo implements an application for a POWERLINK Slave with a minimal input
+output GPIO application.
+
+\ingroup group_applications
+
+*/
+//==============================================================================
+//==============================================================================
+
+//==============================================================================
+//==============================================================================
+/**
+\defgroup group_app_sn Safe Node - Demo
+
+This group consists of all modules which are part of the SN demo. The SN
+demo implements a single or dual channelled openSAFETY SN with a minimal
+input output GPIO application.
+
+\ingroup group_applications
+
+*/
+//==============================================================================
+//==============================================================================
+
+//==============================================================================
+//==============================================================================
+/**
+\defgroup group_app_target Target specific files
+
+This group consists of all modules which are shared between the example
+applications and consists of platform dependent code.
+
+\ingroup group_applications
+
+*/
+//==============================================================================
+//==============================================================================
+
+//==============================================================================
+//==============================================================================
+/**
+\defgroup group_app_common Application common files
+
+This group consists of all modules which are shared between the example
+applications.
+
+\ingroup group_applications
+
+*/
+//==============================================================================
+//==============================================================================

@@ -1,0 +1,57 @@
+//==============================================================================
+//==============================================================================
+/**
+\defgroup group_libpsi PSI user library (libpsi)
+
+In order to ease the interface to the user application the POWERLINK interface
+library is provided. This library is divided into modules in order to be more
+flexible. Each of this modules is assigned to a buffer of the \ref page_tbuf
+IP-Core. This core defines buffered memories where each buffer has a start address
+and a size. The usage of each buffer and it's internal memory layout is not specified
+by the IP-Core. This missing information is defined by the selected demos
+configuration files.
+
+> The software is organized in a way that the user can write additional modules
+> to enable a more flexible communication between the PCP and the application.
+
+\section libpsi_configuration Library Configuration
+Each provided example application consists of a configuration folder located in
+`app/demo-[example_name]/config`. The configuration headers in this folder enable
+to change the configuration of the interconnection between the PCP and the user
+application including the POWERLINK interface library.
+
+For the global configuration of the library the header `triplebuffer.h` is used. This
+header consists of the type \ref tTbufNumLayout which assigns a software module
+to each buffer. The user needs to adapt this type in order to change the meaning
+of the buffers. This type also includes the consumer acknowledge register
+(\ref kTbufAckRegisterCons) at the first indices and the producer acknowledge
+register (\ref kTbufAckRegisterProd) at the last indices. If a buffer instance
+is added in the core also the count of buffers (\ref kTbufCount) needs to be
+adjusted in the \ref tTbufNumLayout type.
+
+Each triple buffer can have one of the following id's:
+- **kTbufNumStatusOut:** ID of the status output triple buffer
+- **kTbufNumStatusIn:** ID of the status input triple buffer
+- **kTbufNumOutputConfChan:** ID of the output configuration channel triple buffer
+- **kTbufNumInputConfChan:** ID of the input configuration channel triple buffer
+- **kTbufNumRpdoImage:** ID of the RPDO triple buffer image
+- **kTbufNumTpdoImage:** ID of the TPDO triple buffer image
+- **kTbufNumSsdoReceive[n]:** ID of the Ssdo receive channel [n] triple buffer.
+  (The first Ssdo receive channel has ID _kTbufNumSsdoReceive0_)
+- **kTbufNumSsdoTransmit[n]:** ID of the Ssdo transmit channel [n] triple buffer
+  (The first Ssdo transmit channel has ID _kTbufNumSsdoTransmit0_)
+
+If a whole module is not needed by the user application it is possible to deactivate
+a module completely. For this the \ref PSI_MODULE_INTEGRATION macro can be used
+where each module id can be selected by using the corresponding define.
+The following module id macros are available:
+- **PSI_MODULE_STATUS**: Id of the \ref module_psi_status
+- **PSI_MODULE_PDO**: Id of the \ref module_psi_pdo
+- **PSI_MODULE_CC**: Id of the \ref module_psi_cc
+- **PSI_MODULE_SSDO**: Id of the \ref module_psi_ssdo
+- **PSI_MODULE_LOGBOOK**: Id of the \ref module_psi_log
+
+
+*/
+//==============================================================================
+//==============================================================================

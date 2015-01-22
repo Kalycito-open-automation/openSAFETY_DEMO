@@ -11,28 +11,28 @@
 # Install it with:
 #  cmake ./ && sudo make install
 # Add the following to the CMakeLists.txt of your project:
-#  include(UseDoxygen OPTIONAL)
+#  INCLUDE(UseDoxygen OPTIONAL)
 # Optionally copy Doxyfile.in in the directory of CMakeLists.txt and edit it.
 #
 # USAGE: INCLUDE IN PROJECT
 #
-#  set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR})
-#  include(UseDoxygen)
+#  SET(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR})
+#  INCLUDE(UseDoxygen)
 # Add the Doxyfile.in and UseDoxygen.cmake files to the projects source directory.
 #
 #
 # Variables you may define are:
 #  DOXYFILE_SOURCE_DIR - Path where the Doxygen input files are.
-#  	Defaults to the current source and binary directory.
+#      Defaults to the current source and binary directory.
 #  DOXYFILE_OUTPUT_DIR - Path where the Doxygen output is stored. Defaults to "doc".
 #
 #  DOXYFILE_LATEX - Set to "NO" if you do not want the LaTeX documentation
-#  	to be built.
+#      to be built.
 #  DOXYFILE_LATEX_DIR - Directory relative to DOXYFILE_OUTPUT_DIR where
-#  	the Doxygen LaTeX output is stored. Defaults to "latex".
+#      the Doxygen LaTeX output is stored. Defaults to "latex".
 #
 #  DOXYFILE_HTML_DIR - Directory relative to DOXYFILE_OUTPUT_DIR where
-#  	the Doxygen html output is stored. Defaults to "html".
+#      the Doxygen html output is stored. Defaults to "html".
 #
 
 #
@@ -43,109 +43,112 @@
 #  For details see the accompanying COPYING-CMAKE-SCRIPTS file.
 #
 
-macro(usedoxygen_set_default name value)
-	if(NOT DEFINED "${name}")
-		set("${name}" "${value}")
-	endif()
-endmacro()
+MACRO(usedoxygen_SET_default name value)
+    IF(NOT DEFINED "${name}")
+        SET("${name}" "${value}")
+    ENDIF()
+ENDMACRO()
 
-find_package(Doxygen)
+FIND_PACKAGE(Doxygen)
 
-if(DOXYGEN_FOUND)
-	find_file(DOXYFILE_IN "Doxyfile.in"
-			PATHS "${CMAKE_CURRENT_SOURCE_DIR}" "${CMAKE_ROOT}/Modules/"
-			NO_DEFAULT_PATH)
-	set(DOXYFILE "${CMAKE_CURRENT_BINARY_DIR}/Doxyfile")
-	include(FindPackageHandleStandardArgs)
-	find_package_handle_standard_args(DOXYFILE_IN DEFAULT_MSG "DOXYFILE_IN")
-endif()
+IF(DOXYGEN_FOUND)
+    FIND_FILE(DOXYFILE_IN "doxyfile.in"
+            PATHS "${DOXYFILE_SOURCE_DIR}/software-manual" "${CMAKE_ROOT}/Modules/"
+            NO_DEFAULT_PATH)
+    SET(DOXYFILE "${DOXYFILE_OUTPUT_DIR}/doxyfile")
+    INCLUDE(FindPackageHandleStandardArgs)
+    FIND_PACKAGE_handle_standard_args(DOXYFILE_IN DEFAULT_MSG "DOXYFILE_IN")
+ENDIF()
 
-if(DOXYGEN_FOUND AND DOXYFILE_IN_FOUND)
-	usedoxygen_set_default(DOXYFILE_OUTPUT_DIR "${CMAKE_CURRENT_BINARY_DIR}/doc")
-	usedoxygen_set_default(DOXYFILE_HTML_DIR "html")
-	usedoxygen_set_default(DOXYFILE_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}\"
-		\"${CMAKE_CURRENT_BINARY_DIR}")
+IF(DOXYGEN_FOUND AND DOXYFILE_IN_FOUND)
+    usedoxygen_SET_default(DOXYFILE_OUTPUT_DIR "${CMAKE_CURRENT_BINARY_DIR}/doc")
+    usedoxygen_SET_default(DOXYFILE_HTML_DIR "html")
 
-	set_property(DIRECTORY APPEND PROPERTY
-		ADDITIONAL_MAKE_CLEAN_FILES
-		"${DOXYFILE_OUTPUT_DIR}/${DOXYFILE_HTML_DIR}")
+    SET_property(DIRECTORY APPEND PROPERTY ADDITIONAL_MAKE_CLEAN_FILES
+        "${DOXYFILE_OUTPUT_DIR}/${DOXYFILE_HTML_DIR}"
+    )
 
-	add_custom_target(doxygen
-		COMMAND ${DOXYGEN_EXECUTABLE}
-			${DOXYFILE} 
-		COMMENT "Writing documentation to ${DOXYFILE_OUTPUT_DIR}..."
-		WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
+    ADD_CUSTOM_TARGET(doxygen
+        COMMAND ${DOXYGEN_EXECUTABLE} ${DOXYFILE}
+        COMMENT "Writing documentation to ${DOXYFILE_OUTPUT_DIR}..."
+        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+    )
 
-	
-	get_target_property(DOT_TARGET generate_dot TYPE)
-	if(NOT DOT_TARGET)
-		add_custom_target(generate_dot)
-	endif()
+    ## dot
+    FILE ( GLOB_RECURSE TARGET_VARIABLE_SOURCE "${DOXYFILE_IMAGE_DIR}/dot/*.dot" )
+
+    IF( NOT ${TARGET_VARIABLE_SOURCE} STREQUAL "" )
+        GET_TARGET_PROPERTY(DOT_TARGET generate_dot TYPE)
+        if(NOT DOT_TARGET)
+            ADD_CUSTOM_TARGET(generate_dot)
+        ENDIF()
 
         if(NOT DOXYGEN_DOT_FILEFORMAT)
             SET(DOXYGEN_DOT_FILEFORMAT "png" )
         ENDIF()
-	
-	FILE ( GLOB_RECURSE TARGET_VARIABLE_SOURCE "${CMAKE_CURRENT_SOURCE_DIR}/../doc/images/dot/*.dot" )
-        add_custom_command(
-        	TARGET generate_dot
-                COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_CURRENT_BINARY_DIR}/doc/html
-                COMMENT "Preparing html directory"
+
+        ADD_CUSTOM_COMMAND(
+            TARGET generate_dot
+            COMMAND ${CMAKE_COMMAND} -E make_directory ${DOXYFILE_OUTPUT_DIR}/${DOXYFILE_HTML_DIR}
+            COMMENT "Preparing html directory"
         )
 
-	FOREACH ( dotfile IN ITEMS ${TARGET_VARIABLE_SOURCE} )
-		STRING(REPLACE "${CMAKE_CURRENT_SOURCE_DIR}/../doc/images/dot/" "" FILE_PATH ${dotfile} )
-		STRING(REPLACE ".dot" "" FILE_NAME ${FILE_PATH} )
-		add_custom_command(
-			TARGET generate_dot
-			COMMAND ${DOXYGEN_DOT_EXECUTABLE} -T${DOXYGEN_DOT_FILEFORMAT} ${dotfile} -o ${CMAKE_CURRENT_BINARY_DIR}/doc/html/${FILE_NAME}.png
-			COMMENT "Generating image for ${FILE_NAME} ..."
-			WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/doc/)
-		SET ( ADD_DEPEND ${ADD_DEPEND} "dot_${FILE_NAME}" )
-	ENDFOREACH()
+        FOREACH ( dotfile IN ITEMS ${TARGET_VARIABLE_SOURCE} )
+            STRING(REPLACE "${DOXYFILE_IMAGE_DIR}/dot/" "" FILE_PATH ${dotfile} )
+            STRING(REPLACE ".dot" "" FILE_NAME ${FILE_PATH} )
+            ADD_CUSTOM_COMMAND(
+                TARGET generate_dot
+                COMMAND ${DOXYGEN_DOT_EXECUTABLE} -T${DOXYGEN_DOT_FILEFORMAT} ${dotfile} -o ${DOXYFILE_OUTPUT_DIR}/${DOXYFILE_HTML_DIR}/${FILE_NAME}.png
+                COMMENT "Generating image for ${FILE_NAME} ..."
+                WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/doc/
+            )
+            SET ( ADD_DEPEND ${ADD_DEPEND} "dot_${FILE_NAME}" )
+        ENDFOREACH()
 
-	add_dependencies(generate_dot ${ADD_DEPEND})
-		
-	SET ( ADD_DEPEND "doxygen" )
-	
-	## LaTeX
-	set(DOXYFILE_PDFLATEX "NO")
-	set(DOXYFILE_DOT "NO")
+        ADD_DEPENDENCIES(generate_dot ${ADD_DEPEND})
+    ENDIF ( NOT ${TARGET_VARIABLE_SOURCE} STREQUAL "" )
 
-	find_package(LATEX)
-	find_program(MAKE_PROGRAM make)
-	if(LATEX_COMPILER AND MAKEINDEX_COMPILER AND MAKE_PROGRAM AND
-			(NOT DEFINED DOXYFILE_LATEX OR DOXYFILE_LATEX STREQUAL "YES"))
-		set(DOXYFILE_LATEX "YES")
-		usedoxygen_set_default(DOXYFILE_LATEX_DIR "latex")
+    SET ( ADD_DEPEND "doxygen" )
 
-		set_property(DIRECTORY APPEND PROPERTY
-				ADDITIONAL_MAKE_CLEAN_FILES
-				"${DOXYFILE_OUTPUT_DIR}/${DOXYFILE_LATEX_DIR}")
+    ## LaTeX
+    SET(DOXYFILE_PDFLATEX "NO")
+    SET(DOXYFILE_DOT "NO")
 
-		if(PDFLATEX_COMPILER)
-			set(DOXYFILE_PDFLATEX "YES")
-		endif()
-		if(DOXYGEN_DOT_EXECUTABLE)
-			set(DOXYFILE_DOT "YES")
-		endif()
+    FIND_PACKAGE(LATEX)
+    IF ( LATEX_COMPILER AND MAKEINDEX_COMPILER AND
+       ( NOT DEFINED DOXYFILE_LATEX OR DOXYFILE_LATEX STREQUAL "YES" ) )
+        SET(DOXYFILE_LATEX "YES")
+        usedoxygen_SET_default(DOXYFILE_LATEX_DIR "latex")
 
-		add_custom_command(TARGET doxygen
-			POST_BUILD
-			COMMAND ${MAKE_PROGRAM}
-			COMMENT	"Running LaTeX for Doxygen documentation in ${DOXYFILE_OUTPUT_DIR}/${DOXYFILE_LATEX_DIR}..."
-			WORKING_DIRECTORY "${DOXYFILE_OUTPUT_DIR}/${DOXYFILE_LATEX_DIR}")
-	else()
-		set(DOXYGEN_LATEX "NO")
-	endif()
+        SET_property(DIRECTORY APPEND PROPERTY ADDITIONAL_MAKE_CLEAN_FILES
+                "${DOXYFILE_OUTPUT_DIR}/${DOXYFILE_LATEX_DIR}"
+        )
 
+        IF(PDFLATEX_COMPILER)
+            SET(DOXYFILE_PDFLATEX "YES")
+        ENDIF()
+        IF(DOXYGEN_DOT_EXECUTABLE)
+            SET(DOXYFILE_DOT "YES")
+        ENDIF()
 
-	configure_file(${DOXYFILE_IN} Doxyfile IMMEDIATE @ONLY)
+        FIND_PROGRAM(MAKE_PROGRAM make)
+        IF(MAKE_PROGRAM AND NOT WIN32)
+            ADD_CUSTOM_COMMAND(TARGET doxygen
+                POST_BUILD
+                COMMAND ${MAKE_PROGRAM}
+                COMMENT    "Running LaTeX for Doxygen documentation in ${DOXYFILE_OUTPUT_DIR}/${DOXYFILE_LATEX_DIR}..."
+                WORKING_DIRECTORY "${DOXYFILE_OUTPUT_DIR}/${DOXYFILE_LATEX_DIR}"
+            )
+        ENDIF()
+    ELSE()
+        SET(DOXYGEN_LATEX "NO")
+    ENDIF()
 
-	get_target_property(DOC_TARGET doc TYPE)
-	if(NOT DOC_TARGET)
-		add_custom_target(doc)
-	endif()
+    CONFIGURE_FILE(${DOXYFILE_IN} ${DOXYFILE} IMMEDIATE @ONLY)
 
-	add_dependencies(doc ${ADD_DEPEND})
-endif()
+    IF(NOT TARGET doc)
+        ADD_CUSTOM_TARGET(doc)
+    ENDIF()
+
+    ADD_DEPENDENCIES(doc ${ADD_DEPEND})
+ENDIF()

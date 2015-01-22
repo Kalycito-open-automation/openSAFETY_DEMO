@@ -1,0 +1,229 @@
+<doxygenlayout version="1.0">
+  <!-- Navigation index tabs for HTML output -->
+  <navindex>
+    <tab type="mainpage" visible="yes" title=""/>
+    <tab type="user" url="\ref page_protocols" title="Fieldbus Protocols"/>
+    <tab type="user" url="\ref page_sysdesc" title="System Overview"/>
+    <tab type="user" url="\ref page_directories" title="Directory Structure"/>
+    <tab type="usergroup" url="\ref page_idxhardware" title="Hardware design">
+      <tab type="user" url="\ref page_hw_pcp" title="Hardware design - PCP"/>
+      <tab type="user" url="\ref page_hw_app" title="Hardware design - Application"/>
+    </tab>
+    <tab type="usergroup" url="\ref page_idxipcore" title="IP-Core Manual">
+      <tab type="usergroup" url="\ref page_plkif" title="POWERLINK Interface IP-Core">
+        <tab type="user" url="\ref page_tbuf" title="Triple Buffer"/>
+        <tab type="user" url="\ref page_spibridge" title="SPI Bridge"/>
+      </tab>
+      <tab type="user" url="\ref page_openmac" title="openMAC IP-Core"/>
+    </tab>
+    <tab type="usergroup" url="\ref page_idxsoftware" title="Software Manual">
+      <tab type="modules" visible="yes" title="" intro=""/>
+      <tab type="namespaces" visible="no" title="">
+        <tab type="namespacelist" visible="yes" title="" intro=""/>
+        <tab type="namespacemembers" visible="yes" title="" intro=""/>
+      </tab>
+      <tab type="classes" visible="yes" title="">
+       <tab type="classlist" visible="yes" title="" intro=""/>
+       <tab type="classindex" visible="$ALPHABETICAL_INDEX" title=""/>
+       <tab type="hierarchy" visible="yes" title="" intro=""/>
+       <tab type="classmembers" visible="yes" title="" intro=""/>
+      </tab>
+      <tab type="files" visible="yes" title="">
+        <tab type="filelist" visible="yes" title="" intro=""/>
+        <tab type="globals" visible="yes" title="" intro=""/>
+      </tab>
+      <tab type="examples" visible="yes" title="" intro=""/>
+    </tab>
+    <tab type="files" visible="yes" title="">
+      <tab type="filelist" visible="yes" title="" intro=""/>
+      <tab type="globals" visible="yes" title="" intro=""/>
+    </tab>
+    <tab type="examples" visible="yes" title="" intro=""/>
+    <tab type="usergroup" url="\ref page_ugindex" title="User Guide">
+      <tab type="user" url="\ref page_x86" title="Target x86/amd64"/>
+      <tab type="usergroup" url="\ref page_altnios2" title="Target Altera/Nios2">
+        <tab type="user" url="\ref page_altsetuphw" title="How to setup the board"/>
+        <tab type="user" url="\ref page_altbuildhw" title="How to build the bitstream"/>
+        <tab type="user" url="\ref page_altbuildsw" title="How to build the software"/>
+      </tab>
+      <tab type="usergroup" url="\ref page_stm32f103rb" title="Target STM32f103RB">
+        <tab type="user" url="\ref page_stm32f103_setuphw" title="How to setup the board"/>
+        <tab type="usergroup" url="\ref page_stm32f103_buildsw" title="How to build the software">
+          <tab type="user" url="\ref page_buildenv_stm32" title="Build environment - Setup"/>
+        </tab>
+      </tab>
+      <tab type="usergroup" url="\ref page_stm32f401re" title="Target STM32f401RE">
+        <tab type="user" url="\ref page_stm32f401_setuphw" title="How to setup the board"/>
+        <tab type="usergroup" url="\ref page_stm32f401_buildsw" title="How to build the software">
+          <tab type="user" url="\ref page_buildenv_stm32" title="Build environment - Setup"/>
+        </tab>
+      </tab>
+    </tab>
+    <tab type="user" url="\ref page_revision" title="Revision History"/>
+    <tab type="user" url="\ref page_licenses" title="Licenses"/>
+  </navindex>
+
+  <!-- Layout definition for a class page -->
+  <class>
+    <briefdescription visible="yes"/>
+    <includes visible="$SHOW_INCLUDE_FILES"/>
+    <inheritancegraph visible="$CLASS_GRAPH"/>
+    <collaborationgraph visible="$COLLABORATION_GRAPH"/>
+    <memberdecl>
+      <nestedclasses visible="yes" title=""/>
+      <publictypes title=""/>
+      <publicslots title=""/>
+      <signals title=""/>
+      <publicmethods title=""/>
+      <publicstaticmethods title=""/>
+      <publicattributes title=""/>
+      <publicstaticattributes title=""/>
+      <protectedtypes title=""/>
+      <protectedslots title=""/>
+      <protectedmethods title=""/>
+      <protectedstaticmethods title=""/>
+      <protectedattributes title=""/>
+      <protectedstaticattributes title=""/>
+      <packagetypes title=""/>
+      <packagemethods title=""/>
+      <packagestaticmethods title=""/>
+      <packageattributes title=""/>
+      <packagestaticattributes title=""/>
+      <properties title=""/>
+      <events title=""/>
+      <privatetypes title=""/>
+      <privateslots title=""/>
+      <privatemethods title=""/>
+      <privatestaticmethods title=""/>
+      <privateattributes title=""/>
+      <privatestaticattributes title=""/>
+      <friends title=""/>
+      <related title="" subtitle=""/>
+      <membergroups visible="yes"/>
+    </memberdecl>
+    <detaileddescription title=""/>
+    <memberdef>
+      <inlineclasses title=""/>
+      <typedefs title=""/>
+      <enums title=""/>
+      <constructors title=""/>
+      <functions title=""/>
+      <related title=""/>
+      <variables title=""/>
+      <properties title=""/>
+      <events title=""/>
+    </memberdef>
+    <allmemberslink visible="yes"/>
+    <usedfiles visible="$SHOW_USED_FILES"/>
+    <authorsection visible="yes"/>
+  </class>
+
+  <!-- Layout definition for a namespace page -->
+  <namespace>
+    <briefdescription visible="yes"/>
+    <memberdecl>
+      <nestednamespaces visible="yes" title=""/>
+      <classes visible="yes" title=""/>
+      <typedefs title=""/>
+      <enums title=""/>
+      <functions title=""/>
+      <variables title=""/>
+      <membergroups visible="yes"/>
+    </memberdecl>
+    <detaileddescription title=""/>
+    <memberdef>
+      <inlineclasses title=""/>
+      <typedefs title=""/>
+      <enums title=""/>
+      <functions title=""/>
+      <variables title=""/>
+    </memberdef>
+    <authorsection visible="yes"/>
+  </namespace>
+
+  <!-- Layout definition for a file page -->
+  <file>
+    <briefdescription visible="yes"/>
+    <includes visible="$SHOW_INCLUDE_FILES"/>
+    <includegraph visible="$INCLUDE_GRAPH"/>
+    <includedbygraph visible="$INCLUDED_BY_GRAPH"/>
+    <sourcelink visible="yes"/>
+    <detaileddescription title=""/>
+    <memberdecl>
+      <classes visible="yes" title=""/>
+      <namespaces visible="yes" title=""/>
+      <defines title=""/>
+      <typedefs title=""/>
+      <enums title=""/>
+      <functions title=""/>
+      <variables title=""/>
+      <membergroups visible="yes"/>
+    </memberdecl>
+    <memberdef>
+      <inlineclasses title=""/>
+      <defines title=""/>
+      <typedefs title=""/>
+      <enums title=""/>
+      <functions title=""/>
+      <variables title=""/>
+    </memberdef>
+    <authorsection/>
+  </file>
+
+  <!-- Layout definition for a group page -->
+  <group>
+    <briefdescription visible="yes"/>
+    <detaileddescription title=""/>
+    <groupgraph visible="$GROUP_GRAPHS"/>
+    <memberdecl>
+      <nestedgroups visible="yes" title=""/>
+      <dirs visible="yes" title=""/>
+      <files visible="yes" title=""/>
+      <namespaces visible="yes" title=""/>
+      <classes visible="yes" title=""/>
+      <defines title=""/>
+      <typedefs title=""/>
+      <enums title=""/>
+      <enumvalues title=""/>
+      <functions title=""/>
+      <variables title=""/>
+      <signals title=""/>
+      <publicslots title=""/>
+      <protectedslots title=""/>
+      <privateslots title=""/>
+      <events title=""/>
+      <properties title=""/>
+      <friends title=""/>
+      <membergroups visible="yes"/>
+    </memberdecl>
+    <memberdef>
+      <pagedocs/>
+      <inlineclasses title=""/>
+      <defines title=""/>
+      <typedefs title=""/>
+      <enums title=""/>
+      <enumvalues title=""/>
+      <functions title=""/>
+      <variables title=""/>
+      <signals title=""/>
+      <publicslots title=""/>
+      <protectedslots title=""/>
+      <privateslots title=""/>
+      <events title=""/>
+      <properties title=""/>
+      <friends title=""/>
+    </memberdef>
+    <authorsection visible="yes"/>
+  </group>
+
+  <!-- Layout definition for a directory page -->
+  <directory>
+    <briefdescription visible="yes"/>
+    <directorygraph visible="yes"/>
+    <memberdecl>
+      <dirs visible="yes"/>
+      <files visible="yes"/>
+    </memberdecl>
+    <detaileddescription title=""/>
+  </directory>
+</doxygenlayout>

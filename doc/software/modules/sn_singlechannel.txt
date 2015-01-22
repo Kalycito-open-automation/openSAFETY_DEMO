@@ -1,0 +1,47 @@
+//==============================================================================
+/**
+\addtogroup group_app_sn
+
+\section sect_singlesn_impl Single channel - Implementation details
+
+The single channelled SN demo uses the same system setup as the CN demo with a
+slightly more complex application and a different configuration of the PSI
+library.
+
+The SN demo source code is located in the folder **app/demo-sn-gpio** where the
+openSAFETY protocol stack implementation is located under **stacks/openSAFETY**!
+The openSAFETY stack itself basically creates the openSAFETY frames which need
+to be forwarded to the underlying fieldbus. The SN demo firmware is put together
+by the following software modules:
+
+- \ref group_app_sn_shnf
+
+    The SHNF module implements the frame forwarding from and to the openSAFETY
+    stack. It receives the openSAFETY payload from the underlying HNF receive
+    channel and forwards the payload to the protocol stack. The SHNF does this
+    without any further investigation of the payload itself.
+    After a frame reception the SHNF then triggeres the build of new transmit data
+    which is the forwarded to the HNF transmit channel.
+
+- \ref module_sn_shnf_hnfpsi
+
+    This module is part of the actual SHNF implementation and acts as a wrapper
+    module of the SHNF to the libpsi. If the SN firmware shall be used with a different
+    interface than the PSI an other implementation of this wrapper would be needed.
+    The header demo-sn-gpio/shnf/include/shnf/hnf.h provides the interface from
+    the SHNF to the hnfpsi.
+
+- \ref group_app_sn_sapl
+
+    The SAPL module implements all parts of the firmware which are close to the
+    the user application or the SOD. It handles the parsing of the parameter stream
+    which is downloaded to object **0x101A** on bootup.
+    In addition the CRC32 calculation over the SOD is carried out by this module.
+    If there is an implementation for the NVM on the selected target platform
+    the SAPL also provides the possibility to store the content of the SOD to the
+    local flash.
+
+![SN software concept](sn_sw_concept.png)
+@image latex sn_sw_concept.eps "SN software concept" width=0.5\textwidth
+
+*/

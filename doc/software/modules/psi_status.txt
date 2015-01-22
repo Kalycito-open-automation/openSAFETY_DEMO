@@ -1,0 +1,76 @@
+//==============================================================================
+/**
+\addtogroup module_psi_status
+
+The status module consists of the time information of the POWERLINK network and
+the status information of the asynchronous channels. It is the only mandatory
+module of the system and is referenced by the SSDO module (\ref module_psi_ssdo) and
+configuration channel (\ref module_psi_cc) module. It is divided into the input
+(**StatusIn**) and output (**StatusOut**) channel which provides information
+flow into both directions.
+
+\section module_psi_status_layout Memory layout
+
+This section provides details about the internal layout of the status triple buffer.
+The module itself consists of all needed fields for a fully functional interface
+including all available modules. Because of this no mandatory user action is required
+inside this module. If the size of the traffic over SPI needs to be optimized and
+an optional module is not needed also the status field of this module can be removed.
+
+> Take care that the data needs to be aligned in memory and that reserved bytes need
+> to be introduced in order to guarantee this alignment.
+
+\subsection module_psi_status_outregisters StatusOut register field description
+
+The structure \ref tTbufStatusOutStructure provides information about the module
+internal memory layout of the **StatusOut** buffer. It provides a cyclic information
+flow from the POWERLINK processor to the user application.
+
+~~~~~~~~~~~~~{.c}
+typedef struct {
+    UINT32 relTimeLow_m;
+    UINT32 relTimeHigh_m;
+    UINT8  iccStatus_m;
+    UINT8  reserved_m;
+    UINT16 asyncConsStatus_m;
+} tTbufStatusOutStructure;
+~~~~~~~~~~~~~
+
+In order to enable a synchronization of the local clock (User application clock)
+to the POWERLINK cycle the RelativeTime (relTimeLow_m and relTimeHigh_m) is
+forwarded via the first eight bytes of the StatusOut triple buffer. In combination
+with the synchronous interrupt at SoC reception, the drift of the local clock can
+be compensated.
+
+> This RelativeTime is always from the **current** POWERLINK cycle.
+
+The fields iccStatus_m gives access to the status of the input configuration
+channel (\ref module_psi_cc). It consists of the channel busy and channel error flag.
+The asyncConsStatus_m field provide information about the status of the asynchronous
+transmit channels. Due to its width of two bytes it can hold the status of up to
+eight asynchronous channels where each channel has two bits of information.
+These two bits are the **Channel Busy (CBx)** and **Transmit Error (CEx)** flags.
+(The transmit error flag is currently not implemented)
+
+asyncConsStatus_m    | Description
+---------------------|----------------------------------------------------------------------------------------------------------------------
+Channel Busy (CBx)   | Transmit channel is currently busy transferring the data. As it can take several cycles until the POWERLINK CN gets an asynchronous slot granted the application has to wait until the busy flag is reset. This prevents the application of flooding the transmit channel.
+Transmit Error (CEx) | In case of a transmit error in the lower layers this flag is set to one for one POWERLINK cycle. The SN can decide if a retransmit should be carried out.
+
+\subsection module_psi_status_inregisters StatusIn register field description
+The **StatusOut** buffer provides a cyclic information flow from the user
+application to the POWERLINK processor. It's internal layout is specified via
+the \ref tTbufStatusInStructure type.
+
+~~~~~~~~~~~~~{.c}
+typedef struct {
+    UINT16 reserved_m;
+    UINT16 asyncProdStatus_m;
+} tTbufStatusInStructure;
+~~~~~~~~~~~~~
+
+The asyncProdStatus_m of the **StatusOut** layout type provides information about
+the status of the asynchronous receive channels. The layout of this field is
+identical to the asyncConsStatus_m field of the \ref tTbufStatusOutStructure type.
+
+*/
