@@ -245,7 +245,7 @@ BOOLEAN sapl_process(void)
     {
         if(saplInstance_l.lastTask_m != saplInstance_l.activeTasks_m)
         {
-            DEBUG_TRACE(DEBUG_LVL_ALWAYS, "\nStore SOD ...\n");
+            DEBUG_TRACE(DEBUG_LVL_ALWAYS, "\nStore SOD -> ");
             saplInstance_l.lastTask_m = saplInstance_l.activeTasks_m;
         }
 
@@ -257,11 +257,23 @@ BOOLEAN sapl_process(void)
             /* Reset the flag of the parameter store task */
             saplInstance_l.activeTasks_m &= ~(1<<SAPL_TASK_PROCESS_PARAM_SET_STORE_BIT);
 
+            DEBUG_TRACE(DEBUG_LVL_ALWAYS, "SUCCESS!\n");
+
             fReturn = TRUE;
         }
         else if(sodStoreRet == kSodStoreProcBusy)
         {
             /* Continue processing on next call of SAPL process */
+            fReturn = TRUE;
+        }
+        else if(sodStoreRet == kSodStoreProcNotApplicable)
+        {
+            /* Reset the flag of the parameter store task */
+            saplInstance_l.activeTasks_m &= ~(1<<SAPL_TASK_PROCESS_PARAM_SET_STORE_BIT);
+
+            /* Unable to restore the SOD (NVM is not empty!) */
+            DEBUG_TRACE(DEBUG_LVL_ALWAYS, "FAILED!\n");
+
             fReturn = TRUE;
         }
     }

@@ -62,9 +62,10 @@ a fast bootup on SN start.
 /* const defines                                                              */
 /*----------------------------------------------------------------------------*/
 #define NVS_IMG_OFFSET_MAGIC        (UINT8)0x00         /**< Offset of the magic word field in the image */
-#define NVS_IMG_OFFSET_LENGTH       (UINT8)0x04         /**< Offset of the length field in the image */
-#define NVS_IMG_OFFSET_CRC32        (UINT8)0x08         /**< Offset of the crc32 field in the image */
-#define NVS_IMG_OFFSET_DATA         (UINT8)0x0C         /**< Offset of the data field in the image */
+#define NVS_IMG_OFFSET_STATE        (UINT8)0x04         /**< Offset of the length field in the image */
+#define NVS_IMG_OFFSET_LENGTH       (UINT8)0x08         /**< Offset of the length field in the image */
+#define NVS_IMG_OFFSET_CRC32        (UINT8)0x0C         /**< Offset of the crc32 field in the image */
+#define NVS_IMG_OFFSET_DATA         (UINT8)0x10         /**< Offset of the data field in the image */
 
 
 /*----------------------------------------------------------------------------*/
@@ -87,6 +88,7 @@ extern UINT32 HNFiff_Crc32CalcSwp(UINT32 w_initCrc, INT32 l_length,
 /* const defines                                                              */
 /*----------------------------------------------------------------------------*/
 #define NVS_MAGIC_WORD                  (UINT32)0xdeadbeef      /**< Magic word which indicates the start of the SOD image */
+#define NVS_STATE_NVM_INVALID           (UINT32)0x00000001      /**< The value of the SOD image state field when the image is not valid */
 
 #define NVS_IMAGE_DATA_CHUNK_SIZE       (UINT8)8                /**< Size of one chunk written to the NVS in one process cycle (Needs to be a divider of 4) */
 
@@ -128,6 +130,8 @@ static BOOLEAN eraseNvsSector(UINT32 offset_p);
 static BOOLEAN storeHeaderToNvs(UINT32 paramSetLen_p);
 
 static BOOLEAN verifyMagic(void);
+static BOOLEAN verifyState(void);
+static BOOLEAN markStateInvalid(void);
 static BOOLEAN verifyParamSetCrc(UINT32 paramSetLen_p);
 
 /*============================================================================*/
@@ -219,18 +223,31 @@ tProcStoreRet sodstore_process(UINT8* pParamSetBase_p, UINT32 paramSetLen_p)
         {
             case kSodStoreStateInit:
             {
-                DEBUG_TRACE(DEBUG_LVL_SAPL, "\nStore parameter set to NVS -> ");
-
-                sodStoreInstance_l.currDataPos_m = NVS_IMG_OFFSET_DATA;
-                sodStoreInstance_l.currParamSetOffs_m = 0;
-
-                /* Store the header information to the NVS */
-                if(storeHeaderToNvs(paramSetLen_p))
+                /* Check if there is an SOD image in the NVM */
+                if(verifyMagic())
                 {
-                    /* Switch the current state to add CRC */
-                    sodStoreInstance_l.sodStoreState_m = kSodStoreStateAddCrc;
+                    /* NVM is full -> Mark image as invalid. (Store possible on the next boot!) */
+                    if(markStateInvalid())
+                    {
+                        sodStoreRet = kSodStoreProcNotApplicable;
+                    }
+                }
+                else
+                {
+                    /* NVM is empty -> Store is possible! */
+                    DEBUG_TRACE(DEBUG_LVL_SAPL, "\nStore parameter set to NVS -> ");
 
-                    sodStoreRet = kSodStoreProcBusy;
+                    sodStoreInstance_l.currDataPos_m = NVS_IMG_OFFSET_DATA;
+                    sodStoreInstance_l.currParamSetOffs_m = 0;
+
+                    /* Store the header information to the NVS */
+                    if(storeHeaderToNvs(paramSetLen_p))
+                    {
+                        /* Switch the current state to add CRC */
+                        sodStoreInstance_l.sodStoreState_m = kSodStoreStateAddCrc;
+
+                        sodStoreRet = kSodStoreProcBusy;
+                    }
                 }
 
                 break;
@@ -356,19 +373,23 @@ BOOLEAN sodstore_getSodImage(UINT8** ppParamSetBase_p, UINT32* pParamSetLen_p)
         /* Verify if there is a magic word */
         if(verifyMagic())
         {
-            /* Read the length of the parameter set */
-            if(nvs_readUint32(NVS_IMG_OFFSET_LENGTH, &pParamSetLen))
+            /* Verify the state field if the SOD image is valid */
+            if(verifyState())
             {
-                if(*pParamSetLen > 0 && *pParamSetLen < UINT32_MAX)
+                /* Read the length of the parameter set */
+                if(nvs_readUint32(NVS_IMG_OFFSET_LENGTH, &pParamSetLen))
                 {
-                    /* Verify if the CRC stored in the flash matches the data stream */
-                    if(verifyParamSetCrc(*pParamSetLen))
+                    if(*pParamSetLen > 0 && *pParamSetLen < UINT32_MAX)
                     {
-                        /* Set the output values */
-                        *ppParamSetBase_p = nvs_getAddress(NVS_IMG_OFFSET_DATA);
-                        *pParamSetLen_p = *pParamSetLen;
+                        /* Verify if the CRC stored in the flash matches the data stream */
+                        if(verifyParamSetCrc(*pParamSetLen))
+                        {
+                            /* Set the output values */
+                            *ppParamSetBase_p = nvs_getAddress(NVS_IMG_OFFSET_DATA);
+                            *pParamSetLen_p = *pParamSetLen;
 
-                        fReturn = TRUE;
+                            fReturn = TRUE;
+                        }
                     }
                 }
             }
@@ -472,6 +493,59 @@ static BOOLEAN verifyMagic(void)
     }
 
     return magicValid;
+}
+
+/*----------------------------------------------------------------------------*/
+/**
+\brief    Verify the state field in the flash
+
+\retval TRUE    The state field indicates that the SOD image seems to be valid
+\retval FALSE   The SOD image is invalid
+*/
+/*----------------------------------------------------------------------------*/
+static BOOLEAN verifyState(void)
+{
+    BOOLEAN nvmValid = FALSE;
+    UINT32 * pReadState = NULL;
+
+    /* Verify the magic word */
+    if(nvs_readUint32(NVS_IMG_OFFSET_STATE, &pReadState) == TRUE)
+    {
+        if(*pReadState == NVS_STATE_NVM_INVALID)
+            nvmValid = FALSE;
+        else
+            nvmValid = TRUE;
+    }
+
+    return nvmValid;
+}
+
+/*----------------------------------------------------------------------------*/
+/**
+\brief    Mark the SOD state field as invalid
+
+\retval TRUE    Successfully marked the state field
+\retval FALSE   Error on NVM write
+*/
+/*----------------------------------------------------------------------------*/
+static BOOLEAN markStateInvalid(void)
+{
+    BOOLEAN fReturn = FALSE;
+    UINT32 stateInvalid = NVS_STATE_NVM_INVALID;
+    BOOLEAN writeRet = FALSE;
+
+    /* Write state field to indicate an invalid SOD image */
+    writeRet = nvs_write(NVS_IMG_OFFSET_STATE, (UINT8*)&stateInvalid, sizeof(stateInvalid));
+    if(writeRet == TRUE)
+    {
+        fReturn = TRUE;
+    }
+    else
+    {
+        errh_postFatalError(kErrSourceSapl, kErrorSodStoreWriteError, 0);
+    }
+
+    return fReturn;
 }
 
 /*----------------------------------------------------------------------------*/

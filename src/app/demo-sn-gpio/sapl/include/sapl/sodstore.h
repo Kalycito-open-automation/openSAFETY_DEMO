@@ -57,6 +57,7 @@ typedef enum
     kSodStoreProcError          = 0x00,     /**< Error during SOD store processing */
     kSodStoreProcFinished       = 0x01,     /**< Storing of the SOD to NVS finished */
     kSodStoreProcBusy           = 0x02,     /**< Storing is currently busy */
+    kSodStoreProcNotApplicable  = 0x03,     /**< Storing the SOD image is not applicable (The NVM is not empty!) */
 } tProcStoreRet;
 
 /*----------------------------------------------------------------------------*/
