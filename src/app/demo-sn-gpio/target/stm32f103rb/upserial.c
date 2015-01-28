@@ -161,9 +161,14 @@ the uP-Slave.
 /*----------------------------------------------------------------------------*/
 BOOLEAN upserial_init(void)
 {
-    /* Initialize all needed peripherals */
-    initGpio();
+    /* Initialize the uart peripheral */
     initUsart();
+
+    /*
+     * Init the uart gpio pins. Always init the pins after the uart init!
+     * This can produce framing errors!
+     */
+    initGpio();
 
     /* The DMA channels are initialized on transfer */
     closeDma();
