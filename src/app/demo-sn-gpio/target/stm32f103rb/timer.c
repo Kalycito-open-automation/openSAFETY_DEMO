@@ -78,7 +78,7 @@ system timer for stm32f103rb (Cortex-M3).
 /*----------------------------------------------------------------------------*/
 #define ENABLE_TIM_DEBUG           0        /* 0 = disable; 1 = enable */
 
-#define TIMER_PRESCALE_1US         64       /**< Prescaler for 1us resolution */
+#define TIMER_PRESCALE_1US         (UINT16)63       /**< Prescaler for 1us resolution */
 
 /* Defines for the TIMx peripheral */
 #define TIMx                TIM2
