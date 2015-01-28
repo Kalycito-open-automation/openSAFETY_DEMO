@@ -546,9 +546,6 @@ static BOOL initModules(void)
 #if(((PSI_MODULE_INTEGRATION) & (PSI_MODULE_LOGBOOK)) != 0)
     tLogInitParam      logInitParam;
 #endif
-#if(((PSI_MODULE_INTEGRATION) & (PSI_MODULE_CC)) != 0)
-    tCcInitParam       ccInitParam;
-#endif
 
     /* Initialize the status module */
     statusInitParam.pfnProcSyncCb_m = processSync;
@@ -557,7 +554,7 @@ static BOOL initModules(void)
 
     if(status_init(&statusInitParam) == FALSE)
     {
-        DEBUG_TRACE(DEBUG_LVL_ERROR,"ERROR: status_init() failed!\n");
+        errh_postFatalError(kErrSourceHnf, kErrorStatusModuleInitFailed, 0);
         return fReturn;
     }
 
@@ -568,7 +565,7 @@ static BOOL initModules(void)
 
     if(pdo_init(processApp, &pdoInitParam) == FALSE)
     {
-        DEBUG_TRACE(DEBUG_LVL_ERROR,"ERROR: pdo_init() failed!\n");
+        errh_postFatalError(kErrSourceHnf, kErrorPdoModuleInitFailed, 0);
         return fReturn;
     }
 #endif
@@ -585,7 +582,7 @@ static BOOL initModules(void)
         hnfPsiInstance_l.apSsdoInstance_m[i] = ssdo_create(kNumSsdoChan0 + i, &ssdoInitParam);
         if(hnfPsiInstance_l.apSsdoInstance_m[i] == NULL)
         {
-            DEBUG_TRACE(DEBUG_LVL_ERROR,"ERROR: ssdo_create() failed for instance %d!\n", i);
+            errh_postFatalError(kErrSourceHnf, kErrorSsdoModuleInitFailed, 0);
             return fReturn;
         }
     }
@@ -600,22 +597,9 @@ static BOOL initModules(void)
         hnfPsiInstance_l.apLogInstance_m[i] = log_create(kNumLogChan0 + i, &logInitParam);
         if(hnfPsiInstance_l.apLogInstance_m[i] == NULL)
         {
-            DEBUG_TRACE(DEBUG_LVL_ERROR,"ERROR: log_create() failed for instance %d!\n", i);
+            errh_postFatalError(kErrSourceHnf, kErrorLoggerModuleInitFailed, 0);
             return fReturn;
         }
-    }
-#endif
-
-#if(((PSI_MODULE_INTEGRATION) & (PSI_MODULE_CC)) != 0)
-    /* Initialize configuration channel (CC) */
-    ccInitParam.iccId_m = kTbufNumInputConfChan;
-    ccInitParam.occId_m = kTbufNumOutputConfChan;
-    ccInitParam.pfnCritSec_p = syncir_enterCriticalSection;
-
-    if(cc_init(&ccInitParam) == FALSE)
-    {
-        DEBUG_TRACE(DEBUG_LVL_ERROR,"ERROR: cc_init() failed!\n");
-        return fReturn;
     }
 #endif
 
@@ -644,10 +628,6 @@ static void exitModules(void)
 
 #if(((PSI_MODULE_INTEGRATION) & (PSI_MODULE_PDO)) != 0)
     pdo_exit();
-#endif
-
-#if(((PSI_MODULE_INTEGRATION) & (PSI_MODULE_CC)) != 0)
-    cc_exit();
 #endif
 
 #if(((PSI_MODULE_INTEGRATION) & (PSI_MODULE_SSDO)) != 0)

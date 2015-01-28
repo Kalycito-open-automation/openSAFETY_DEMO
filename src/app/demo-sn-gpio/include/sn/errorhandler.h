@@ -120,6 +120,11 @@ typedef enum
     kXComSpdoCrcMissmatch                   = 0xA4,     /**< The SPDO CRC is different on uP-Master and uP-Slave */
     kXComSsdoSnmtCrcMissmatch               = 0xA5,     /**< The SSDO/SNMT CRC is different on uP-Master and uP-Slave */
     kXComFrameMissing                       = 0xA6,     /**< A frame was produced on the remote processor but locally non is available */
+
+    kErrorStatusModuleInitFailed            = 0xB0,     /**< Unable to initialize the PSI status module */
+    kErrorPdoModuleInitFailed               = 0xB1,     /**< Unable to initialize the PSI pdo module */
+    kErrorSsdoModuleInitFailed              = 0xB2,     /**< Unable to initialize the PSI ssdo module */
+    kErrorLoggerModuleInitFailed            = 0xB3,     /**< Unable to initialize the PSI logger module */
 } tErrorTypes;
 
 
