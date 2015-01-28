@@ -523,14 +523,14 @@ static void initNvic(void)
 
     memset(&NVIC_InitStructure, 0, sizeof(NVIC_InitTypeDef));
 
-    /* Enable DMA1 Channel2 interrupt */
+    /* Enable DMAx ChannelRx interrupt */
     NVIC_InitStructure.NVIC_IRQChannel = DMAx_ChannelRx_IRQn;
     NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0x0E;
     NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0x01;
     NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
     NVIC_Init(&NVIC_InitStructure);
 
-    /* Enable DMA1 Channel3 interrupt */
+    /* Enable DMAx ChannelTx interrupt */
     NVIC_InitStructure.NVIC_IRQChannel = DMAx_ChannelTx_IRQn;
     NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0x0E;
     NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0x01;

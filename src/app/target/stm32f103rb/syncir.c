@@ -85,6 +85,8 @@ stm32f103rb (Cortex-M3).
 #define IRx_SYNC_GPIO_PORT               GPIOC
 #define IRx_RCC_APB2Periph               RCC_APB2Periph_GPIOC
 
+#define IRx_SYNC_IRQHandler              EXTI9_5_IRQHandler
+
 #define EXTI_LINEx                       EXTI_Line7
 #define EXTIx_IRQn                       EXTI9_5_IRQn
 
@@ -260,7 +262,12 @@ void syncir_setSyncCallback(tPlatformSyncIrq pfnSyncCb_p)
 /** \name Private Functions */
 /** \{ */
 
-void EXTI9_5_IRQHandler(void)
+/*----------------------------------------------------------------------------*/
+/**
+\brief External interrupt handler for the synchronous interrupt
+*/
+/*----------------------------------------------------------------------------*/
+void IRx_SYNC_IRQHandler(void)
 {
     if(EXTI_GetITStatus(EXTI_LINEx) != RESET)
     {

@@ -76,8 +76,6 @@ system timer for stm32f103rb (Cortex-M3).
 /*----------------------------------------------------------------------------*/
 /* const defines                                                              */
 /*----------------------------------------------------------------------------*/
-#define ENABLE_TIM_DEBUG           0        /* 0 = disable; 1 = enable */
-
 #define TIMER_PRESCALE_1US         (UINT16)63       /**< Prescaler for 1us resolution */
 
 /* Defines for the TIMx peripheral */
@@ -178,7 +176,7 @@ static void initTimer(void)
 
     memset(&TIM_TimeBaseStructure, 0, sizeof(TIM_TimeBaseInitTypeDef));
 
-    /* Enable timer2 clock */
+    /* Enable TIMx clock */
     RCC_APB1PeriphClockCmd(TIMx_RCC_PERIPH, ENABLE);
 
     TIM_TimeBaseStructure.TIM_Prescaler = TIMER_PRESCALE_1US;

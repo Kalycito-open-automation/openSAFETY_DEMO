@@ -87,6 +87,7 @@ stm32f103rb.
 #define IRx_SYNC_GPIO_PORT               GPIOC
 
 #define Rx_SYNC_IRQn                     EXTI9_5_IRQn
+#define IRx_SYNC_IRQHandler              EXTI9_5_IRQHandler
 
 /*----------------------------------------------------------------------------*/
 /* local types                                                                */
@@ -257,8 +258,7 @@ void syncir_setSyncCallback(tPlatformSyncIrq pfnSyncCb_p)
 \brief  External interrupt callback
 
 \param gpioPin_p        The pin the callback is called for
-
-\ingroup module_targ_stm32f401_serial*/
+*/
 /*----------------------------------------------------------------------------*/
 void HAL_GPIO_EXTI_Callback(uint16_t gpioPin_p)
 {
@@ -274,10 +274,9 @@ void HAL_GPIO_EXTI_Callback(uint16_t gpioPin_p)
 /*----------------------------------------------------------------------------*/
 /**
 \brief  External interrupt handler for the synchronous interrupt
-
-\ingroup module_targ_stm32f401_serial*/
+*/
 /*----------------------------------------------------------------------------*/
-void EXTI9_5_IRQHandler(void)
+void IRx_SYNC_IRQHandler(void)
 {
     HAL_GPIO_EXTI_IRQHandler(IRx_SYNC_PIN);
 }

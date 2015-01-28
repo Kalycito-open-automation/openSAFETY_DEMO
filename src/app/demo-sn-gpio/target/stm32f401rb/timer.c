@@ -78,8 +78,6 @@ system timer for stm32f401 (Cortex-M4).
 /*----------------------------------------------------------------------------*/
 /* const defines                                                              */
 /*----------------------------------------------------------------------------*/
-#define ENABLE_TIM_DEBUG           0        /* 1=enable; 0=disable */
-
 #define TIMER_PRESCALE_1US         84       /**< Prescaler for 1us resolution */
 
 /* Definition for TIMx clock resources */
