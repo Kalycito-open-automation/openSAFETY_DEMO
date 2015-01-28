@@ -100,6 +100,7 @@ typedef enum
     kErrorInvalidFlowCount                  = 0x72,     /**< The flow count returned an invalid value */
     kErrorInvalidCrcValue                   = 0x73,     /**< The CRC returned an invalid value */
     kErrorInvalidMsgFormatValue             = 0x74,     /**< Failed to retrieve message format field */
+    kErrorInvalidCycleTime                  = 0x75,     /**< The measured cycle time is out of the valid range */
 
     kErrorSerialInitFailed                  = 0x80,     /**< Unable to initialize the serial device */
     kErrorSerialTransferFailed              = 0x81,     /**< Error during the serial transfer */

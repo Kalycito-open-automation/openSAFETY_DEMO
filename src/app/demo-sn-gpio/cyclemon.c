@@ -166,6 +166,10 @@ BOOLEAN cyclemon_process(void)
                     cycMonInstance_l.cycMonState_m = kCycleMonStateActive;
                     fReturn = TRUE;
                 }
+                else
+                {
+                    errh_postFatalError(kErrSourcePeriph, kErrorInvalidCycleTime, cycMonInstance_l.cycleTime_m);
+                }
             }
             else
             {
