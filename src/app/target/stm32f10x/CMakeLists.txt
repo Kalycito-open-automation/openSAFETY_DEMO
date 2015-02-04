@@ -41,6 +41,10 @@ IF(NOT CFG_STM32_HAL_LIB_LOC)
         ${PROJECT_SOURCE_DIR}
         CACHE PATH "Set the location of the STM32 Nucleo HAL library V1.2.0"
        )
+ELSEIF(NOT EXISTS ${CFG_STM32_HAL_LIB_LOC}/Libraries/STM32F10x_StdPeriph_Driver/src/stm32f10x_adc.c)
+    MESSAGE(FATAL_ERROR "The (H)ardware (A)bstration (L)ibrary does not seem to exist in "
+                        "${CFG_STM32_HAL_LIB_LOC}. Please download the correct ĺibrary from "
+                        "http://www.st.com/web/en/catalog/tools/PF260613 and copy it to the path." )
 ENDIF()
 
 #################################################################################

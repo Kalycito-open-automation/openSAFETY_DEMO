@@ -41,9 +41,13 @@ IF(NOT CFG_STM32_HAL_LIB_LOC)
         ${PROJECT_SOURCE_DIR}
         CACHE PATH "Set the location of the STM32Cube FW F4 V1.3.0"
        )
+ELSEIF(NOT EXISTS ${CFG_STM32_HAL_LIB_LOC}/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal.c)
+    MESSAGE(FATAL_ERROR "The (H)ardware (A)bstration (L)ibrary does not seem to exist in "
+                        "${CFG_STM32_HAL_LIB_LOC}. Please download the correct ĺibrary from "
+                        "http://www.st.com/web/en/catalog/tools/PF259243 and copy it to the path." )
 ENDIF()
 
-#################################################################################
+################################################################################
 # Target for creating the board support package
 SET(STM32_HAL_DRIVER_DIR ${CFG_STM32_HAL_LIB_LOC}/Drivers)
 

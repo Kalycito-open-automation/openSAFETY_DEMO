@@ -79,6 +79,13 @@ SET(BOOT_DIR ${PROJECT_SOURCE_DIR}/boot)
 SET(COMMON_SOURCE_DIR ${PROJECT_SOURCE_DIR}/../common)
 SET(SN_TARGET_SOURCE_DIR ${PROJECT_SOURCE_DIR}/target)
 
+# Check for openSAFETY distribution
+IF ( NOT EXISTS ${OSCHECKSUM_BASE_DIR}/crc.c )
+    MESSAGE(FATAL_ERROR "openSAFETY is not installed in ${OSFT_BASE_DIR}. Please download "
+                        "the distribution from http://sf.net/opensafety and install it to "
+                        "${OSFT_BASE_DIR}" )
+ENDIF()
+
 ########################################################################
 # Set all source files
 ########################################################################
