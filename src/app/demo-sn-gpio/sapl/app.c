@@ -57,6 +57,9 @@ by the local hardwares inputs.
 
 #include <common/app-gpio.h>
 
+#include <stm32f4xx_hal_gpio.h>
+
+#include <common/debug.h>
 
 /*============================================================================*/
 /*            G L O B A L   D E F I N I T I O N S                             */
@@ -256,10 +259,12 @@ static BOOLEAN processChaserLight(UINT8 inPort_p, UINT32* pOutport_p)
 
     if(pOutport_p != NULL)
     {
-        traspSafeIN_g.SafeInput01= inPort_p;
+        traspSafeIN_g.SafeInput01 = inPort_p;
         traspSafeIN_g.SafeInput02 = inPort_p;
         traspSafeIN_g.SafeInput03 = inPort_p;
         traspSafeIN_g.SafeInput04 = inPort_p;
+
+        *pOutport_p = traspSafeOUT_g.SafeOutput01;
 
         /* Digital OUT: set Leds and hex digits */
         for (i = 0; i < 3; i++)

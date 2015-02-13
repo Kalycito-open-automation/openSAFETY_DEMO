@@ -34,6 +34,14 @@ out in the Quartus II IDE.
 
 > **Note:** The Quartus II synthesis can take several minutes.
 
+> **Note:** The Fmax value which is around 100 MHz (range 99 MHz - 105 Mhz) in
+> `TimeQuest Timing Analyzer -> Slow 1200mV 85C Model -> Fmax Summary` has to
+> be above 100 MHz.
+> Ohterwise the proper function of the hardware with a Fmax under 100 MHz at
+> such operating conditions can not be guaranteed.
+> Due to different Place & Route results after every compilation, Fmax is
+> expected to be above 100 MHz after a new compilation run.
+
 # The script create-this-fpga   {#sect_buildhw_script}
 The bitstream can be generated automatically by using the script called **create-this-fpga**
 located in the folder `src/misc/altera_nios2/scripts`.

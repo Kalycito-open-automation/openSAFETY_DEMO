@@ -95,13 +95,13 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /**
  * \brief Maximum length of the parameter set.
  */
-#define SAPL_k_MAX_PARAM_SET_LEN       361UL
+#define SAPL_k_MAX_PARAM_SET_LEN       0x200
 
 /**
  * \brief This define is the maximum number of CRCs any instance within the SL needs to protect its SOD.
  */
 #if (! defined EPS_NO_SOD_CRCS)
-    #define EPS_NO_SOD_CRCS 1
+    #define EPS_NO_SOD_CRCS ((SAPL_k_MAX_PARAM_SET_LEN + 0x1FF)/0x200)
 #endif
 
 /*----------------------------------------------------------------------------*/

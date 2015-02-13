@@ -59,6 +59,12 @@ erase-nvm-[CURR_DEMO]     | Erase the local flash.
 > **Note:** The variable **CURR_DEMO** can be `pcppsi`, `demo-cn-gpio` or `demo-sn-gpio-single`!
 > Use `make help` to print all available make targets.
 
+> **Note:** Make targets download-bits-[CURR_DEMO] and download-elf-[CURR_DEMO]
+> download configuration and software to volatile memory, which are therefore
+> lost after a power cycle of the FPGA board. To avoid a possible mixup for
+> configurations and software in volatile and non-volatile memory, flash memory
+> may be erased before downloading to volatile memory.
+
 ## Application processor - Flash programming   {#sect_targalt_appprogflash}
 It is possible to program the application processor software to the parallel flash
 of the **terasic-de2-115** by using the **program-nvm** make target. Before this

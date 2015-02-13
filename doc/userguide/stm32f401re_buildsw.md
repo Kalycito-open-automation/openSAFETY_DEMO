@@ -32,6 +32,28 @@ Nucleo board. The following steps need to be carried out in order to do this:
 
 > **Note:** Use `make help` to print all available make targets.
 
+When downloading software to the boards, it must to be ensured that
+only one Nucleo board is connected to the computer during that time.
+
+**IMPORTANT:** The boards have to be powered up before they are connected via
+USB to the computer.
+
+**NOTE**: "WARN src/stlink-common.c: unknown chip id! 0xe0042000"
+This indicates that an unknown (or unpowered) micro-controller board is
+connected to the host-computer.
+
+**NOTE**: "SRAM size: 0x18000 bytes (96 KiB), Flash: 0 bytes (0 KiB) in pages
+of 16384 bytes"
+This indicates that the micro-controller board has been connected
+to the host-computer first before it got powered up by the external
+power-source.
+
+> **Note:** When the application gets stuck on "Restore SOD" the whole
+> flash memory of the microcontroller should be erased, and the download of the
+> software must be started again.
+> Erasing the flash can be done with STM32 ST-LINK Utility:
+> `Target -> Erase chip` or with the button `Full chip erase`.
+
 # Debug the software (stm32f401re)   {#sect_stm32f401_buildsw_debug}
 It is possible to debug the software using arm-none-eabi-gdb, the st-link tools
 and the **Eclipse IDE**. With this you should be able to comfortably step through
@@ -60,6 +82,22 @@ the code and set breakpoints.
      * GDB debugger = arm-none-eabi-gdb
      * Connection / Host = localhost
      * Connection / Port = 4242
+   > **Note:** If debugging isn't possible in the described way with
+   > C/C++ Remote Application Debug Configuration go to
+   > `Help -> Install New Software`.
+   > In the new window select the entry that matches your version of Eclipse
+   > e.g. "[VERSION] - http://download.eclipse.org/releases/[VERSION]" from the
+   > `Work with` drop down menu.
+   > Enter "hardware" in the filter text box and install
+   > `C/C++ GDB Hardware Debugging` from the section
+   > `Mobile and Device Development`.
+   > Now a new Debug Configuration can be added (GDB Hardware Debugging):
+   > In the 'Main' tab select your .elf file you want to debug.
+   > In the 'Debugger' tab make the following settings:
+   > * GDB Command: arm-none-eabi-gdb
+   > * check use remote target checkbox
+   > * Host name or IP address: localhost
+   > * Port number: 4242
 
 \b -> Step through the code and find the bug!
 
@@ -67,7 +105,7 @@ the code and set breakpoints.
 
 - **CFG_STM32_HAL_LIB_LOC**
 
- Specify the path to the stm32f401 HAL library (**STM32Cube_FW_F4_V1.3.0**).
+ Specify the path to the stm32f401 HAL library (**STM32Cube_FW_F4_V1.4.0**).
  Get it from: http://www.st.com/web/catalog/tools/FM147/CL1794/SC961/SS1743/LN1897/PF259243
 
 - **CFG_ARM_BOARD_DIR**
