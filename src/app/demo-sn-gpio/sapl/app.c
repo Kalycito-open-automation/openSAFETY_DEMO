@@ -57,9 +57,6 @@ by the local hardwares inputs.
 
 #include <common/app-gpio.h>
 
-#include <stm32f4xx_hal_gpio.h>
-
-#include <common/debug.h>
 
 /*============================================================================*/
 /*            G L O B A L   D E F I N I T I O N S                             */
@@ -102,6 +99,7 @@ static tGetConValidCb pfnGetConValid_l = NULL;
 /* local function prototypes                                                  */
 /*----------------------------------------------------------------------------*/
 static BOOLEAN processChaserLight(UINT8 inPort_p, UINT32* pOutport_p);
+static BOOLEAN processGPIO(UINT8 inPort_p, UINT32* pOutport_p);
 
 /*============================================================================*/
 /*            P U B L I C   F U N C T I O N S                                 */
@@ -204,11 +202,19 @@ BOOLEAN app_process(void)
             /* Read the digital input port from hardware */
             inPort = appgpio_readInputPort();
 
+#ifdef USE_CHASERLIGHT
             /* Call the chaser light application */
             if(processChaserLight(inPort, &outPort))
             {
                 fReturn = TRUE;
             }
+#else
+            /* Call the simple gpio processing application */
+            if(processGPIO(inPort, &outPort))
+            {
+                fReturn = TRUE;
+            }
+#endif
 
             /* Write the digital output port to hardware */
             appgpio_writeOutputPort(outPort);
@@ -264,8 +270,6 @@ static BOOLEAN processChaserLight(UINT8 inPort_p, UINT32* pOutport_p)
         traspSafeIN_g.SafeInput03 = inPort_p;
         traspSafeIN_g.SafeInput04 = inPort_p;
 
-        *pOutport_p = traspSafeOUT_g.SafeOutput01;
-
         /* Digital OUT: set Leds and hex digits */
         for (i = 0; i < 3; i++)
         {
@@ -284,6 +288,43 @@ static BOOLEAN processChaserLight(UINT8 inPort_p, UINT32* pOutport_p)
                 *pOutport_p = (*pOutport_p & ~(0xff << (i * 8))) | (traspSafeOUT_g.SafeOutput03 << (i * 8));
             }
         }
+
+        fReturn = TRUE;
+    }
+    else
+    {
+        errh_postFatalError(kErrSourceSapl, kErrorInvalidParameter, 0);
+    }
+
+    return fReturn;
+}
+
+/*----------------------------------------------------------------------------*/
+/**
+\brief    Read input data and write output data
+
+This function implements a simple gpio application which stores the
+read in value of the gpio pins in tx data and writes the value of rx data
+to the gpio pins
+
+\param[in] inPort_p     The current value of the inport
+\param[out] pOutport_p  Pointer to the current value of the outport
+
+\return TRUE on success; FALSE on error
+*/
+/*----------------------------------------------------------------------------*/
+static BOOLEAN processGPIO(UINT8 inPort_p, UINT32* pOutport_p)
+{
+    BOOLEAN fReturn = FALSE;
+
+    if(pOutport_p != NULL)
+    {
+        traspSafeIN_g.SafeInput01 = inPort_p;
+        traspSafeIN_g.SafeInput02 = inPort_p;
+        traspSafeIN_g.SafeInput03 = inPort_p;
+        traspSafeIN_g.SafeInput04 = inPort_p;
+
+        *pOutport_p = traspSafeOUT_g.SafeOutput01;
 
         fReturn = TRUE;
     }
