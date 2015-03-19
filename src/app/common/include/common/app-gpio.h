@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   demo-cn-gpio/include/cn/app-gpio.h
+\file   common/include/common/app-gpio.h
 
 \brief  Implements the interface to the GPIO application
 
@@ -36,8 +36,8 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
 
-#ifndef _INC_cn_app_gpio_H_
-#define _INC_cn_app_gpio_H_
+#ifndef _INC_common_app_gpio_H_
+#define _INC_common_app_gpio_H_
 
 /*----------------------------------------------------------------------------*/
 /* includes                                                                   */
@@ -55,11 +55,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /*----------------------------------------------------------------------------*/
 /* function prototypes                                                        */
 /*----------------------------------------------------------------------------*/
-void app_init(void);
-void app_exit(void);
+UINT8 appgpio_init(void);
+void appgpio_exit(void);
 
-void app_writeOutputPort(UINT32 value_p);
-UINT8 app_readInputPort();
+void appgpio_writeOutputPort(UINT32 value_p);
+UINT8 appgpio_readInputPort();
 
-#endif /* _INC_cn_app_gpio_H_ */
+#endif /* _INC_common_app_gpio_H_ */
 

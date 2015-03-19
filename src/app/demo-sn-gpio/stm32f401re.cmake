@@ -53,6 +53,7 @@ SET(DEMO_ARCH_SRCS
                     ${TARGET_DIR}/syncir.c
                     ${TARGET_DIR}/startup_stm32f401xe.s
                     ${TARGET_DIR}/syscalls.c
+                    ${TARGET_DIR}/app-gpio.c
                     ${TARGET_DIR}/stm32f4xx_it.c
                     ${TARGET_DIR}/system_stm32f4xx.c
                     ${BOARD_TARGET_DIR}/timer.c

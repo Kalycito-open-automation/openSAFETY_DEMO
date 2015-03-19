@@ -3,7 +3,7 @@
 // This file is generated automatically depending on the ipcore settings!
 // Hence, it is highly recommended to avoid manual modifications!
 //
-// timestamp = 2014-07-10 09:54:32
+// timestamp = 2015-01-22 12:09:15
 //-------------------------------------------------------------------------
 
 #ifndef _INC_tbuf_cfg_H_
@@ -38,10 +38,10 @@
 #define TBUF_PORTA_ISPRODUCER5 1
 
 #define TBUF_OFFSET6 160
-#define TBUF_SIZE6 24
+#define TBUF_SIZE6 12
 #define TBUF_PORTA_ISPRODUCER6 1
 
-#define TBUF_OFFSET_PROACK 184
+#define TBUF_OFFSET_PROACK 172
 #define TBUF_SIZE_PROACK 4
 #define TBUF_PORTA_ISPRODUCER_PROACK -1
 

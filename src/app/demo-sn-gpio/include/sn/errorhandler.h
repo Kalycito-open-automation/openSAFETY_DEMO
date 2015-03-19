@@ -64,6 +64,7 @@ typedef enum
     kErrorInvalidTxMemory                   = 0x05,     /**< There is no transmit memory left for sending */
     kErrorUnableToGenerateStreamParams      = 0x06,     /**< Unable to generate parameters for the stream interface */
     kErrorInitConsTimeFailed                = 0x07,     /**< Unable to init the consecutive timebase */
+    kErrorInitApplicationFailed             = 0x08,     /**< Unable to init the application module */
 
     kErrorSyncProcessFailed                 = 0x20,     /**< Processing the synchronous task has failed */
     kErrorSyncProcessActionFailed           = 0x21,     /**< Processing the post action has failed */

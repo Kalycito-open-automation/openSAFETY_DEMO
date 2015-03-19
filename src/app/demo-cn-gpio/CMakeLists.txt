@@ -47,7 +47,6 @@ SET ( DEMO_SRCS
 # Set include paths
 ########################################################################
 SET ( DEMO_INCS
-    ${PROJECT_SOURCE_DIR}/include
     ${APP_COMMON_DIR}/include
     ${psi_SOURCE_DIR}/include
     ${psicommonapp_SOURCE_DIR}/include

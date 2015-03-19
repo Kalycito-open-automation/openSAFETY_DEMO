@@ -60,15 +60,6 @@ using the `-D` parameter or by enabling them in the graphical user interface:
 
   Change the type of the demo to build. (e.g: `cn-gpio`, `sn-gpio` or `custom`)
 
-- **CFG_DUAL_CHANNEL**
-
-  If `CFG_DEMO_TYPE=sn-gpio` this parameter specifies if the demo has one or two
-  SN channels.
-
-- **CFG_SAPL_SN_UDID**
-
-  If `CFG_DEMO_TYPE=sn-gpio` this parameter specifies the UDID of your SN.
-
 - **CMAKE_BUILD_TYPE**
 
   This parameter specifies the build type of the PSI project. The following options
@@ -89,3 +80,37 @@ using the `-D` parameter or by enabling them in the graphical user interface:
 - **CFG_PSICOMMON_DEBUG_LVL**
 
   Change the debug level of the PSI common library. (See \ref group_libpsicommon)
+
+### SN configuration options {#sect_buildsw_options_sn}
+All options from this sections are valid when `CFG_DEMO_TYPE=sn-gpio`. This means
+that the application build system is set to host a safe node (SN) demo.
+
+- **CFG_DUAL_CHANNEL**
+
+  This parameter specifies if the demo has one or two SN channels. A second
+  channel means that the application is hosted on two redundant processors.
+
+- **CFG_SAPL_SN_UDID**
+
+  This parameter specifies the UDID of your SN. This ID needs to be set as a unique
+  number for each SN in the network.
+
+- **CFG_SAPL_SN_VENDORID**
+
+  This parameter specifies the vendor ID of your SN. (Object 0x1018/0x1 in the SOD)
+
+- **CFG_SAPL_SN_PRODUCT_CODE**
+
+  This parameter specifies the product code of your SN. (Object 0x1018/0x2 in the SOD)
+
+- **CFG_SAPL_SN_REVISION_NR**
+
+  This parameter specifies the revision number of your SN. (Object 0x1018/0x3 in the SOD)
+
+- **CFG_SAPL_SN_SERIAL_NR**
+
+  This parameter specifies the serial number of your SN. (Object 0x1018/0x4 in the SOD)
+
+- **CFG_SAPL_SN_FW_CHKSUM**
+
+  This parameter specifies the firmware checksum of your SN. (Object 0x1018/0x5 in the SOD)

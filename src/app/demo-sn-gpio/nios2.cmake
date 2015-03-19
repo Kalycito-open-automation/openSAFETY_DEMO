@@ -65,7 +65,7 @@ FILE(COPY ${ALT_MISC_DIR}/scripts/${NIOS2_LS_TCL_NAME} DESTINATION ${ALT_BUILD_D
 SET(ALT_TARGET_SRCS ${TARGET_DIR}/platform.c
                     ${TARGET_DIR}/pcpserial-ma.c
                     ${TARGET_DIR}/syncir.c
-                    #${TARGET_DIR}/app-gpio.c   # No application implemented yet!
+                    ${TARGET_DIR}/app-gpio.c
                     ${ALT_SN_TARGET_DIR}/timer.c
                     ${ALT_SN_TARGET_DIR}/nvs.c
                     ${ALT_SN_TARGET_DIR}/gpio.c

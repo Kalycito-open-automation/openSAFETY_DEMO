@@ -53,16 +53,17 @@ get's time to do some calculation between each piece.
 /*----------------------------------------------------------------------------*/
 /* includes                                                                   */
 /*----------------------------------------------------------------------------*/
-
 #include <sapl/sapl.h>
 
 #include <shnf/shnf.h>
 
 #include <sn/statehandler.h>
+#include <sn/gpio.h>
 
 #include <sapl/parameterset.h>
 #include <sapl/parametercrc.h>
 #include <sapl/sodstore.h>
+#include <sapl/app.h>
 
 #include <SODapi.h>
 #include <SERRapi.h>
@@ -144,6 +145,8 @@ static tSaplInstance saplInstance_l SAFE_INIT_SEKTOR;
 /*----------------------------------------------------------------------------*/
 /* local function prototypes                                                  */
 /*----------------------------------------------------------------------------*/
+static BOOLEAN getConnValidInst0(UINT16 spdoId_p);
+static void checkConnectionValid(void);
 
 /*============================================================================*/
 /*            P U B L I C   F U N C T I O N S                                 */
@@ -172,10 +175,17 @@ BOOLEAN sapl_init(void)
             /* Initialize the SOD storage module */
             if(sodstore_init())
             {
-                fReturn = TRUE;
-            }
-        }
-    }
+                /* Initialize target specific gpio pins */
+                gpio_init();
+
+                /* Initialize the SN application */
+                if(app_init(getConnValidInst0))
+                {
+                    fReturn = TRUE;
+                }   /* no else: Error is handled in the called function */
+            }   /* no else: Error is handled in the called function */
+        }   /* no else: Error is handled in the called function */
+    }   /* no else: Error is handled in the called function */
 
     return fReturn;
 }
@@ -191,6 +201,9 @@ void sapl_exit(void)
     paramcrc_exit();
 
     sodstore_close();
+
+    gpio_close();
+    app_exit();
 }
 
 /*----------------------------------------------------------------------------*/
@@ -202,7 +215,7 @@ void sapl_exit(void)
 /*----------------------------------------------------------------------------*/
 void sapl_reset(void)
 {
-    /* Call the application here and reset all outputs */
+    app_reset();
 }
 
 /*----------------------------------------------------------------------------*/
@@ -282,6 +295,9 @@ BOOLEAN sapl_process(void)
         /* Nothing to process -> Success! */
         fReturn = TRUE;
     }
+
+    /* Check if the connection valid bit is set */
+    checkConnectionValid();
 
     return fReturn;
 }
@@ -367,6 +383,30 @@ BOOLEAN sapl_processSync(void)
 
 /*----------------------------------------------------------------------------*/
 /**
+\brief    Process the SAPL application task
+
+This function processes the SAPL application task if the connection valid
+bit of the SPDO is set.
+
+\retval TRUE    Processing of the SAPL application successful
+\retval FALSE   Error during processing
+*/
+/*----------------------------------------------------------------------------*/
+BOOLEAN sapl_processApp(void)
+{
+    BOOLEAN fReturn = FALSE;
+
+    /* Call the application process function */
+    if(app_process())
+    {
+        fReturn = TRUE;
+    }
+
+    return fReturn;
+}
+
+/*----------------------------------------------------------------------------*/
+/**
 \brief    Check if there is an SOD image present in the NVM
 
 \retval TRUE    There is a valid SOD image in the storage
@@ -436,29 +476,6 @@ BOOLEAN sapl_restoreSod(BOOLEAN fRestoreSod_p)
     }
 
     return fReturn;
-}
-
-/*----------------------------------------------------------------------------*/
-/**
-\brief    Check if the connection valid bit is set for this RxSpdo
-
-\param[in] spdoId_p       Id if the RxSpdo
-
-\retval TRUE    Connection valid bit is set
-\retval FALSE   Connection is not valid
-*/
-/*----------------------------------------------------------------------------*/
-BOOLEAN sapl_getConnValidInst0(UINT16 spdoId_p)
-{
-    BOOLEAN conValid = FALSE;
-
-    if(spdoId_p < SPDO_cfg_MAX_NO_RX_SPDO)
-    {
-        if((SHNF_aaulConnValidBit[0][spdoId_p] & (UINT32)0x00000001) != FALSE)
-            conValid = TRUE;
-    }
-
-    return conValid;
 }
 
 /**
@@ -651,6 +668,56 @@ UINT32 HNFiff_Crc32CalcSwp(UINT32 w_initCrc, INT32 l_length,
 /*============================================================================*/
 /** \name Private Functions */
 /** \{ */
+
+
+/*----------------------------------------------------------------------------*/
+/**
+\brief    Check if the connection valid bit is set for this RxSpdo
+
+\param[in] spdoId_p       Id if the RxSpdo
+
+\retval TRUE    Connection valid bit is set
+\retval FALSE   Connection is not valid
+*/
+/*----------------------------------------------------------------------------*/
+static BOOLEAN getConnValidInst0(UINT16 spdoId_p)
+{
+    BOOLEAN conValid = FALSE;
+
+    if(spdoId_p < SPDO_cfg_MAX_NO_RX_SPDO)
+    {
+        if((SHNF_aaulConnValidBit[0][spdoId_p] & (UINT32)0x00000001) != FALSE)
+            conValid = TRUE;
+    }
+
+    return conValid;
+}
+
+
+/*----------------------------------------------------------------------------*/
+/**
+\brief    Poll the connection valid bit and forward the value to the hardware
+
+This function needs to be called periodically. It forwards the value of the
+connection valid bit to an external hardware peripheral.
+*/
+/*----------------------------------------------------------------------------*/
+static void checkConnectionValid(void)
+{
+    UINT16 i;
+    BOOLEAN conValidBit = FALSE;
+
+    /* Iterate over all SPDOs */
+    for(i=0; i<SPDO_cfg_MAX_NO_RX_SPDO; i++)
+    {
+        /* Get connection valid bit of current SPDO */
+        conValidBit = getConnValidInst0(i);
+
+        /* Set gpio according to the new value */
+        gpio_changeConValid(i, conValidBit);
+    }
+}
+
 
 /**
  * \}

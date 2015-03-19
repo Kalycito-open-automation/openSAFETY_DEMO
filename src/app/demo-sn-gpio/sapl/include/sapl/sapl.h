@@ -41,8 +41,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /*----------------------------------------------------------------------------*/
 #include <sn/global.h>
 
-#include <sapl/saplapi.h>
-
 /*----------------------------------------------------------------------------*/
 /* const defines                                                              */
 /*----------------------------------------------------------------------------*/
@@ -66,6 +64,7 @@ void sapl_reset(void);
 
 BOOLEAN sapl_process(void);
 BOOLEAN sapl_processSync(void);
+BOOLEAN sapl_processApp(void);
 
 BOOLEAN sapl_checkSodStorage(void);
 BOOLEAN sapl_restoreSod(BOOLEAN fRestoreSod_p);

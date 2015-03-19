@@ -59,9 +59,15 @@ ENDIF()
 PROJECT(demo-${CFG_DEMO_TYPE}-${CURRENT_DEMO_CONTEXT} C)
 
 ########################################################################
-# Define the CN unique id
+# Create user options
 ########################################################################
 SET(CFG_SAPL_SN_UDID "{0x00U,0x60U,0x65U,0x01U,0x14U,0x9BU}" CACHE STRING "Unique id of this SN")
+
+SET(CFG_SAPL_SN_VENDORID "0x12345678UL" CACHE STRING "Vendor ID (0x1018/0x1)")
+SET(CFG_SAPL_SN_PRODUCT_CODE "0x00000001UL" CACHE STRING "Product Code (0x1018/0x2)")
+SET(CFG_SAPL_SN_REVISION_NR "0x00010100UL" CACHE STRING "Revision Number (0x1018/0x3)")
+SET(CFG_SAPL_SN_SERIAL_NR "0x5A5A5A5AUL" CACHE STRING "Serial Number (0x1018/0x4)")
+SET(CFG_SAPL_SN_FW_CHKSUM "0x5A5A5A5AUL" CACHE STRING "Firmware Checksum (0x1018/0x4)")
 
 # Enable rotated CRCs in oschecksum
 SET(CRC_ROTATED_ENABLE ON)
@@ -103,6 +109,7 @@ SET(SAPL_SRCS
     ${SAPL_DIR}/parametercrc.c
     ${SAPL_DIR}/sodstore.c
     ${SAPL_DIR}/stackerrorhandler.c
+    ${SAPL_DIR}/app.c
 )
 
 SET(LIBOSCHECKSUM_SRCS

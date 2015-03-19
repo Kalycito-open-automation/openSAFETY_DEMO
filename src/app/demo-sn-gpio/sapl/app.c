@@ -1,16 +1,18 @@
 /**
 ********************************************************************************
-\file   target/stm32f103rb/app-gpio.c
+\file   demo-sn-gpio/sapl/app.c
 
-\defgroup module_targ_stm32f103_app GPIO application module
+\defgroup module_sn_sapl_app User application module
 \{
 
-\brief  Implements a GPIO application for target stm32f103 (Cortex-M3)
+\brief  This module hosts the user application
 
-This application simply reads inputs and outputs from common GPIO pins and
-forwards it to the user application.
+This module implements the generic part of the user application. This application
+reads and writes the SPDOs with meaningful data which is than transported
+to the SCM. The application implements the a chaser light which can be steered
+by the local hardwares inputs.
 
-\ingroup group_app_targ_stm32f103
+\ingroup group_app_sn_sapl
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
@@ -49,7 +51,12 @@ forwards it to the user application.
 /*----------------------------------------------------------------------------*/
 /* includes                                                                   */
 /*----------------------------------------------------------------------------*/
+#include <sapl/app.h>
+
+#include <sodutil.h>
+
 #include <common/app-gpio.h>
+
 
 /*============================================================================*/
 /*            G L O B A L   D E F I N I T I O N S                             */
@@ -58,11 +65,13 @@ forwards it to the user application.
 /*----------------------------------------------------------------------------*/
 /* const defines                                                              */
 /*----------------------------------------------------------------------------*/
+#define APP_SPDO_NUM        (UINT16)0       /**< Id of the SPDO of the application */
 
 /*----------------------------------------------------------------------------*/
 /* module global vars                                                         */
 /*----------------------------------------------------------------------------*/
-
+tSPDOTransportSafeIN traspSafeIN_g SAFE_NO_INIT_SEKTOR;      /**< The SafeIn SPDOTransport channels */
+tSPDOTransportSafeOUT traspSafeOUT_g SAFE_NO_INIT_SEKTOR;    /**< The SafeOUT SPDOTransport channels */
 
 /*----------------------------------------------------------------------------*/
 /* global function prototypes                                                 */
@@ -84,10 +93,12 @@ forwards it to the user application.
 /*----------------------------------------------------------------------------*/
 /* local vars                                                                 */
 /*----------------------------------------------------------------------------*/
+static tGetConValidCb pfnGetConValid_l = NULL;
 
 /*----------------------------------------------------------------------------*/
 /* local function prototypes                                                  */
 /*----------------------------------------------------------------------------*/
+static BOOLEAN processChaserLight(UINT8 inPort_p, UINT32* pOutport_p);
 
 /*============================================================================*/
 /*            P U B L I C   F U N C T I O N S                                 */
@@ -95,62 +106,129 @@ forwards it to the user application.
 
 /*----------------------------------------------------------------------------*/
 /**
-\brief  Initialize the GPIO application
+\brief    Initialize the application module
 
-\retval 0       Init successful
-\retval 1       Error on init
+\param[in] pfnGetConValid_p     Pointer to the get connection valid callback
+
+\return TRUE on success; FALSE on error
 */
 /*----------------------------------------------------------------------------*/
-UINT8 appgpio_init(void)
+BOOLEAN app_init(tGetConValidCb pfnGetConValid_p)
 {
-    return 0;
+    BOOLEAN fReturn = FALSE;
+
+    /* Check if the connection valid callback is set */
+    if(pfnGetConValid_p != NULL)
+    {
+        pfnGetConValid_l = pfnGetConValid_p;
+
+        /* Initialize the target specific parts of the gpio application */
+        if(appgpio_init() == 0)
+        {
+            /* Initialize the SPDOTransport data */
+            app_reset();
+
+            fReturn = TRUE;
+        }
+        else
+        {
+            errh_postFatalError(kErrSourceSapl, kErrorInitApplicationFailed, 0);
+        }
+    }
+    else
+    {
+        errh_postFatalError(kErrSourceSapl, kErrorInvalidParameter, 0);
+    }
+
+    return fReturn;
 }
 
 /*----------------------------------------------------------------------------*/
 /**
-\brief  Cleanup the GPIO application
+\brief    Close the application module
 */
 /*----------------------------------------------------------------------------*/
-void appgpio_exit(void)
+void app_exit(void)
 {
-    /* TODO! */
-}
+    pfnGetConValid_l = NULL;
 
+    app_reset();
 
-/*----------------------------------------------------------------------------*/
-/**
-\brief  Write a value to the output port
-
-This function writes a value to the output port of the AP
-
-\param[in] value_p       the value to write
-*/
-/*----------------------------------------------------------------------------*/
-void appgpio_writeOutputPort(UINT32 value_p)
-{
-    (void)value_p;
-
-    /* TODO! */
+    /* Shutdown peripherals */
+    appgpio_exit();
 }
 
 /*----------------------------------------------------------------------------*/
 /**
-\brief  Read a value from the input port
-
-This function reads a value from the input port of the AP
-
-\return  UINT32
-\retval  value              the value of the input port
+\brief    Reset the application input and outputs
 */
 /*----------------------------------------------------------------------------*/
-UINT8 appgpio_readInputPort(void)
+void app_reset(void)
 {
-    UINT8 val = 0;
+    UINT32 outPort = 0;
 
-    /* TODO! */
+    traspSafeIN_g.SafeInput01 = 0;
+    traspSafeIN_g.SafeInput02 = 0;
+    traspSafeIN_g.SafeInput03 = 0;
+    traspSafeIN_g.SafeInput04 = 0;
 
-    return val;
+    traspSafeOUT_g.SafeOutput01 = 0;
+    traspSafeOUT_g.SafeOutput02 = 0;
+    traspSafeOUT_g.SafeOutput03 = 0;
+    traspSafeOUT_g.SafeOutput04 = 0;
+
+    /* Write zero to outport */
+    appgpio_writeOutputPort(outPort);
 }
+
+/*----------------------------------------------------------------------------*/
+/**
+\brief    Process the application
+
+\return TRUE on success; FALSE on error
+*/
+/*----------------------------------------------------------------------------*/
+BOOLEAN app_process(void)
+{
+    BOOLEAN fReturn = FALSE;
+    UINT32 outPort = 0;
+    UINT8 inPort;
+
+    if(pfnGetConValid_l != NULL)
+    {
+        if(pfnGetConValid_l(APP_SPDO_NUM))
+        {
+            /* Read the digital input port from hardware */
+            inPort = appgpio_readInputPort();
+
+            /* Call the chaser light application */
+            if(processChaserLight(inPort, &outPort))
+            {
+                fReturn = TRUE;
+            }
+
+            /* Write the digital output port to hardware */
+            appgpio_writeOutputPort(outPort);
+        }
+        else
+        {
+            /* Connection is not valid! Application processing not allowed! */
+            app_reset();
+
+            /* Write zero to outport */
+            appgpio_writeOutputPort(outPort);
+
+            fReturn = TRUE;
+        }
+    }
+    else
+    {
+        errh_postFatalError(kErrSourceSapl, kErrorCallbackNotInitialized, 0);
+    }
+
+    return fReturn;
+}
+
 
 /*============================================================================*/
 /*            P R I V A T E   F U N C T I O N S                               */
@@ -158,6 +236,59 @@ UINT8 appgpio_readInputPort(void)
 /** \name Private Functions */
 /** \{ */
 
+/*----------------------------------------------------------------------------*/
+/**
+\brief    Read input data and write output data
+
+This function implements the gpio application which in this case is a simple
+chaser light which can be configured by the input data.
+
+\param[in] inPort_p     The current value of the inport
+\param[out] pOutport_p  Pointer to the current value of the outport
+
+\return TRUE on success; FALSE on error
+*/
+/*----------------------------------------------------------------------------*/
+static BOOLEAN processChaserLight(UINT8 inPort_p, UINT32* pOutport_p)
+{
+    BOOLEAN fReturn = FALSE;
+    UINT8 i;
+
+    if(pOutport_p != NULL)
+    {
+        traspSafeIN_g.SafeInput01= inPort_p;
+        traspSafeIN_g.SafeInput02 = inPort_p;
+        traspSafeIN_g.SafeInput03 = inPort_p;
+        traspSafeIN_g.SafeInput04 = inPort_p;
+
+        /* Digital OUT: set Leds and hex digits */
+        for (i = 0; i < 3; i++)
+        {
+            if (i == 0) /* first 8 bit of DigOut */
+            {
+                /* configured as output -> overwrite invalid input values with RSPDO mapped variables */
+                *pOutport_p = (*pOutport_p & ~(0xff << (i * 8))) | (traspSafeOUT_g.SafeOutput01 << (i * 8));
+            }
+            else if (i == 1) /* second 8 bit of DigOut */
+            {
+                *pOutport_p = (*pOutport_p & ~(0xff << (i * 8))) | (traspSafeOUT_g.SafeOutput02 << (i * 8));
+            }
+            else if (i == 2)  /* third 8 bit of DigOut */
+            {
+                /* configured as input -> store in TSPDO mapped variable */
+                *pOutport_p = (*pOutport_p & ~(0xff << (i * 8))) | (traspSafeOUT_g.SafeOutput03 << (i * 8));
+            }
+        }
+
+        fReturn = TRUE;
+    }
+    else
+    {
+        errh_postFatalError(kErrSourceSapl, kErrorInvalidParameter, 0);
+    }
+
+    return fReturn;
+}
 
 /**
  * \}

@@ -1,8 +1,8 @@
 /**
 ********************************************************************************
-\file   sn/config.h
+\file   demo-sn-gpio/sapl/include/sapl/app.h
 
-\brief  SN demo global configuration file
+\brief  Interface to the SN user application.
 
 *******************************************************************************/
 
@@ -33,38 +33,26 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
 
-#ifndef _INC_sn_config_H_
-#define _INC_sn_config_H_
+#ifndef _INC_sapl_app_H_
+#define _INC_sapl_app_H_
 
 /*----------------------------------------------------------------------------*/
 /* includes                                                                   */
 /*----------------------------------------------------------------------------*/
+#include <sn/global.h>
 
 /*----------------------------------------------------------------------------*/
 /* const defines                                                              */
 /*----------------------------------------------------------------------------*/
-#cmakedefine ID_TARG_SINGLE         @ID_TARG_SINGLE@       /**< This target is a single processor demo */
-#cmakedefine ID_TARG_UP_MASTER      @ID_TARG_UP_MASTER@       /**< This target is the uP-Master processor */
-#cmakedefine ID_TARG_UP_SLAVE       @ID_TARG_UP_SLAVE@       /**< This target is the uP-Slave processor */
-
-/*----------------------------------------------------------------------------*/
-/* SN settings                                                                */
-/*----------------------------------------------------------------------------*/
-#cmakedefine CFG_SAPL_SN_UDID       @CFG_SAPL_SN_UDID@      /**< The UDID of this SN */
-
-#cmakedefine CFG_SAPL_SN_VENDORID      @CFG_SAPL_SN_VENDORID@        /**< Vendor ID (0x1018/0x1) */
-#cmakedefine CFG_SAPL_SN_PRODUCT_CODE  @CFG_SAPL_SN_PRODUCT_CODE@        /**< Product Code (0x1018/0x2) */
-#cmakedefine CFG_SAPL_SN_REVISION_NR   @CFG_SAPL_SN_REVISION_NR@        /**< Revision Number (0x1018/0x3) */
-#cmakedefine CFG_SAPL_SN_SERIAL_NR     @CFG_SAPL_SN_SERIAL_NR@        /**< Serial Number (0x1018/0x4) */
-#cmakedefine CFG_SAPL_SN_FW_CHKSUM     @CFG_SAPL_SN_FW_CHKSUM@        /**< Firmware Checksum (0x1018/0x5) */
 
 /*----------------------------------------------------------------------------*/
 /* typedef                                                                    */
 /*----------------------------------------------------------------------------*/
 
-/*----------------------------------------------------------------------------*/
-/* includes                                                                   */
-/*----------------------------------------------------------------------------*/
+/**
+ * \brief The get connection valid callback function
+ */
+typedef BOOLEAN (*tGetConValidCb)(UINT16 spdoId_p);
 
 /*----------------------------------------------------------------------------*/
 /* function prototypes                                                        */
@@ -74,9 +62,15 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     extern "C" {
 #endif
 
+BOOLEAN app_init(tGetConValidCb pfnGetConValid_p);
+void app_exit(void);
+
+void app_reset(void);
+BOOLEAN app_process(void);
+
 #ifdef __cplusplus
     }
 #endif
 
 
-#endif /* _INC_sn_config_H_ */
+#endif /* _INC_sapl_app_H_ */

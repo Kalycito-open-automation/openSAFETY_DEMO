@@ -52,7 +52,6 @@ stack and processes the background task.
 /*----------------------------------------------------------------------------*/
 
 #include <sn/global.h>
-#include <sn/gpio.h>
 #include <sn/cyclemon.h>
 #include <sn/statehandler.h>
 
@@ -134,7 +133,7 @@ static BOOLEAN processAsync(void);
 static BOOLEAN processSync(void);
 static BOOLEAN syncCycle(void);
 
-static void checkConnectionValid(void);
+static BOOLEAN processTaskSchedule(void);
 
 static void enterReset(void);
 static void shutdown(void);
@@ -168,9 +167,6 @@ int main (void)
 
     /* Initialize target specific functions */
     platform_init();
-
-    /* Initialize target specific gpio pins */
-    gpio_init();
 
     DEBUG_TRACE(DEBUG_LVL_ALWAYS, "\n\n********************************************************************\n");
     DEBUG_TRACE(DEBUG_LVL_ALWAYS, "\n\topenSAFETY SafetyNode Demo \n\n ");
@@ -386,8 +382,6 @@ static BOOLEAN processAsync(void)
     {
         stateh_printSNState();
 
-        checkConnectionValid();
-
         /* Process a possible error */
         errh_proccessError();
 
@@ -420,11 +414,8 @@ static BOOLEAN processAsync(void)
 /**
 \brief    Process all synchronous actions
 
-Process all openSAFETY stack tasks which would be possible to be called in the
-background loop at the end of the synchronous task. In order to reduce the cycle
-time this tasks are multiplexed over multiple cycles.
-
-\note Calling these functions synchronous ensures a valid consecutive time.
+Calls all synchronous actions which need to be done after the openSAFETY stack
+had time to calculate.
 
 \retval TRUE    Processing of sync task successful
 \retval FALSE   Processing failed due to error
@@ -434,48 +425,15 @@ static BOOLEAN processSync(void)
 {
     BOOLEAN fReturn = FALSE;
 
-    /* Process one synchronous action in each cycle */
-    switch(syncTaskState_l)
+    /* Process the SAPL user application task */
+    if(sapl_processApp())
     {
-        case kSyncTaskShnf:
-            /* Periodically process the asynchronous task of the SHNF */
-            if(shnf_process())
-            {
-                fReturn = TRUE;
-            }
-
-            /* Switch to next state */
-            syncTaskState_l = kSyncTaskSapl;
-
-            break;
-
-        case kSyncTaskSapl:
-            /* Periodically process the asynchronous task of the SAPL */
-            if(sapl_processSync())
-            {
-                fReturn = TRUE;
-            }
-
-            /* Switch to next state */
-            syncTaskState_l = kSyncTaskState;
-
-            break;
-
-        case kSyncTaskState:
-            /* Handle internal state changes */
-            if(stateh_handleStateChange())
-            {
-                fReturn = TRUE;
-            }
-
-            /* Switch to first state */
-            syncTaskState_l = kSyncTaskShnf;
-            break;
-
-        default:
-            errh_postFatalError(kErrSourcePeriph, kErrorInvalidState, 0);
-            break;
-    }
+        /* Call the task scheduler at the end of the cycle */
+        if(processTaskSchedule())
+        {
+            fReturn = TRUE;
+        }   /* no else: Error already reported in the called function */
+    }   /* no else: Error already reported in the called function */
 
     return fReturn;
 }
@@ -527,26 +485,70 @@ static BOOLEAN syncCycle(void)
     return fReturn;
 }
 
+
 /*----------------------------------------------------------------------------*/
 /**
-\brief    Poll the connection valid bit and forward the value to the hardware
+\brief    Process the end of cycle task scheduler
+
+Process all openSAFETY stack tasks which would be possible to be called in the
+background loop at the end of the synchronous task. In order to reduce the cycle
+time this tasks are multiplexed over multiple cycles.
+
+\note Calling these functions synchronous ensures a valid program flow counter.
+
+\return TRUE on success; FALSE on error
 */
 /*----------------------------------------------------------------------------*/
-static void checkConnectionValid(void)
+static BOOLEAN processTaskSchedule(void)
 {
-    UINT16 i;
-    BOOLEAN conValidBit = FALSE;
+    BOOLEAN fReturn = FALSE;
 
-    /* Iterate over all SPDOs */
-    for(i=0; i<SPDO_cfg_MAX_NO_RX_SPDO; i++)
+    /* Process one synchronous action in each cycle */
+    switch(syncTaskState_l)
     {
-        /* Get connection valid bit of current SPDO */
-        conValidBit = sapl_getConnValidInst0(i);
+        case kSyncTaskShnf:
+            /* Periodically process the asynchronous task of the SHNF */
+            if(shnf_process())
+            {
+                fReturn = TRUE;
+            }
 
-        /* Set gpio according to the new value */
-        gpio_changeConValid(i, conValidBit);
+            /* Switch to next state */
+            syncTaskState_l = kSyncTaskSapl;
+
+            break;
+
+        case kSyncTaskSapl:
+            /* Periodically process the asynchronous task of the SAPL */
+            if(sapl_processSync())
+            {
+                fReturn = TRUE;
+            }
+
+            /* Switch to next state */
+            syncTaskState_l = kSyncTaskState;
+
+            break;
+
+        case kSyncTaskState:
+            /* Handle internal state changes */
+            if(stateh_handleStateChange())
+            {
+                fReturn = TRUE;
+            }
+
+            /* Switch to first state */
+            syncTaskState_l = kSyncTaskShnf;
+            break;
+
+        default:
+            errh_postFatalError(kErrSourcePeriph, kErrorInvalidState, 0);
+            break;
     }
+
+    return fReturn;
 }
+
 
 /*----------------------------------------------------------------------------*/
 /**
@@ -582,7 +584,6 @@ static void shutdown(void)
 #endif /* #if (defined SYSTEM_PATH) && (SYSTEM_PATH > ID_TARG_SINGLE) */
 
     constime_exit();
-    gpio_close();
     platform_exit();
 }
 

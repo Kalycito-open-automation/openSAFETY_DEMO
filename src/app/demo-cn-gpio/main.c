@@ -60,13 +60,12 @@ sends/receives exemplary data from and to the PCP.
 #include <common/platform.h>      /* Interface header to the platform specific functions */
 #include <common/pcpserial.h>     /* Interface header to the platform specific serial device */
 #include <common/syncir.h>        /* Interface header to initialize the synchronous interrupt */
+#include <common/app-gpio.h>      /* Interface header to the application of this demo */
 
 #include <common/benchmark.h>     /* Debug header for performance measurements */
 #include <common/debug.h>
 #include <common/tbufparams.h>
 #include <powerlink.h>
-
-#include <cn/app-gpio.h>          /* Interface header to the application of this demo */
 
 
 /*============================================================================*/
@@ -253,27 +252,37 @@ static BOOL initPeripherals(UINT8 * pTbufMemBase_p)
     /* Setup consumer/producer transfer parameters with initialization fields */
     if(tbufp_genTransferParams(pTbufMemBase_p, &transferParam))
     {
-        /* Init the serial device */
-        DEBUG_TRACE(DEBUG_LVL_ALWAYS,"\n\nInitialize serial device -> ");
-        if(pcpserial_init(&transferParam, serialTransferFinished))
+        DEBUG_TRACE(DEBUG_LVL_ALWAYS,"\n\nInitialize gpio application -> ");
+        if(appgpio_init() == 0)
         {
             DEBUG_TRACE(DEBUG_LVL_ALWAYS, "SUCCESS!\n");
 
-            /* initialize PCP interrupt handler */
-            DEBUG_TRACE(DEBUG_LVL_ALWAYS,"\n\nInitialize sync interrupt -> ");
-            if(syncir_init(syncIntHandler))
+            /* Init the serial device */
+            DEBUG_TRACE(DEBUG_LVL_ALWAYS,"\n\nInitialize serial device -> ");
+            if(pcpserial_init(&transferParam, serialTransferFinished))
             {
                 DEBUG_TRACE(DEBUG_LVL_ALWAYS, "SUCCESS!\n");
-                fReturn = TRUE;
+
+                /* initialize PCP interrupt handler */
+                DEBUG_TRACE(DEBUG_LVL_ALWAYS,"\n\nInitialize sync interrupt -> ");
+                if(syncir_init(syncIntHandler))
+                {
+                    DEBUG_TRACE(DEBUG_LVL_ALWAYS, "SUCCESS!\n");
+                    fReturn = TRUE;
+                }
+                else
+                {
+                    DEBUG_TRACE(DEBUG_LVL_ERROR,"\nERROR: Unable to initialize the sync interrupt!\n");
+                }
             }
             else
             {
-                DEBUG_TRACE(DEBUG_LVL_ERROR,"\nERROR: Unable to initialize the sync interrupt!\n");
+                DEBUG_TRACE(DEBUG_LVL_ERROR,"\nERROR: Unable to initialize the serial device!\n");
             }
         }
         else
         {
-            DEBUG_TRACE(DEBUG_LVL_ERROR,"\nERROR: Unable to initialize the serial device!\n");
+            DEBUG_TRACE(DEBUG_LVL_ERROR,"\nERROR: Unable to initialize the gpio application!\n");
         }
     }
     else
@@ -447,7 +456,7 @@ static BOOL workInputOutput(UINT32 rpdoRelTimeLow_p,
     UNUSED_PARAMETER(rpdoRelTimeLow_p);
 
     /* Digital IN: read push- and joystick buttons */
-    inPort = app_readInputPort();
+    inPort = appgpio_readInputPort();
 
 
     pTpdoImage_p->digitalOutput0 = inPort;
@@ -474,7 +483,7 @@ static BOOL workInputOutput(UINT32 rpdoRelTimeLow_p,
         }
     }
 
-    app_writeOutputPort(outPort);
+    appgpio_writeOutputPort(outPort);
 
     return TRUE;
 }
@@ -655,6 +664,7 @@ static void shutdown(void)
     /* Shutdown platform specific parts */
     syncir_exit();
     pcpserial_exit();
+    appgpio_exit();
     platform_exit();
 }
 

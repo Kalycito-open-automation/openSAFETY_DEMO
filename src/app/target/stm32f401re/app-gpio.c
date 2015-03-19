@@ -49,7 +49,7 @@ forwards it to the user application.
 /*----------------------------------------------------------------------------*/
 /* includes                                                                   */
 /*----------------------------------------------------------------------------*/
-#include <cn/app-gpio.h>
+#include <common/app-gpio.h>
 
 /*============================================================================*/
 /*            G L O B A L   D E F I N I T I O N S                             */
@@ -96,11 +96,14 @@ forwards it to the user application.
 /*----------------------------------------------------------------------------*/
 /**
 \brief  Initialize the GPIO application
+
+\retval 0       Init successful
+\retval 1       Error on init
 */
 /*----------------------------------------------------------------------------*/
-void app_init(void)
+UINT8 appgpio_init(void)
 {
-    /* TODO! */
+    return 0;
 }
 
 /*----------------------------------------------------------------------------*/
@@ -108,7 +111,7 @@ void app_init(void)
 \brief  Cleanup the GPIO application
 */
 /*----------------------------------------------------------------------------*/
-void app_exit(void)
+void appgpio_exit(void)
 {
     /* TODO! */
 }
@@ -123,7 +126,7 @@ This function writes a value to the output port of the AP
 \param[in] value_p       the value to write
 */
 /*----------------------------------------------------------------------------*/
-void app_writeOutputPort(UINT32 value_p)
+void appgpio_writeOutputPort(UINT32 value_p)
 {
     (void)value_p;
 
@@ -140,7 +143,7 @@ This function reads a value from the input port of the AP
 \retval  value              the value of the input port
 */
 /*----------------------------------------------------------------------------*/
-UINT8 app_readInputPort(void)
+UINT8 appgpio_readInputPort(void)
 {
     UINT8 val = 0;
 

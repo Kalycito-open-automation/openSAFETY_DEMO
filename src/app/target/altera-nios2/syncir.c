@@ -100,6 +100,7 @@ Altera Nios2.
 /*----------------------------------------------------------------------------*/
 /* local vars                                                                 */
 /*----------------------------------------------------------------------------*/
+static tPlatformSyncIrq pfnSyncIrq_l = NULL;        /**< Pointer to the sync IR callback function */
 
 /*----------------------------------------------------------------------------*/
 /* local function prototypes                                                  */
@@ -124,26 +125,13 @@ will be initialized, the interrupt handler will be connected to the ISR.
 /*----------------------------------------------------------------------------*/
 BOOL syncir_init(tPlatformSyncIrq pfnSyncIrq_p)
 {
-    BOOL fReturn = FALSE, regRet = FALSE;
+    BOOL fReturn = FALSE;
 
-    /* register interrupt handler */
-#ifdef ALT_ENHANCED_INTERRUPT_API_PRESENT
-    if (alt_ic_isr_register(APP_INTERRUPT_CONTROLLER_ID, SYNC_IRQ_NUM, pfnSyncIrq_p, NULL, 0) == 0)
-    {
-        regRet = TRUE;
-    }
-#else
-    if (alt_irq_register(SYNC_IRQ_NUM, NULL, pfnSyncIrq_p) == 0)
-    {
-        regRet = TRUE;
-    }
-#endif
+    syncir_disable();
 
-    if(regRet != FALSE)
+    if(pfnSyncIrq_p != NULL)
     {
-        /* Disable interrupt until syncir_enable() is called! */
-        syncir_disable();
-        IOWR_ALTERA_AVALON_PIO_IRQ_MASK(SYNC_IRQ_BASE, 0x01);
+        pfnSyncIrq_l = pfnSyncIrq_p;
 
         fReturn = TRUE;
     }
@@ -180,7 +168,14 @@ syncir_enable() enables the synchronous interrupt.
 /*----------------------------------------------------------------------------*/
 void syncir_enable(void)
 {
-    alt_ic_irq_enable(0, SYNC_IRQ_NUM);  /* enable specific IRQ Number */
+    IOWR_ALTERA_AVALON_PIO_IRQ_MASK(SYNC_IRQ_BASE, 0x01);
+
+    /* register interrupt handler */
+#ifdef ALT_ENHANCED_INTERRUPT_API_PRESENT
+    (void)alt_ic_isr_register(APP_INTERRUPT_CONTROLLER_ID, SYNC_IRQ_NUM, pfnSyncIrq_l, NULL, 0);
+#else
+    (void)alt_irq_register(SYNC_IRQ_NUM, NULL, pfnSyncIrq_p);
+#endif
 }
 
 /*----------------------------------------------------------------------------*/
