@@ -111,6 +111,9 @@ uP-Master with the uP-Slave. (Target is the stm32f401re board)
 #define USARTx_DMA_TX_IRQHandler         DMA2_Stream7_IRQHandler
 #define USARTx_DMA_RX_IRQHandler         DMA2_Stream2_IRQHandler
 
+#define USARTx_IRQ_Handler               USART1_IRQHandler
+#define USARTx_IRQn                      USART1_IRQn
+
 /*----------------------------------------------------------------------------*/
 /* local types                                                                */
 /*----------------------------------------------------------------------------*/
@@ -381,6 +384,10 @@ BOOLEAN upserial_transmit(volatile UINT8 * pData_p, UINT32 size_p)
 This function is called in the call of HAL_UART_Init and initializes all
 peripherals needed to carry out the transfer with DMA.
 
+\note
+The function call __HAL_UART_ENABLE_IT() has been added for HAL 1.4.0
+(STM32Cube_FW_F4_V1.4.0) support.
+
 \param pUsartHandler_p    Pointer to the USART handler
 */
 /*----------------------------------------------------------------------------*/
@@ -393,6 +400,7 @@ void HAL_UART_MspInit(UART_HandleTypeDef* pUsartHandler_p)
         /* Initialize all needed peripherals */
         initGpio();
         initDma(pUsartHandler_p);
+        __HAL_UART_ENABLE_IT(pUsartHandler_p, UART_IT_TC);
     }
 }
 
@@ -539,6 +547,11 @@ static BOOLEAN initDma(UART_HandleTypeDef* pUsartHandler_p)
 
 Setupt transfer finished and transfer error interrupts for both DMA
 channels.
+
+\note
+The function calls under 'NVIC configuration for UART transfer complete
+interrupt' have been added for HAL 1.4.0 (STM32Cube_FW_F4_V1.4.0) support.
+
 */
 /*----------------------------------------------------------------------------*/
 static void initNvic(void)
@@ -550,6 +563,10 @@ static void initNvic(void)
     /* NVIC configuration for DMA transfer complete interrupt (USARTx_RX) */
     HAL_NVIC_SetPriority(USARTx_DMA_RX_IRQn, 1, 1);
     HAL_NVIC_EnableIRQ(USARTx_DMA_RX_IRQn);
+
+    /* NVIC configuration for UART transfer complete interrupt */
+    HAL_NVIC_SetPriority(USARTx_IRQn, 1, 0);
+    HAL_NVIC_EnableIRQ(USARTx_IRQn);
 }
 
 /*----------------------------------------------------------------------------*/
@@ -627,6 +644,21 @@ void USARTx_DMA_TX_IRQHandler(void)
 {
     HAL_NVIC_ClearPendingIRQ(USARTx_DMA_TX_IRQn);
     HAL_DMA_IRQHandler(UsartHandle_l.hdmatx);
+}
+
+/*----------------------------------------------------------------------------*/
+/**
+\brief  This function handles UART TC interrupt request.
+
+\note
+This function has been added for HAL 1.4.0 (STM32Cube_FW_F4_V1.4.0) support.
+
+*/
+/*----------------------------------------------------------------------------*/
+void USARTx_IRQ_Handler(void)
+{
+    HAL_NVIC_ClearPendingIRQ(USARTx_IRQn);
+    HAL_UART_IRQHandler(&UsartHandle_l);
 }
 
 /*----------------------------------------------------------------------------*/

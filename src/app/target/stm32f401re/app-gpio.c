@@ -50,7 +50,8 @@ forwards it to the user application.
 /* includes                                                                   */
 /*----------------------------------------------------------------------------*/
 #include <common/app-gpio.h>
-
+#include <stm32f4xx_hal_gpio.h>
+#include <stm32f4xx_hal_rcc.h>
 /*============================================================================*/
 /*            G L O B A L   D E F I N I T I O N S                             */
 /*============================================================================*/
@@ -76,7 +77,8 @@ forwards it to the user application.
 /*----------------------------------------------------------------------------*/
 /* const defines                                                              */
 /*----------------------------------------------------------------------------*/
-
+//#define STM32CUBE_F4_V1_4_0 	1
+#define STM32CUBE_F4_V1_3_0		1
 /*----------------------------------------------------------------------------*/
 /* local types                                                                */
 /*----------------------------------------------------------------------------*/
@@ -84,7 +86,9 @@ forwards it to the user application.
 /*----------------------------------------------------------------------------*/
 /* local vars                                                                 */
 /*----------------------------------------------------------------------------*/
-
+static UINT32 usedInputPins_l = 0;
+static UINT32 usedOutputPins_l = 0;
+static BOOL gpioClockWasActivated_l = 0;
 /*----------------------------------------------------------------------------*/
 /* local function prototypes                                                  */
 /*----------------------------------------------------------------------------*/
@@ -103,6 +107,46 @@ forwards it to the user application.
 /*----------------------------------------------------------------------------*/
 UINT8 appgpio_init(void)
 {
+	GPIO_InitTypeDef inputInitSettings;
+	GPIO_InitTypeDef outputInitSettings;
+
+	/* enable clock for GPIO port C, if it isn't activated */
+	if (!(RCC->AHB1ENR & RCC_AHB1ENR_GPIOCEN))
+	{
+#ifdef STM32CUBE_F4_V1_4_0
+		__HAL_RCC_GPIOC_CLK_ENABLE();
+#endif
+#ifdef STM32CUBE_F4_V1_3_0
+		__GPIOC_CLK_ENABLE();
+#endif
+	}
+	else
+	{
+		gpioClockWasActivated_l = 1;
+	}
+
+	usedInputPins_l = 0;
+	usedOutputPins_l = 0;
+
+	inputInitSettings.Pin = GPIO_PIN_10 | GPIO_PIN_12;	/* Port C, MorphoConnector CN7: Pin 1 (PC10), Pin 3 (PC12) */
+	inputInitSettings.Mode = GPIO_MODE_INPUT;
+	inputInitSettings.Pull = GPIO_PULLDOWN;
+	inputInitSettings.Speed = GPIO_SPEED_LOW; 			/* Ignored when pin is configured as input */
+	inputInitSettings.Alternate = 0;
+
+	usedInputPins_l |= inputInitSettings.Pin;
+
+	outputInitSettings.Pin = GPIO_PIN_2 | GPIO_PIN_3;	/* Port C, MorphoConnector CN7: Pin 35 (PC2), Pin 37 (PC3) */
+	outputInitSettings.Mode = GPIO_MODE_OUTPUT_PP;
+	outputInitSettings.Pull = GPIO_NOPULL;
+	outputInitSettings.Speed = GPIO_SPEED_LOW;
+	outputInitSettings.Alternate = 0;
+
+	usedOutputPins_l |= outputInitSettings.Pin;
+
+	HAL_GPIO_Init (GPIOC, & inputInitSettings);
+	HAL_GPIO_Init (GPIOC, & outputInitSettings);
+
     return 0;
 }
 
@@ -113,7 +157,22 @@ UINT8 appgpio_init(void)
 /*----------------------------------------------------------------------------*/
 void appgpio_exit(void)
 {
-    /* TODO! */
+	HAL_GPIO_DeInit(GPIOC, usedInputPins_l | usedOutputPins_l);
+
+	/* disable clock for port, if it got activated in appgpio_init() */
+	if (gpioClockWasActivated_l == 0)
+	{
+#ifdef STM32CUBE_F4_V1_4_0
+		__HAL_RCC_GPIOC_CLK_DISABLE();
+#endif
+
+#ifdef STM32CUBE_F4_V1_3_0
+		__GPIOC_CLK_DISABLE();
+#endif
+	}
+
+	usedInputPins_l = 0;
+	usedOutputPins_l = 0;
 }
 
 
@@ -128,9 +187,25 @@ This function writes a value to the output port of the AP
 /*----------------------------------------------------------------------------*/
 void appgpio_writeOutputPort(UINT32 value_p)
 {
-    (void)value_p;
+	UINT16 outputPin = 0x01;
+	GPIO_PinState pinState = GPIO_PIN_RESET;
 
-    /* TODO! */
+	/* process value for output ports */
+	if (usedOutputPins_l != 0)
+	{
+		while (outputPin)
+		{
+			if (outputPin & usedOutputPins_l)
+			{
+				pinState = (value_p & 0x01) ? GPIO_PIN_SET : GPIO_PIN_RESET;
+				HAL_GPIO_WritePin(GPIOC, outputPin, pinState);
+				value_p = value_p >> 1;
+			}
+
+			outputPin = (outputPin << 1)  & GPIO_PIN_MASK;
+		}
+	}
+
 }
 
 /*----------------------------------------------------------------------------*/
@@ -146,8 +221,28 @@ This function reads a value from the input port of the AP
 UINT8 appgpio_readInputPort(void)
 {
     UINT8 val = 0;
+    UINT8 valPosition = 0x01;
+	UINT16 inputPin = 0x01;
+	GPIO_PinState pinState = GPIO_PIN_RESET;
 
-    /* TODO! */
+	if (usedInputPins_l != 0)
+	{
+		while (inputPin)
+		{
+			if (inputPin & usedInputPins_l)
+			{
+				pinState = HAL_GPIO_ReadPin(GPIOC, inputPin);
+
+				if (pinState == GPIO_PIN_SET)
+				{
+					val = val | valPosition;
+				}
+
+				valPosition = valPosition << 1;
+			}
+			inputPin = (inputPin << 1)  & GPIO_PIN_MASK;
+		}
+	}
 
     return val;
 }
