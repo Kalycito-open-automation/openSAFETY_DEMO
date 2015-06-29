@@ -1,6 +1,6 @@
 [gerrit]
 host=brateggevoat1
 port=29418
-project=openPOWERLINK_PIFA.git
+project=openSAFETY_DEMO.git
 defaultremote=origin
 defaultrebase=0
