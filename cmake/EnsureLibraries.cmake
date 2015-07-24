@@ -13,7 +13,7 @@ MACRO(EnsureLibraries EXE_NAME LIBRARY_NAMES )
             IF ( CMAKE_COMPILER_IS_GNUCC )
                 ADD_CUSTOM_COMMAND ( TARGET ${EXE_NAME}
                     POST_BUILD
-                    COMMAND ${CMAKE_COMMAND} -D LIBRARY="${libLocation}" -D TARGET="${exeLocation}" -P "${CMAKE_SOURCE_DIR}/../cmake/EnsureLibrariesRunner.cmake"
+                    COMMAND ${CMAKE_COMMAND} -D LIBRARY="${libLocation}" -D TARGET="${exeLocation}" -P "${CMAKE_SOURCE_DIR}/cmake/EnsureLibrariesRunner.cmake"
                     COMMENT "Copy lib ${LIBRARY_NAME} to ${EXE_NAME} build ..."
                     DEPENDS ${LIBRARY_NAME}
                 )

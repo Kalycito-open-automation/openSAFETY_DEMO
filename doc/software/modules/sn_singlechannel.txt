@@ -9,7 +9,7 @@ slightly more complex application and a different configuration of the PSI
 library.
 
 The SN demo source code is located in the folder **app/demo-sn-gpio** where the
-openSAFETY protocol stack implementation is located under **stacks/openSAFETY**!
+openSAFETY protocol stack implementation is located under **/openSAFETY**!
 The openSAFETY stack itself basically creates the openSAFETY frames which need
 to be forwarded to the underlying fieldbus. The SN demo firmware is put together
 by the following software modules:

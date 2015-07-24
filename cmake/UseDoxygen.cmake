@@ -53,7 +53,7 @@ FIND_PACKAGE(Doxygen)
 
 IF(DOXYGEN_FOUND)
     FIND_FILE(DOXYFILE_IN "doxyfile.in"
-            PATHS "${DOXYFILE_SOURCE_DIR}/software-manual" "${CMAKE_ROOT}/Modules/"
+            PATHS "${CMAKE_CURRENT_SOURCE_DIR}" "${CMAKE_SOURCE_DIR}/doc/doxygen" "${CMAKE_ROOT}/Modules/"
             NO_DEFAULT_PATH)
     SET(DOXYFILE "${DOXYFILE_OUTPUT_DIR}/doxyfile")
     INCLUDE(FindPackageHandleStandardArgs)
