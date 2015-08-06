@@ -12,19 +12,6 @@ variety of microcontrollers.
 
 # Layout - Single Channelled   {#sect_hw_app_single}
 
-In order to run the PSI with a CN application a controller with the following
-mandatory or recommended features is necessary:
-
-CN feature            | uC - Feature
-----------------------|------------------------------
-Synchronous IR        | External IR controller
-PCP serial            | SPI master + DMA controller
-Non-volatile memory   | Parallel flash (64kb)
-Volatile memory       | SRAM (10kb)
-Debugging interface   | JTAG pin header + programmer (e.g: stlink)
-Debug prints          | Serial to the host PC
-Application           | Hardware to support the user application (e.g: GPIO pins)
-
 In case of a single channelled SN demo the following uC features are needed or
 recommended:
 
@@ -44,7 +31,7 @@ Application           | Hardware to support the user application (e.g: GPIO pins
 
 In case of a dual channelled SN demo a special setup is required. Basically it is
 recommended to use two of the microcontrollers used for the single channelled demo
-with an additional serial device between the uP-Master and uP-Slave. In addition
+with an additional serial device between the uP-Master and uP-Slave. In addition,
 the serial to the PCP needs to be an SPI in slave mode.
 
 SN feature            | uC - Feature

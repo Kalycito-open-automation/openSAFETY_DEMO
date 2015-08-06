@@ -58,6 +58,9 @@
           <tab type="user" url="\ref page_buildenv_stm32" title="Build environment - Setup"/>
         </tab>
       </tab>
+      <tab type="usergroup" url="\ref page_flashing" title="Flashing the boards"/>
+      <tab type="usergroup" url="\ref page_user_customisations" title="How to customise the openSAFETY_DEMO"/>
+      <tab type="usergroup" url="\ref page_system_integration" title="System integration, start up"/>
     </tab>
     <tab type="user" url="\ref page_revision" title="Revision History"/>
     <tab type="user" url="\ref page_licenses" title="Licenses"/>

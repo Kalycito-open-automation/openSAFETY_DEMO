@@ -5,9 +5,8 @@ Target platform stm32f103rb/Cortex-M3 {#page_stm32f103rb}
 
 
 The target board stm32f103rb with an ARM Cortex-M3 is well suited to host the
-user application. Therefore the following applications in the folder **app** are
+user application. Therefore the following application in the folder **app** is
 ported to be built for this target hardware:
-- `app/demo-cn-gpio:` The software for the POWERLINK CN only demo with GPIO application.
 - `app/demo-sn-gpio:` The software for the openSAFETY SN over POWERLINK demo for
    **dual** and **single** channelled applications.
 

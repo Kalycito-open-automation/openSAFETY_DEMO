@@ -32,26 +32,26 @@ DOXYFILE_ENCODING      = UTF-8
 # title of most generated pages and in a few other places.
 # The default value is: My Project.
 
-PROJECT_NAME           = "[P]OWERLINK [S]lim [I]nterface (PSI)"
+PROJECT_NAME           = "openSAFETY_DEMO"
 
 # The PROJECT_NUMBER tag can be used to enter a project or revision number. This
 # could be handy for archiving the generated documentation or if some version
 # control system is used.
 
-PROJECT_NUMBER         = 1.0.0
+PROJECT_NUMBER         =
 
 # Using the PROJECT_BRIEF tag one can provide an optional one line description
 # for a project that appears at the top of each page and should give viewer a
 # quick idea about the purpose of the project. Keep the description short.
 
-PROJECT_BRIEF          = "A lightweight interface to the openPOWERLINK stack"
+PROJECT_BRIEF          = "An openSAFETY safe node demo application"
 
 # With the PROJECT_LOGO tag one can specify a logo or an icon that is included
 # in the documentation. The maximum height of the logo should not exceed 55
 # pixels and the maximum width should not exceed 200 pixels. Doxygen will copy
 # the logo to the output directory.
 
-PROJECT_LOGO           = @DOXYFILE_SOURCE_DIR@/images/br_logo.png
+PROJECT_LOGO           = @DOXYFILE_SOURCE_DIR@/images/opensafety_logo_small.png
 
 # The OUTPUT_DIRECTORY tag is used to specify the (relative or absolute) path
 # into which the generated documentation will be written. If a relative path is
@@ -769,7 +769,7 @@ WARN_LOGFILE           =
 # Note: If this tag is empty the current directory is searched.
 
 INPUT                  = @DOXYFILE_SOURCE_DIR@/doxygen \
-                         @CMAKE_SOURCE_DIR@/../readme.md \
+                         @CMAKE_SOURCE_DIR@/readme.md \
                          @DOXYFILE_SOURCE_DIR@/directories.md \
                          @DOXYFILE_SOURCE_DIR@/protocols.md \
                          @DOXYFILE_SOURCE_DIR@/systemoverview.md \
@@ -782,6 +782,7 @@ INPUT                  = @DOXYFILE_SOURCE_DIR@/doxygen \
                          @DOXYFILE_SOURCE_DIR@/ipcore/triplebuffer.md \
                          @DOXYFILE_SOURCE_DIR@/ipcore/openmac.md \
                          @DOXYFILE_SOURCE_DIR@/userguide/index.md \
+                         @DOXYFILE_SOURCE_DIR@/userguide/customisations.md \
                          @DOXYFILE_SOURCE_DIR@/userguide/targ_x86.md \
                          @DOXYFILE_SOURCE_DIR@/userguide/targ_altnios2.md \
                          @DOXYFILE_SOURCE_DIR@/userguide/targ_stm32f103rb.md \
@@ -794,15 +795,12 @@ INPUT                  = @DOXYFILE_SOURCE_DIR@/doxygen \
                          @DOXYFILE_SOURCE_DIR@/userguide/altnios2_buildhw.md \
                          @DOXYFILE_SOURCE_DIR@/userguide/altnios2_buildsw.md \
                          @DOXYFILE_SOURCE_DIR@/userguide/altnios2_setuphw.md \
-                         @CMAKE_SOURCE_DIR@/../revision.md \
-                         @CMAKE_SOURCE_DIR@/../licenses.md \
+                         @DOXYFILE_SOURCE_DIR@/userguide/system_integration.md \
+                         @DOXYFILE_SOURCE_DIR@/userguide/flashing.md \
+                         @CMAKE_SOURCE_DIR@/revision.md \
+                         @CMAKE_SOURCE_DIR@/licenses.md \
                          @DOXYFILE_SOURCE_DIR@/software/index.md \
                          @DOXYFILE_SOURCE_DIR@/software/group_applications.txt \
-                         @CMAKE_SOURCE_DIR@/app/demo-cn-gpio \
-                         @CMAKE_SOURCE_DIR@/app/demo-cn-gpio/include/cn \
-                         @CMAKE_SOURCE_DIR@/app/demo-cn-gpio/config/pcp \
-                         @CMAKE_SOURCE_DIR@/app/demo-cn-gpio/config/tbuf/include/config \
-                         @CMAKE_SOURCE_DIR@/app/demo-cn-gpio/config/tbuf/include/ipcore \
                          @DOXYFILE_SOURCE_DIR@/software/group_sn.txt \
                          @DOXYFILE_SOURCE_DIR@/software/modules/sn_singlechannel.txt \
                          @DOXYFILE_SOURCE_DIR@/software/modules/sn_dualchannel.txt \
@@ -843,13 +841,13 @@ INPUT                  = @DOXYFILE_SOURCE_DIR@/doxygen \
                          @DOXYFILE_SOURCE_DIR@/software/modules/psi_pdo.txt \
                          @DOXYFILE_SOURCE_DIR@/software/modules/psi_ssdo.txt \
                          @DOXYFILE_SOURCE_DIR@/software/modules/psi_logbook.txt \
-                         @CMAKE_SOURCE_DIR@/libs/psi/include/libpsi \
-                         @CMAKE_SOURCE_DIR@/libs/psi/include/libpsi/internal \
-                         @CMAKE_SOURCE_DIR@/libs/psi \
+                         @CMAKE_SOURCE_DIR@/blackchannel/POWERLINK/libs/psi/include/libpsi \
+                         @CMAKE_SOURCE_DIR@/blackchannel/POWERLINK/libs/psi/include/libpsi/internal \
+                         @CMAKE_SOURCE_DIR@/blackchannel/POWERLINK/libs/psi \
                          @DOXYFILE_SOURCE_DIR@/software/group_libpsicommon.txt \
-                         @CMAKE_SOURCE_DIR@/libs/psicommon/include/libpsicommon \
-                         @CMAKE_SOURCE_DIR@/libs/psicommon/include/libpsicommon/internal \
-                         @CMAKE_SOURCE_DIR@/libs/psicommon
+                         @CMAKE_SOURCE_DIR@/blackchannel/POWERLINK/libs/psicommon/include/libpsicommon \
+                         @CMAKE_SOURCE_DIR@/blackchannel/POWERLINK/libs/psicommon/include/libpsicommon/internal \
+                         @CMAKE_SOURCE_DIR@/blackchannel/POWERLINK/libs/psicommon
 
 
 # This tag can be used to specify the character encoding of the source files
@@ -1454,7 +1452,7 @@ GENERATE_ECLIPSEHELP   = YES
 # The default value is: org.doxygen.Project.
 # This tag requires that the tag GENERATE_ECLIPSEHELP is set to YES.
 
-ECLIPSE_DOC_ID         = org.doxygen.pifa
+ECLIPSE_DOC_ID         = org.doxygen.openSAFETY_DEMO
 
 # If you want full control over the layout of the generated HTML pages it might
 # be necessary to disable the index and replace it with your own. The

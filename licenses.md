@@ -5,7 +5,7 @@ Licenses {#page_licenses}
 
 The main source code of the application interface is licensed under BSD license
 by B&R electronic GmbH and third-party contributors. Some target platform specific
-parts of the PSI are licensed under other licenses such as, without limitation,
+parts of the openSAFETY_DEMO are licensed under other licenses such as, without limitation,
 the GNU General Public License Version 2. Please refer to the file's header for
 the applicable license and the corresponding terms and conditions.
 

@@ -3,13 +3,14 @@ System Overview {#page_sysdesc}
 
 [TOC]
 
-# POWERLINK Slim Interface (PSI) {#sect_sysdesc_psi}
+# openSAFETY_DEMO {#sect_sysdesc_oS_demo}
 
-This chapter provides an overview of the PSI system components and how they
-interact with each other. The basic concept of the system is the clear separation
-of the network protocol and the user application by using a standalone processor
-for POWERLINK called the `POWERLINK Communication Processor (PCP)` and a second
-standalone processor for the application. The PCP handles the complete processing
+This chapter provides an overview of the openSAFETY_DEMO system components
+and how they interact with each other. The basic concept of the system is the
+clear separation of the network protocol and the user application by using a
+standalone processor for POWERLINK called the
+`POWERLINK Communication Processor (PCP)` and a second standalone processor
+for the application. The PCP handles the complete processing
 of the network protocol and provides a memory interface to forward the process and
 service data to the user application. System setup details are pictured in the next
 figure.
@@ -17,32 +18,32 @@ figure.
 ![Component overview of the POWERLINK interface](system_overview.png)
 @image latex system_overview.eps "Component overview of the POWERLINK interface"
 
-## POWERLINK processor (PCP)  {#sect_sysdesc_psi_pcp}
+## POWERLINK processor (PCP)  {#sect_sysdesc_oS_demo_pcp}
 In order to handle the real time requirements of POWERLINK and to provide the
-lowest possible cycle times the PCP is implemented on an FPGA where the most time
+lowest possible cycle times, the PCP is implemented on an FPGA where the most time
 critical parts are realized as soft IP-Cores. It consists of the openMAC IP-Core
 for access to the POWERLINK network and the POWERLINK interface IP-Core for an
 interface to the user application. More about these IP-Cores is given in the
 section \ref page_idxipcore!
 
-The software parts of the POWERLINK interface like the protocol stack and the
-interface drivers are executed on a soft processor inside the FPGA and are
+The software parts of the POWERLINK interface, like the protocol stack and the
+interface drivers, are executed on a soft processor inside the FPGA and are
 therefore out of the scope of an application engineer. Only basic configuration
 steps need to be carried out inside the code of the PCP. (See \ref sect_sw_pcp)
 
-## POWERLINK interface library   {#sect_sysdesc_psi_libpsi}
+## POWERLINK interface library   {#sect_sysdesc_oS_demo_libpsi}
 The PSI library is executed on the application processor and provides a simple
 interface for the user application. More details about the POWERLINK interface library can
 be found in the \ref group_libpsi and \ref group_libpsicommon.
 
-## Interconnect PCP <-> Application   {#sect_sysdesc_psi_interconn}
+## Interconnect PCP <-> Application   {#sect_sysdesc_oS_demo_interconn}
 The application processor uses a serial peripheral interface (**SPI**) as an interconnect
 to access the PCP. In addition to this serial device the synchronous interrupt line
 is connected to the application processor. This line is used to periodically trigger
 the SPI master on the application processor which then starts a new cyclically data
 transfer.
 
-## Limits of the PSI {#sect_sysdesc_psi_limits}
+## Limits of the demo application {#sect_sysdesc_oS_demo_limits}
 In order to reduce the code size at the application processor also the feature set
 of the PSI is limited. The following list gives details about the limits of the
 interface:
@@ -51,7 +52,8 @@ interface:
   initialization.
 - The number of RPDOs is limited to one.
 - Sending and receiving of SDOs at the application is not possible.
-  * Access to the data of unique objects can be achieved by using the \ref module_psi_cc.
+  * Access to the data of unique objects can be achieved by using the
+  \ref module_psi_cc.
 - There is no Virtual Ethernet interface on the application.
   (It is therefore not possible to send or receive any generic ehternet frame
    at the application)
@@ -61,38 +63,10 @@ The application processor hosts the user application and can be any piece of
 code which is executed on the target hardware and needs to transfer data by
 using the POWERLINK protocol. In order to ease the access to the interface
 the PSI user library is provided. This library needs to run on the application
-processor and is linked to the user application. For demonstration purpose the
-software package consists of the following example applications which are ported
+processor and is linked to the user application. For demonstration purposes the
+software package consists of the following example application which are ported
 to the available hardware platforms.
 
-## Controlled Node - Demo  {#sect_sysdesc_app_cndemo}
-The controlled node demo (**demo-cn-gpio**) implements a minimal POWERLINK CN with
-cyclic access to the process data. It uses the \ref group_libpsi to interface
-the POWERLINK processor.
-
-The PSI interface is configured with the following modules in this demo:
-- \ref module_psi_status
-
-    This interface internal module is used to forward the time information of
-    POWERLINK to the application. In addition it internally handles the asynchronous
-    transfer of the configuration channel.
-
-- \ref module_psi_pdo
-
-    The PDO module is configured to transmit four bytes of input data and to receive
-    four bytes of output data. The application uses DIP switches and output LEDS to
-    display the transferred data. See the function \ref workInputOutput for the
-    application details.
-
-- \ref module_psi_cc
-
-    The configuration channel module enables to access unique objects in the PCP
-    object dictionary. In this demo the object **0x2000** with subindex **0x1-0x4** is
-    forwarded to the demo application. An example on how to read and write these
-    objects is provided by the functions \ref ccReadObject and \ref ccWriteObject.
-
-> For implementation details of this demo see \ref group_app_cn
-    
 ## Safe Node - Demo  {#sect_sysdesc_app_sndemo}
 The safe node demo (**demo-sn-gpio**) implements an openSAFETY SN on the
 application processor which uses the PSI interface to access the POWERLINK

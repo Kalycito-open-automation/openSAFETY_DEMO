@@ -61,7 +61,7 @@ course, POWERLINK is the preferred transfer layer because of the close relations
 between the communication mechanisms in POWERLINK and openSAFETY, which enable an
 ideal level of performance.
 
-A openSAFETY network can consist of up to 1023 openSAFETY nodes (so called Safety
+An openSAFETY network can consist of up to 1023 openSAFETY nodes (so called Safety
 Nodes), and up to 1023 openSAFETY networks may exist in parallel on the same
 fieldbus network. The openSAFETY domain can be spread across several, even
 inhomogeneous networks. Special openSAFETY Domain Gateways enable communication

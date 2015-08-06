@@ -9,19 +9,20 @@ This setup changes if the desired demo application needs to run as a **single**
 or **dual** channelled solution.
 
 # Board setup (stm32f401re) - Single channelled    {#sect_stm32f401_setuphw_single}
-In order to setup the board for the **demo-cn-gpio** or the **demo-sn-gpio** in
+In order to setup the board for the **demo-sn-gpio** in
 single channelled configuration, carry out the following steps:
 1. Connect the jumper **JP5** to pin **1-2**. (Power supply over E5V)
 2. Connect the stm32 **E5V** power supply pins with the terasic-de2 **JP5**
   (5V, GND) pins.
 3. Connect the **PCP** <-> **uP** interconnect the following way:
-    Name   | terasic-de2 | stm32f401
+    Name   | terasic-de2 FPGA pin (board connector JP5 pin) | stm32f401 (board connector CN5 pin)
     :------|:------------|:---------
-    sync   | AC15        | PC7
-    SS_n   | Y17         | PB6
-    MOSI   | Y16         | PA7
-    MISO   | AE16        | PA6
-    SCK    | AE15        | PA5
+    sync   | AC15 (2)    | PC7  (2)
+    SS_n   | Y17 (4)     | PB6 (3)
+    MOSI   | Y16 (6)     | PA7 (4)
+    MISO   | AE16 (8)    | PA6 (5)
+    SCK    | AE15 (10)   | PA5 (6)
+    GND    | (12)        | (7)
 
 4. For programming and debugging connect the USB connector with your PC.
 
@@ -44,7 +45,7 @@ needed. The following figure provides an overview of the wiring of the two board
 @image latex stm32_nucleo_dual.eps "Setup - stm32f401 (Dual channelled)" width=1\textwidth
 
 Carry out the following steps in order to wire a dual channelled demo:
-1. Setup one board exactly as described in \ref sect_stm32f401_setuphw_single
+1. Setup one board **exactly** as described in \ref sect_stm32f401_setuphw_single
 2. Also connect the jumper **JP5** to pin **1-2** of **uP-Slave**.
 3. Connect the uP-Slave **E5V** power supply pins with the ones from **uP-Master**.
    (You can use the bottom side end of the uP-Master pins!)

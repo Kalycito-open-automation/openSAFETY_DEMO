@@ -4,7 +4,7 @@ How to generate the bitstream {#page_altbuildhw}
 [TOC]
 
 The Quartus projects for the FPGA configuration are located in the folder
-`src/fpga/altera/boards/[board_name]/[example_name]`. In order to generate a
+`blackchannel/POWERLINK/fpga/altera/boards/[board_name]/[example_name]`. In order to generate a
 bitstream for the FPGA of the POWERLINK processor a few steps need to be
 executed. After a successful generation the project directory consists of a
 file called `[toplevel].sof` (The bitstream to download) and a file called
@@ -17,7 +17,7 @@ If you want to generate the bitstream manually a few steps need to be carried
 out in the Quartus II IDE.
 
 1. Open the toolchain **Quartus II 13.0sp1**. (**Note:** It is important to use
-   exactly this version of the toolchain)
+   **exactly** this version of the toolchain)
 2. Open a desired project from `fpga/boards/[platform]/[board_name]/[example_name]`
    by clicking on `File -> Open Project`.
 3. Open the tool Qsys with `Tools -> Qsys` and open the file `[toplevel].qsys`.
@@ -50,5 +50,5 @@ In order to execute this script open the `Nios II 13.0sp1 Command Shell` or a
 shell where the path to the Quartus II toolchain is set. In this shell execute the
 following command:
 
-      > cd src/misc/altera_nios2/scripts
+      > cd blackchannel/POWERLINK/misc/altera_nios2/scripts
       > ./create-this-fpga ../../../fpga/boards/[platform]/[board_name]/[example_name]

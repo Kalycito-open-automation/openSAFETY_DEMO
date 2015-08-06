@@ -5,10 +5,10 @@ Build environment - Setup {#page_buildenv_stm32}
 
 # On Windows   {#sect_buildenv_windows}
 This section covers to setup the build environment for using the STM32 Nucleo
-board with the PSI under Windows.
+board with the openSAFETY_DEMO under Windows.
 
 > **Note:** This guide explicitly uses only open source software. There are probably
-> many other ways to get the PSI demos on an stm32 Nucleo board running.
+> many other ways to get the demo software running on an stm32 Nucleo board.
 
 1. Download **MinGW** from: http://sourceforge.net/projects/mingw/
    - Install the following packages:
@@ -53,7 +53,7 @@ This gives details on how to compile the **st-link** tools on windows with
 > **libusb build issues for Windows:** On some systems, while trying to
 > build libusb, ./configure may cause wrong results while checking for
 > "struct timespec". To solve this issue, please remove the line
-> "#define HAVE_STRUCT_TIMESPEC 1" in the file config.h.
+> `#define HAVE_STRUCT_TIMESPEC 1` in the file config.h.
 >
 > To fix errors like *"In function 'get_windows_version':
 > os/windows_usb.c:850:4: error: implicit declaration of function
@@ -61,8 +61,8 @@ This gives details on how to compile the **st-link** tools on windows with
 > = VerSetConditionMask(0, VER_MAJORVERSION, VER_EQUAL);"*:
 > add the defines with the appropriate value to the file **config.h** and
 > build libusb again.
-> *#define WINVER 0x0601*
-> *#define _WIN32_WINNT 0x0601*
+> `#define WINVER 0x0601`
+> `#define _WIN32_WINNT 0x0601`
 >
 > - Windows 7: 0x0601
 > - Windows 8: 0x0602

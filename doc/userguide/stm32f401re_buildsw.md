@@ -13,7 +13,7 @@ Nucleo board. The following steps need to be carried out in order to do this:
 
        > cd build
        > cmake -G"Unix Makefiles" -DCMAKE_TOOLCHAIN_FILE=../cmake/toolchain-arm-cortexm4-gnueabi.cmake \
-       >       -DCFG_STM32_HAL_LIB_LOC=../../contrib/STM32Cube_FW_F4_V1.3.0 ../src
+       >       -DCFG_STM32_HAL_LIB_LOC=../../contrib/STM32Cube_FW_F4_V1.7.0 ../
 
    This will generate Unix style Makefiles for the stm32f401re platform with the
    default configuration. See the section \ref sect_buildsw_options and
@@ -82,33 +82,34 @@ the code and set breakpoints.
      * GDB debugger = arm-none-eabi-gdb
      * Connection / Host = localhost
      * Connection / Port = 4242
-   > **Note:** If debugging isn't possible in the described way with
-   > C/C++ Remote Application Debug Configuration go to
-   > `Help -> Install New Software`.
-   > In the new window select the entry that matches your version of Eclipse
-   > e.g. "[VERSION] - http://download.eclipse.org/releases/[VERSION]" from the
-   > `Work with` drop down menu.
-   > Enter "hardware" in the filter text box and install
-   > `C/C++ GDB Hardware Debugging` from the section
-   > `Mobile and Device Development`.
-   > Now a new Debug Configuration can be added (GDB Hardware Debugging):
-   > In the 'Main' tab select your .elf file you want to debug.
-   > In the 'Debugger' tab make the following settings:
-   > * GDB Command: arm-none-eabi-gdb
-   > * check use remote target checkbox
-   > * Host name or IP address: localhost
-   > * Port number: 4242
 
-\b -> Step through the code and find the bug!
+6. \b -> Step through the code and find the bug!
+
+> **Note:** If debugging isn't possible in the described way with
+> C/C++ Remote Application Debug Configuration go to
+> `Help -> Install New Software`.
+> In the new window select the entry that matches your version of Eclipse
+> e.g. "[VERSION] - http://download.eclipse.org/releases/[VERSION]" from the
+> `Work with` drop down menu.
+> Enter "hardware" in the filter text box and install
+> `C/C++ GDB Hardware Debugging` from the section
+> `Mobile and Device Development`.
+> Now a new Debug Configuration can be added (GDB Hardware Debugging):
+> In the 'Main' tab select your .elf file you want to debug.
+> In the 'Debugger' tab make the following settings:
+> - GDB Command: arm-none-eabi-gdb
+> - check use remote target checkbox
+> - Host name or IP address: localhost
+> - Port number: 4242
 
 # Target specific configuration option (stm32f401re)   {#sect_stm32f401_buildsw_options}
 
 - **CFG_STM32_HAL_LIB_LOC**
 
- Specify the path to the stm32f401 HAL library (**STM32Cube_FW_F4_V1.4.0**).
+ Specify the path to the stm32f401 HAL library (**STM32Cube_FW_F4_V1.7.0**).
  Get it from: http://www.st.com/web/catalog/tools/FM147/CL1794/SC961/SS1743/LN1897/PF259243
 
-- **CFG_ARM_BOARD_DIR**
+- **CFG_ARM_BOARD_TYPE**
 
   Enables to specify the kind of Cortex-M4 board type (e.g: **stm32f401re**)
 
@@ -116,3 +117,8 @@ the code and set breakpoints.
 
   Enables a custom target to write the firmware to the local flash by using the
   tool **st-flash**.
+
+- **CFG_DUAL_CHANNEL**
+
+  Select between single and dual channelled application as well as just the
+  up-master and up-slave of the dual channelled application.

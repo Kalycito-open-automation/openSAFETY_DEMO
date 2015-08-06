@@ -3,7 +3,7 @@ How to build the software {#page_stm32f103_buildsw}
 
 [TOC]
 
-This section provides information on how to build the software for the stm32f103rb
+This section provides information on how to build the software for the **stm32f103rb**
 Nucleo board. The following steps need to be carried out in order to do this:
 
 1. Create a build environment with **bash** shell, the **GNU CoreUtils** and the
@@ -13,7 +13,7 @@ Nucleo board. The following steps need to be carried out in order to do this:
 
        > cd build
        > cmake -G"Unix Makefiles" -DCMAKE_TOOLCHAIN_FILE=../cmake/toolchain-arm-cortexm3-gnueabi.cmake \
-       >       -DCFG_STM32_HAL_LIB_LOC=../../contrib/STM32_Nucleo_FW_V1.2.1 ../src
+       >       -DCFG_STM32_HAL_LIB_LOC=../../contrib/STM32_Nucleo_FW_V1.2.1 ../
 
    This will generate Unix style Makefiles for the stm32f103rb platform with the
    default configuration. See the section \ref sect_buildsw_options and
@@ -82,24 +82,25 @@ the code and set breakpoints.
      * GDB debugger = arm-none-eabi-gdb
      * Connection / Host = localhost
      * Connection / Port = 4242
-   > **Note:** If debugging isn't possible in the described way with
-   > C/C++ Remote Application Debug Configuration go to
-   > `Help -> Install New Software`.
-   > In the new window select the entry that matches your version of Eclipse
-   > e.g. "[VERSION] - http://download.eclipse.org/releases/[VERSION]" from the
-   > `Work with` drop down menu.
-   > Enter "hardware" in the filter text box and install
-   > `C/C++ GDB Hardware Debugging` from the section
-   > `Mobile and Device Development`.
-   > Now a new Debug Configuration can be added (GDB Hardware Debugging):
-   > In the 'Main' tab select your .elf file you want to debug.
-   > In the 'Debugger' tab make the following settings:
-   > * GDB Command: arm-none-eabi-gdb
-   > * check use remote target checkbox
-   > * Host name or IP address: localhost
-   > * Port number: 4242
 
-\b -> Step through the code and find the bug!
+6. \b -> Step through the code and find the bug!
+
+> **Note:** If debugging isn't possible in the described way with
+> C/C++ Remote Application Debug Configuration go to
+> `Help -> Install New Software`.
+> In the new window select the entry that matches your version of Eclipse
+> e.g. "[VERSION] - http://download.eclipse.org/releases/[VERSION]" from the
+> `Work with` drop down menu.
+> Enter "hardware" in the filter text box and install
+> `C/C++ GDB Hardware Debugging` from the section
+> `Mobile and Device Development`.
+> Now a new Debug Configuration can be added (GDB Hardware Debugging):
+> In the 'Main' tab select your .elf file you want to debug.
+> In the 'Debugger' tab make the following settings:
+> - GDB Command: arm-none-eabi-gdb
+> - check use remote target checkbox
+> - Host name or IP address: localhost
+> - Port number: 4242
 
 # Target specific configuration option (stm32f103rb)   {#sect_stm32f103_buildsw_options}
 
@@ -108,7 +109,7 @@ the code and set breakpoints.
  Specify the path to the stm32f103 HAL library (**STM32_Nucleo_FW_V1.2.1**).
  Get it from: http://www.st.com/web/en/catalog/tools/PF260215
 
-- **CFG_ARM_BOARD_DIR**
+- **CFG_ARM_BOARD_TYPE**
 
   Enables to specify the kind of Cortex-M3 board type (e.g: **stm32f103rb**)
 
@@ -116,3 +117,7 @@ the code and set breakpoints.
 
   Enables a custom target to write the firmware to the local flash by using the
   tool **st-flash**.
+
+- **CFG_DUAL_CHANNEL**
+
+  Enables switching between single and dual channelled application.
