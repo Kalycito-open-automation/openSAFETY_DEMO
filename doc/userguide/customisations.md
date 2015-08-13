@@ -123,11 +123,12 @@ USE_CUSTOMISED_FILES    | Enable or disable the usage of customised files instea
 
 Variable name                 | Description                               | Default value
 ----------------------------- | ------------------------------------------|--------------
+PYSODBUILDER_SAPL_REPORT_STATE_CHANGE | Enable or disable status change callback functions | OFF
 PYSODBUILDER_MAXINSTANCES     | Maximum number of instances               | 1
 PYSODBUILDER_MAXPAYLOADLENGTH | Maximum payload data length of a SSDO     | 8
-PYSODBUILDER_ERRORSTRING      | Enables or disables the  XXX_GetErrorStr function (e.g. SOD_GetErrorStr) | False
-PYSODBUILDER_ERRORSTATISTIC   | Enable or disable the extended telegram error statistic | False
-PYSODBUILDER_APPLICATIONOBJECTS | Enable or disable the objects managed by the application | False
+PYSODBUILDER_ERRORSTRING      | Enables or disables the  XXX_GetErrorStr function (e.g. SOD_GetErrorStr) | OFF
+PYSODBUILDER_ERRORSTATISTIC   | Enable or disable the extended telegram error statistic | OFF
+PYSODBUILDER_APPLICATIONOBJECTS | Enable or disable the objects managed by the application | OFF
 
 
 - **PYSODBUILDER_MAXINSTANCES**
@@ -198,12 +199,17 @@ PYSODBUILDER_CONFIGSTRING     | Represents the EPLsafety Stack configuration as 
 
 Variable name                 | Description                               | Default value
 ----------------------------- | ------------------------------------------|--------------
-PYSODBUILDER_FRAMECOPYINTERN     | Enable or disable the copy of the received SPDO frames within the SPDO_ProcessRxSpdo() | False
-PYSODBUILDER_NUMLOOKUPTABLE |  Enable or disable the usage of the Lookup table for the SPDO number assignment | False
-PYSODBUILDER_CONNECTIONVALIDBITFIELD | Enable or disable creation of Valid bit field | True
-PYSODBUILDER_CONNECTIONVALIDSTATISTIC | Enable or disable creation of Valid statistic counter field created | False
+PYSODBUILDER_PROP_DELAY_STATISTIC | Enable variable which delivers an average over the last cycle
+  and actual cycle propagation delay | OFF
+PYSODBUILDER_40BIT_CT_SUPPORT | Enable the support for SPDOs with a 40-bit CT value | ON
+PYSODBUILDER_EXTENDED_CT_BITFIELD | Extended CT bit field is to be created | OFF
+PYSODBUILDER_FRAMECOPYINTERN     | Enable or disable the copy of the received SPDO frames within the SPDO_ProcessRxSpdo() | OFF
+PYSODBUILDER_NUMLOOKUPTABLE |  Enable or disable the usage of the Lookup table for the SPDO number assignment | OFF
+PYSODBUILDER_CONNECTIONVALIDBITFIELD | Enable or disable creation of Valid bit field | ON
+PYSODBUILDER_CONNECTIONVALIDSTATISTIC | Enable or disable creation of Valid statistic counter field created | OFF
 PYSODBUILDER_MAXRXSYNCEDPERTX | Maximum number of RxSPDOs to be synchronized over a TxSPDO | 1
 PYSODBUILDER_MAXRXSYNCEDPERTX | Number of not answered TR (internal Time Request counter) | 100
+
 
 - **PYSODBUILDER_FRAMECOPYINTERN**
 
@@ -267,6 +273,25 @@ PYSODBUILDER_MAXRXSYNCEDPERTX | Number of not answered TR (internal Time Request
    - if SPDO_cfg_MAX_NO_RX_SPDO == 0 then EPLS_k_NOT_APPLICABLE
 
   See also SPDO_cfg_NO_NOT_ANSWERED_TR in the openSAFETY stack documentation.
+
+
+- **PYSODBUILDER_PROP_DELAY_STATISTIC**
+  Define to enable variable which delivers an average over the last cycle
+  and actual cycle propagation delay.
+
+  See also SPDO_cfg_PROP_DELAY_STATISTIC in the openSAFETY stack documentation.
+
+- **PYSODBUILDER_40BIT_CT_SUPPORT**
+  Define to enable the support for SPDOs with a 40-bit CT value.
+
+  Allowed values: EPLS_k_ENABLE, EPLS_k_DISABLE
+  See also SPDO_cfg_40_BIT_CT_SUPPORT in the openSAFETY stack documentation.
+
+- **PYSODBUILDER_EXTENDED_CT_BITFIELD**
+  Extended CT bit field is to be created
+
+   Allowed values: EPLS_k_ENABLE, EPLS_k_DISABLE
+  See also SPDO_cfg_EXTENDED_CT_BIT_FIELD in the openSAFETY stack documentation.
 
 ### txspdocom settings {#sect_pysodbuilder_cmakeconfig_txspdocom}
 
@@ -399,7 +424,7 @@ PYSODBUILDER_RX_MAXSPDOSDG    | Maximum number of the Rx SPDOs of a SDG instance
 
 ## Execution of the pysodbuilder tool {#sect_pysodbuilder_execution}
 
-When the **CMake** variable PYSODBUILDER_ENABLE is `True`, the tool will be
+When the **CMake** variable PYSODBUILDER_ENABLE is `ON`, the tool will be
 invoked automatically when building the targets for the application processor
 software.
 

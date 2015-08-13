@@ -232,6 +232,12 @@ SOD_cfg_TO_RAM_ROM SOD_t_OBJECT *SAPL_ps_OD[EPLS_cfg_MAX_INSTANCES]=
     SAPL_s_OD_INST_0
 };
 
+/* dummy for virtual SOD */
+const SOD_t_ENTRY_VIRT *const SAPL_ps_SOD_VIRT[EPLS_cfg_MAX_INSTANCES] =
+{
+    NULL
+};
+
 /*============================================================================*/
 /*            P U B L I C   F U N C T I O N S                                 */
 /*============================================================================*/

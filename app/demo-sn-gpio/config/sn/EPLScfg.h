@@ -26,6 +26,11 @@
 /*******************************************************************************
  **                    General configuration defines
  *******************************************************************************/
+/* Define to enable or disable status change callback functions
+   These functions are may be used by the application to detect status changes.
+   Allowed values: EPLS_k_ENABLE, EPLS_k_DISABLE */
+#define EPLS_cfg_SAPL_REPORT_STATE_CHANGE EPLS_k_DISABLE
+
 /*  This define configures the maximum number of instances.
     Allowed values : 1..255 */
 #define EPLS_cfg_MAX_INSTANCES  1
@@ -109,6 +114,18 @@
 /*******************************************************************************
  **    SPDO configuration defines
  *******************************************************************************/
+/* Define to enable variable which delivers an average over the last cycle
+ * and actual cycle propagation delay. */
+#define SPDO_cfg_PROP_DELAY_STATISTIC           EPLS_k_DISABLE
+
+/* Define to enable the support for SPDOs with a 40-bit CT value.
+ * Allowed values: EPLS_k_ENABLE, EPLS_k_DISABLE */
+#define SPDO_cfg_40_BIT_CT_SUPPORT              EPLS_k_DISABLE
+
+/* Extended CT bit field is to be created
+ * Allowed values: EPLS_k_ENABLE, EPLS_k_DISABLE */
+#define SPDO_cfg_EXTENDED_CT_BIT_FIELD          EPLS_k_DISABLE
+
 /*  Define to enable or disable the copy of the received SPDO frames within the
     SPDO_ProcessRxSpdo(). If this define is enabled then the buffer of the
     received SPDO frame will be copied into a internal SPDO buffer. The buffer

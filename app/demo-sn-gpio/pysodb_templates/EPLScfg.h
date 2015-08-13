@@ -3,7 +3,6 @@ from pysodb.codegeneration.geneplscfgh import init
 cg = init()
 cg.init()
 ]]]*/
-/* SODBuilder v0.1 generated file for "demo-sn-gpio" |generated on: 2015-03-20 10:18:13 */
 /*[[[end]]]*/
 #ifndef EPLSCFG_H
 #define EPLSCFG_H
@@ -16,7 +15,7 @@ cg.init()
 /** EPLS_k_CONFIGURATION_STRING:
     This symbol represents the EPLsafety Stack configuration as a string.*/
 /*[[[cog cg.EPLS_k_CONFIGURATION_STRING() ]]]*/
-#define EPLS_k_CONFIGURATION_STRING "demo-sn-gpio"
+#define EPLS_k_CONFIGURATION_STRING "openSAFETY_DEMO"
 /*[[[end]]]*/
 
 
@@ -34,6 +33,13 @@ cg.init()
 /*******************************************************************************
  **                    General configuration defines
  *******************************************************************************/
+/* Define to enable or disable status change callback functions
+   These functions are may be used by the application to detect status changes.
+   Allowed values: EPLS_k_ENABLE, EPLS_k_DISABLE */
+/*[[[cog cg.EPLS_cfg_SAPL_REPORT_STATE_CHANGE() ]]]*/
+#define EPLS_cfg_SAPL_REPORT_STATE_CHANGE EPLS_k_DISABLE
+/*[[[end]]]*/
+
 /*  This define configures the maximum number of instances.
     Allowed values : 1..255 */
 /*[[[cog cg.EPLS_cfg_MAX_INSTANCES() ]]]*/
@@ -125,6 +131,24 @@ cg.init()
 /*******************************************************************************
  **    SPDO configuration defines
  *******************************************************************************/
+/* Define to enable variable which delivers an average over the last cycle
+ * and actual cycle propagation delay. */
+/*[[[cog cg.SPDO_cfg_PROP_DELAY_STATISTIC() ]]]*/
+#define SPDO_cfg_PROP_DELAY_STATISTIC EPLS_k_DISABLE
+/*[[[end]]]*/
+
+/* Define to enable the support for SPDOs with a 40-bit CT value.
+ * Allowed values: EPLS_k_ENABLE, EPLS_k_DISABLE */
+/*[[[cog cg.SPDO_cfg_40_BIT_CT_SUPPORT() ]]]*/
+#define SPDO_cfg_40_BIT_CT_SUPPORT EPLS_k_ENABLE
+/*[[[end]]]*/
+
+/* Extended CT bit field is to be created
+ * Allowed values: EPLS_k_ENABLE, EPLS_k_DISABLE */
+/*[[[cog cg.SPDO_cfg_EXTENDED_CT_BIT_FIELD() ]]]*/
+#define SPDO_cfg_EXTENDED_CT_BIT_FIELD EPLS_k_DISABLE
+/*[[[end]]]*/
+
 /*  Define to enable or disable the copy of the received SPDO frames within the
     SPDO_ProcessRxSpdo(). If this define is enabled then the buffer of the
     received SPDO frame will be copied into a internal SPDO buffer. The buffer
