@@ -53,8 +53,10 @@ stm32f103rb (Cortex-M3).
 
 #include <apptarget/benchmark.h>
 
-#include <misc.h>
-#include <stm32f1xx_it.h>
+#include <stm32f1xx_hal.h>
+#include <stm32f1xx_hal_gpio.h>
+#include <stm32f1xx_hal_dma.h>
+#include <stm32f1xx_hal_uart.h>
 
 #include <stdio.h>
 
@@ -65,16 +67,33 @@ stm32f103rb (Cortex-M3).
 /*----------------------------------------------------------------------------*/
 /* const defines                                                              */
 /*----------------------------------------------------------------------------*/
+/* Definition for USARTx clock resources */
+#define USARTx                           USART2
+#define USARTx_CLK_ENABLE()              __HAL_RCC_USART2_CLK_ENABLE();
+#define USARTx_RX_GPIO_CLK_ENABLE()      __HAL_RCC_GPIOA_CLK_ENABLE()
+#define USARTx_TX_GPIO_CLK_ENABLE()      __HAL_RCC_GPIOA_CLK_ENABLE()
+
+#define USARTx_FORCE_RESET()             __HAL_RCC_USART2_FORCE_RESET()
+#define USARTx_RELEASE_RESET()           __HAL_RCC_USART2_RELEASE_RESET()
+
+/* Definition for USARTx Pins */
+#define USARTx_TX_PIN                    GPIO_PIN_2
+#define USARTx_TX_GPIO_PORT              GPIOA
+#define USARTx_TX_AF                     GPIO_AF7_USART2
+#define USARTx_RX_PIN                    GPIO_PIN_3
+#define USARTx_RX_GPIO_PORT              GPIOA
+#define USARTx_RX_AF                     GPIO_AF7_USART2
 
 /*----------------------------------------------------------------------------*/
 /* module global vars                                                         */
 /*----------------------------------------------------------------------------*/
-
+static UART_HandleTypeDef UartHandle_l;
 
 /*----------------------------------------------------------------------------*/
 /* global function prototypes                                                 */
 /*----------------------------------------------------------------------------*/
-static void usart2init(void);
+static BOOL systemClockInit(void);
+static BOOL uart2init(void);
 static void initBenchmark(void);
 
 /*============================================================================*/
@@ -84,17 +103,6 @@ static void initBenchmark(void);
 /*----------------------------------------------------------------------------*/
 /* const defines                                                              */
 /*----------------------------------------------------------------------------*/
-#define USARTx                           USART2
-
-#define USARTx_RCC_PERIPH                RCC_APB1Periph_USART2
-#define USARTx_RX_RCC_PERIPH             RCC_APB2Periph_GPIOA
-#define USARTx_TX_RCC_PERIPH             RCC_APB2Periph_GPIOA
-
-/* Definition for USARTx Pins */
-#define USARTx_TX_PIN                    GPIO_Pin_2
-#define USARTx_TX_GPIO_PORT              GPIOA
-#define USARTx_RX_PIN                    GPIO_Pin_3
-#define USARTx_RX_GPIO_PORT              GPIOA
 
 /*----------------------------------------------------------------------------*/
 /* local types                                                                */
@@ -124,24 +132,31 @@ controller.
 /*----------------------------------------------------------------------------*/
 BOOL platform_init(void)
 {
-    RCC_ClocksTypeDef RCC_Clocks;
+    BOOL retVal = FALSE;
 
-    /* SysTick end of count event each 1ms */
-    RCC_GetClocksFreq(&RCC_Clocks);
-    SysTick_Config(RCC_Clocks.HCLK_Frequency / 1000);
+    (void)HAL_DeInit();
 
-    /* by default stdin/stdout are on usart2 */
-    usart2init();
+    if(HAL_Init() == HAL_OK)
+    {
+        if(systemClockInit())
+        {
+            /* By default stdin/stdout are on usart2 */
+            if(uart2init())
+            {
+                /* turn off buffers, so IO occurs immediately */
+                setvbuf(stdin, NULL, _IONBF, 0);
+                setvbuf(stdout, NULL, _IONBF, 0);
+                setvbuf(stderr, NULL, _IONBF, 0);
 
-    /* turn off buffers, so IO occurs immediately */
-    setvbuf(stdin, NULL, _IONBF, 0);
-    setvbuf(stdout, NULL, _IONBF, 0);
-    setvbuf(stderr, NULL, _IONBF, 0);
+                /* Initialize the benchmark pins */
+                initBenchmark();
 
-    /* Initialize the benchmark pins */
-    initBenchmark();
+                retVal = TRUE;
+            }
+        }
+    }
 
-    return TRUE;
+    return retVal;
 }
 
 /*----------------------------------------------------------------------------*/
@@ -151,14 +166,19 @@ BOOL platform_init(void)
 /*----------------------------------------------------------------------------*/
 void platform_exit(void)
 {
-    /* Close the USART serial */
-    GPIO_DeInit(USARTx_TX_GPIO_PORT);
-    GPIO_DeInit(USARTx_RX_GPIO_PORT);
+    /* Disable USART */
+    USARTx_FORCE_RESET();
+    USARTx_RELEASE_RESET();
 
-    USART_DeInit(USARTx);
+    HAL_GPIO_DeInit(USARTx_TX_GPIO_PORT, USARTx_TX_PIN);
+    HAL_GPIO_DeInit(USARTx_RX_GPIO_PORT, USARTx_RX_PIN);
 
-    /* Close the benchmark pins */
-    GPIO_DeInit(PINx_BENCHMARK_PORT);
+    /* Disable benchmark */
+    HAL_GPIO_DeInit(PINx_BENCHMARK_PORT, PINx_BENCHMARK_PIN0);
+    HAL_GPIO_DeInit(PINx_BENCHMARK_PORT, PINx_BENCHMARK_PIN1);
+
+    /* Close HAL library */
+    HAL_DeInit();
 }
 
 /*----------------------------------------------------------------------------*/
@@ -170,13 +190,7 @@ void platform_exit(void)
 /*----------------------------------------------------------------------------*/
 void platform_msleep(UINT32 msec_p)
 {
-    UINT32 currTime = tickCnt_l;
-    UINT32 endTime = currTime + msec_p;
-
-    while(currTime < endTime)
-    {
-        currTime = tickCnt_l;
-    }
+    HAL_Delay(msec_p);
 }
 
 /*============================================================================*/
@@ -187,44 +201,114 @@ void platform_msleep(UINT32 msec_p)
 
 /*----------------------------------------------------------------------------*/
 /**
-\brief  Initialize the USART to enable prints to the terminal
+  \brief  System Clock Configuration
 
-The USART is used to forward characters from printf via the stdlib to the
-host PC terminal.
+        The system Clock is configured as follow :
+           System Clock source            = PLL (HSI)
+           SYSCLK(Hz)                     = 64000000
+           HCLK(Hz)                       = 64000000
+           AHB Prescaler                  = 1
+           APB1 Prescaler                 = 2
+           APB2 Prescaler                 = 1
+           PLLMUL                         = 16
+           Flash Latency(WS)              = 2
+
+ \return TRUE on success; FALSE on error
 */
 /*----------------------------------------------------------------------------*/
-static void usart2init(void)
+static BOOL systemClockInit(void)
 {
-    USART_InitTypeDef USART_InitStructure;
-    GPIO_InitTypeDef GPIO_InitStructure;
+    BOOL retVal = FALSE;
+    RCC_ClkInitTypeDef RCC_ClkInitStruct;
+    RCC_OscInitTypeDef RCC_OscInitStruct;
 
-    /* Init peripheral clocks */
-    RCC_APB2PeriphClockCmd(USARTx_RX_RCC_PERIPH | USARTx_TX_RCC_PERIPH | RCC_APB2Periph_AFIO, ENABLE);
-    RCC_APB1PeriphClockCmd(USARTx_RCC_PERIPH, ENABLE);
+    /* Enable Power Control clock */
+    __HAL_RCC_PWR_CLK_ENABLE();
 
-    /* Configure USART Tx as push-pull */
-    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
-    GPIO_InitStructure.GPIO_Pin = USARTx_TX_PIN;
-    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-    GPIO_Init(USARTx_TX_GPIO_PORT, &GPIO_InitStructure);
+    /* The voltage scaling allows optimizing the power consumption when the device is
+     clocked below the maximum system frequency, to update the voltage scaling value
+     regarding system frequency refer to product datasheet.  */
+    //__HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE2);
 
-    /* Configure USART Rx as input floating */
-    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING;
-    GPIO_InitStructure.GPIO_Pin = USARTx_RX_PIN;
-    GPIO_Init(USARTx_RX_GPIO_PORT, &GPIO_InitStructure);
+    /* Enable HSI Oscillator and activate PLL with HSI as source */
+    RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI;
+    RCC_OscInitStruct.HSEState        = RCC_HSE_OFF;
+    RCC_OscInitStruct.LSEState        = RCC_LSE_OFF;
+    RCC_OscInitStruct.HSIState = RCC_HSI_ON;
+    RCC_OscInitStruct.HSICalibrationValue = RCC_HSICALIBRATION_DEFAULT;
+    RCC_OscInitStruct.HSEPredivValue    = RCC_HSE_PREDIV_DIV1;
+    RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
+    RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSI_DIV2;
+    RCC_OscInitStruct.PLL.PLLMUL = RCC_PLL_MUL16;
+    if(HAL_RCC_OscConfig(&RCC_OscInitStruct) == HAL_OK)
+    {
+        /* Select PLL as system clock source and configure the HCLK, PCLK1 and PCLK2 clocks dividers */
+        RCC_ClkInitStruct.ClockType = (RCC_CLOCKTYPE_SYSCLK | RCC_CLOCKTYPE_HCLK | RCC_CLOCKTYPE_PCLK1 | RCC_CLOCKTYPE_PCLK2);
+        RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
+        RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
+        RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV2;
+        RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV1;
+        if(HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_2) == HAL_OK)
+        {
+            retVal = TRUE;
+        }
+    }
+
+    return retVal;
+}
+
+/*----------------------------------------------------------------------------*/
+/**
+\brief  Initialize the USART2 to enable prints to the terminal
+
+The USART2 is used to forward characters from printf via the stdlib to the
+host PC terminal.
+
+\return TRUE on success; FALSE on error;
+*/
+/*----------------------------------------------------------------------------*/
+static BOOL uart2init(void)
+{
+    BOOL retVal = FALSE;
+    GPIO_InitTypeDef  GPIO_InitStruct;
+
+    memset(&UartHandle_l, 0, sizeof(UART_HandleTypeDef));
+
+    /* Enable GPIO TX/RX clock */
+    __HAL_RCC_GPIOA_CLK_ENABLE();
+
+    memset(&GPIO_InitStruct, 0, sizeof(GPIO_InitTypeDef));
+
+    /* UART TX GPIO pin configuration  */
+    GPIO_InitStruct.Pin = USARTx_TX_PIN;
+    GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
+    GPIO_InitStruct.Pull = GPIO_PULLUP;
+    GPIO_InitStruct.Speed = GPIO_SPEED_HIGH;
+    HAL_GPIO_Init(USARTx_TX_GPIO_PORT, &GPIO_InitStruct);
+
+    memset(&GPIO_InitStruct, 0, sizeof(GPIO_InitTypeDef));
+
+    /* UART RX GPIO pin configuration  */
+    GPIO_InitStruct.Pin = USARTx_RX_PIN;
+    HAL_GPIO_Init(USARTx_RX_GPIO_PORT, &GPIO_InitStruct);
+
+    /* Enable USART2 clock */
+    USARTx_CLK_ENABLE();
 
     /* Configure USART */
-    USART_InitStructure.USART_BaudRate = 115200;
-    USART_InitStructure.USART_WordLength = USART_WordLength_8b;
-    USART_InitStructure.USART_StopBits = USART_StopBits_1;
-    USART_InitStructure.USART_Parity = USART_Parity_No;
-    USART_InitStructure.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
-    USART_InitStructure.USART_Mode = USART_Mode_Rx | USART_Mode_Tx;
+    UartHandle_l.Instance = USARTx;
+    UartHandle_l.Init.BaudRate = 115200;
+    UartHandle_l.Init.WordLength = UART_WORDLENGTH_8B;
+    UartHandle_l.Init.StopBits = UART_STOPBITS_1;
+    UartHandle_l.Init.Parity = UART_PARITY_NONE;
+    UartHandle_l.Init.HwFlowCtl = UART_HWCONTROL_NONE;
+    UartHandle_l.Init.Mode = UART_MODE_TX_RX;
+    if(HAL_UART_Init(&UartHandle_l) == HAL_OK)
+    {
+        retVal = TRUE;
+    }
 
-    USART_Init(USARTx, &USART_InitStructure);
-
-    /* Enable USART */
-    USART_Cmd(USARTx, ENABLE);
+    return retVal;
 }
 
 /*----------------------------------------------------------------------------*/
@@ -238,14 +322,55 @@ static void initBenchmark(void)
 
     memset(&GPIO_InitStructure, 0, sizeof(GPIO_InitTypeDef));
 
-    /* Enable BENCHMARK GPIO clock */
-    RCC_APB2PeriphClockCmd(PINx_BENCHMARK_CLK_ENABLE, ENABLE);
+    /* Enable benchmark GPIO clock */
+    PINx_BENCHMARK_CLK_ENABLE();
 
-    /* Use PA8 for benchmark pin 0 */
-    GPIO_InitStructure.GPIO_Pin = PINx_BENCHMARK_PIN0 | PINx_BENCHMARK_PIN1 | PINx_BENCHMARK_PIN2;
-    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_10MHz;
-    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
-    GPIO_Init(PINx_BENCHMARK_PORT, &GPIO_InitStructure);
+    /* Init benchmark pins */
+    GPIO_InitStructure.Pin = PINx_BENCHMARK_PIN0 | PINx_BENCHMARK_PIN1 | PINx_BENCHMARK_PIN2;
+    GPIO_InitStructure.Speed = GPIO_SPEED_MEDIUM;
+    GPIO_InitStructure.Mode = GPIO_MODE_OUTPUT_PP;
+    HAL_GPIO_Init(PINx_BENCHMARK_PORT, &GPIO_InitStructure);
+}
+
+/*----------------------------------------------------------------------------*/
+/**
+\brief  Retargets the C library printf function to the USART.
+
+\param char_p   The char to print
+
+\return The printed char on success; 0 otherweise
+*/
+/*----------------------------------------------------------------------------*/
+int __io_putchar(int char_p)
+{
+    int ret = 0;
+
+    if(HAL_UART_Transmit(&UartHandle_l, (UINT8 *)&char_p, 1, 0xFFFF) == HAL_OK)
+    {
+        ret = char_p;
+    }
+
+    return ret;
+}
+
+/*----------------------------------------------------------------------------*/
+/**
+\brief  Retargets the C library printf function to the USART.
+
+\return The read data from the UART
+*/
+/*----------------------------------------------------------------------------*/
+int __io_getchar(void)
+{
+    int ret = 0;
+    UINT8 data = 0;
+
+    if(HAL_UART_Receive(&UartHandle_l, &data, sizeof(data), 0xFFFF) == HAL_OK)
+    {
+        ret = data;
+    }
+
+    return ret;
 }
 
 /**

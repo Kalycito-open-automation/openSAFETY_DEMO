@@ -51,7 +51,7 @@ flash memory for target stm32f103rb (Cortex-M3).
 /*----------------------------------------------------------------------------*/
 #include <sn/nvs.h>
 
-#include <stm32f10x_flash.h>
+#include <stm32f1xx_hal_flash.h>
 
 /*============================================================================*/
 /*            G L O B A L   D E F I N I T I O N S                             */
@@ -87,6 +87,8 @@ flash memory for target stm32f103rb (Cortex-M3).
 /*----------------------------------------------------------------------------*/
 static UINT32 imageBaseAddr_l = 0;
 
+static FLASH_EraseInitTypeDef EraseInitHandle_l;
+
 /*----------------------------------------------------------------------------*/
 /* local function prototypes                                                  */
 /*----------------------------------------------------------------------------*/
@@ -111,7 +113,7 @@ BOOLEAN nvs_init(void)
     imageBaseAddr_l = (UINT32)(FLASH_BASE + FLASH_IMAGE_OFFSET);
 
     /* Clear All pending flags */
-    FLASH_ClearFlag(FLASH_FLAG_BSY | FLASH_FLAG_EOP|FLASH_FLAG_PGERR |FLASH_FLAG_WRPRTERR);
+    __HAL_FLASH_CLEAR_FLAG(FLASH_FLAG_BSY | FLASH_FLAG_EOP|FLASH_FLAG_PGERR |FLASH_FLAG_WRPERR);
 
     return TRUE;
 }
@@ -144,7 +146,7 @@ BOOLEAN nvs_write(UINT32 offset_p, UINT8 * pData_p, UINT32 length_p)
 
     if(length_p > 0 && pData_p != NULL)
     {
-        FLASH_Unlock();
+        HAL_FLASH_Unlock();
 
         while(length_p > 0)
         {
@@ -190,7 +192,7 @@ BOOLEAN nvs_write(UINT32 offset_p, UINT8 * pData_p, UINT32 length_p)
             }
         }
 
-        FLASH_Lock();
+        HAL_FLASH_Lock();
     }
 
     if(error == FALSE)
@@ -234,18 +236,21 @@ BOOLEAN nvs_readUint32(UINT32 offset_p, UINT32 ** ppReadData_p)
 BOOLEAN nvs_erase(UINT32 offset_p)
 {
     BOOLEAN retVal = FALSE;
-    FLASH_Status status;
+    uint32_t pageError = 0;
     UINT32 address = imageBaseAddr_l + offset_p;
 
-    FLASH_Unlock();
+    HAL_FLASH_Unlock();
 
-    status = FLASH_ErasePage(address);
-    if(status == FLASH_COMPLETE)
+    EraseInitHandle_l.TypeErase   = FLASH_TYPEERASE_PAGES;
+    EraseInitHandle_l.PageAddress = address;
+    EraseInitHandle_l.NbPages     = 1;
+
+    if(HAL_FLASHEx_Erase(&EraseInitHandle_l, &pageError) == HAL_OK)
     {
         retVal = TRUE;
     }
 
-    FLASH_Lock();
+    HAL_FLASH_Lock();
 
     return retVal;
 }
@@ -286,10 +291,8 @@ UINT8* nvs_getAddress(UINT32 offset_p)
 static BOOLEAN progUint32(UINT32 address_p, UINT32 * pData_p)
 {
     BOOLEAN retVal = FALSE;
-    FLASH_Status status;
 
-    status = FLASH_ProgramWord(address_p, (UINT32)(*pData_p));
-    if(status == FLASH_COMPLETE)
+    if(HAL_FLASH_Program(FLASH_TYPEPROGRAM_WORD, address_p, (UINT64)(*pData_p)) == HAL_OK)
     {
         retVal = TRUE;
     }
@@ -310,10 +313,9 @@ static BOOLEAN progUint32(UINT32 address_p, UINT32 * pData_p)
 static BOOLEAN progUint16(UINT32 address_p, UINT16 * pData_p)
 {
     BOOLEAN retVal = FALSE;
-    FLASH_Status status;
 
-    status = FLASH_ProgramHalfWord(address_p, (UINT16)(*pData_p));
-    if(status == FLASH_COMPLETE)
+
+    if(HAL_FLASH_Program(FLASH_TYPEPROGRAM_HALFWORD, address_p, (UINT64)(*pData_p)) == HAL_OK)
     {
         retVal = TRUE;
     }
@@ -339,7 +341,6 @@ the CPU.
 static BOOLEAN progUint8(UINT32 address_p, UINT8 * pData_p)
 {
     BOOLEAN retVal = FALSE;
-    FLASH_Status status;
     UINT16 tempData = 0;
 
     if(pData_p != NULL)
@@ -348,8 +349,7 @@ static BOOLEAN progUint8(UINT32 address_p, UINT8 * pData_p)
         tempData = (UINT16)*pData_p;
 
         /* Perform half word write access */
-        status = FLASH_ProgramHalfWord(address_p, tempData);
-        if(status == FLASH_COMPLETE)
+        if(HAL_FLASH_Program(FLASH_TYPEPROGRAM_HALFWORD, address_p, (UINT64)(tempData)) == HAL_OK)
         {
             retVal = TRUE;
         }

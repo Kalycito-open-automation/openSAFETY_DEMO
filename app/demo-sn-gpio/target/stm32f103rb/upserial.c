@@ -53,10 +53,13 @@ uP-Master with the uP-Slave. (Target is the stm32f103rb board)
 
 #include <common/platform.h>
 
-#include <stm32f1xx_it.h>
-#include <stm32f10x_usart.h>
-#include <stm32f10x_gpio.h>
-#include <stm32f10x_dma.h>
+#include <stm32f1xx_hal.h>
+#include <stm32f1xx_hal_cortex.h>
+#include <stm32f1xx_hal_def.h>
+#include <stm32f1xx_hal_rcc.h>
+#include <stm32f1xx_hal_dma.h>
+#include <stm32f1xx_hal_uart.h>
+#include <stm32f1xx_hal_gpio.h>
 
 /*============================================================================*/
 /*            G L O B A L   D E F I N I T I O N S                             */
@@ -81,39 +84,33 @@ uP-Master with the uP-Slave. (Target is the stm32f103rb board)
 /*----------------------------------------------------------------------------*/
 /* const defines                                                              */
 /*----------------------------------------------------------------------------*/
-/* Defines for the USART peripheral */
-#define USARTx                          USART1
-#define USARTx_RCC_PERIPH               RCC_APB2Periph_USART1
+#define USARTx                           USART1
+#define USARTx_CLK_ENABLE()              __HAL_RCC_USART1_CLK_ENABLE()
+#define DMAx_CLK_ENABLE()                __HAL_RCC_DMA1_CLK_ENABLE()
+#define USARTx_RX_GPIO_CLK_ENABLE()      __HAL_RCC_GPIOA_CLK_ENABLE()
+#define USARTx_TX_GPIO_CLK_ENABLE()      __HAL_RCC_GPIOA_CLK_ENABLE()
 
+#define USARTx_CLK_DISABLE()             __HAL_RCC_USART1_CLK_DISABLE()
 
 /* Definition for USARTx Pins */
-#define USARTx_RX_PIN                   GPIO_Pin_10
-#define USARTx_TX_PIN                   GPIO_Pin_9
+#define USARTx_RX_PIN                    GPIO_PIN_10
+#define USARTx_TX_PIN                    GPIO_PIN_9
 
-#define USARTx_GPIO_PORT                GPIOA
+#define USARTx_GPIO_PORT                 GPIOA
 
-#define USARTx_GPIO_RCC_PERIPH          RCC_APB2Periph_GPIOA
+/* Definition for USARTx's DMA */
+#define USARTx_TX_DMA_CHANNEL            DMA1_Channel4
+#define USARTx_RX_DMA_CHANNEL            DMA1_Channel5
 
-/* Defines for the DMA channels */
-#define DMAx_Channel_Tx                 DMA1_Channel4
-#define DMAx_Channel_Rx                 DMA1_Channel5
 
-#define DMAx_ChannelTx_IRQn             DMA1_Channel4_IRQn
-#define DMAx_ChannelRx_IRQn             DMA1_Channel5_IRQn
+/* Definition for USARTx's NVIC */
+#define USARTx_DMA_TX_IRQn               DMA1_Channel4_IRQn
+#define USARTx_DMA_RX_IRQn               DMA1_Channel5_IRQn
+#define USARTx_DMA_TX_IRQHandler         DMA1_Channel4_IRQHandler
+#define USARTx_DMA_RX_IRQHandler         DMA1_Channel5_IRQHandler
 
-#define DMAx_ChannelTx_IRQHandler       DMA1_Channel4_IRQHandler
-#define DMAx_ChannelRx_IRQHandler       DMA1_Channel5_IRQHandler
-
-#define DMAx_RCC_PERIPH                 RCC_AHBPeriph_DMA1
-
-#define DMAx_FLAG_TE_Tx                 DMA1_FLAG_TE4
-#define DMAx_FLAG_TE_Rx                 DMA1_FLAG_TE5
-#define DMAx_FLAG_TC_Tx                 DMA1_FLAG_TC4
-#define DMAx_FLAG_TC_Rx                 DMA1_FLAG_TC5
-#define DMAx_IT_TE_Tx                   DMA1_IT_TE4
-#define DMAx_IT_TE_Rx                   DMA1_IT_TE5
-#define DMAx_IT_TC_Tx                   DMA1_IT_TC4
-#define DMAx_IT_TC_Rx                   DMA1_IT_TC5
+#define USARTx_IRQ_Handler               USART1_IRQHandler
+#define USARTx_IRQn                      USART1_IRQn
 
 /*----------------------------------------------------------------------------*/
 /* local types                                                                */
@@ -126,23 +123,22 @@ static tUpSerialTransferFin pfnTransfFin_l = NULL;      /**< This callback is ca
 static tUpSerialReceiveFin pfnReceiveFin_l = NULL;      /**< This callback is called on reception of a new frame */
 static tUpSerialTransferError pfnTransfError_l = NULL;  /**< This callback is called on serial error */
 
-static volatile BOOLEAN fTxFinished_l = FALSE;       /**< Transfer finished flag for blocking mode */
-static volatile BOOLEAN fRxFinished_l = FALSE;       /**< Receive finished flag for blocking mode */
+static UART_HandleTypeDef UsartHandle_l;     /**< USART handle structure */
+static DMA_HandleTypeDef DmaRxHandle_l;      /**< DMA receive handle structure */
+static DMA_HandleTypeDef DmaTxHandle_l;      /**< DMA transmit handle structure */
+
+static BOOLEAN fTxFinished_l = FALSE;       /**< Transfer finished flag for blocking mode */
+static BOOLEAN fRxFinished_l = FALSE;       /**< Receive finished flag for blocking mode */
 
 /*----------------------------------------------------------------------------*/
 /* local function prototypes                                                  */
 /*----------------------------------------------------------------------------*/
 static void initGpio(void);
-static void initUsart(void);
-static void initDmaRx(volatile UINT8 * pTargBase_p, UINT32 targLen_p);
-static void initDmaTx(volatile UINT8 * pSrcBase_p, UINT32 srcLen_p);
-static void closeDma(void);
+static BOOLEAN initUsart(void);
+static BOOLEAN initDma(UART_HandleTypeDef* pUsartHandler_p);
 static void initNvic(void);
 
-static void usartReceive(volatile UINT8 * pData_p, UINT32 size_p);
-static void usartTransmit(volatile UINT8 * pData_p, UINT32 size_p);
-
-static BOOLEAN waitForTransferFinished(volatile BOOLEAN * pTransFin_p, UINT32 timeoutMs_p);
+static BOOLEAN waitForTransferFinished(BOOLEAN * pTransFin_p, UINT32 timeoutMs_p);
 
 /*============================================================================*/
 /*            P U B L I C   F U N C T I O N S                                 */
@@ -161,24 +157,16 @@ the uP-Slave.
 /*----------------------------------------------------------------------------*/
 BOOLEAN upserial_init(void)
 {
-    /* Initialize the uart peripheral */
-    initUsart();
+    UINT8 fReturn = FALSE;
 
-    /*
-     * Init the uart gpio pins. Always init the pins after the uart init!
-     * This can produce framing errors!
-     */
-    initGpio();
+    if(initUsart())
+    {
+        initNvic();
 
-    /* The DMA channels are initialized on transfer */
-    closeDma();
+        fReturn = TRUE;
+    }
 
-    initNvic();
-
-    /* Globally enable the USARTx core */
-    USART_Cmd(USARTx, ENABLE);
-
-    return TRUE;
+    return fReturn;
 }
 
 
@@ -193,13 +181,8 @@ void upserial_exit(void)
     pfnReceiveFin_l = NULL;
     pfnTransfError_l = NULL;
 
-    USART_DeInit(USARTx);
-
-    /* Close the DMAx channels */
-    closeDma();
-
-    /* Close the GPIO pins */
-    GPIO_DeInit(USARTx_GPIO_PORT);
+    /* Close the USART peripherial */
+    HAL_UART_DeInit(&UsartHandle_l);
 }
 
 /*----------------------------------------------------------------------------*/
@@ -253,21 +236,23 @@ BOOLEAN upserial_transmitBlock(volatile UINT8 * pData_p, UINT32 size_p)
 
     if(pData_p != NULL && size_p > 0)
     {
-        usartTransmit(pData_p, size_p);
-
-        /* Wait until DMA transfer is finished */
-        if(waitForTransferFinished(&fTxFinished_l, 0xFFFF))
+        /* Perform a blocking UART transfer */
+        if(HAL_UART_Transmit_DMA(&UsartHandle_l, (UINT8*)pData_p, size_p) == HAL_OK)
         {
-            /* Frame successfully transmitted */
-            fReturn = TRUE;
-        }
-        else
-        {
-            /* Timeout occurred */
-            USART_DMACmd(USARTx, USART_DMAReq_Tx, DISABLE);
-        }
+            /* Wait until DMA transfer is finished */
+            if(waitForTransferFinished(&fTxFinished_l, 0xFFFF))
+            {
+                /* Frame successfully transmitted */
+                fReturn = TRUE;
+            }
+            else
+            {
+                /* Timeout occurred */
+                (void)HAL_UART_DMAStop(&UsartHandle_l);
+            }
 
-        fTxFinished_l = FALSE;
+            fTxFinished_l = FALSE;
+        }
     }
 
     return fReturn;
@@ -297,22 +282,23 @@ BOOLEAN upserial_receiveBlock(volatile UINT8 * pData_p, UINT32 size_p, UINT32 ti
 
     if(pData_p != NULL && size_p > 0)
     {
-        usartReceive(pData_p, size_p);
-
-        /* Wait until DMA transfer is finished */
-        if(waitForTransferFinished(&fRxFinished_l, timeoutMs_p))
+        /* Perform a blocking UART receive */
+        if(HAL_UART_Receive_DMA(&UsartHandle_l, (UINT8*)pData_p, size_p) == HAL_OK)
         {
-            /* Frame successfully received */
-            fReturn = TRUE;
-        }
-        else
-        {
-            /* Timeout occurred */
-            USART_DMACmd(USARTx, USART_DMAReq_Rx, DISABLE);
-        }
+            /* Wait until DMA transfer is finished */
+            if(waitForTransferFinished(&fRxFinished_l, timeoutMs_p))
+            {
+                /* Frame successfully received */
+                fReturn = TRUE;
+            }
+            else
+            {
+                /* Timeout occurred */
+                (void)HAL_UART_DMAStop(&UsartHandle_l);
+            }
 
-        fRxFinished_l = FALSE;
-
+            fRxFinished_l = FALSE;
+        }
     }
 
     return fReturn;
@@ -338,9 +324,11 @@ BOOLEAN upserial_enableReceive(volatile UINT8 * pData_p, UINT32 size_p)
 
     if(pData_p != NULL && size_p > 0)
     {
-        usartReceive(pData_p, size_p);
-
-        fReturn = TRUE;
+        /* Perform a DMA transfer */
+        if(HAL_UART_Receive_DMA(&UsartHandle_l, (UINT8*)pData_p, size_p) == HAL_OK)
+        {
+            fReturn = TRUE;
+        }
     }
 
     return fReturn;
@@ -366,9 +354,11 @@ BOOLEAN upserial_transmit(volatile UINT8 * pData_p, UINT32 size_p)
 
     if(pData_p != NULL && size_p > 0)
     {
-        usartTransmit(pData_p, size_p);
-
-        fReturn = TRUE;
+        /* Perform a DMA transfer */
+        if(HAL_UART_Transmit_DMA(&UsartHandle_l, (UINT8*)pData_p, size_p) == HAL_OK)
+        {
+            fReturn = TRUE;
+        }
     }
 
     return fReturn;
@@ -382,29 +372,67 @@ BOOLEAN upserial_transmit(volatile UINT8 * pData_p, UINT32 size_p)
 
 /*----------------------------------------------------------------------------*/
 /**
+\brief  Initialize the peripherals needed by the USART core
+
+This function is called in the call of HAL_UART_Init and initializes all
+peripherals needed to carry out the transfer with DMA.
+
+\param pUsartHandler_p    Pointer to the USART handler
+*/
+/*----------------------------------------------------------------------------*/
+void HAL_UART_MspInit(UART_HandleTypeDef* pUsartHandler_p)
+{
+    if(pUsartHandler_p->Instance == USARTx)
+    {
+        USARTx_CLK_ENABLE();
+
+        /* Initialize all needed peripherals */
+        initGpio();
+        initDma(pUsartHandler_p);
+    }
+}
+
+/*----------------------------------------------------------------------------*/
+/**
+\brief  Close the peripherals needed by the USART core
+
+This function is called in the call of HAL_UART_DeInit and closes all
+peripherals needed by the USART core.
+
+\param pUsartHandler_p    Pointer to the USART handler
+*/
+/*----------------------------------------------------------------------------*/
+void HAL_UART_MspDeInit(UART_HandleTypeDef* pUsartHandler_p)
+{
+    if(pUsartHandler_p->Instance == USARTx)
+    {
+        USARTx_CLK_DISABLE();
+
+        /* Disable the DMA Streams */
+        HAL_DMA_DeInit(pUsartHandler_p->hdmarx);
+        HAL_DMA_DeInit(pUsartHandler_p->hdmatx);
+
+        /* Disable peripherals and GPIO Clocks */
+        HAL_GPIO_DeInit(USARTx_GPIO_PORT, USARTx_RX_PIN);
+    }
+}
+
+/*----------------------------------------------------------------------------*/
+/**
 \brief  Initialize the USART GPIO pins
 */
 /*----------------------------------------------------------------------------*/
 static void initGpio(void)
 {
-    GPIO_InitTypeDef GPIO_InitStructure;
+    GPIO_InitTypeDef GPIO_InitStruct;
 
-    memset(&GPIO_InitStructure, 0, sizeof(GPIO_InitTypeDef));
+    memset(&GPIO_InitStruct, 0, sizeof(GPIO_InitTypeDef));
 
-    /* Enable peripheral clocks */
-    RCC_APB2PeriphClockCmd(USARTx_GPIO_RCC_PERIPH, ENABLE);
-    RCC_APB2PeriphClockCmd(RCC_APB2Periph_AFIO, ENABLE);
-
-    /*  USARTx: TX */
-    GPIO_InitStructure.GPIO_Pin = USARTx_TX_PIN;
-    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
-    GPIO_Init(USARTx_GPIO_PORT, &GPIO_InitStructure);
-
-    /*  USARTx: RX */
-    GPIO_InitStructure.GPIO_Pin = USARTx_RX_PIN;
-    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING;
-    GPIO_Init(USARTx_GPIO_PORT, &GPIO_InitStructure);
+    GPIO_InitStruct.Pin = USARTx_RX_PIN | USARTx_TX_PIN;
+    GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
+    GPIO_InitStruct.Pull = GPIO_PULLUP;
+    GPIO_InitStruct.Speed = GPIO_SPEED_HIGH;
+    HAL_GPIO_Init(USARTx_GPIO_PORT, &GPIO_InitStruct);
 }
 
 /*----------------------------------------------------------------------------*/
@@ -414,238 +442,189 @@ static void initGpio(void)
 Setup USART core for receive and transmit
 */
 /*----------------------------------------------------------------------------*/
-static void initUsart(void)
+static BOOLEAN initUsart(void)
 {
-    USART_InitTypeDef USART_InitStructure;
+    BOOLEAN fReturn = FALSE;
 
-    memset(&USART_InitStructure, 0, sizeof(USART_InitTypeDef));
-
-    /* Enable the USART periph */
-    RCC_APB2PeriphClockCmd(USARTx_RCC_PERIPH, ENABLE);
+    memset(&UsartHandle_l, 0, sizeof(UART_HandleTypeDef));
 
     /* Configure the USART core */
-    USART_StructInit(&USART_InitStructure);
-    USART_InitStructure.USART_BaudRate = 3686400; //1843200//; //10500000;
-    USART_InitStructure.USART_WordLength = USART_WordLength_8b;
-    USART_InitStructure.USART_StopBits = USART_StopBits_1;
-    USART_InitStructure.USART_Parity = USART_Parity_No;
-    USART_InitStructure.USART_Mode = USART_Mode_Rx | USART_Mode_Tx;
-    USART_InitStructure.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
-    USART_Init(USARTx, &USART_InitStructure);
+    UsartHandle_l.Instance = USARTx;
+    UsartHandle_l.Init.BaudRate = 3686400;
+    UsartHandle_l.Init.WordLength = UART_WORDLENGTH_8B;
+    UsartHandle_l.Init.StopBits = UART_STOPBITS_1;
+    UsartHandle_l.Init.Parity = UART_PARITY_NONE;
+    UsartHandle_l.Init.Mode = UART_MODE_TX_RX;
+    if(HAL_UART_Init(&UsartHandle_l) == HAL_OK)
+    {
+        fReturn = TRUE;
+    }
+
+    return fReturn;
 }
 
 /*----------------------------------------------------------------------------*/
 /**
-\brief  Initialize USART DMA for receive
+\brief  Initialize USART DMA for receive and transmit
 
-Setup the DMA for receive from USART to RAM.
+Setup the DMA for receive from USART to RAM and back!
 
-\param[in] pTargBase_p      Pointer to the base address of the target buffer
-\param[in] targLen_p        The length of the target buffer
+\param pUsartHandler_p    Pointer to the USART handler
 */
 /*----------------------------------------------------------------------------*/
-static void initDmaRx(volatile UINT8 * pTargBase_p, UINT32 targLen_p)
+static BOOLEAN initDma(UART_HandleTypeDef* pUsartHandler_p)
 {
-    DMA_InitTypeDef DMA_InitStructure;
+    BOOLEAN fReturn = FALSE;
 
-    /* Configure DMAx - ChannelRx (USART -> memory) */
-    DMA_StructInit(&DMA_InitStructure);
-    DMA_InitStructure.DMA_PeripheralBaseAddr = (uint32_t)&USARTx->DR;     /* Address of peripheral the DMA must map to */
-    DMA_InitStructure.DMA_MemoryBaseAddr = (uint32_t)pTargBase_p;         /* Variable to which received data will be stored */
-    DMA_InitStructure.DMA_DIR = DMA_DIR_PeripheralSRC;
-    DMA_InitStructure.DMA_BufferSize = targLen_p;                         /* Buffer size */
-    DMA_InitStructure.DMA_PeripheralInc = DMA_PeripheralInc_Disable;
-    DMA_InitStructure.DMA_MemoryInc = DMA_MemoryInc_Enable;
-    DMA_InitStructure.DMA_PeripheralDataSize = DMA_PeripheralDataSize_Byte;
-    DMA_InitStructure.DMA_MemoryDataSize = DMA_MemoryDataSize_Byte;
-    DMA_InitStructure.DMA_Mode = DMA_Mode_Normal;
-    DMA_InitStructure.DMA_Priority = DMA_Priority_High;
-    DMA_InitStructure.DMA_M2M = DMA_M2M_Disable;
-    DMA_Init(DMAx_Channel_Rx, &DMA_InitStructure);
+    memset(&DmaRxHandle_l, 0, sizeof(DMA_HandleTypeDef));
+    memset(&DmaTxHandle_l, 0, sizeof(DMA_HandleTypeDef));
 
-    DMA_ITConfig(DMAx_Channel_Rx, DMA_IT_TC | DMA_IT_TE, ENABLE);
-}
+    DMAx_CLK_ENABLE();
 
-/*----------------------------------------------------------------------------*/
-/**
-\brief  Initialize USART DMA for transmit
+    /* Configure DMAx - Receive channel (USART -> memory) */
+    DmaRxHandle_l.Instance = USARTx_RX_DMA_CHANNEL;
+    DmaRxHandle_l.Init.Direction = DMA_PERIPH_TO_MEMORY;          /* P2M transfer mode                 */
+    DmaRxHandle_l.Init.PeriphInc = DMA_PINC_DISABLE;              /* Peripheral increment mode Disable */
+    DmaRxHandle_l.Init.MemInc = DMA_MINC_ENABLE;                  /* Memory increment mode Enable      */
+    DmaRxHandle_l.Init.PeriphDataAlignment = DMA_PDATAALIGN_BYTE; /* Peripheral data alignment : Byte  */
+    DmaRxHandle_l.Init.MemDataAlignment = DMA_MDATAALIGN_BYTE;    /* memory data alignment : Byte      */
+    DmaRxHandle_l.Init.Mode = DMA_NORMAL;                         /* Normal DMA mode                   */
+    DmaRxHandle_l.Init.Priority = DMA_PRIORITY_HIGH;              /* priority level : high             */
 
-Setup the DMA for transmit from RAM to USART.
+    if(HAL_DMA_Init(&DmaRxHandle_l) == HAL_OK)
+    {
+        __HAL_LINKDMA(pUsartHandler_p, hdmarx, DmaRxHandle_l);
 
-\param[in] pSrcBase_p      Pointer to the base address of the source buffer
-\param[in] srcLen_p        The length of the source buffer
-*/
-/*----------------------------------------------------------------------------*/
-static void initDmaTx(volatile UINT8 * pSrcBase_p, UINT32 srcLen_p)
-{
-    DMA_InitTypeDef DMA_InitStructure;
+        /* Configure DMAx - Transmit channel (memory -> USART) */
+        DmaTxHandle_l.Instance = USARTx_TX_DMA_CHANNEL;
+        DmaTxHandle_l.Init.Direction = DMA_MEMORY_TO_PERIPH;          /* M2P transfer mode                 */
+        DmaTxHandle_l.Init.PeriphInc = DMA_PINC_DISABLE;              /* Peripheral increment mode Disable */
+        DmaTxHandle_l.Init.MemInc = DMA_MINC_ENABLE;                  /* Memory increment mode Enable      */
+        DmaTxHandle_l.Init.PeriphDataAlignment = DMA_PDATAALIGN_BYTE; /* Peripheral data alignment : Byte  */
+        DmaTxHandle_l.Init.MemDataAlignment = DMA_MDATAALIGN_BYTE;    /* memory data alignment : Byte      */
+        DmaTxHandle_l.Init.Mode = DMA_NORMAL;                         /* Normal DMA mode                   */
+        DmaTxHandle_l.Init.Priority = DMA_PRIORITY_LOW;               /* priority level : low              */
 
-    /* Configure DMAx - ChannelTx (memory -> USART) */
-    DMA_StructInit(&DMA_InitStructure);
-    DMA_InitStructure.DMA_PeripheralBaseAddr = (uint32_t)&USARTx->DR;     /* Address of peripheral the DMA must map to */
-    DMA_InitStructure.DMA_MemoryBaseAddr = (uint32_t)pSrcBase_p;          /* Variable from which data will be transmitted */
-    DMA_InitStructure.DMA_DIR = DMA_DIR_PeripheralDST;
-    DMA_InitStructure.DMA_BufferSize = srcLen_p;                          /* Buffer size */
-    DMA_InitStructure.DMA_PeripheralInc = DMA_PeripheralInc_Disable;
-    DMA_InitStructure.DMA_MemoryInc = DMA_MemoryInc_Enable;
-    DMA_InitStructure.DMA_PeripheralDataSize = DMA_PeripheralDataSize_Byte;
-    DMA_InitStructure.DMA_MemoryDataSize = DMA_MemoryDataSize_Byte;
-    DMA_InitStructure.DMA_Mode = DMA_Mode_Normal;
-    DMA_InitStructure.DMA_Priority = DMA_Priority_High;
-    DMA_InitStructure.DMA_M2M = DMA_M2M_Disable;
-    DMA_Init(DMAx_Channel_Tx, &DMA_InitStructure);
+        if(HAL_DMA_Init(&DmaTxHandle_l) == HAL_OK)
+        {
+            __HAL_LINKDMA(pUsartHandler_p, hdmatx, DmaTxHandle_l);
 
-    DMA_ITConfig(DMAx_Channel_Tx, DMA_IT_TC | DMA_IT_TE, ENABLE);
-}
+            fReturn = TRUE;
+        }
+    }
 
-/*----------------------------------------------------------------------------*/
-/**
-\brief  Close the DMA channels
-*/
-/*----------------------------------------------------------------------------*/
-static void closeDma(void)
-{
-    /* Disable DMA interrupts */
-    DMA_ITConfig(DMAx_Channel_Rx, DMA_IT_TC | DMA_IT_TE, DISABLE);
-    DMA_ITConfig(DMAx_Channel_Tx, DMA_IT_TC | DMA_IT_TE, DISABLE);
-
-    /* Close the DMA channels */
-    DMA_DeInit(DMAx_Channel_Rx);
-    DMA_DeInit(DMAx_Channel_Tx);
+    return fReturn;
 }
 
 /*----------------------------------------------------------------------------*/
 /**
 \brief  Initialize the DMA interrupts in NVIC
 
-Setup transfer finished and transfer error interrupts for both DMA
+Setupt transfer finished and transfer error interrupts for both DMA
 channels.
 */
 /*----------------------------------------------------------------------------*/
 static void initNvic(void)
 {
-    NVIC_InitTypeDef   NVIC_InitStructure;
+    /* NVIC configuration for DMA transfer complete interrupt (USARTx_TX) */
+    HAL_NVIC_SetPriority(USARTx_DMA_TX_IRQn, 1, 0);
+    HAL_NVIC_EnableIRQ(USARTx_DMA_TX_IRQn);
 
-    memset(&NVIC_InitStructure, 0, sizeof(NVIC_InitTypeDef));
+    /* NVIC configuration for DMA transfer complete interrupt (USARTx_RX) */
+    HAL_NVIC_SetPriority(USARTx_DMA_RX_IRQn, 1, 1);
+    HAL_NVIC_EnableIRQ(USARTx_DMA_RX_IRQn);
 
-    /* Enable DMAx ChannelRx interrupt */
-    NVIC_InitStructure.NVIC_IRQChannel = DMAx_ChannelRx_IRQn;
-    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0x0E;
-    NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0x01;
-    NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
-    NVIC_Init(&NVIC_InitStructure);
-
-    /* Enable DMAx ChannelTx interrupt */
-    NVIC_InitStructure.NVIC_IRQChannel = DMAx_ChannelTx_IRQn;
-    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0x0E;
-    NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0x01;
-    NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
-    NVIC_Init(&NVIC_InitStructure);
+    /* NVIC configuration for UART transfer complete interrupt */
+    HAL_NVIC_SetPriority(USARTx_IRQn, 1, 0);
+    HAL_NVIC_EnableIRQ(USARTx_IRQn);
 }
 
 /*----------------------------------------------------------------------------*/
 /**
-\brief  Start an USART DMA reception
+\brief  USART transfer completed callback.
 
-\param[in] pData_p      Pointer to the base address of the target buffer
-\param[in] size_p       The length of the target buffer
+\param pUsartHandle_p     Pointer to the USART handle
 */
 /*----------------------------------------------------------------------------*/
-static void usartReceive(volatile UINT8 * pData_p, UINT32 size_p)
+void HAL_UART_TxCpltCallback(UART_HandleTypeDef * pUsartHandle_p)
 {
-    /* Initialize the DMA receive channel with the new base address */
-    initDmaRx(pData_p, size_p);
-
-    /* Enable the DMA receive channel */
-    DMA_Cmd(DMAx_Channel_Rx, ENABLE);
-
-    /* Enable the USART DMA receive channel */
-    USART_DMACmd(USARTx, USART_DMAReq_Rx, ENABLE);
-}
-
-/*----------------------------------------------------------------------------*/
-/**
-\brief  Start an USART DMA transmission
-
-\param[in] pData_p      Pointer to the base address of the source buffer
-\param[in] size_p       The length of the source buffer
-*/
-/*----------------------------------------------------------------------------*/
-static void usartTransmit(volatile UINT8 * pData_p, UINT32 size_p)
-{
-    /* Initialize the DMA receive channel with the new base address */
-    initDmaTx(pData_p, size_p);
-
-    /* Enable the DMA transmit channel */
-    DMA_Cmd(DMAx_Channel_Tx, ENABLE);
-
-    /* Enable the USARTx DMA interface (This starts the transfer!) */
-    USART_DMACmd(USARTx, USART_DMAReq_Tx, ENABLE);
-}
-
-/*----------------------------------------------------------------------------*/
-/**
-\brief  DMA receive channel interrupt handler (USART -> memory)
-*/
-/*----------------------------------------------------------------------------*/
-void DMAx_ChannelRx_IRQHandler(void)
-{
-    if(DMA_GetITStatus(DMAx_IT_TC_Rx) == SET)
+    if(pUsartHandle_p == &UsartHandle_l)
     {
-        /* Disable the DMA channel */
-        DMA_Cmd(DMAx_Channel_Rx, DISABLE);
-
-        fRxFinished_l = TRUE;
-
-        /* Call receive finished callback function */
-        if(pfnReceiveFin_l != NULL)
-            pfnReceiveFin_l();
-
-        /* Clear the interrupt flag */
-        DMA_ClearFlag(DMAx_FLAG_TC_Rx);
-    }
-    else if(DMA_GetITStatus(DMAx_IT_TE_Rx) == SET)
-    {   /* Transfer error! */
-
-        /* Call transfer error callback function */
-        if(pfnTransfError_l != NULL)
-            pfnTransfError_l();
-
-        DMA_ClearFlag(DMAx_FLAG_TE_Rx);
-    }
-}
-
-
-
-/*----------------------------------------------------------------------------*/
-/**
-\brief  DMA transmit channel interrupt handler (memory -> USART)
-*/
-/*----------------------------------------------------------------------------*/
-void DMAx_ChannelTx_IRQHandler(void)
-{
-    if(DMA_GetITStatus(DMAx_IT_TC_Tx) == SET)
-    {
-        /* Disable the DMA channel */
-        DMA_Cmd(DMAx_Channel_Tx, DISABLE);
-
         fTxFinished_l = TRUE;
 
         /* Call transfer finished callback function */
         if(pfnTransfFin_l != NULL)
             pfnTransfFin_l();
-
-        /* Clear the interrupt flag */
-        DMA_ClearFlag(DMAx_FLAG_TC_Tx);
     }
-    else if(DMA_GetITStatus(DMAx_IT_TE_Tx) == SET)
+}
+
+/*----------------------------------------------------------------------------*/
+/**
+\brief  USART reception completed callback.
+
+\param pUsartHandle_p     Pointer to the USART handle
+*/
+/*----------------------------------------------------------------------------*/
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef * pUsartHandle_p)
+{
+    if(pUsartHandle_p == &UsartHandle_l)
     {
-        /* Call transfer error callback function */
-        if(pfnTransfError_l != NULL)
-            pfnTransfError_l();
+        fRxFinished_l = TRUE;
 
-        DMA_ClearFlag(DMAx_FLAG_TE_Tx);
+        /* Call receive finished callback function */
+        if(pfnReceiveFin_l != NULL)
+            pfnReceiveFin_l();
     }
+}
+
+/*----------------------------------------------------------------------------*/
+/**
+\brief  DMA error callback
+
+\param pUsartHandle_p     Pointer to the USART handle
+*/
+/*----------------------------------------------------------------------------*/
+void HAL_UART_ErrorCallback(UART_HandleTypeDef * pUsartHandle_p)
+{
+    if(pUsartHandle_p == &UsartHandle_l)
+    {
+         /* Call transfer error callback function */
+         if(pfnTransfError_l != NULL)
+             pfnTransfError_l();
+    }
+}
+
+/*----------------------------------------------------------------------------*/
+/**
+\brief  This function handles DMA Rx interrupt request
+*/
+/*----------------------------------------------------------------------------*/
+void USARTx_DMA_RX_IRQHandler(void)
+{
+    HAL_NVIC_ClearPendingIRQ(USARTx_DMA_RX_IRQn);
+    HAL_DMA_IRQHandler(UsartHandle_l.hdmarx);
+}
+
+/*----------------------------------------------------------------------------*/
+/**
+\brief  This function handles DMA Tx interrupt request.
+*/
+/*----------------------------------------------------------------------------*/
+void USARTx_DMA_TX_IRQHandler(void)
+{
+    HAL_NVIC_ClearPendingIRQ(USARTx_DMA_TX_IRQn);
+    HAL_DMA_IRQHandler(UsartHandle_l.hdmatx);
+}
+
+/*----------------------------------------------------------------------------*/
+/**
+\brief  This function handles UART TC interrupt request.
+*/
+/*----------------------------------------------------------------------------*/
+void USARTx_IRQ_Handler(void)
+{
+    HAL_NVIC_ClearPendingIRQ(USARTx_IRQn);
+    HAL_UART_IRQHandler(&UsartHandle_l);
 }
 
 /*----------------------------------------------------------------------------*/
@@ -656,16 +635,16 @@ void DMAx_ChannelTx_IRQHandler(void)
 \param[in] timeoutMs_p      Time in ms until timeout
 */
 /*----------------------------------------------------------------------------*/
-static BOOLEAN waitForTransferFinished(volatile BOOLEAN * pTransFin_p, UINT32 timeoutMs_p)
+static BOOLEAN waitForTransferFinished(BOOLEAN * pTransFin_p, UINT32 timeoutMs_p)
 {
     BOOLEAN fTransFin = FALSE;
-    volatile UINT32 currTime = tickCnt_l;
+    UINT32 currTime = HAL_GetTick();
     UINT32 timeoutTime = currTime + timeoutMs_p;
 
     /* Wait until timeout is reached or transfer is finished */
     while(*pTransFin_p == FALSE && currTime < timeoutTime)
     {
-        currTime = tickCnt_l;
+        currTime = HAL_GetTick();
     }
 
     fTransFin = *pTransFin_p;

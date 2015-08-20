@@ -51,7 +51,10 @@ system timer for stm32f103rb (Cortex-M3).
 /*----------------------------------------------------------------------------*/
 #include <sn/timer.h>
 
-#include <stm32f10x_tim.h>
+#include <stm32f1xx_hal_rcc.h>
+#include <stm32f1xx_hal_dma.h>
+#include <stm32f1xx_hal_tim.h>
+
 
 /*============================================================================*/
 /*            G L O B A L   D E F I N I T I O N S                             */
@@ -76,12 +79,12 @@ system timer for stm32f103rb (Cortex-M3).
 /*----------------------------------------------------------------------------*/
 /* const defines                                                              */
 /*----------------------------------------------------------------------------*/
-#define TIMER_PRESCALE_1US         (UINT16)63       /**< Prescaler for 1us resolution */
+#define TIMER_PRESCALE_1US         (UINT16)63   /**< Prescaler for 1us resolution */
 
 /* Defines for the TIMx peripheral */
 #define TIMx                TIM2
 
-#define TIMx_RCC_PERIPH     RCC_APB1Periph_TIM2
+#define TIMx_CLK_ENABLE()     __HAL_RCC_TIM2_CLK_ENABLE()
 
 /*----------------------------------------------------------------------------*/
 /* local types                                                                */
@@ -90,11 +93,12 @@ system timer for stm32f103rb (Cortex-M3).
 /*----------------------------------------------------------------------------*/
 /* local vars                                                                 */
 /*----------------------------------------------------------------------------*/
+static TIM_HandleTypeDef TimerHandle_l;
 
 /*----------------------------------------------------------------------------*/
 /* local function prototypes                                                  */
 /*----------------------------------------------------------------------------*/
-static void initTimer(void);
+static BOOLEAN initTimer(void);
 
 /*============================================================================*/
 /*            P U B L I C   F U N C T I O N S                                 */
@@ -104,17 +108,22 @@ static void initTimer(void);
 /**
 \brief    Initialize the timer module
 
-\return 0 on success; 1 on error
+\return TRUE on success; FALSE on error
 */
 /*----------------------------------------------------------------------------*/
 BOOLEAN timer_init(void)
 {
-    initTimer();
+    BOOLEAN fReturn = FALSE;
 
-    /* Enable timer interface */
-    TIM_Cmd(TIMx, ENABLE);
+    if(initTimer())
+    {
+        if(HAL_TIM_Base_Start(&TimerHandle_l) == HAL_OK)
+        {
+            fReturn = TRUE;
+        }
+    }
 
-    return TRUE;
+    return fReturn;
 }
 
 /*----------------------------------------------------------------------------*/
@@ -124,26 +133,26 @@ BOOLEAN timer_init(void)
 /*----------------------------------------------------------------------------*/
 void timer_close(void)
 {
-    /* Close TIMx interface */
-    TIM_DeInit(TIMx);
+    /* Close TIMx */
+    HAL_TIM_Base_DeInit(&TimerHandle_l);
 }
 
 /*----------------------------------------------------------------------------*/
 /**
 \brief    Get current system tick
 
-This function returns the current system tick determined by the system timer.
+This function returns the current value of the internal 16bit timer.
 
 \return Returns the system tick in milliseconds
 */
 /*----------------------------------------------------------------------------*/
 UINT16 timer_getTickCount(void)
 {
-    UINT16 time = 0;
+    UINT64 usTime = 0;
 
-    time = (UINT16)TIM_GetCounter(TIMx);
+    usTime = (UINT32)__HAL_TIM_GetCounter(&TimerHandle_l);
 
-    return time;
+    return usTime;
 }
 
 /*----------------------------------------------------------------------------*/
@@ -155,9 +164,8 @@ UINT16 timer_getTickCount(void)
 /*----------------------------------------------------------------------------*/
 void timer_setTickCount(UINT16 newVal_p)
 {
-    TIM_SetCounter(TIMx, newVal_p);
+    __HAL_TIM_SetCounter(&TimerHandle_l, newVal_p);
 }
-
 
 /*============================================================================*/
 /*            P R I V A T E   F U N C T I O N S                               */
@@ -170,21 +178,23 @@ void timer_setTickCount(UINT16 newVal_p)
 \brief  Initialize the timer core
 */
 /*----------------------------------------------------------------------------*/
-static void initTimer(void)
+static BOOLEAN initTimer(void)
 {
-    TIM_TimeBaseInitTypeDef TIM_TimeBaseStructure;
+    BOOLEAN fReturn = FALSE;
 
-    memset(&TIM_TimeBaseStructure, 0, sizeof(TIM_TimeBaseInitTypeDef));
+    TIMx_CLK_ENABLE();
 
-    /* Enable TIMx clock */
-    RCC_APB1PeriphClockCmd(TIMx_RCC_PERIPH, ENABLE);
+    TimerHandle_l.Instance = TIMx;
+    TimerHandle_l.Init.Period = 0xFFFF;
+    TimerHandle_l.Init.Prescaler = TIMER_PRESCALE_1US;
+    TimerHandle_l.Init.ClockDivision = 0;
+    TimerHandle_l.Init.CounterMode = TIM_COUNTERMODE_UP;
+    if(HAL_TIM_Base_Init(&TimerHandle_l) == HAL_OK)
+    {
+        fReturn = TRUE;
+    }
 
-    TIM_TimeBaseStructure.TIM_Prescaler = TIMER_PRESCALE_1US;
-    TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
-    TIM_TimeBaseStructure.TIM_Period = 0xFFFF;
-    TIM_TimeBaseStructure.TIM_ClockDivision = TIM_CKD_DIV1;
-    TIM_TimeBaseStructure.TIM_RepetitionCounter = 0;
-    TIM_TimeBaseInit(TIMx, &TIM_TimeBaseStructure);
+    return fReturn;
 }
 
 /**

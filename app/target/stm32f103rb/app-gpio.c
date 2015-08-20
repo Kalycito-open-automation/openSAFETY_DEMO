@@ -50,7 +50,8 @@ forwards it to the user application.
 /* includes                                                                   */
 /*----------------------------------------------------------------------------*/
 #include <common/app-gpio.h>
-
+#include <stm32f1xx_hal_gpio.h>
+#include <stm32f1xx_hal_rcc.h>
 /*============================================================================*/
 /*            G L O B A L   D E F I N I T I O N S                             */
 /*============================================================================*/
@@ -76,7 +77,28 @@ forwards it to the user application.
 /*----------------------------------------------------------------------------*/
 /* const defines                                                              */
 /*----------------------------------------------------------------------------*/
-
+/**
+ * \name STM32F103RB specific defines
+ * These defines are purely target specific and are closely related
+ * to the functions in which they are used, so it is considered better to
+ * place them inside the app-gpio.c source file than in an additional header
+ * file.
+ * They describe port, pin and control registers of the STM32F103RB
+ * microcontroller.
+ * For information on the pinout see \ref page_stm32f103_setuphw,
+ * http://www.st.com/web/catalog/tools/FM116/SC959/SS1532/LN1847/PF259875
+ * the STM32 NUCLEO-F103RB webpage
+ * or the STM32F103RB webpage
+ * http://www.st.com/web/catalog/mmc/FM141/SC1169/SS1031/LN1565/PF164487
+ */
+/* @{*/
+#define GPIO_PORT           GPIOC                       /**<  Port C */
+#define GPIO_INPUT_PINS     (GPIO_PIN_6 | GPIO_PIN_8)   /**< MorphoConnector CN10: Pin 2 (PC8), Pin 4 (PC6) */
+#define GPIO_OUTPUT_PINS    (GPIO_PIN_2 | GPIO_PIN_3)   /**< MorphoConnector CN7: Pin 35 (PC2), Pin 37 (PC3) */
+#define GPIO_CLK_ENABLE()   __HAL_RCC_GPIOC_CLK_ENABLE()  /**< HAL driver macro to enable clock */
+#define GPIO_CLK_DISABLE()  __HAL_RCC_GPIOC_CLK_DISABLE() /**< HAL driver macro to disable clock */
+#define GPIO_CLK_IS_SET     __HAL_RCC_GPIOC_IS_CLK_ENABLED()    /**< HAL driver macro to check for enabled clock */
+/* @}*/
 /*----------------------------------------------------------------------------*/
 /* local types                                                                */
 /*----------------------------------------------------------------------------*/
@@ -84,7 +106,7 @@ forwards it to the user application.
 /*----------------------------------------------------------------------------*/
 /* local vars                                                                 */
 /*----------------------------------------------------------------------------*/
-
+static BOOL gpioClockWasActivated_l = 0;
 /*----------------------------------------------------------------------------*/
 /* local function prototypes                                                  */
 /*----------------------------------------------------------------------------*/
@@ -103,6 +125,32 @@ forwards it to the user application.
 /*----------------------------------------------------------------------------*/
 UINT8 appgpio_init(void)
 {
+    GPIO_InitTypeDef inputInitSettings;
+    GPIO_InitTypeDef outputInitSettings;
+
+    /* enable clock for GPIO port, if it isn't activated */
+    if (!GPIO_CLK_IS_SET)
+    {
+        GPIO_CLK_ENABLE();
+    }
+    else
+    {
+        gpioClockWasActivated_l = 1;
+    }
+
+    inputInitSettings.Pin = GPIO_INPUT_PINS;
+    inputInitSettings.Mode = GPIO_MODE_INPUT;
+    inputInitSettings.Pull = GPIO_PULLDOWN;
+    inputInitSettings.Speed = GPIO_SPEED_LOW;   /* Ignored when pin is configured as input */
+
+    outputInitSettings.Pin = GPIO_OUTPUT_PINS;
+    outputInitSettings.Mode = GPIO_MODE_OUTPUT_PP;
+    outputInitSettings.Pull = GPIO_NOPULL;
+    outputInitSettings.Speed = GPIO_SPEED_LOW;
+
+    HAL_GPIO_Init (GPIO_PORT, & inputInitSettings);
+    HAL_GPIO_Init (GPIO_PORT, & outputInitSettings);
+
     return 0;
 }
 
@@ -113,7 +161,13 @@ UINT8 appgpio_init(void)
 /*----------------------------------------------------------------------------*/
 void appgpio_exit(void)
 {
-    /* TODO! */
+    HAL_GPIO_DeInit(GPIO_PORT, GPIO_INPUT_PINS | GPIO_OUTPUT_PINS);
+
+    /* disable clock for port, if it got activated in appgpio_init() */
+    if (gpioClockWasActivated_l == 0)
+    {
+        GPIO_CLK_DISABLE();
+    }
 }
 
 
@@ -128,9 +182,24 @@ This function writes a value to the output port of the AP
 /*----------------------------------------------------------------------------*/
 void appgpio_writeOutputPort(UINT32 value_p)
 {
-    (void)value_p;
+    UINT16 outputPin = 0x01;
+    GPIO_PinState pinState = GPIO_PIN_RESET;
 
-    /* TODO! */
+    /* process value for output ports */
+    if (GPIO_OUTPUT_PINS != 0)
+    {
+        while (outputPin)
+        {
+            if (outputPin & GPIO_OUTPUT_PINS)
+            {
+                pinState = (value_p & 0x01) ? GPIO_PIN_SET : GPIO_PIN_RESET;
+                HAL_GPIO_WritePin(GPIO_PORT, outputPin, pinState);
+                value_p = value_p >> 1;
+            }
+
+            outputPin = (outputPin << 1)  & GPIO_PIN_MASK;
+        }
+    }
 }
 
 /*----------------------------------------------------------------------------*/
@@ -146,8 +215,29 @@ This function reads a value from the input port of the AP
 UINT8 appgpio_readInputPort(void)
 {
     UINT8 val = 0;
+    UINT8 valPosition = 0x01;
+    UINT16 inputPin = 0x01;
+    GPIO_PinState pinState = GPIO_PIN_RESET;
 
-    /* TODO! */
+    /* process value from intput ports */
+    if (GPIO_INPUT_PINS != 0)
+    {
+        while (inputPin)
+        {
+            if (inputPin & GPIO_INPUT_PINS)
+            {
+                pinState = HAL_GPIO_ReadPin(GPIO_PORT, inputPin);
+
+                if (pinState == GPIO_PIN_SET)
+                {
+                    val = val | valPosition;
+                }
+
+                valPosition = valPosition << 1;
+            }
+            inputPin = (inputPin << 1)  & GPIO_PIN_MASK;
+        }
+    }
 
     return val;
 }

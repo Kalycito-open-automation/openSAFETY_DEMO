@@ -32,7 +32,7 @@ ENABLE_LANGUAGE(ASM-ATT)
 
 ################################################################################
 # Set C flags for this board configuration
-SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DUSE_STDPERIPH_DRIVER -DSTM32F10X_MD")
+SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DUSE_STDPERIPH_DRIVER -DSTM32F103xB")
 
 ################################################################################
 # Add board support package for target stm32f10x
@@ -55,9 +55,9 @@ SET(DEMO_ARCH_SRCS
                     #${TARGET_DIR}/app-gpio.c
                     ${APP_GPIO_C}
                     ${TARGET_DIR}/startup_stm32f10x_md.s
-                    ${TARGET_DIR}/newlib_stubs.c
+                    ${TARGET_DIR}/syscalls.c
                     ${TARGET_DIR}/stm32f1xx_it.c
-                    ${TARGET_DIR}/system_stm32f10x.c
+                    ${TARGET_DIR}/system_stm32f1xx.c
                     ${BOARD_TARGET_DIR}/timer.c
                     ${BOARD_TARGET_DIR}/nvs.c
                     ${BOARD_TARGET_DIR}/gpio.c

@@ -51,9 +51,9 @@ stm32f103rb (Cortex-M3).
 /*----------------------------------------------------------------------------*/
 #include <common/syncir.h>
 
-#include <stm32f10x_exti.h>
-#include <stm32f10x_gpio.h>
-#include <misc.h>
+#include <stm32f1xx_hal_rcc.h>
+#include <stm32f1xx_hal_gpio.h>
+#include <stm32f1xx_hal_cortex.h>
 
 #include <stdio.h>
 
@@ -81,14 +81,13 @@ stm32f103rb (Cortex-M3).
 /*----------------------------------------------------------------------------*/
 /* const defines                                                              */
 /*----------------------------------------------------------------------------*/
-#define IRx_SYNC_PIN                     GPIO_Pin_7
+#define IRx_SYNC_CLK_ENABLE()            __HAL_RCC_GPIOC_CLK_ENABLE()
+
+#define IRx_SYNC_PIN                     GPIO_PIN_7
 #define IRx_SYNC_GPIO_PORT               GPIOC
-#define IRx_RCC_APB2Periph               RCC_APB2Periph_GPIOC
 
+#define Rx_SYNC_IRQn                     EXTI9_5_IRQn
 #define IRx_SYNC_IRQHandler              EXTI9_5_IRQHandler
-
-#define EXTI_LINEx                       EXTI_Line7
-#define EXTIx_IRQn                       EXTI9_5_IRQn
 
 /*----------------------------------------------------------------------------*/
 /* local types                                                                */
@@ -124,39 +123,25 @@ will be initialized, the interrupt handler will be connected to the ISR.
 BOOL syncir_init(tPlatformSyncIrq pfnSyncIrq_p)
 {
     BOOL fReturn = TRUE;
-
     GPIO_InitTypeDef   GPIO_InitStructure;
-    EXTI_InitTypeDef   EXTI_InitStructure;
-    NVIC_InitTypeDef   NVIC_InitStructure;
+
+    memset(&GPIO_InitStructure, 0, sizeof(GPIO_InitTypeDef));
 
     /* Remember ISR handler callback */
     pfnSyncIrq_l = pfnSyncIrq_p;
 
     /* Enable GPIOC clock */
-    RCC_APB2PeriphClockCmd(IRx_RCC_APB2Periph, ENABLE);
+    IRx_SYNC_CLK_ENABLE();
 
-    /* Configure SYNC IR pin as input floating */
-    GPIO_InitStructure.GPIO_Pin = IRx_SYNC_PIN;
-    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING;
-    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_10MHz;
-    GPIO_Init(IRx_SYNC_GPIO_PORT, &GPIO_InitStructure);
+    /* Configure SYNC interrupt pin */
+    GPIO_InitStructure.Pin = IRx_SYNC_PIN;
+    GPIO_InitStructure.Mode = GPIO_MODE_IT_RISING;
+    GPIO_InitStructure.Speed = GPIO_SPEED_MEDIUM;
+    GPIO_InitStructure.Pull = GPIO_PULLDOWN;
+    HAL_GPIO_Init(IRx_SYNC_GPIO_PORT, &GPIO_InitStructure);
 
-    /* Connect EXTI Line7 to PC7 pin */
-    GPIO_EXTILineConfig(GPIO_PortSourceGPIOC,GPIO_PinSource7);
-
-    /* Configure EXTI Line7 */
-    EXTI_InitStructure.EXTI_Line = EXTI_LINEx;
-    EXTI_InitStructure.EXTI_Mode = EXTI_Mode_Interrupt;
-    EXTI_InitStructure.EXTI_Trigger = EXTI_Trigger_Rising;
-    EXTI_InitStructure.EXTI_LineCmd = ENABLE;
-    EXTI_Init(&EXTI_InitStructure);
-
-    /* Enable and set EXTI Line7 Interrupt to the highest priority */
-    NVIC_InitStructure.NVIC_IRQChannel = EXTIx_IRQn;
-    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0x0F;
-    NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0x01;   /* Use lowest sub priority! */
-    NVIC_InitStructure.NVIC_IRQChannelCmd = DISABLE;
-    NVIC_Init(&NVIC_InitStructure);
+    /* Enable and set EXTI Line7 Interrupt to the lowest priority */
+    HAL_NVIC_SetPriority(Rx_SYNC_IRQn, 2, 0);
 
     return fReturn;
 }
@@ -168,8 +153,9 @@ BOOL syncir_init(tPlatformSyncIrq pfnSyncIrq_p)
 /*----------------------------------------------------------------------------*/
 void syncir_exit(void)
 {
-    EXTI_DeInit();
-    GPIO_DeInit(IRx_SYNC_GPIO_PORT);
+    syncir_disable();
+
+    HAL_GPIO_DeInit(IRx_SYNC_GPIO_PORT, IRx_SYNC_PIN);
 
     pfnSyncIrq_l = NULL;
 }
@@ -193,14 +179,14 @@ syncir_enable() enables the synchronous interrupt.
 /*----------------------------------------------------------------------------*/
 void syncir_enable(void)
 {
-    /* Clear the EXTI line pending bit */
-    EXTI_ClearITPendingBit(EXTI_LINEx);
+    /* Clear EXTI pending interrupts */
+    __HAL_GPIO_EXTI_CLEAR_IT(IRx_SYNC_PIN);
 
-    /* Clear pending interrupt in NVIC */
-    NVIC_ClearPendingIRQ(EXTIx_IRQn);
+    /* Clear any IRQ pending from the last run */
+    HAL_NVIC_ClearPendingIRQ(Rx_SYNC_IRQn);
 
     /* Really enable the synchronous interrupt */
-    NVIC_EnableIRQ(EXTIx_IRQn);
+    NVIC_EnableIRQ(Rx_SYNC_IRQn);
 }
 
 /*----------------------------------------------------------------------------*/
@@ -212,7 +198,7 @@ syncir_disable() disable the synchronous interrupt.
 /*----------------------------------------------------------------------------*/
 void syncir_disable(void)
 {
-    NVIC_DisableIRQ(EXTIx_IRQn);
+    NVIC_DisableIRQ(Rx_SYNC_IRQn);
 }
 
 /*----------------------------------------------------------------------------*/
@@ -226,10 +212,15 @@ This function enables/disables the interrupts of the AP processor
 /*----------------------------------------------------------------------------*/
 void syncir_enterCriticalSection(UINT8 fEnable_p)
 {
+    /* Toggle interrupt disable/enable */
     if(fEnable_p)
-        NVIC_EnableIRQ(EXTIx_IRQn);
+    {
+        __enable_irq();
+    }
     else
-        NVIC_DisableIRQ(EXTIx_IRQn);
+    {
+        __disable_irq();
+    }
 }
 
 /*----------------------------------------------------------------------------*/
@@ -264,21 +255,30 @@ void syncir_setSyncCallback(tPlatformSyncIrq pfnSyncCb_p)
 
 /*----------------------------------------------------------------------------*/
 /**
-\brief External interrupt handler for the synchronous interrupt
+\brief  External interrupt callback
+
+\param gpioPin_p        The pin the callback is called for
+*/
+/*----------------------------------------------------------------------------*/
+void HAL_GPIO_EXTI_Callback(uint16_t gpioPin_p)
+{
+  if(gpioPin_p == IRx_SYNC_PIN)
+  {
+      if(pfnSyncIrq_l != NULL)
+      {
+          pfnSyncIrq_l(NULL);
+      }
+  }
+}
+
+/*----------------------------------------------------------------------------*/
+/**
+\brief  External interrupt handler for the synchronous interrupt
 */
 /*----------------------------------------------------------------------------*/
 void IRx_SYNC_IRQHandler(void)
 {
-    if(EXTI_GetITStatus(EXTI_LINEx) != RESET)
-    {
-        if(pfnSyncIrq_l != NULL)
-        {
-            pfnSyncIrq_l(NULL);
-        }
-
-        /* Clear the EXTI line pending bit */
-        EXTI_ClearITPendingBit(EXTI_LINEx);
-    }
+    HAL_GPIO_EXTI_IRQHandler(IRx_SYNC_PIN);
 }
 
 /**

@@ -42,21 +42,23 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /*----------------------------------------------------------------------------*/
 /* includes                                                                   */
 /*----------------------------------------------------------------------------*/
-#include <stm32f10x_gpio.h>
+
 
 /*----------------------------------------------------------------------------*/
 /* const defines                                                              */
 /*----------------------------------------------------------------------------*/
 /* Definition for Benchmark pins */
-#define PINx_BENCHMARK_PIN0              GPIO_Pin_10
-#define PINx_BENCHMARK_PIN1              GPIO_Pin_11
-#define PINx_BENCHMARK_PIN2              GPIO_Pin_12
+#define PINx_BENCHMARK_PIN0              GPIO_PIN_10
+#define PINx_BENCHMARK_PIN1              GPIO_PIN_11
+#define PINx_BENCHMARK_PIN2              GPIO_PIN_12
 #define PINx_BENCHMARK_PORT              GPIOC
-#define PINx_BENCHMARK_CLK_ENABLE        RCC_APB2Periph_GPIOC
+#define PINx_BENCHMARK_CLK_ENABLE()      __HAL_RCC_GPIOC_CLK_ENABLE()
 
 #ifdef BENCHMARK_ENABLED
-    #define BENCHMARK_SET(x)    GPIO_WriteBit(PINx_BENCHMARK_PORT, (UINT16)(1<<(10 + (x))), Bit_SET)
-    #define BENCHMARK_RESET(x)  GPIO_WriteBit(PINx_BENCHMARK_PORT, (UINT16)(1<<(10 + (x))), Bit_RESET)
+    #include <stm32f1xx_hal_gpio.h>
+
+    #define BENCHMARK_SET(x)    HAL_GPIO_WritePin(PINx_BENCHMARK_PORT, (UINT16)(1<<(10 + (x))), GPIO_PIN_SET)
+    #define BENCHMARK_RESET(x)  HAL_GPIO_WritePin(PINx_BENCHMARK_PORT, (UINT16)(1<<(10 + (x))), GPIO_PIN_RESET)
     #define BENCHMARK_TOGGLE(x) /* No toggle till now */
 #else
     #undef BENCHMARK_MODULES
