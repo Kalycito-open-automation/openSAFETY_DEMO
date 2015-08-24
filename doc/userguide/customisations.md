@@ -199,8 +199,7 @@ PYSODBUILDER_CONFIGSTRING     | Represents the EPLsafety Stack configuration as 
 
 Variable name                 | Description                               | Default value
 ----------------------------- | ------------------------------------------|--------------
-PYSODBUILDER_PROP_DELAY_STATISTIC | Enable variable which delivers an average over the last cycle
-  and actual cycle propagation delay | OFF
+PYSODBUILDER_PROP_DELAY_STATISTIC | Enable variable which delivers an average over the last cycle and actual cycle propagation delay | OFF
 PYSODBUILDER_40BIT_CT_SUPPORT | Enable the support for SPDOs with a 40-bit CT value | ON
 PYSODBUILDER_EXTENDED_CT_BITFIELD | Extended CT bit field is to be created | OFF
 PYSODBUILDER_FRAMECOPYINTERN     | Enable or disable the copy of the received SPDO frames within the SPDO_ProcessRxSpdo() | OFF

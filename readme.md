@@ -6,43 +6,34 @@ Introduction {#mainpage}
 # openSAFETY_DEMO   {#sect_main_intro}
 
 The openSAFETY_DEMO is an example implementation of an openSAFETY Safe Node (SN)
-using POWERLINK as the underlying communication network. It is intended for
-people interested in openSAFETY, for evaluation purposes of openSAFETY and as
+with a simple GPIO application using POWERLINK as the underlying
+communication network. It is intended for people interested in openSAFETY,
+for evaluation purposes of openSAFETY and as
 a very first starting point for SN development.
 
-The demo application consists of one part executing the openSAFETY stack and
-the user application (application processor) and a second part for handling the
+The demo application consists of one part for handling the
 POWERLINK communication (POWERLINK Communication Processor, PCP) which is
-implemented on a FPGA platform.
+implemented on a FPGA platform and a second part (application processor) executing the
+the user application, such as the openSAFETY stack and the safe application.
 
-The software for the application part implements a single and a dual channelled
-solution. The single channelled application uses one application processor,
-the dual channelled application uses two application processors which receive
-the same data, exchange data among them and verify each others produced output.
+The user application part can be used in a single and a dual channelled
+configuration. The single channelled configuration uses one application
+processor, the dual channelled configuration additionally uses a second redundant
+application processor.
 
 The partitioning of the system into application and network part allows a good
 separation of safety related and non-safety related code as well as the exchange
 of the underlying network interface.
 
-This demo uses a lightweight modular interface to connect the application
-processor to the PCP and the POWERLINK network behind this processor.
+> In order to get a better overview of the whole system and it's setup,
+> please investigate \ref page_sysdesc.
 
-This documentation describes the software API of the interface between the
-POWERLINK Communication Processor (PCP) and the user application. In this setup
-the PCP itself handles the complete processing of the POWERLINK protocol.
-The interface to the user application only provides the process and service
-data. As this interface is considered to be lightweight and modular,
-it is therefore limited in it's functionality. (See \ref sect_sysdesc_oS_demo_limits)
 
-> This software distribution uses the POWERLINK and openSAFETY protocols as a basis
-> for communication. More information about this protocols are provided in
-> \ref page_protocols.
+# Protocol Stacks
 
-In order to provide a better understanding of the interface an example
-implementation of the user application is provided. Currently the following
-application is available:
-- **sn-gpio**: This demo implements an openSAFETY SN with a simple
-  GPIO application. (See \ref sect_sysdesc_app_sndemo)
+This software distribution uses the POWERLINK and openSAFETY protocols as a basis
+for communication. More information about this protocols is provided in
+\ref page_protocols.
 
 For processing the POWERLINK protocol on the PCP the open source protocol stack
 `openPOWERLINK V2.x` is used. This stack is already integrated in this
@@ -50,11 +41,11 @@ distribution. For more information about openPOWERLINK checkout the doxygen
 documentation of the stack in the folder
 `blackchannel/POWERLINK/stacks/openPOWERLINK/doc`.
 
-The application processor implements a Safe Node which executes the openSAFETY
-protocol stack. It can be downloaded from http://sourceforge.net/projects/opensafety.
+The openSAFETY protocol stack is processed on the application processor.
+This open source stack can be downloaded from
+http://sourceforge.net/projects/opensafety.
 
-> In order to get a better overview of the whole system and it's different
-> setups please investigate \ref page_sysdesc.
+
 
 # License   {#sect_main_license}
 
@@ -64,6 +55,19 @@ Please refer to the file's header and the file [\"license.md\"](\ref page_licens
 for the applicable license and the corresponding terms and conditions.
 
 # Documentation   {#sect_main_documentation}
+
+## Scope of the openSAFETY_DEMO Documentation
+
+This documentation provides demo-specific information on the used hard-
+and software, how to put the demo into operation and the demo's
+customisation possibilities.
+With SN development in mind, this documentation also gives generalised
+information on the hardware design, software design and the software API of the
+interface between the POWERLINK Communication Processor (PCP) and the user
+application.
+
+
+## Location and Generation
 
 * The documentation of the openSAFETY_DEMO is located in the
   subdirectory "doc". It is written in _markdown_ markup format and can be read

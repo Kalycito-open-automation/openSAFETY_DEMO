@@ -54,6 +54,37 @@ power-source.
 > Erasing the flash can be done with STM32 ST-LINK Utility:
 > `Target -> Erase chip` or with the button `Full chip erase`.
 
+# Target specific configuration option (stm32f103rb)   {#sect_stm32f103_buildsw_options}
+
+- **CFG_STM32_HAL_LIB_LOC**
+
+ Specify the path to the stm32f103 HAL library (**STM32CubeF1 V 1.2.0**).
+ Get it from: http://www.st.com/web/catalog/tools/FM147/CL1794/SC961/SS1743/LN1897/PF260820
+ > **IMPORTANT**: There is a bug in Version 1.2.0 of the STM32CubeF1 software.
+ > Open the file
+ > `[STM32CubeDirectory]/Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_spi.c`
+ > and comment the following lines in function `HAL_SPI_Receive_DMA()`:
+ >
+ > ~~~~~~~~~~~~~~~~~~~~~{.c}
+ >   /*hspi->hdmatx->XferHalfCpltCallback = 0;*/
+ >   /*hspi->hdmatx->XferCpltCallback     = 0;*/
+ >   /*hspi->hdmatx->XferErrorCallback    = 0;*/
+ > ~~~~~~~~~~~~~~~~~~~~~
+
+
+- **CFG_ARM_BOARD_TYPE**
+
+  Enables to specify the kind of Cortex-M3 board type (e.g: **stm32f103rb**)
+
+- **CFG_PROG_FLASH_ENABLE**
+
+  Enables a custom target to write the firmware to the local flash by using the
+  tool **st-flash**.
+
+- **CFG_DUAL_CHANNEL**
+
+  Enables switching between single and dual channelled application.
+
 # Debug the software (stm32f103rb)   {#sect_stm32f103_buildsw_debug}
 It is possible to debug the software using arm-none-eabi-gdb, the st-link tools
 and the **Eclipse IDE**. With this you should be able to comfortably step through
@@ -102,22 +133,4 @@ the code and set breakpoints.
 > - Host name or IP address: localhost
 > - Port number: 4242
 
-# Target specific configuration option (stm32f103rb)   {#sect_stm32f103_buildsw_options}
 
-- **CFG_STM32_HAL_LIB_LOC**
-
- Specify the path to the stm32f103 HAL library (**STM32_Nucleo_FW_V1.2.1**).
- Get it from: http://www.st.com/web/en/catalog/tools/PF260215
-
-- **CFG_ARM_BOARD_TYPE**
-
-  Enables to specify the kind of Cortex-M3 board type (e.g: **stm32f103rb**)
-
-- **CFG_PROG_FLASH_ENABLE**
-
-  Enables a custom target to write the firmware to the local flash by using the
-  tool **st-flash**.
-
-- **CFG_DUAL_CHANNEL**
-
-  Enables switching between single and dual channelled application.

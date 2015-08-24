@@ -773,6 +773,7 @@ INPUT                  = @DOXYFILE_SOURCE_DIR@/doxygen \
                          @DOXYFILE_SOURCE_DIR@/directories.md \
                          @DOXYFILE_SOURCE_DIR@/protocols.md \
                          @DOXYFILE_SOURCE_DIR@/systemoverview.md \
+                         @DOXYFILE_SOURCE_DIR@/systemdesign.md \
                          @DOXYFILE_SOURCE_DIR@/hardware/index.md \
                          @DOXYFILE_SOURCE_DIR@/hardware/hw_pcp.md \
                          @DOXYFILE_SOURCE_DIR@/hardware/hw_app.md \
@@ -814,8 +815,6 @@ INPUT                  = @DOXYFILE_SOURCE_DIR@/doxygen \
                          @CMAKE_SOURCE_DIR@/app/demo-sn-gpio/boot \
                          @CMAKE_SOURCE_DIR@/app/demo-sn-gpio/boot/include/boot \
                          @CMAKE_SOURCE_DIR@/app/demo-sn-gpio/boot/include/boot/internal \
-                         @CMAKE_SOURCE_DIR@/app/demo-sn-gpio/target/altera-nios2 \
-                         @CMAKE_SOURCE_DIR@/app/demo-sn-gpio/target/altera-nios2/include \
                          @CMAKE_SOURCE_DIR@/app/demo-sn-gpio/target/stm32f103rb \
                          @CMAKE_SOURCE_DIR@/app/demo-sn-gpio/target/stm32f103rb/include \
                          @CMAKE_SOURCE_DIR@/app/demo-sn-gpio/target/stm32f401rb \
@@ -825,8 +824,6 @@ INPUT                  = @DOXYFILE_SOURCE_DIR@/doxygen \
                          @CMAKE_SOURCE_DIR@/app/demo-sn-gpio/config/tbuf/include/config \
                          @CMAKE_SOURCE_DIR@/app/demo-sn-gpio/config/tbuf/include/ipcore \
                          @DOXYFILE_SOURCE_DIR@/software/group_apptarget.txt \
-                         @CMAKE_SOURCE_DIR@/app/target/altera-nios2/include/apptarget \
-                         @CMAKE_SOURCE_DIR@/app/target/altera-nios2 \
                          @CMAKE_SOURCE_DIR@/app/target/stm32f103rb/include/apptarget \
                          @CMAKE_SOURCE_DIR@/app/target/stm32f103rb \
                          @CMAKE_SOURCE_DIR@/app/target/stm32f401re/include/apptarget \

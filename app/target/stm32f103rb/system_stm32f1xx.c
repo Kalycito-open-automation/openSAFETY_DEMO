@@ -62,35 +62,11 @@
   ******************************************************************************
   */
 
-/** @addtogroup CMSIS
-  * @{
-  */
 
-/** @addtogroup stm32f1xx_system
-  * @{
-  */
-
-/** @addtogroup STM32F1xx_System_Private_Includes
-  * @{
-  */
 
 #include "stm32f1xx.h"
 
-/**
-  * @}
-  */
 
-/** @addtogroup STM32F1xx_System_Private_TypesDefinitions
-  * @{
-  */
-
-/**
-  * @}
-  */
-
-/** @addtogroup STM32F1xx_System_Private_Defines
-  * @{
-  */
 
 #if !defined  (HSE_VALUE)
   #define HSE_VALUE    ((uint32_t)8000000) /*!< Default value of the External oscillator in Hz.
@@ -114,21 +90,7 @@
                                   This value must be a multiple of 0x200. */
 
 
-/**
-  * @}
-  */
 
-/** @addtogroup STM32F1xx_System_Private_Macros
-  * @{
-  */
-
-/**
-  * @}
-  */
-
-/** @addtogroup STM32F1xx_System_Private_Variables
-  * @{
-  */
 
 /*******************************************************************************
 *  Clock Definitions
@@ -140,13 +102,7 @@
 #endif
 
 __IO const uint8_t AHBPrescTable[16] = {0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 3, 4, 6, 7, 8, 9};
-/**
-  * @}
-  */
 
-/** @addtogroup STM32F1xx_System_Private_FunctionPrototypes
-  * @{
-  */
 
 #if defined(STM32F100xE) || defined(STM32F101xE) || defined(STM32F101xG) || defined(STM32F103xE) || defined(STM32F103xG)
 #ifdef DATA_IN_ExtSRAM
@@ -154,13 +110,6 @@ __IO const uint8_t AHBPrescTable[16] = {0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 3, 4, 6, 7
 #endif /* DATA_IN_ExtSRAM */
 #endif /* STM32F100xE || STM32F101xE || STM32F101xG || STM32F103xE || STM32F103xG */
 
-/**
-  * @}
-  */
-
-/** @addtogroup STM32F1xx_System_Private_Functions
-  * @{
-  */
 
 /**
   * @brief  Setup the microcontroller system
@@ -423,15 +372,5 @@ void SystemInit_ExtMemCtl(void)
 #endif /* DATA_IN_ExtSRAM */
 #endif /* STM32F100xE || STM32F101xE || STM32F101xG || STM32F103xE || STM32F103xG */
 
-/**
-  * @}
-  */
 
-/**
-  * @}
-  */
-
-/**
-  * @}
-  */
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

@@ -8,50 +8,53 @@ as well as the build steps of each supported platform
 where all platforms use the tool **CMake** as a common configuration
 point.
 
-The following target platforms are supported by the openSAFETY_DEMO where not
-all platforms always provide a full set of features.
-
-- \subpage page_x86
-- \subpage page_altnios2
-- \subpage page_stm32f103rb
-- \subpage page_stm32f401re
-
-
 # Hardware Requirements   {#sect_requirements_hw}
 
 The following hardware is needed for using the openSAFETY_DEMO:
 
 - 1x Terasic DE2-115 FPGA Board http://www.terasic.com.tw/cgi-bin/page/archive.pl?Language=English&CategoryNo=139&No=502
-- 2x STMicroelectronics NUCLEO-F401RE http://www.st.com/web/catalog/tools/FM116/SC959/SS1532/LN1847/PF260000
+- 2x STMicroelectronics Nucleo boards (NUCLEO-F401RE or NUCLEO-F103RB)
+ - NUCLEO-F401RE http://www.st.com/web/catalog/tools/FM116/SC959/SS1532/LN1847/PF260000
+ - NUCLEO-F103RB http://www.st.com/web/en/catalog/tools/FM116/SC959/SS1532/LN1847/PF259875
 
 For a complete system integration i.e. putting the demo into operation in an
 B&R openSAFETY system, the following hardware is needed:
-- B&R X20CP1585 CPU
+- B&R X20CP1585 CPU + Compact Flash card, 128 MB
 - B&R X20SL8100 SafeLOGIC + SafeKEY X20MK0211 or SafeKEY X20MK0213
+- suitable power supply, eg. B&R PS1100 Power Supply
 
 # Software Requirements   {#sect_requirements_sw}
 
 The software requirements are depending on the desired usage of the openSAFETY_DEMO:
-1. Usage of the pre-built binaries only:
+## 1. Usage of the pre-built binaries only {#sect_req_sw1}
 
   For flashing the development hardware with the pre-built binaries only, the following software is needed:
   - ST-Link/V2-1 USB driver for your NUCLEO board
     - NUCLEO-F401RE: http://www.st.com/web/catalog/tools/FM116/SC959/SS1532/LN1847/PF260000
+    - NUCLEO-F103RB: http://www.st.com/web/en/catalog/tools/FM116/SC959/SS1532/LN1847/PF259875
 
   - Altera Quartus Programmer v13.0sp1 https://www.altera.com/downloads/download-center.html
 
-2. Build the software locally:
+## 2. Build the software locally {#sect_req_sw2}
 
   For building the software and the FPGA bitstream locally,
   the following software is additionally needed to (1):
-  - MinGW (+ MSYS) http://sourceforge.net/projects/mingw/
+  - openSAFETY distribution 1.5 http://sourceforge.net/projects/opensafety
+
+    The content of the downloaded archive needs to be stored to the
+    `openSAFETY` subdirectory in the openSAFETY_DEMO folder.
   - GCC ARM Embedded 4.8-2014-q2-update https://launchpad.net/gcc-arm-embedded/4.8/4.8-2014-q2-update
   - stlink tools https://github.com/texane/stlink
   - libusb http://libusb.info/
   > For further information on installing the mentioned tools refer to \ref page_buildenv_stm32.
 
-  - HAL Library for the used NUCLEO board:
-    - NUCLEO-F401RE: STM32CubeF4 V1.7.0: http://www.st.com/web/en/catalog/tools/PF259243
+  - HAL Library for the used NUCLEO boards:
+    * NUCLEO-F103RB: STM32CubeF1 V1.2.0: http://www.st.com/web/en/catalog/tools/FM147/CL1794/SC961/SS1743/LN1897/PF260820
+
+      **IMPORTANT**: There is a bug in version 1.2.0 of the STM32CubeF1 software.
+      See \ref sect_stm32f103_buildsw_options for a workaround.
+
+    * NUCLEO-F401RE: STM32CubeF4 V1.7.0: http://www.st.com/web/en/catalog/tools/PF259243
   - CMake http://www.cmake.org/
   - Altera Quartus v13.0sp1 with device support for Cyclone IV E devices https://www.altera.com/downloads/download-center.html
   > **Note:** The Quartus Programmer is part of the Quartus Toolchain,
@@ -64,8 +67,9 @@ The software requirements are depending on the desired usage of the openSAFETY_D
   > mandatory to use the generated bitstream.
   > In the case the connection gets closed, the PCP part will stop working.
 
+  - Windows operating systems only: MinGW (+ MSYS) http://sourceforge.net/projects/mingw/
 
-3. Modify the openSAFETY_DEMO with user customised OSDD file:
+## 3. Modify the openSAFETY_DEMO with user customised OSDD file {#sect_req_sw3}
 
   For customising the demo in respect to the processing of input and output data
   as well as the used GPIO pins, the following software is additionally needed to (2):
@@ -75,13 +79,19 @@ The software requirements are depending on the desired usage of the openSAFETY_D
     * PyXB 1.2.4 https://pypi.python.org/pypi/PyXB/1.2.4
     * cogapp 2.4 https://pypi.python.org/pypi/cogapp/2.4
 
-4. System integration in an B&R openSAFETY system:
+## 4. System integration in an B&R openSAFETY system {#sect_req_sw4}
 
   For integrating the demo in an B&R openSAFETY system and putting the whole
   system into operation the following software is needed:
   - Automation Studio 4.2.4 or higher
   - SafeDESIGNER 4.2 or higher
 
+# Flashing the Boards {#sect_flashing}
+
+Please refer to \subpage page_flashing for information on how to download the
+software to the boards. This chapter also covers the procedure for flashing
+the pre-built binaries with minimum software requirements
+(\ref sect_requirements_sw (1)).
 
 # CMake    {#sect_buildsw_cmake}
 
@@ -89,6 +99,22 @@ The openSAFETY_DEMO extensively uses the cross-platform, open-source build
 system called **CMake**. You can download the tool free of charge from
 http://www.cmake.org/ (On Windows) or install it from the local package manager
 (On Linux).
+
+The following target platforms are supported, where not
+all platforms always provide a full set of features.
+Follow the referenced targets for information on hardware and software setup
+and the procedure for building the bitstream and software respectively.
+
+Target platforms used for executing parts of the openSAFETY_DEMO:
+- \subpage page_altnios2
+- \subpage page_stm32f103rb
+- \subpage page_stm32f401re
+
+
+The following platform is used only for compiling and executing the PSI
+unit tests:
+- \subpage page_x86
+
 
 ## Executing CMake    {#sect_buildsw_execmake}
 
@@ -124,7 +150,7 @@ architectures a second or third build folder may be created by the user.
 The following build configuration options are available to pass to **CMake** by
 using the `-D` parameter or by enabling them in the graphical user interface:
 
-> **Note:**When using `cmake-gui` check the boxes `Grouped` and `Advanced`
+> **Note:** When using `cmake-gui` check the boxes `Grouped` and `Advanced`
 > to make visible all available options grouped by their names.
 
 Variable name                 | Description                               | Default value
@@ -218,11 +244,6 @@ CFG_SAPL_SN_FW_CHKSUM   | Specifies the firmware checksum of your SN    | 0x5A5A
 
   This parameter specifies the firmware checksum of your SN. (Object 0x1018/0x5 in the SOD)
 
-
-# Flashing the Boards {#sect_flashing}
-
-Please refert to \subpage page_flashing for information on how to download the
-software to the boards.
 
 # Customise the openSAFETY_DEMO {#sect_user_customisations}
 Please refer to \subpage page_user_customisations for information on

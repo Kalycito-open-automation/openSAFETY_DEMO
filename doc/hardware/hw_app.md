@@ -1,4 +1,4 @@
-Hardware design - Application {#page_hw_app}
+Hardware Design - Application {#page_hw_app}
 ============
 
 [TOC]

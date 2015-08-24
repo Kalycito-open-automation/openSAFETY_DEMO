@@ -26,6 +26,20 @@ Make sure the tools are installed:
 > possibilities and much more. Refer to this help for information not covered
 > in this guide.
 
+## Setting up the hardware {#sect_as_hw_setup}
+
+1. Ensure that the development hardware is set up as described in the sections
+  `How to setup the board` of the used targets.
+2. Connect the openSAFETY_DEMO device to the B&R system as shown in the picture
+  below using Ethernet cables.
+3. Plug the SafeKEY into the SafePLC.
+4. Set the station number of the PLC to a value between 1 and 253,
+  set the node number of the SafePLC to 1 and the node number of the
+  openSAFETY_DEMO device to 2 (switch SW11 up, all others down).
+
+![Hardware structure](br_hardware.png)
+@image latex br_hardware.png "Hardware structure" width=0.75\textwidth
+
 ## Importing the openSAFETY_DEMO {#sect_as_osdd_import}
 
 For importing the openSAFETY_DEMO device, perform the following steps:
@@ -34,19 +48,6 @@ For importing the openSAFETY_DEMO device, perform the following steps:
 2. Import the OSDD file from the directory **device_description** via the
     menu `Tools -> Import Fieldbus Device...`, then select the XDD file in the
     window opened afterwards.
-
-## Setting up the hardware {#sect_as_hw_setup}
-
-1. Ensure that the development hardware is set up as described in the sections
-  `How to setup the board` of the used targets.
-2. Connect the openSAFETY_DEMO device to the B&R system as shown in the picture
-  below using Ethernet cables.
-3. Plug the SafeKEY into the SafePLC.
-4. Set the node number of the SafePLC to 1, set the node number of the
-  openSAFETY_DEMO device to 2 (switch SW11 up, all others down).
-
-![Hardware structure](br_hardware.png)
-@image latex br_hardware.png "Hardware structure" width=0.75\textwidth
 
 ## Downloading the software {#sect_as_sw_setup}
 

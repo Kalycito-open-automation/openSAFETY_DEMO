@@ -4,12 +4,13 @@
 
 \section sect_singlesn_impl Single channel - Implementation details
 
-The single channelled SN demo uses the same system setup as the CN demo with a
-slightly more complex application and a different configuration of the PSI
-library.
+The single channelled SN demo is a slightly simpler application than the
+dual channelled SN demo.
 
 The SN demo source code is located in the folder **app/demo-sn-gpio** where the
-openSAFETY protocol stack implementation is located under **/openSAFETY**!
+openSAFETY protocol stack implementation is located in the
+folder **openSAFETY**.
+
 The openSAFETY stack itself basically creates the openSAFETY frames which need
 to be forwarded to the underlying fieldbus. The SN demo firmware is put together
 by the following software modules:

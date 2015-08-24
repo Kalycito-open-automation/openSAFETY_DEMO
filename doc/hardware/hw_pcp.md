@@ -1,4 +1,4 @@
-Hardware design - PCP {#page_hw_pcp}
+Hardware Design - PCP {#page_hw_pcp}
 ============
 
 [TOC]

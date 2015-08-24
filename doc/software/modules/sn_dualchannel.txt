@@ -3,23 +3,24 @@
 \addtogroup group_app_sn
 
 \section sect_dualsn_impl Dual channel - Implementation details
-A dual channelled SN demo means that a second redundant application processors
-runs concurrently to a single channelled processors. These two processors always
-receive the same input data stream at slightly the same time which makes them behave
-like they are the same.
+A dual channelled SN demo means that a second redundant application processor
+runs concurrently to a single channelled processor. These two processors always
+receive the same input data stream at slightly the same time which makes them
+behave like they are the same.
 
 An additional serial connection between the two redundant processors is used
 in order to verify that both processors always produce the same output data
 in each cycle.
 
 As one of the processors always triggers the data exchange with the PCP and
-also assembles the final output image for POWERLINK the execution on both processors
-is not completely concurrent. Therefore the names **uP-Master** and **uP-Slave**
-are chosen for these two processors.
+also assembles the final output image for POWERLINK,
+the execution on both processors is not completely concurrent.
+Therefore the names **uP-Master** and **uP-Slave** are chosen for these two
+processors.
 
 \subsection sect_dualsn_impl_rcv Receive data flow
 Basically each information block produced by the PCP and forwarded to the uP-Master
-are also sent to the redundant controller uP-Slave. The information flow is
+is also sent to the redundant controller uP-Slave. The information flow is
 conveyed by the PSI interface by extending the SPI connection from the uP-Master
 to the PCP with additional lines to the uP-Slave. The following wires of the
 PCP <-> uP-Master connection are shared with the SPI-Slave of uP-Slave:
@@ -28,7 +29,7 @@ PCP <-> uP-Master connection are shared with the SPI-Slave of uP-Slave:
 - Slave Select (SS)
 
 > The MISO line from the uP-Master <-> PCP interconnect is connected to the MOSI
-> line of uP-Slave!
+> line of uP-Slave.
 
 ![Demo receive data flow details](sn-dual-rcv_data_flow.png)
 @image latex sn-dual-rcv_data_flow.eps "Demo receive data flow details"
@@ -44,8 +45,8 @@ to the safe processors. The data exchange occurs as following:
    the input image and have a concurrent view of the incoming data from the network.
 
 \subsection sect_dualsn_impl_trans Transmit data flow
-The transmit data flow is slightly more complex than the receive data flow as
-every produced frame needs to be assembled from one subframes of uP-Master and
+The transmit data flow is slightly more complex than the receive data flow, as
+every produced frame needs to be assembled from one subframe of uP-Master and
 uP-Slave. This means that the PCP needs to transmit an openSAFETY frame where
 sub1 was produced by uP-Master and sub2 by uP-Slave.
 

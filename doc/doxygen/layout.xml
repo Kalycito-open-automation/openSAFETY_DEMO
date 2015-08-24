@@ -5,40 +5,7 @@
     <tab type="user" url="\ref page_protocols" title="Fieldbus Protocols"/>
     <tab type="user" url="\ref page_sysdesc" title="System Overview"/>
     <tab type="user" url="\ref page_directories" title="Directory Structure"/>
-    <tab type="usergroup" url="\ref page_idxhardware" title="Hardware design">
-      <tab type="user" url="\ref page_hw_pcp" title="Hardware design - PCP"/>
-      <tab type="user" url="\ref page_hw_app" title="Hardware design - Application"/>
-    </tab>
-    <tab type="usergroup" url="\ref page_idxipcore" title="IP-Core Manual">
-      <tab type="usergroup" url="\ref page_plkif" title="POWERLINK Interface IP-Core">
-        <tab type="user" url="\ref page_tbuf" title="Triple Buffer"/>
-        <tab type="user" url="\ref page_spibridge" title="SPI Bridge"/>
-      </tab>
-      <tab type="user" url="\ref page_openmac" title="openMAC IP-Core"/>
-    </tab>
-    <tab type="usergroup" url="\ref page_idxsoftware" title="Software Manual">
-      <tab type="modules" visible="yes" title="" intro=""/>
-      <tab type="namespaces" visible="no" title="">
-        <tab type="namespacelist" visible="yes" title="" intro=""/>
-        <tab type="namespacemembers" visible="yes" title="" intro=""/>
-      </tab>
-      <tab type="classes" visible="yes" title="">
-       <tab type="classlist" visible="yes" title="" intro=""/>
-       <tab type="classindex" visible="$ALPHABETICAL_INDEX" title=""/>
-       <tab type="hierarchy" visible="yes" title="" intro=""/>
-       <tab type="classmembers" visible="yes" title="" intro=""/>
-      </tab>
-      <tab type="files" visible="yes" title="">
-        <tab type="filelist" visible="yes" title="" intro=""/>
-        <tab type="globals" visible="yes" title="" intro=""/>
-      </tab>
-      <tab type="examples" visible="yes" title="" intro=""/>
-    </tab>
-    <tab type="files" visible="yes" title="">
-      <tab type="filelist" visible="yes" title="" intro=""/>
-      <tab type="globals" visible="yes" title="" intro=""/>
-    </tab>
-    <tab type="examples" visible="yes" title="" intro=""/>
+
     <tab type="usergroup" url="\ref page_ugindex" title="User Guide">
       <tab type="user" url="\ref page_x86" title="Target x86/amd64"/>
       <tab type="usergroup" url="\ref page_altnios2" title="Target Altera/Nios2">
@@ -62,6 +29,44 @@
       <tab type="usergroup" url="\ref page_user_customisations" title="How to customise the openSAFETY_DEMO"/>
       <tab type="usergroup" url="\ref page_system_integration" title="System integration, start up"/>
     </tab>
+
+    <tab type="usergroup" url="\ref page_systemdesign" title="System Design">
+        <tab type="usergroup" url="\ref page_idxhardware" title="Hardware Design">
+          <tab type="user" url="\ref page_hw_pcp" title="Hardware Design - PCP"/>
+          <tab type="user" url="\ref page_hw_app" title="Hardware Design - Application"/>
+        </tab>
+        <tab type="usergroup" url="\ref page_idxipcore" title="IP-Core Manual">
+          <tab type="usergroup" url="\ref page_plkif" title="POWERLINK Interface IP-Core">
+            <tab type="user" url="\ref page_tbuf" title="Triple Buffer"/>
+            <tab type="user" url="\ref page_spibridge" title="SPI Bridge"/>
+          </tab>
+          <tab type="user" url="\ref page_openmac" title="openMAC IP-Core"/>
+        </tab>
+        <tab type="usergroup" url="\ref page_idxsoftware" title="Software Manual">
+          <tab type="modules" visible="yes" title="" intro=""/>
+          <tab type="namespaces" visible="no" title="">
+            <tab type="namespacelist" visible="yes" title="" intro=""/>
+            <tab type="namespacemembers" visible="yes" title="" intro=""/>
+          </tab>
+          <tab type="classes" visible="yes" title="">
+           <tab type="classlist" visible="yes" title="" intro=""/>
+           <tab type="classindex" visible="$ALPHABETICAL_INDEX" title=""/>
+           <tab type="hierarchy" visible="yes" title="" intro=""/>
+           <tab type="classmembers" visible="yes" title="" intro=""/>
+          </tab>
+          <tab type="files" visible="yes" title="">
+            <tab type="filelist" visible="yes" title="" intro=""/>
+            <tab type="globals" visible="yes" title="" intro=""/>
+          </tab>
+          <tab type="examples" visible="yes" title="" intro=""/>
+        </tab>
+    </tab>
+
+    <tab type="files" visible="yes" title="">
+      <tab type="filelist" visible="yes" title="" intro=""/>
+      <tab type="globals" visible="yes" title="" intro=""/>
+    </tab>
+    <tab type="examples" visible="yes" title="" intro=""/>
     <tab type="user" url="\ref page_revision" title="Revision History"/>
     <tab type="user" url="\ref page_licenses" title="Licenses"/>
   </navindex>

@@ -1,13 +1,11 @@
 //==============================================================================
 //==============================================================================
 /**
-\defgroup group_applications Example Applications
+\defgroup group_applications User Application
 
-This page provides an overview of all example applications of the software
-distribution. As the PSI hosts two different kind of demos the CN and the SN
-demo there need to be four groups of modules. Two for the demos, one for the
-generic files which are shared by both demos and one for the target specific
-files which are shared by both demos.
+This page provides an overview of the user application parts of the software
+distribution. There is one part with the SN demo itself, one part for generic
+files and one part for the target specific files.
 
 */
 //==============================================================================
@@ -33,8 +31,7 @@ input output GPIO application.
 /**
 \defgroup group_app_target Target specific files
 
-This group consists of all modules which are shared between the example
-applications and consists of platform dependent code.
+This group consists of all modules which consist of platform dependent code.
 
 \ingroup group_applications
 
@@ -47,8 +44,7 @@ applications and consists of platform dependent code.
 /**
 \defgroup group_app_common Application common files
 
-This group consists of all modules which are shared between the example
-applications.
+This group consists of all modules which are generic to the application.
 
 \ingroup group_applications
 

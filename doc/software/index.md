@@ -13,8 +13,8 @@ The build steps for the software vary depending on the platform the software is
 cross compiled. See the \ref page_ugindex for more information about each build
 step.
 
-All software parts including the interface libraries which are running on the
-application processor provide unit tests in the folder `src/unittest`.
+For the interface libraries which are running on the application processor there
+are provided unit tests in the folder `src/unittest`.
 
 # POWERLINK interface driver (PCP)  {#sect_sw_pcp}
 Documentation of the software running on the POWERLINK processor (PCP) is

@@ -23,6 +23,7 @@ Initial release of the openSAFETY_DEMO.
         - Dual channelled
   - Demos ported to platforms:
      * terasic-de2-115
+     * stm32f103rb
      * stm32f401re
   - Full documentation in doxygen.
   - Common build system for all platforms (CMake)
