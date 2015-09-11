@@ -44,7 +44,7 @@ SET(BOARD_TARGET_DIR ${SN_TARGET_SOURCE_DIR}/stm32f401rb)
 
 ################################################################################
 # Set demo linker script
-SET(DEMO_LINKER_SCRIPT ${TARGET_DIR}/stm32f401cr_flash.ld)
+SET(DEMO_LINKER_SCRIPT ${TARGET_DIR}/STM32F401XE.ld)
 
 ################################################################################
 # Set architecture specific sources
