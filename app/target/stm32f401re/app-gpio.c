@@ -93,7 +93,7 @@ forwards it to the user application.
  */
 /* @{*/
 #define GPIO_PORT           GPIOC                       /**<  Port C */
-#define GPIO_INPUT_PINS     (GPIO_PIN_6 | GPIO_PIN_8)   /**< MorphoConnector CN7: Pin 2 (PC8), Pin 4 (PC6) */
+#define GPIO_INPUT_PINS     (GPIO_PIN_6 | GPIO_PIN_8)   /**< MorphoConnector CN10: Pin 2 (PC8), Pin 4 (PC6) */
 #define GPIO_OUTPUT_PINS    (GPIO_PIN_2 | GPIO_PIN_3)   /**< MorphoConnector CN7: Pin 35 (PC2), Pin 37 (PC3) */
 #define GPIO_CLK_ENABLE()   __HAL_RCC_GPIOC_CLK_ENABLE()  /**< HAL driver macro to enable clock */
 #define GPIO_CLK_DISABLE()  __HAL_RCC_GPIOC_CLK_DISABLE() /**< HAL driver macro to enable clock */

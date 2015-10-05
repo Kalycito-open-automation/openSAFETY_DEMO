@@ -204,15 +204,15 @@ void platform_msleep(UINT32 msec_p)
   \brief  System Clock Configuration
 
       The system Clock is configured as follow :
-         System Clock source            = PLL (HSI)
+         System Clock source            = PLL (HSE)
          SYSCLK(Hz)                     = 84000000
          HCLK(Hz)                       = 84000000
          AHB Prescaler                  = 1
          APB1 Prescaler                 = 2
          APB2 Prescaler                 = 1
-         HSI Frequency(Hz)              = 16000000
-         PLL_M                          = 16
-         PLL_N                          = 336
+         HSI Frequency(Hz)              = 8000000
+         PLL_M                          = 4
+         PLL_N                          = 168
          PLL_P                          = 4
          PLL_Q                          = 7
          VDD(V)                         = 3.3
@@ -237,13 +237,13 @@ static BOOL systemClockInit(void)
     __HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE2);
 
     /* Enable HSI Oscillator and activate PLL with HSI as source */
-    RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI;
-    RCC_OscInitStruct.HSIState = RCC_HSI_ON;
-    RCC_OscInitStruct.HSICalibrationValue = 0x10;
+    RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE;
+    RCC_OscInitStruct.HSIState = RCC_HSI_OFF;
+    RCC_OscInitStruct.HSEState = RCC_HSE_BYPASS;
     RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
-    RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSI;
-    RCC_OscInitStruct.PLL.PLLM = 16;
-    RCC_OscInitStruct.PLL.PLLN = 336;
+    RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
+    RCC_OscInitStruct.PLL.PLLM = 4;
+    RCC_OscInitStruct.PLL.PLLN = 168;
     RCC_OscInitStruct.PLL.PLLP = RCC_PLLP_DIV4;
     RCC_OscInitStruct.PLL.PLLQ = 7;
     if(HAL_RCC_OscConfig(&RCC_OscInitStruct) == HAL_OK)
