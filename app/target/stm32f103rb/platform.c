@@ -204,13 +204,13 @@ void platform_msleep(UINT32 msec_p)
   \brief  System Clock Configuration
 
         The system Clock is configured as follow :
-           System Clock source            = PLL (HSI)
-           SYSCLK(Hz)                     = 64000000
-           HCLK(Hz)                       = 64000000
+           System Clock source            = PLL (HSE)
+           SYSCLK(Hz)                     = 72000000
+           HCLK(Hz)                       = 72000000
            AHB Prescaler                  = 1
            APB1 Prescaler                 = 2
            APB2 Prescaler                 = 1
-           PLLMUL                         = 16
+           PLLMUL                         = 9
            Flash Latency(WS)              = 2
 
  \return TRUE on success; FALSE on error
@@ -225,21 +225,15 @@ static BOOL systemClockInit(void)
     /* Enable Power Control clock */
     __HAL_RCC_PWR_CLK_ENABLE();
 
-    /* The voltage scaling allows optimizing the power consumption when the device is
-     clocked below the maximum system frequency, to update the voltage scaling value
-     regarding system frequency refer to product datasheet.  */
-    //__HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE2);
-
-    /* Enable HSI Oscillator and activate PLL with HSI as source */
-    RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI;
-    RCC_OscInitStruct.HSEState        = RCC_HSE_OFF;
-    RCC_OscInitStruct.LSEState        = RCC_LSE_OFF;
-    RCC_OscInitStruct.HSIState = RCC_HSI_ON;
-    RCC_OscInitStruct.HSICalibrationValue = RCC_HSICALIBRATION_DEFAULT;
-    RCC_OscInitStruct.HSEPredivValue    = RCC_HSE_PREDIV_DIV1;
+    /* Enable HSE Oscillator and activate PLL with HSE as source */
+    RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE;
+    RCC_OscInitStruct.HSEState = RCC_HSE_BYPASS;
+    RCC_OscInitStruct.LSEState = RCC_LSE_OFF;
+    RCC_OscInitStruct.HSIState = RCC_HSI_OFF;
+    RCC_OscInitStruct.HSEPredivValue = RCC_HSE_PREDIV_DIV1;
     RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
-    RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSI_DIV2;
-    RCC_OscInitStruct.PLL.PLLMUL = RCC_PLL_MUL16;
+    RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
+    RCC_OscInitStruct.PLL.PLLMUL = RCC_PLL_MUL9;
     if(HAL_RCC_OscConfig(&RCC_OscInitStruct) == HAL_OK)
     {
         /* Select PLL as system clock source and configure the HCLK, PCLK1 and PCLK2 clocks dividers */
