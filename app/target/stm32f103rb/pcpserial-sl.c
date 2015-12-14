@@ -319,7 +319,7 @@ static BOOL initSpi(void)
 
 Setup the DMA for to receive from SPIx to RAM!
 
-\param pTransParam_p    Pointer to the transfer parameters structure
+\param pSpiHandler_p    Pointer to the SPI handler
 */
 /*----------------------------------------------------------------------------*/
 static BOOL initDma(SPI_HandleTypeDef* pSpiHandler_p)

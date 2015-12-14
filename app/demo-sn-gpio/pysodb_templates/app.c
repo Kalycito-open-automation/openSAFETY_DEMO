@@ -254,8 +254,8 @@ to the gpio pins
 static BOOLEAN processGPIO(UINT8 inPort_p, UINT32* pOutport_p)
 {
     BOOLEAN fReturn = FALSE;
-    UNUSED_PARAMETER(inPort_p);
-    UNUSED_PARAMETER(pOutport_p);
+    UNUSED_PARAMETER(inPort_p);     /*remove line if parameter is used*/
+    UNUSED_PARAMETER(pOutport_p);   /*remove line if parameter is used*/
 
     if(pOutport_p != NULL)
     {
