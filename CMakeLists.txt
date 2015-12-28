@@ -108,7 +108,7 @@ IF ( UNITTEST_ENABLE )
     CONFIGURE_FILE (
         ${CMAKE_SOURCE_DIR}/CTestCustom.cmake
         ${CMAKE_BINARY_DIR}/CTestCustom.cmake
-        COPY_ONLY
+        COPYONLY
     )
 
     IF ( UNITTEST_XML_REPORTS )

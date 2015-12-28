@@ -86,8 +86,8 @@ $(PROGRAM_EPCS_TARGET) : $(ELF)
 .PHONY : erase-nvm
 erase-nvm:
 	@nios2-configure-sof $(DOWNLOAD_CABLE_FLAG) -C $(QUARTUS_PROJECT_DIR)
-	$(ECHO) $(FLASHPROG) --instance=$(INSTANCE_ID) $(DOWNLOAD_CABLE_FLAG) $(SOPC_SYSID_FLAG) $($(basename $(PROGRAM_EPCS_TARGET))_EPCS_FLAGS) --base=$($(basename $(PROGRAM_EPCS_TARGET))_START) --accept-bad-sysid --erase-all
-	$(FLASHPROG) --instance=$(INSTANCE_ID) $(DOWNLOAD_CABLE_FLAG) $(SOPC_SYSID_FLAG) $($(basename $(PROGRAM_EPCS_TARGET))_EPCS_FLAGS) --base=$($(basename $(PROGRAM_EPCS_TARGET))_START) --accept-bad-sysid --erase-all
+	$(ECHO) $(FLASHPROG) --instance=$(INSTANCE_ID) $(DOWNLOAD_CABLE_FLAG) $(SOPC_SYSID_FLAG) $($(basename $(PROGRAM_EPCS_TARGET))_EPCS_FLAGS) --base=$($(basename $(PROGRAM_EPCS_TARGET))_START) --override=$(FLASH_OVERRIDE) --accept-bad-sysid --erase-all
+	$(FLASHPROG) --instance=$(INSTANCE_ID) $(DOWNLOAD_CABLE_FLAG) $(SOPC_SYSID_FLAG) $($(basename $(PROGRAM_EPCS_TARGET))_EPCS_FLAGS) --base=$($(basename $(PROGRAM_EPCS_TARGET))_START) --override=$(FLASH_OVERRIDE) --accept-bad-sysid --erase-all
 
 # Rule for downloading the FPGA bitstream to the target
 .PHONY : download-bits
