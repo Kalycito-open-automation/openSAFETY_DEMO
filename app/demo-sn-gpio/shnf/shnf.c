@@ -556,6 +556,9 @@ static void buildTxSpdoFrame(void)
 
         DEBUG_TRACE(DEBUG_LVL_SHNF, "Build TSPDO\n");
 
+       #if (SPDO_cfg_40_BIT_CT_SUPPORT == EPLS_k_ENABLE)
+        SPDO_UpdateExtCtValue(B_INSTNUM_ consTime);
+       #endif /* (SPDO_cfg_40_BIT_CT_SUPPORT == EPLS_k_ENABLE) */
         /* SPDO frames are built */
         SPDO_BuildTxSpdo(B_INSTNUM_ consTime, &numFreeSpdoFrms);
     }

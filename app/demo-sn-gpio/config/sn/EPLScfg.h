@@ -120,7 +120,7 @@
 
 /* Define to enable the support for SPDOs with a 40-bit CT value.
  * Allowed values: EPLS_k_ENABLE, EPLS_k_DISABLE */
-#define SPDO_cfg_40_BIT_CT_SUPPORT              EPLS_k_DISABLE
+#define SPDO_cfg_40_BIT_CT_SUPPORT              EPLS_k_ENABLE
 
 /* Extended CT bit field is to be created
  * Allowed values: EPLS_k_ENABLE, EPLS_k_DISABLE */
