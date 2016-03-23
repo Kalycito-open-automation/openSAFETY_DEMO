@@ -641,23 +641,22 @@ static void processRxSpdoFrame(UINT8* pPayload_p, UINT16 paylLen_p)
         {
             /* Get payload length field from frame */
             pLenField = &pPayload_p[FRAME_OFFSET_LENGTH];
-            if(*pLenField > 0)
-            {
-                DEBUG_TRACE(DEBUG_LVL_SHNF, "Rcv RSPDO\n");
 
-                consTime = constime_getTime();
+            DEBUG_TRACE(DEBUG_LVL_SHNF, "Rcv RSPDO\n");
 
-                /* Calculate real size of frame by using the length field */
-                paylLen = getFrameLength(pLenField);
+            consTime = constime_getTime();
 
-                /* Forward frame to stack */
-                SPDO_ProcessRxSpdo(B_INSTNUM_ consTime, pPayload_p, paylLen);
+            /* Calculate real size of frame by using the length field */
+            paylLen = getFrameLength(pLenField);
+
+            /* Forward frame to stack */
+            SPDO_ProcessRxSpdo(B_INSTNUM_ consTime, pPayload_p, paylLen);
 
 #if (SPDO_cfg_MAX_NO_RX_SPDO != 0)
-                /* SCT timeout is checked */
-                SPDO_CheckRxTimeout(B_INSTNUM_ consTime);
+            /* SCT timeout is checked */
+            SPDO_CheckRxTimeout(B_INSTNUM_ consTime);
 #endif
-            }
+
         }
     }
     else
