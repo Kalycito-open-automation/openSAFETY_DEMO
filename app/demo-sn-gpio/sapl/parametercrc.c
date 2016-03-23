@@ -413,6 +413,7 @@ static BOOLEAN verifyCrc32Values(void)
 {
     BOOLEAN fCrcValid = FALSE;
     BOOLEAN fSubCrcValid = TRUE;
+    BOOLEAN fIsAppObj = FALSE;
     UINT8 i = 0;
     UINT32 paramCrcHdl = 0;
     SOD_t_ERROR_RESULT errRes;
@@ -423,11 +424,11 @@ static BOOLEAN verifyCrc32Values(void)
 
     /* Get attribute of the Parameter Checksum object */
     pSodAttr = (SOD_t_ATTR *)SOD_AttrGet(DEVICE_VENDOR_OBJ_IDX, PARAMETER_CHECKSUM_OBJ_SUBIDX,
-                                         &paramCrcHdl, FALSE, &errRes);
+                                         &paramCrcHdl, &fIsAppObj, &errRes);
     if(pSodAttr != NULL)
     {
         /* Read the data of the parameter checksum object */
-        pChkSumObj = (tParamChksum *)SOD_Read(paramCrcHdl, FALSE, 0, pSodAttr->dw_objLen, &errRes);
+        pChkSumObj = (tParamChksum *)SOD_Read(paramCrcHdl, fIsAppObj, 0, pSodAttr->dw_objLen, &errRes);
         if(pChkSumObj != NULL)
         {
             /* Iterate over all parameter checksum values */
