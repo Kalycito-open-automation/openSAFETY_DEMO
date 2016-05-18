@@ -317,7 +317,7 @@
                     <Object index="1006" name="NMT_CycleLen_U32" objectType="7" dataType="0007" accessType="rw" PDOmapping="no" defaultValue="1000"/>
                     <Object index="1008" name="NMT_ManufactDevName_VS" objectType="7" dataType="0009" accessType="const" PDOmapping="no" defaultValue="openSAFETY_DEMO"/>
                     <Object index="1009" name="NMT_ManufactHwVers_VS" objectType="7" dataType="0009" accessType="const" PDOmapping="no" defaultValue="1.00"/>
-                    <Object index="100A" name="NMT_ManufactSwVers_VS" objectType="7" dataType="0009" accessType="const" PDOmapping="no" defaultValue="OPLK V2.0.1"/>
+                    <Object index="100A" name="NMT_ManufactSwVers_VS" objectType="7" dataType="0009" accessType="const" PDOmapping="no" defaultValue="OPLK V2.0.2"/>
                     <Object index="1018" name="NMT_IdentityObject_REC" objectType="9">
                         <SubObject subIndex="00" name="NumberOfEntries" objectType="7" dataType="0005" accessType="const" PDOmapping="no" defaultValue="4"/>
                         <SubObject subIndex="01" name="VendorId_U32" objectType="7" dataType="0007" accessType="const" PDOmapping="no" defaultValue="0x00000000"/>
@@ -610,6 +610,11 @@
                         <SubObject subIndex="01" name="NodeID_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
                         <SubObject subIndex="02" name="MappingVersion_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
                     </Object>
+					<Object index="1402" name="PDO_RxCommParam_02h_REC" objectType="9">
+                        <SubObject subIndex="00" name="NumberOfEntries" objectType="7" dataType="0005" accessType="const" PDOmapping="no" defaultValue="2"/>
+                        <SubObject subIndex="01" name="NodeID_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+                        <SubObject subIndex="02" name="MappingVersion_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+                    </Object>
                     <Object index="1600" name="PDO_RxMappParam_00h_AU64" objectType="8">
                         <SubObject subIndex="00" name="NumberOfEntries" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
                         <SubObject subIndex="01" name="ObjectMapping" objectType="7" dataType="001B" accessType="rw" PDOmapping="no" defaultValue="0x0000000000000000"/>
@@ -717,13 +722,13 @@
                         <SubObject subIndex="02" name="ThresholdCnt_U32" objectType="7" dataType="0007" accessType="ro" PDOmapping="no"/>
                         <SubObject subIndex="03" name="Threshold_U32" objectType="7" dataType="0007" accessType="rw" PDOmapping="no" defaultValue="15"/>
                     </Object>
-                    <Object index="1C14" name="DLL_CNLossOfSocTolerance_U32" objectType="7" dataType="0007" accessType="rw" defaultValue="100000"/>
+                    <Object index="1C14" name="DLL_CNLossOfSocTolerance_U32" objectType="7" dataType="0007" accessType="rw" defaultValue="5000000"/>
                     <Object index="1E40" name="NWL_IpAddrTable_0h_REC" objectType="9">
                         <SubObject subIndex="00" name="NumberOfEntries" objectType="7" dataType="0005" accessType="const" PDOmapping="no" defaultValue="5"/>
                         <SubObject subIndex="01" name="IfIndex_U16" objectType="7" dataType="0006" accessType="ro" PDOmapping="no" defaultValue="1"/>
                         <SubObject subIndex="02" name="Addr_IPAD" objectType="7" dataType="0402" accessType="ro" PDOmapping="no" defaultValue="192.168.100.2"/>
                         <SubObject subIndex="03" name="NetMask_IPAD" objectType="7" dataType="0402" accessType="ro" PDOmapping="no" defaultValue="255.255.255.0"/>
-                        <SubObject subIndex="04" name="ReasmMaxSize_U16" objectType="7" dataType="0006" accessType="ro" PDOmapping="no" defaultValue="0"/>
+                        <SubObject subIndex="04" name="ReasmMaxSize_U16" objectType="7" dataType="0006" accessType="ro" PDOmapping="no" defaultValue="50000"/>
                         <SubObject subIndex="05" name="DefaultGateway_IPAD" objectType="7" dataType="0402" accessType="rw" PDOmapping="no" defaultValue="192.168.100.254"/>
                     </Object>
                     <Object index="1E4A" name="NWL_IpGroup_REC" objectType="9">
@@ -988,7 +993,7 @@
                         <SubObject subIndex="FD" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" PDOmapping="no" defaultValue="0"/>
                         <SubObject subIndex="FE" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" PDOmapping="no" defaultValue="0"/>
                     </Object>
-                    <Object index="1F82" name="NMT_FeatureFlags_U32" objectType="7" dataType="0007" accessType="const" PDOmapping="no" defaultValue="0x00050247"/>
+                    <Object index="1F82" name="NMT_FeatureFlags_U32" objectType="7" dataType="0007" accessType="const" PDOmapping="no" defaultValue="0x00050267"/>
                     <Object index="1F83" name="NMT_EPLVersion_U8" objectType="7" dataType="0005" accessType="const" PDOmapping="no" defaultValue="0x20"/>
                     <Object index="1F8C" name="NMT_CurrNMTState_U8" objectType="7" dataType="0005" PDOmapping="optional" accessType="ro"/>
                     <Object index="1F8D" name="NMT_PResPayloadLimitList_AU16" objectType="8" dataType="0006">

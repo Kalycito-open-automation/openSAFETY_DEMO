@@ -52,11 +52,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // POWERLINK CN default settings (Use powerlink.h to overload these settings)
 //------------------------------------------------------------------------------
 #ifndef CONFIG_ISOCHR_TX_MAX_PAYLOAD
-#define CONFIG_ISOCHR_TX_MAX_PAYLOAD    max(40, sizeof(tTpdoMappedObj))
+#define CONFIG_ISOCHR_TX_MAX_PAYLOAD    max(36, sizeof(tTpdoMappedObj))
 #endif
 
 #ifndef CONFIG_ISOCHR_RX_MAX_PAYLOAD
-#define CONFIG_ISOCHR_RX_MAX_PAYLOAD    1496
+#define CONFIG_ISOCHR_RX_MAX_PAYLOAD    1490
 #endif
 
 #ifndef CONFIG_IDENT_DEVICE_TYPE

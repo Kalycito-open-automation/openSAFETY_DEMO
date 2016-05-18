@@ -280,7 +280,7 @@ static tPsiStatus psi_initPlk(tMainInstance* pInstance_p)
     initParam.presMaxLatency              = 2000;                          // const; only required for IdentRes
     initParam.asndMaxLatency              = 2000;                          // const; only required for IdentRes
     initParam.preqActPayloadLimit         = 36;                            // required for initialization (+28 bytes)
-    initParam.presActPayloadLimit         = 40;                            // required for initialization of Pres frame (+28 bytes)
+    initParam.presActPayloadLimit         = 36;                            // required for initialization of Pres frame (+28 bytes)
     initParam.multiplCylceCnt             = 0;                             // required for error detection
     initParam.asyncMtu                    = 300;                           // required to set up max frame size
     initParam.prescaler                   = 2;                             // required for sync
