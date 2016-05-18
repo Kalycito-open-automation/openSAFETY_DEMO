@@ -1,0 +1,88 @@
+//==============================================================================
+//==============================================================================
+/**
+\defgroup group_app_sn_shnf Safety Hardware Near Firmware (SHNF) module
+
+This group consists of all modules which enable the frame forwarding from
+the underlying fieldbus to the openSAFETY stack. It provides a generic interface
+by the header demo-sn-gpio/shnf/include/shnf/hnf.h in order to use the SN firmware
+with other interfaces than the PSI.
+
+\ingroup group_app_sn
+
+*/
+//==============================================================================
+//==============================================================================
+
+//==============================================================================
+//==============================================================================
+/**
+\defgroup group_app_sn_sapl Safety Application (SAPL) module
+
+This group consists of the modules which implement the safe application. They
+handle the parameter stream from the SCM, calculate the CRC32 over the SOD and
+store the SOD to the NVM.
+
+\ingroup group_app_sn
+
+*/
+//==============================================================================
+//==============================================================================
+
+//==============================================================================
+//==============================================================================
+/**
+\defgroup group_app_sn_boot Bootup module
+
+This group consists of all modules which are used in order to carry out the
+communication between the two redundant processors on bootup. It uses the
+serial device for cross communication to synchronize the bootup of both
+processors.
+
+\ingroup group_app_sn
+
+*/
+//==============================================================================
+//==============================================================================
+
+//==============================================================================
+//==============================================================================
+/**
+\defgroup group_app_sn_target Target specific module
+
+This group consists of all modules of the Safety Node demo which are target
+dependent.
+
+\ingroup group_app_sn
+
+*/
+//==============================================================================
+//==============================================================================
+
+//==============================================================================
+//==============================================================================
+/**
+\defgroup group_app_sn_targ_stm32f103 Target stm32f103 (Cortex-M3)
+
+This group consists of all modules which are target dependent for the @b stm32f103
+board with a @b Cortex-M3 processor.
+
+\ingroup group_app_sn_target
+
+*/
+//==============================================================================
+//==============================================================================
+
+//==============================================================================
+//==============================================================================
+/**
+\defgroup group_app_sn_targ_stm32f401 Target stm32f401 (Cortex-M4)
+
+This group consists of all modules which are target dependent for the @b stm32f401
+board with a @b Cortex-M4 processor.
+
+\ingroup group_app_sn_target
+
+*/
+//==============================================================================
+//==============================================================================

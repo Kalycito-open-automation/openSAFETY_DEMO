@@ -1,0 +1,24 @@
+//==============================================================================
+/**
+\addtogroup group_app_sn_boot
+
+\section sect_dualsn_impl_bootup Boot-up handshake
+In order to enable a synchronized bootup, a handshake is performed between both
+safe processors. This handshake is carried out in the following way:
+
+1. The uP-Master boots up and waits for the **welcome** message from the uP-Slave.
+2. uP-Slave boots up and sends the **welcome** message
+3. uP-Master restores it's local SOD from NVM when both processors have a valid image
+4. uP-Master sends the **response** message
+5. uP-Slave receives the **response** message and also restores the local SOD
+6. uP-Slave sends the **sync** message
+7. On **sync** receive the uP-Master waits for the first sync IR from the PCP
+8. uP-Master receives the sync IR and sends the **ready** message.
+9. uP-Slave receives the **ready** message
+
+\b -> Both processors boot up synchronously!
+
+![Processor handshake](sn_handshake.png)
+@image latex sn_handshake.eps "Processor handshake" width=0.7\textwidth
+
+*/

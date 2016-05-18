@@ -1,0 +1,65 @@
+//==============================================================================
+/**
+\addtogroup module_psi_cc
+
+The configuration channel module provides access to a few designated objects of
+the object dictionary of the POWERLINK stack. The channel itself is realized by
+decoupling the internal PCP / application communication from the POWERLINK SDO
+transfer. This enables the MN to only update the local OD on the PCP. In order
+to get and set new data the local application polls the PCP object dictionary
+by using the **internal communication loop**. The transfer in the internal
+communication loop is done by processing a predefined list of objects. This
+list is exchanged cyclically which eventually provides a consistent view to the
+PCP object dictionary at the application.
+
+![Configuration Channel - details](internal_communication_loop.png)
+@image latex internal_communication_loop.eps "Configuration Channel - details"
+
+This module is not actually forwarding an event when an object is externally
+updated via SDO. It can take a few cycles until the new data arrives at the
+applications local copy of the object list. Therefore the user can only poll
+the local object list for new information by using the corresponding \ref cc_readObject
+function.
+
+If it is desired to update a value in the object dictionary of the PCP the
+\ref cc_writeObject function can be used. Consider that this function is only
+updating the local OD of the PCP and is not establishing an SDO transfer to a
+remote location.
+
+\section module_psi_cc_interface User interface
+The configuration channel module inside the PSI library provides an API for easy
+access to the local objects. Use the following functions to access the configuration
+channel:
+- \ref cc_init
+- \ref cc_exit
+- \ref cc_writeObject
+- \ref cc_readObject
+
+\section module_psi_cc_configuration Module configuration
+The configuration of the module can be changed by using the corresponding
+configuration header named common/include/psicommon/cc.h! The following procedure
+needs to be carried out to change the list of configuration channel objects:
+- Open the local POWERLINK stack object dictionary layout header. (demo-cn-gpio/config/pcp/objdict.h)
+  Add the new object to the list and connect the callback **cc_obdAccessCb** with
+  the newly created object.
+- Change your device description file (xdd or osdd) to represent the new layout
+  of the object dictionary.
+- Open the object list configuration header called demo-cn-gpio/config/tbuf/include/config/ccobjectlist.h
+  and adapt the number of objects in the list (\ref CONF_CHAN_NUM_OBJECTS).
+- Also add the newly created object to \ref CCOBJECT_LIST_INIT_VECTOR. Take care
+  that the size of the object in the configuration header matches the size of the
+  object in demo-cn-gpio/config/pcp/objdict.h!
+- Fully rebuild the PCP and application software and reconfigure the used
+  POWERLINK master.
+
+\section module_psi_cc_layout Memory layout
+This module has a static memory layout of the triple buffer and therefore needs a
+total size of 12 bytes for **OCC** and 12 bytes for **ICC**. The layout itself
+is defined in the configuration header of the channel called common/include/psicommon/cc.h
+by using the \ref tTbufCcStructure type.
+
+\see module_psi_status
+\see module_psicom_ccobject
+\see module_psicom_timeout
+
+*/

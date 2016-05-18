@@ -1,0 +1,15 @@
+//==============================================================================
+//==============================================================================
+/**
+\defgroup group_libpsicommon PSI common user library (libpsicommon)
+
+Some internals of the interface library are also needed by the POWERLINK
+interface drivers running on the PCP. Therefore some modules of the interface
+library are moved to the common library and get linked into the PCP as well as
+into the user application.
+
+\see group_libpsi
+
+*/
+//==============================================================================
+//==============================================================================

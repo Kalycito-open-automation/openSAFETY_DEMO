@@ -1,0 +1,30 @@
+//==============================================================================
+/**
+\addtogroup group_app_sn_shnf
+
+\section sect_dualsn_impl_xcom uP-Master <-> uP-Slave cross communication
+The cross communication between the two safe processors is carried out by using
+the UART serial device.
+
+\subsection sect_dualsn_impl_xcom_checks Cross communication checks
+Additionally the following checks are performed during the uP-Master <-> uP-Slave
+cross communication:
+1. Both processors exchange their current program flow counter and compare it to
+   their local value.
+2. Both processors exchange the CRC of the subframe of the other processor. This
+   means that the uP-Master forwards the CRC of sub2 to uP-Slave. uP-Slave uses
+   this CRC to verify the frame locally before this subframe is discarded.
+3. The clock drift of the consecutive time of both processors needs to be compensated.
+   Therefore uP-Master and uP-Slave always exchange their current value of the
+   64bit timebase. With the received value and the current local time an average
+   time is calculated. This average time is then used as a basis for the
+   consecutive time in the whole cycle.
+
+\subsection sect_dualsn_impl_xcom_msg Cross communication messages
+The cross communication checks are enabled by exchanging a message from the
+uP-Master to the uP-Slave and back. This message exchange is done synchronously.
+The format of the message from the uP-Master to the uP-Slave is defined by the
+type \ref tXComMaSlImage. The message back is defined by \ref tXComSlMaImage.
+
+
+*/

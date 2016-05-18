@@ -1,0 +1,476 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Module xmlns="http://br-automation.co.at/AS/HardwareModule"
+  xmlns:osdd="http://www.ethernet-powerlink.org/osdd" Version="1.6.0.0"
+  Description-de="openSAFETY_DEMO"
+  Description-en="openSAFETY_DEMO" SlotWidth="1" Width="90" Height="45" >
+  <Aprol>
+    <Config ID="Supported" FromVersion="APROL R 3.3-70" Recommended="true"/>
+  </Aprol>
+
+  <Channels Target="SG4">
+    <!-- BEGIN:: AS PLK Module Default Parameters -->
+    <Channel ID="ModuleOk" HwdResource="IO" Description-de="Modul Status (1 = Modul gesteckt)"
+      Description-en="Module status (1 = module present)">
+      <Parameter ID="Ext" Value="/OK" Type="STRING" />
+      <Parameter ID="Address" Value="0" Type="UDINT"/>
+      <Parameter ID="Direction" Value="IN" Type="STRING" />
+      <Parameter ID="Type" Value="BOOL" Type="STRING" />
+      <Parameter ID="ArConfig" Value="copy"/>
+    </Channel>
+    <Separator />
+    <Channel ID="ModuleID" HwdResource="IO" Description-en="1018h/2, Module IDn">
+      <Parameter ID="Ext" Value="/INFO"/>
+      <Parameter ID="Address" Value="0x00021018" Type="UDINT"/>
+      <Parameter ID="Direction" Value="IN" Type="STRING" />
+      <Parameter ID="Type" Value="UDINT" Type="STRING" />
+      <Parameter ID="Sig_St_Uint" Value="1" Type="STRING" />
+    </Channel>
+    <Channel ID="HardwareVariant" HwdResource="IO" Description-en="1018h/3, Hardware Variant">
+      <Parameter ID="Ext" Value="/INFO"/>
+      <Parameter ID="Address" Value="0x00031018" Type="UDINT"/>
+      <Parameter ID="Direction" Value="IN" Type="STRING" />
+      <Parameter ID="Type" Value="UDINT" Type="STRING" />
+      <Parameter ID="Sig_St_Uint" Value="1" Type="STRING" />
+    </Channel>
+
+    <Separator />
+
+    <!-- END:: AS PLK Module Default Parameters -->
+
+    <!-- BEGIN:: openSAFETY TxSPDO & RxSPDO transport channel -->
+    <Channel ID="SafeIN" HwdResource="IO">
+      <Filter Value="IS_RUNTIME='1'"/>
+      <Parameter ID="Ext" Value="/DYNAMIC"/>
+      <Parameter ID="Address" Value="0x00014000" Type="UDINT"/>
+      <Parameter ID="Direction" Value="IN"/>
+      <Parameter ID="Type" Value="OCTET"/>
+      <Parameter ID="NrElements" Value="19" Type="UDINT"/>
+    </Channel>
+    <Channel ID="SafeOUT" HwdResource="IO">
+      <Filter Value="IS_RUNTIME='1'"/>
+      <Parameter ID="Ext" Value="/DYNAMIC"/>
+      <Parameter ID="Address" Value="0x00014001" Type="UDINT"/>
+      <Parameter ID="Direction" Value="OUT"/>
+      <Parameter ID="Type" Value="OCTET"/>
+      <Parameter ID="NrElements" Value="19" Type="UDINT"/>
+    </Channel>
+    <!-- END:: openSAFETY TxSPDO & RxSPDO transport channel -->
+
+    <!-- BEGIN:: openSAFETY Data Channels -->
+
+    <Channel ID="SafeModuleOk" Safe="true" HwdResource="IO">
+      <Filter Value="SafeCOMPONENTS='1'"/>
+      <Parameter ID="Direction" Value="IN" Type="STRING"/>
+      <Parameter ID="Type" Value="BOOL" Type="STRING"/>
+      <Parameter ID="ConnectionValidation" Value="1" Type="STRING"/>
+    </Channel>
+
+    <!-- BEGIN:: Input Channels -->
+    <Channel ID="SafeInput01" Safe="true" HwdResource="IO" Description-en="Safe Input 01" Description-de="Sicherer Eingang 01">
+      <Parameter ID="Ext" Value="/SUB=SafeIN" Type="STRING" />
+      <Parameter ID="Address" Value="4" Type="UDINT" />
+      <Parameter ID="BitOffset" Value="0" Type="UDINT" />
+      <Parameter ID="Direction" Value="IN" Type="STRING" />
+      <Parameter ID="Type" Value="USINT" Type="STRING" />
+      <Parameter ID="Sig_St_Bool" Value="1" Type="STRING" />
+      <Parameter ID="SODIndex" Value="0x6000" Type="STRING" />
+      <Parameter ID="SODSubIndex" Value="0x01" Type="STRING" />
+    </Channel>
+    <Channel ID="SafeInput02" Safe="true" HwdResource="IO" Description-en="Safe Input 02" Description-de="Sicherer Eingang 02">
+      <Parameter ID="Ext" Value="/SUB=SafeIN" Type="STRING" />
+      <Parameter ID="Address" Value="5" Type="UDINT" />
+      <Parameter ID="BitOffset" Value="0" Type="UDINT" />
+      <Parameter ID="Direction" Value="IN" Type="STRING" />
+      <Parameter ID="Type" Value="USINT" Type="STRING" />
+      <Parameter ID="Sig_St_Bool" Value="1" Type="STRING" />
+      <Parameter ID="SODIndex" Value="0x6000" Type="STRING" />
+      <Parameter ID="SODSubIndex" Value="0x02" Type="STRING" />
+    </Channel>
+    <Channel ID="SafeInput03" Safe="true" HwdResource="IO" Description-en="Safe Input 03" Description-de="Sicherer Eingang 03">
+      <Parameter ID="Ext" Value="/SUB=SafeIN" Type="STRING" />
+      <Parameter ID="Address" Value="6" Type="UDINT" />
+      <Parameter ID="BitOffset" Value="0" Type="UDINT" />
+      <Parameter ID="Direction" Value="IN" Type="STRING" />
+      <Parameter ID="Type" Value="USINT" Type="STRING" />
+      <Parameter ID="Sig_St_Bool" Value="1" Type="STRING" />
+      <Parameter ID="SODIndex" Value="0x6000" Type="STRING" />
+      <Parameter ID="SODSubIndex" Value="0x03" Type="STRING" />
+    </Channel>
+    <Channel ID="SafeInput04" Safe="true" HwdResource="IO" Description-en="Safe Input 04" Description-de="Sicherer Eingang 04">
+      <Parameter ID="Ext" Value="/SUB=SafeIN" Type="STRING" />
+      <Parameter ID="Address" Value="7" Type="UDINT" />
+      <Parameter ID="BitOffset" Value="0" Type="UDINT" />
+      <Parameter ID="Direction" Value="IN" Type="STRING" />
+      <Parameter ID="Type" Value="USINT" Type="STRING" />
+      <Parameter ID="Sig_St_Bool" Value="1" Type="STRING" />
+      <Parameter ID="SODIndex" Value="0x6000" Type="STRING" />
+      <Parameter ID="SODSubIndex" Value="0x04" Type="STRING" />
+    </Channel>
+    <!-- END:: Input Channels -->
+    <Separator />
+    <!-- BEGIN:: Output Channels -->
+    <Channel ID="SafeOutput01" Safe="true" HwdResource="IO" Description-en="Safe Output 01" Description-de="Sicherer Ausgang 01">
+      <Filter Value="SafeCOMPONENTS='1'" />
+      <Parameter ID="Ext" Value="/SUB=SafeOUT" Type="STRING" />
+      <Parameter ID="Address" Value="4" Type="UDINT" />
+      <Parameter ID="BitOffset" Value="0" Type="UDINT" />
+      <Parameter ID="Direction" Value="OUT" Type="STRING" />
+      <Parameter ID="Type" Value="USINT" Type="STRING" />
+      <Parameter ID="Sig_St_Bool" Value="1" Type="STRING" />
+      <Parameter ID="SODIndex" Value="0x6200" Type="STRING" />
+      <Parameter ID="SODSubIndex" Value="0x01" Type="STRING" />
+    </Channel>
+    <Channel ID="SafeOutput02" Safe="true" HwdResource="IO" Description-en="Safe Output 02" Description-de="Sicherer Ausgang 02">
+      <Filter Value="SafeCOMPONENTS='1'" />
+      <Parameter ID="Ext" Value="/SUB=SafeOUT" Type="STRING" />
+      <Parameter ID="Address" Value="5" Type="UDINT" />
+      <Parameter ID="BitOffset" Value="0" Type="UDINT" />
+      <Parameter ID="Direction" Value="OUT" Type="STRING" />
+      <Parameter ID="Type" Value="USINT" Type="STRING" />
+      <Parameter ID="Sig_St_Bool" Value="1" Type="STRING" />
+      <Parameter ID="SODIndex" Value="0x6200" Type="STRING" />
+      <Parameter ID="SODSubIndex" Value="0x02" Type="STRING" />
+    </Channel>
+    <Channel ID="SafeOutput03" Safe="true" HwdResource="IO" Description-en="Safe Output 03" Description-de="Sicherer Ausgang 03">
+      <Filter Value="SafeCOMPONENTS='1'" />
+      <Parameter ID="Ext" Value="/SUB=SafeOUT" Type="STRING" />
+      <Parameter ID="Address" Value="6" Type="UDINT" />
+      <Parameter ID="BitOffset" Value="0" Type="UDINT" />
+      <Parameter ID="Direction" Value="OUT" Type="STRING" />
+      <Parameter ID="Type" Value="USINT" Type="STRING" />
+      <Parameter ID="Sig_St_Bool" Value="1" Type="STRING" />
+      <Parameter ID="SODIndex" Value="0x6200" Type="STRING" />
+      <Parameter ID="SODSubIndex" Value="0x03" Type="STRING" />
+    </Channel>
+    <Channel ID="SafeOutput04" Safe="true" HwdResource="IO" Description-en="Safe Output 04" Description-de="Sicherer Ausgang 04">
+      <Filter Value="SafeCOMPONENTS='1'" />
+      <Parameter ID="Ext" Value="/SUB=SafeOUT" Type="STRING" />
+      <Parameter ID="Address" Value="7" Type="UDINT" />
+      <Parameter ID="BitOffset" Value="0" Type="UDINT" />
+      <Parameter ID="Direction" Value="OUT" Type="STRING" />
+      <Parameter ID="Type" Value="USINT" Type="STRING" />
+      <Parameter ID="Sig_St_Bool" Value="1" Type="STRING" />
+      <Parameter ID="SODIndex" Value="0x6200" Type="STRING" />
+      <Parameter ID="SODSubIndex" Value="0x04" Type="STRING" />
+    </Channel>
+    <!-- END:: Output Channels -->
+    <!-- END:: openSAFETY Data Channels -->
+
+  </Channels>
+
+  <Classification>
+    <FieldbusProtocol Value="Powerlink"/>
+    <HardwareModuleFamily Value="Powerlink"/>
+    <HardwareModuleType Value="Safe"/>
+    <HardwareModuleType Value="IO"/>
+    <IOType Value="Analog" />
+    <IOType Value="In" />
+    <IOType Value="Out" />
+    <NetworkType Value="Powerlink" />
+  </Classification>
+
+  <Connectors>
+    <Connector Name="PLK1" AddressRule="NodeNumber" Male="true" NodeSwitch="true" Type="Cable">
+      <Connections>
+        <Connection Name="Powerlink" />
+      </Connections>
+      <Layout PositionX="29" PositionY="35" />
+    </Connector>
+    <Connector Name="PLK2" Male="true" Type="Cable">
+      <Connections>
+        <Connection Name="Powerlink" />
+      </Connections>
+      <Layout PositionX="54" PositionY="35" />
+    </Connector>
+  </Connectors>
+  <Editors>
+    <Editor Name="IoMapping"/>
+    <Editor Name="Configuration"/>
+  </Editors>
+
+  <HWD Target="SG4">
+    <Parameter ID="UseType" Type="UDINT" Value="6"/>
+    <Parameter ID="NeededBus" Value="PL"/>
+    <Parameter ID="CompatibleCode" Value="PowerlinkStation"/>
+    <Parameter ID="RemoteUpdate" Type="UDINT" Value="1"/>
+    <Parameter ID="Classcode" Type="UDINT" Value="0x20000014"/>
+    <Parameter ID="VendorId" Type="UDINT" Value="0x00000000"/>
+    <Parameter ID="EPL_ApplSwUpdate" Type="UDINT" Value="0"/>
+    <Parameter ID="EPL_ApplSwVerify" Type="UDINT" Value="0"/>
+    <Parameter ID="EPL_CfgVerify" Type="UDINT" Value="1"/>
+    <Parameter ID="EPL_DeviceType" Type="UDINT" Value="0x00000000"/>
+    <Parameter ID="EPL_BootTimeNotActive" Type="UDINT" Value="10000000"/>
+    <Parameter ID="EPL_ParamStrategy" Value="Store"/>
+    <Parameter ID="EPL_ResetToDefault" Value="on"/>
+    <Parameter ID="IOSuffix" Value=":IO"/>
+    <Parameter ID="EPL_SDOWriteMultiple" Value="off"/>
+    <Parameter ID="EPL_MinRedCycleTime" Type="UDINT" Value="400" FromSafetyRelease="1.6"
+      FromVersion="A4.01"/>
+    <Resource ID="IO">
+        <Parameter ID="Transparent" Type="UDINT" Value="1"/>
+      <!-- Channels aus HWD werden hier eingefuegt -->
+    </Resource>
+    <Resource ID="OD">
+      <!-- resource fuer OD daten -->
+    </Resource>
+    <Resource ID="CCP">
+      <Resource ID="SSDO">
+        <Parameter ID="Classcode" Type="UDINT" Value="0x200000ff"/>
+        <Parameter ID="DDriverName" Type="STRING" Value="DdxxIoSSDO"/>
+        <Parameter ID="AsynResource" Type="UDINT" Value="1"/>
+        <Parameter ID="ARIOMaster" Type="UDINT" Value="1"/>
+        <Parameter ID="Transparent" Type="UDINT" Value="1"/>
+        <Parameter ID="Protocol" Value="POWERLINK"/>
+        <Parameter ID="ChannelId" Type="UDINT" Value="0x012110"/>
+        <!-- Object with destination for SSDO: Bit31..24 Node Bit23..16 SubIndex Bit15..0 Index  -->
+        <Parameter ID="ChannelIdData" Type="UDINT" Value="0x012130"/>
+        <!-- Object to send SSDO to if not same as ChannelId's SubIndex+1-->
+      </Resource>
+      <Resource ID="SLOG">
+        <Parameter ID="Classcode" Type="UDINT" Value="0x200000ff"/>
+        <Parameter ID="DDriverName" Type="STRING" Value="DdxxIoSafetyLogger"/>
+        <Parameter ID="AsynResource" Type="UDINT" Value="1"/>
+        <Parameter ID="ARIOMaster" Type="UDINT" Value="1"/>
+        <Parameter ID="Transparent" Type="UDINT" Value="1"/>
+        <Parameter ID="ChannelId" Type="UDINT" Value="0x012403"/>
+      </Resource>
+    </Resource>
+
+  </HWD>
+  <Images>
+    <Image Type="Icon" Name="hw_pl.ico" />
+    <Image Type="FrontFoto" Name="epl_cn.front.png" />
+  </Images>
+
+  <Properties Target="SG4">
+    <Group ID="General" Name-en="General" Name-de="Allgemein" Name-fr="Gnral">
+      <Parameter ID="Supervision" Name-en="Module supervised" Name-de="Modulueberwachung"
+        Name-fr="Surveillance module" Value="on"
+        Description-en="Service mode if there is no hardware module"
+        Description-de="Service Mode auslesen, wenn Modul nicht vorhanden ist">
+        <ComboBox>
+          <Item ID="off" Name-en="off" Name-de="Aus" Name-fr="Inactif"/>
+          <Item ID="on" Name-en="on" Name-de="Ein" Name-fr="Actif"/>
+        </ComboBox>
+      </Parameter>
+      <Parameter ID="SafeLogicID" Name-en="SafeLOGIC ID" Name-de="SafeLOGIC ID" Type="UDINT"
+        Value="1" Range="1-1000"/>
+      <Parameter ID="SafeModuleID" Name-en="SafeMODULE ID" Name-de="SafeMODULE ID" Type="UDINT"
+        Value="2" Range="2-300"/>
+    </Group>
+    <Group ID="PL2" Name-en="Powerlink parameters" Name-de="Powerlink Parameter">
+
+      <!--########## Powerlink Parameter ##########-->
+      <Selector ID="Mode" Value="CN" Name-en="Mode" Name-de="Modus" Name-fr="Mode">
+        <Selection ID="CN" Name-en="controlled node" Name-de="Controlled Node"
+          Name-fr="controlled node">
+          <Parameter ID="ResponseTimeout" Name-en="Response timeout [us]"
+            Name-de="Antwort Timeout [us]" Name-fr="Response timeout [us]" MultiSelection="false"
+            Type="UDINT" Value="22" Visible="true" Range="2-65000"/>
+        </Selection>
+      </Selector>
+      <Parameter ID="ASndMaxLatency" Name-en="ASndMaxLatency [us]" Name-de="ASndMaxLatency [us]"
+        Name-fr="ASndMaxLatency [us]" MultiSelection="false" Type="UDINT" Value="2" Visible="false"/>
+      <Parameter ID="EPL_CnSoc2Preq" Name-en="EPL_CnSoc2Preq [us]" Name-de="EPL_CnSoc2Preq [us]"
+        Name-fr="EPL_CnSoc2Preq [us]" MultiSelection="false" Type="UDINT" Value="0" Visible="false"/>
+      <Parameter ID="EPL_PReqDataInPResMN" Name-en="Output in PResMN"
+        Name-de="Ausgangsdaten im PResMN" Name-fr="Output in PResMN" MultiSelection="false"
+        Value="off" Visible="true" Template="OnOffText"
+        Description-en="Send output data at the beginning of the cycle in PRes frame from managing node"
+        Description-de="Output Daten am Anfang des Zyklus im PRes-Frame des Managing-Node versenden"/>
+      <Selector ID="Multiplexed" Value="0" Name-en="Multiplexed station"
+        Name-de="Multiplexed Station" Name-fr="Multiplexed station" ArConfigSkip="true">
+        <Selection ID="0" Name-en="off" Name-de="Aus" Name-fr="off">
+          <Parameter ID="MuxNetworkSlot" Name-en="MuxNetworkSlot" Name-de="MuxNetworkSlot"
+            Name-fr="MuxNetworkSlot" MultiSelection="false" Type="UDINT" Value="0" Visible="false"
+            ArConfigSkip="false"/>
+          <Parameter ID="EPL_Chained" Name-en="Chained station" Name-de="Verkettete Station"
+            Name-fr="Chained station" MultiSelection="false" Value="off" Visible="true"
+            Template="OnOffText" Description-en="" Description-de="" ArConfigSkip="false"
+            Validated="true"/>
+        </Selection>
+        <Selection ID="1" Name-en="on" Name-de="Ein" Name-fr="on">
+          <Group ID="Advanced" Name-en="Advanced multiplexing"
+            Name-de="Erweiterte Multiplexing Einstellungen" Name-fr="Advanced multiplexing"
+            Collapsed="false" ArConfigSkip="false">
+            <Selector ID="ForceCycle" Value="0" Name-en="Force multiplexed station network cycle"
+              Name-de="Netzwerkzyklus der multiplexed Station erzwingen"
+              Name-fr="Force multiplexed station network cycle">
+              <Selection ID="0" Name-en="off" Name-de="Aus" Name-fr="off">
+                <Parameter ID="MuxNetworkSlot" Name-en="MuxNetworkSlot" Name-de="MuxNetworkSlot"
+                  Name-fr="MuxNetworkSlot" MultiSelection="false" Type="UDINT" Value="0"
+                  Visible="true" CanEdit="false"/>
+              </Selection>
+              <Selection ID="1" Name-en="on" Name-de="Ein" Name-fr="on">
+                <Parameter ID="MuxNetworkSlot" Name-en="MuxNetworkSlot" Name-de="MuxNetworkSlot"
+                  Name-fr="MuxNetworkSlot" MultiSelection="false" Type="UDINT" Value="1"
+                  Visible="true" Range="1-253"/>
+              </Selection>
+            </Selector>
+          </Group>
+          <Parameter ID="EPL_Chained" Name-en="Chained station" Name-de="Verkettete Station"
+            Name-fr="Chained station" MultiSelection="false" Value="off" Visible="false"
+            Template="OnOffText" Description-en="" Description-de="" ArConfigSkip="false"
+            Validated="true"/>
+        </Selection>
+      </Selector>
+      <Parameter ID="EPL_ResetToDefault" Name-en="EPL_ResetToDefault" Name-de="EPL_ResetToDefault"
+        Name-fr="EPL_ResetToDefault" MultiSelection="false" Type="STRING" Value="off"
+        Visible="false"/>
+      <Parameter ID="EPL_TellMuxSlot" Name-en="EPL_TellMuxSlot" Name-de="EPL_TellMuxSlot"
+        Name-fr="EPL_TellMuxSlot" MultiSelection="false" Type="STRING" Value="off" Visible="false"/>
+
+
+      <Group ID="CNSettings" Name-en="Advanced" Name-de="Erweitert" Name-fr="Advanced"
+        Collapsed="true">
+        <Parameter ID="IPGateway" Name-en="IP Gateway" Name-de="IP Gateway" Name-fr="IP Gateway"
+          MultiSelection="false" Type="UDINT" Value="254" Visible="true" Range="1-254"
+          Description-en="Node number of EPL station acting as IP default gateway"
+          Description-de="Knotennummer der EPL Station die als IP Standard Gateway fungiert"/>
+        <Parameter ID="EPL_BootTimeNotActive" Name-en="EPL_BootTimeNotActive"
+          Name-de="EPL_BootTimeNotActive" Name-fr="EPL_BootTimeNotActive" MultiSelection="false"
+          Type="UDINT" Value="10000000" Visible="false"/>
+        <Selector ID="DummyDeviceType" Value="off" Name-en="Verify Device Type"
+          Name-de="Geraetetyp pruefen" Name-fr="Verify Device Type"
+          Description-en="Verify correct Device Type"
+          Description-de="Pruefe auf richtigen Geraetetyp" FromVersion="S2.95">
+          <Selection ID="off" Name-en="off" Name-de="Aus" Name-fr="off"/>
+          <Selection ID="on" Name-en="on" Name-de="ein" Name-fr="on">
+            <Parameter ID="EPL_DeviceType" Name-en="EPL_DeviceType" Name-de="EPL_DeviceType" Name-fr="EPL_DeviceType" MultiSelection="false" Type="UDINT" Value="0" Visible="false"/>
+          </Selection>
+        </Selector>
+        <Selector ID="DummyVendorId" Value="off" Name-en="Verify VendorID"
+          Name-de="Pruefe Hersteller ID" Name-fr="Verify VendorID"
+          Description-en="Verify correct VendorID"
+          Description-de="Pruefe auf richtige Hersteller ID" FromVersion="S2.95">
+          <Selection ID="off" Name-en="off" Name-de="Aus" Name-fr="off"/>
+          <Selection ID="on" Name-en="on" Name-de="ein" Name-fr="on">
+            <Parameter ID="VendorId" Name-en="VendorId" Name-de="VendorId" Name-fr="VendorId" MultiSelection="false" Type="UDINT" Value="0x00000000" Visible="false"/>
+          </Selection>
+        </Selector>
+        <Selector ID="DummyRevisionNo" Value="off" Name-en="Verify RevisionNumber"
+          Name-de="Pruefe Revisionsnummer" Name-fr="Verify RevisionNumber"
+          Description-en="Verify correct Revision Number"
+          Description-de="Pruefe auf richtige Revisionsnummer" FromVersion="S2.95">
+          <Selection ID="off" Name-en="off" Name-de="Aus" Name-fr="off"/>
+          <Selection ID="on" Name-en="on" Name-de="ein" Name-fr="on">
+            <Parameter ID="EPL_RevisionNo" Name-en="EPL_RevisionNo" Name-de="EPL_RevisionNo" Name-fr="EPL_RevisionNo" MultiSelection="false" Type="UDINT" Value="2" Visible="false"/>
+          </Selection>
+        </Selector>
+        <Selector ID="DummyModno" Value="off" Name-en="Verify Product Code"
+          Name-de="Pruefe Produktcode" Name-fr="Verify Product Code"
+          Description-en="Verify correct product code"
+          Description-de="Pruefe auf richtigen Produktcode" FromVersion="S2.95">
+          <Selection ID="off" Name-en="off" Name-de="Aus" Name-fr="off"/>
+          <Selection ID="on" Name-en="on" Name-de="ein" Name-fr="on">
+            <Parameter ID="Modno" Name-en="Modno" Name-de="Modno" Name-fr="Modno" MultiSelection="false" Type="UDINT" Value="0x00000001" Visible="false"/>
+          </Selection>
+        </Selector>
+        <Parameter ID="EPL_MinCycleTime" Name-en="EPL_MinCycleTime [us]"
+          Name-de="EPL_MinCycleTime [us]" Name-fr="EPL_MinCycleTime [us]" MultiSelection="false"
+          Type="UDINT" Value="400" Visible="false"/>
+      </Group>
+
+
+      <!--########## Firmware ##########-->
+      <Group ID="invisible" Visible="false">
+        <Parameter ID="EPL_ResetPostLoad" Type="UINT" Value="42"/>
+        <Parameter ID="EPL_ParamStrategy" Value="Load"/>
+      </Group>
+
+    </Group>
+  </Properties>
+
+  <Runtime Target="SG4" HardwareID="epl" FromVersion="A2.90" BuildError="true" RPDOs="2"/>
+  <Safety AdditionalSADR="0">
+
+<Configuration ID="openSAFETY_DEMO" RevisionNumber="65537" SDPayLoad="8" TypicalSafeInputSize="4" TypicalSafeOutputSize="4" TypicalInputSize="4" TypicalOutputSize="4" SafeIN="19" SafeOUT="19" CRC-de="3359123831" CRC-en="2217856116" CRC-fr="1141791952" CRC-data="748567802" CRC-default="739236732" FromSafetyRelease="1.6" ToSafetyRelease="1.9">
+      <Template ID="OptChoice" Type="USINT">
+        <Parameter ID="0" Name-en="No" Name-de="Nein" Name-fr="DE"/>
+        <Parameter ID="1" Name-en="Yes" Name-de="Ja" Name-fr="SUR"/>
+        <Parameter ID="2" Name-en="Startup" Name-de="Hochlauf" Name-fr="avant de lancer"/>
+      </Template>
+      <Template ID="YesNo" Type="BOOL">
+        <Parameter ID="0" Name-en="No" Name-de="Nein" Name-fr="DE"/>
+        <Parameter ID="1" Name-en="Yes" Name-de="Ja" Name-fr="SUR"/>
+      </Template>
+      <Template ID="YesNo2" Type="UDINT">
+        <Parameter ID="0" Name-en="No" Name-de="Nein" Name-fr="DE"/>
+        <Parameter ID="1" Name-en="Yes-ATTENTION" Name-de="Ja-ACHTUNG" Name-fr="SUR"/>
+      </Template>
+      <Template ID="YesNo3" Type="USINT">
+        <Parameter ID="0" Name-en="No" Name-de="Nein" Name-fr="DE"/>
+        <Parameter ID="1" Name-en="Yes-ATTENTION" Name-de="Ja-ACHTUNG" Name-fr="SUR"/>
+      </Template>
+      <Template ID="YesNoBOOL" Type="BOOL">
+        <Parameter ID="0" Name-en="No" Name-de="Nein" Name-fr="DE"/>
+        <Parameter ID="1" Name-en="Yes-ATTENTION" Name-de="Ja-ACHTUNG" Name-fr="SUR"/>
+      </Template>
+      <Template ID="MinFwRev" Type="UDINT">
+        <Parameter ID="1" Name-en="Test Version"/>
+        <Parameter ID="256" Name-en="Basic Release"/>
+      </Template>
+      <Group ID="Basic">
+        <BitStream ID="VendorID" Value="0x00021234" Type="UDINT"/>
+        <BitStream ID="HWC_CRC" Value="1670908504" Type="UDINT" />
+        <BitStream ID="CRC_Number_of_RxSpdos" Value="1" Type="UDINT"/>
+        <BitStream ID="CRC_Number_of_TxSpdos" Value="1" Type="UDINT"/>
+        <BitStream ID="CRC_Number_of_Maps_per_Spdo" Value="3" Type="UDINT"/>
+        <BitStream ID="CRC_Number_of_Machine_Options" Value="0" Type="UDINT"/>
+        <!--The ProductCode is the parameter modno from section [description]-->
+        <BitStream ID="ProductCode" Value="0x00000001" Type="UDINT"/>
+        <BitStream ID="RevisionNumber" Value="65537" Type="UDINT"/>
+        <BitStream ID="SDPayLoad" Value="8" Type="UDINT"/>
+        <BitStream ID="ConsecutiveTimeBase_us" Value="100" Type="UDINT"/>
+        <BitStream ID="Module_Cycle_Time_min_us" Value="400" Type="UDINT"/>
+        <BitStream ID="Module_Cycle_Time_max_us" Value="799" Type="UDINT"/>
+        <Parameter UniqueID="0_0" ID="Min_required_FW_Rev" Value="256" Template="MinFwRev"/>
+        <Parameter UniqueID="0_1" ID="Optional" Value="0" Template="OptChoice"/>
+        <Parameter UniqueID="0_3" ID="External_UDID" Value="0" Template="YesNo2"/>
+        <BitStream ID="ParameterVersion" Value="1" Type="UINT" CopyToDomain="true"/>
+        <BitStream ID="ParameterLength" Value="8" Type="UINT" CopyToDomain="true"/>
+      </Group>
+      <Group ID="Safety_Response_Time">
+        <Parameter UniqueID="1_0" ID="Manual_Configuration" Value="0" Template="YesNo"/>
+        <Parameter UniqueID="1_1" ID="Syncronous_Network_Only" Name-en="Synchronous_Network_Only"
+          Value="1" Template="YesNo"/>
+        <Parameter UniqueID="1_2" ID="Max_X2X_CyleTime_us" Name-en="Max_X2X_CycleTime_us"
+          Value="5000" Range="200-30000" Type="UDINT"/>
+        <Parameter UniqueID="1_3" ID="Max_Powerlink_CyleTime_us"
+          Name-en="Max_Powerlink_CycleTime_us" Value="5000" Range="200-30000" Type="UDINT"/>
+        <Parameter UniqueID="1_4" ID="Max_CPU_CrossLinkTask_CyleTime_us"
+          Name-en="Max_CPU_CrossLinkTask_CycleTime_us" Value="5000" Range="0-30000" Type="UDINT"/>
+        <Parameter UniqueID="1_5" ID="Min_X2X_CyleTime_us" Name-en="Min_X2X_CycleTime_us"
+          Value="200" Range="200-30000" Type="UDINT"/>
+        <Parameter UniqueID="1_6" ID="Min_Powerlink_CyleTime_us"
+          Name-en="Min_Powerlink_CycleTime_us" Value="400" Range="400-30000" Type="UDINT"/>
+        <Parameter UniqueID="1_7" ID="Min_CPU_CrossLinkTask_CyleTime_us"
+          Name-en="Min_CPU_CrossLinkTask_CycleTime_us" Value="0" Range="0-30000" Type="UDINT"/>
+        <Parameter UniqueID="1_8" ID="Worst_Case_Response_Time_us" Value="50000" Range="3000-500000"
+          Type="UDINT"/>
+        <BitStream ID="Refresh_Prescale_us" Value="100" Range="1-10000000" Type="UDINT"/>
+        <BitStream ID="HWC_Version" Value="1" Type="UDINT"/>
+        <BitStream ID="BUR_SAFEPAR_BOOL_LOW" Value="0" Type="BOOL"/>
+        <BitStream ID="BUR_SAFEPAR_BOOL_HIGH" Value="1" Type="BOOL"/>
+        <BitStream ID="BUR_SAFEPAR_USINT_LOW" Value="0x01" Type="USINT"/>
+        <BitStream ID="BUR_SAFEPAR_USINT_HIGH" Value="250" Type="USINT"/>
+        <BitStream ID="BUR_SAFEPAR_UINT_LOW" Value="0x000A" Type="UINT"/>
+        <BitStream ID="BUR_SAFEPAR_UINT_HIGH" Value="65000" Type="UINT"/>
+        <BitStream ID="BUR_SAFEPAR_UDINT_LOW" Value="100" Type="UDINT"/>
+        <BitStream ID="BUR_SAFEPAR_UDINT_HIGH" Value="4000000000" Type="UDINT"/>
+        <BitStream ID="BUR_SAFEPAR_SINT_LOW" Value="6" Type="SINT"/>
+        <BitStream ID="BUR_SAFEPAR_SINT_HIGH" Value="-6" Type="SINT"/>
+        <BitStream ID="BUR_SAFEPAR_INT_LOW" Value="0x8300" Type="INT"/>
+        <BitStream ID="BUR_SAFEPAR_INT_HIGH" Value="32000" Type="INT"/>
+        <BitStream ID="BUR_SAFEPAR_DINT_LOW" Value="-2000000000" Type="DINT"/>
+        <BitStream ID="BUR_SAFEPAR_DINT_HIGH" Value="0x77359400" Type="DINT"/>
+      </Group>
+      <Group ID="GenericParameters">
+        <Parameter UniqueID="DefaultSetting01" ID="TestSetting01" Name-en="Setting for testing 01" Value="100" Type="UDINT" Range="1-2000" CopyToDomain="true"/>
+        <Parameter UniqueID="DefaultSetting02" ID="TestSetting02" Name-en="Setting for testing 02" Value="50" Type="UINT" Range="1-100" CopyToDomain="true"/>
+        <Parameter UniqueID="DefaultSetting03" ID="TestSetting03" Name-en="Setting for testing 03" Value="70" Type="UINT" Range="1-100" CopyToDomain="true"/>
+      </Group>
+    </Configuration>
+  </Safety>
+
+</Module>

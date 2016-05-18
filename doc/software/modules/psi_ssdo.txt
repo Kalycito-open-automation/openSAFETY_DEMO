@@ -1,0 +1,115 @@
+//==============================================================================
+/**
+\addtogroup module_psi_ssdo
+
+The ssdo module provides one or more SSDO channels where each channel has a
+receive and transmit buffer. The communication inside this channel is handled
+like it is specified in the `openSAFETY over POWERLINK` specification and therefore
+this module is only usable for openSAFETY applications. It implements the objects
+**SSDOStub** and **SSDOStubData** for transmission and reception of the SSDO data.
+The configuration of both parts of the channel is handled via the
+app/demo-sn-gpio/config/tbuf/include/config/ssdo.h header.
+
+\section module_psi_ssdo_rcv_channel SSDO receive channel
+
+The receive channel uses the SSDOStubData domain object. The incoming data is
+written via SDO to this object and internally forwarded to the receive triple
+buffer. The internal memory layout of the buffer is defined via the \ref tTbufSsdoRxStructure.
+
+~~~~~~~~~~~~~{.c}
+typedef struct {
+    UINT8   seqNr_m;
+    UINT8   reserved;
+    UINT16  paylSize_m;
+    UINT8   ssdoStubDataDom_m[SSDO_STUB_DATA_DOM_SIZE];
+} tTbufSsdoRxStructure;
+~~~~~~~~~~~~~
+
+The buffer consists of a sequence number (seqNr_m) which is always toggled when
+new data arrives. If there is no new data in the buffer the old payload is
+retransmitted over the interface. The sequence number always toggles between the
+values 0x55 and 0xAA where the receive channel is blocked until the **Channel Busy (CBx)**
+flag of the status output (StatusOut) buffer toggles back. This indicates that the
+application has finished processing the incoming frame and a new payload can be
+forwarded to the application.
+
+The size of the incoming payload is indicated by the paylSize_m field of the
+receive structure. The data itself is written to the ssdoStubDataDom_m field.
+The size of this array is defined by the \ref SSDO_STUB_DATA_DOM_SIZE and needs
+to fit to the size of the buffer in the triple buffer IP-Core. (The value in the
+IP-Core represents the size of the SSDOStubData field including the four byte
+header)
+
+\section module_psi_ssdo_tx_channel SSDO transmit channel
+
+The transmit channel uses the SSDOStub address (Object 2110h) for the destination
+target of the data to send. If data is written from the local application to the
+transmit channel of the POWERLINK processor the target information from the SSDOStub
+is used to forward the transmit data to the target node index and subindex. The
+internal memory layout of the transmit buffer is defined via the \ref tTbufSsdoTxStructure.
+
+~~~~~~~~~~~~~{.c}
+typedef struct {
+    UINT8   seqNr_m;
+    UINT8   reserved;
+    UINT16  paylSize_m;
+    UINT8   tssdoTransmitData_m[TSSDO_TRANSMIT_DATA_SIZE];
+} tTbufSsdoTxStructure;
+~~~~~~~~~~~~~
+
+The layout of the channel is similar to the receive channel and consists of a
+sequence number, the payload size and the data itself. Use the macro
+\ref TSSDO_TRANSMIT_DATA_SIZE to adjust the maximum size of the ssdo channel.
+
+\section module_psi_ssdo_interface User interface
+
+The ssdo module inside the PSI library provides an API for easy access to the
+receive and transmit data. Use the following functions to work with the ssdo
+module:
+- \ref ssdo_create
+- \ref ssdo_destroy
+- \ref ssdo_postPayload
+- \ref ssdo_getCurrentTxBuffer
+- \ref ssdo_receiveMsgFinished
+
+\section module_psi_ssdo_configuration Module configuration
+This section describes the required steps to change the configuration of the ssdo
+channel.
+
+> After a change of the configuration always fully rebuild the FPGA configuration
+> and the PCP and application software.  Also don't forget to reconfigure the used
+> POWERLINK master.
+
+\subsection module_psi_ssdo_config_change_size Size of the SSDO message
+If it is desired to change the size of the SSDO receive or transmit object of the
+module the following action is required:
+- Open the GUI of the triple buffer IP-Core and adjust the size of the ssdo buffer.
+- Also change the read and write size in the SPI bridge IP-Core to the new transmit
+  size.
+- Open the app/demo-sn-gpio/config/tbuf/include/config/ssdo.h configuration header
+  and adapt the size of the SSDO payload array. (\ref SSDO_STUB_DATA_DOM_SIZE or
+  \ref TSSDO_TRANSMIT_DATA_SIZE)
+
+\subsection module_psi_ssdo_config_second_channel Add a second SSDO channel
+If an additional ssdo channel is required the software module can be instantiated
+multiple times. For this several actions need to be carried out:
+- Open the GUI of the triple buffer IP-Core and add an additional producing and
+  consuming buffer with at least 36 bytes each. (36 bytes is the size of the first
+  channel)
+- Also change the read and write size in the SPI bridge IP-Core to the new transmit
+  size.
+- Open obdict.h and add an additional subindex to object 2110h (SSDOStub) and
+  2130h (SSDOStubData)! Check if the callback **ssdo_obdAccessCb** is hooked up
+  with this object.
+- Change your device description file (osdd or hwx) to represent the new layout
+  of the object dictionary.
+- Open the app/demo-sn-gpio/config/tbuf/include/config/triplebuffer.h configuration
+  header and change the type \ref tTbufNumLayout to represent the new triple buffer
+  IP-Core layout.
+- Open the app/demo-sn-gpio/config/tbuf/include/config/ssdo.h configuration header
+  and increase the number of ssdo channels in the type \ref tSsdoChanNum.
+
+\see module_psi_status
+\see module_psicom_timeout
+
+*/

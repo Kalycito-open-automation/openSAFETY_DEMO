@@ -1,0 +1,107 @@
+//==============================================================================
+/**
+\addtogroup module_psi_pdo
+
+The Process Data Object (PDO) module forwards the isochronous receive data (RPDO)
+to the application and sends the transmit data (TPDO) to the POWERLINK network. 
+
+The module itself provides easy access to the isochronous data of POWERLINK which
+is transferred inside the Preq (RPDO) and Pres (TPDO). It provides a receive and
+transmit image of the mapped data which can be accessed by the user application.
+Due to the simplified interface of the application interface light it is not possible
+to read cross traffic from an additional POWERLINK station. Only direct communication
+with the managing node is possible.
+
+\section module_psi_pdo_configuration Module configuration
+
+In order to change the behaviour of the protocol to fit to the needs of the custom
+application the layout of the receive and transmit PDOs probably needs to be changed.
+For this two triple buffers are instantiated which can be configured by using the
+header demo-cn-gpio/config/tbuf/include/config/rpdo.h for receive data and
+demo-cn-gpio/config/tbuf/include/config/tpdo.h for transmit data. The following
+action needs to be carried out to change the PDO layout:
+
+- Open the GUI of the triple buffer IP-Core and adjust the size of the receive or
+  transmit PDO image.
+  -# The receive PDO image is consumer buffer number 2 in the provided example. The
+     size of the buffer always is the amount of mapped data with additional **four**
+     bytes of header.
+  -# The transmit PDO image is producer buffer number 2 in the provided example. The
+     size of this buffer is always the amount of mapped data. (No header is needed
+     for the TPDO image!)
+
+> If the size of the PDO images is changed the new size of the images always needs
+> to be four byte aligned.
+
+- Also change the read and write size in the SPI bridge IP-Core to the new transmit
+  size.
+- Open the object dictionary configuration header (obdict.h) and create an object
+  where the data can be mapped to.
+- Change your device description file (xdd or osdd) to represent the new layout
+  of the object dictionary.
+- In order to change to layout of the receive PDO image open the configuration
+  header called config/rpdo.h and carry out the following steps:
+  -# Adjust the macro \ref RPDO_NUM_OBJECTS to represent the new amount of mapped
+     data
+  -# Add the new object to the \ref tRpdoMappedObj type. This type represents the
+     layout of the receive PDO triple buffer and therefore needs to be four byte
+     aligned. (You probably need to add reserved bytes to fulfil this requirement)
+  -# Also add a new **offsetof** define like it is done in the TBUF_RPDO0_SPDO_DOM_OFF
+     macro.
+  -# Finally adapt the \ref RPDO_LINKING_LIST_INIT_VECTOR to finally link the new
+     object from obdict.h to the layout of the triple buffer (\ref tRpdoMappedObj).
+
+> After a change of the configuration always fully rebuild the FPGA configuration
+> and the PCP and application software. Also don't forget to reconfigure the used
+> POWERLINK master.
+
+\section module_psi_pdo_layout Memory layout
+
+This section provides details about the internal memory layout of the receive and
+transmit PDO images inside the corresponding triple buffers.
+
+\subsection module_psi_pdo_rpdo_layout PDO receive image (RPDO)
+
+The layout of the receive image is defined via the \ref tTbufRpdoImage type. This
+type consists of the field relativeTimeLow_m at the first four bytes. This time
+information is always updated when mapped data is written and indicates if the
+payload is from the current POWERLINK cycle. If the relative time is not updated
+the origin of the data is probably a multiplexed station and no data has arrived
+in the current POWERLINK cycle.
+
+The \ref tRpdoMappedObj type consists of the list of mapped objects. This type
+needs to be adjusted according to the user application.
+
+~~~~~~~~~~~~~{.c}
+
+typedef struct {
+    UINT8          r0SpdoDom_m[R0SPDO_DOM_SIZE];
+} tRpdoMappedObj;
+
+
+typedef struct {
+    UINT32         relativeTimeLow_m;
+    tRpdoMappedObj mappedObjList_m;
+} tTbufRpdoImage;
+
+~~~~~~~~~~~~~
+
+\subsection module_psi_pdo_tpdo_layout PDO transmit image (TPDO)
+
+The layout of the transmit image is defined via the \ref tTbufTpdoImage! The
+\ref tRpdoMappedObj type consists of the list of mapped objects.  This type needs
+to be adjusted according to the user application.
+
+~~~~~~~~~~~~~{.c}
+
+typedef struct {
+    UINT8  t0SpdoDom_m[T0SPDO_DOM_SIZE];
+} tTpdoMappedObj;
+
+
+typedef struct {
+    tTpdoMappedObj mappedObjList_m;
+} tTbufTpdoImage;
+~~~~~~~~~~~~~
+
+*/

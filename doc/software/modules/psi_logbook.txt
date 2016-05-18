@@ -1,0 +1,43 @@
+//==============================================================================
+/**
+\addtogroup module_psi_log
+
+The logbook module provides one or more channels to transfer logging information
+to the Automation Studio Logger. The communication inside this channel is handled
+like it is specified in the "openSAFETY over POWERLINK" specification and therefore
+this module is only usable for openSAFETY applications. It implements the objects
+LOGStub for transmission of the logger data. The configuration of of the channel
+is handled via the app/demo-sn-gpio/config/tbuf/include/config/logbook.h header.
+
+\section log_channel Logbook transmit channel
+
+The transmit channel uses the LOGStubAddress_U32 (Object 2403h) for the destination
+target of the data to send. If data is written from the local application to the
+transmit channel of the POWERLINK processor the target information from the SSDOStub
+is used to forward the transmit data to the target node index and subindex. The
+internal memory layout of the transmit buffer is defined via the \ref tTbufLogStructure.
+
+~~~~~~~~~~~~~{.c}
+typedef struct {
+    UINT8        seqNr_m;
+    tLogFormat   logData_m;
+} PACK_STRUCT tTbufLogStructure;
+~~~~~~~~~~~~~
+
+Use the type \ref tLogChanNum to adjust the number of logbook channel. For SN
+demos this is typically one.
+
+\section log_interface User interface
+
+The logbook module inside the PSI library provides an API for easy access to the
+transmit data. Use the following functions to work with the logger module:
+- \ref log_create
+- \ref log_destroy
+- \ref log_process
+- \ref log_getCurrentLogBuffer
+- \ref log_postLogEntry
+
+\see module_psi_status
+\see module_psicom_timeout
+
+*/
