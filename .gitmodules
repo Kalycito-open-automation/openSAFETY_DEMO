@@ -1,0 +1,3 @@
+[submodule "blackchannel/POWERLINK/stacks/openPOWERLINK"]
+	path = blackchannel/POWERLINK/stacks/openPOWERLINK
+	url = http://172.17.2.210:8080/AC0002_20080428_BRAUTO_oplk
