@@ -236,6 +236,7 @@ typedef enum {
     kPsiSsdoInvalidState            = 0x9A,
     kPsiSsdoChannelBusy             = 0x9B,
     kPsiSsdoInvalidTargetInfo       = 0x9C,
+    kPsiSsdoCloseSdoConError        = 0x9D,
 
     kPsiLogInitError                = 0xA0,
     kPsiLogInvalidParameter         = 0xA1,
@@ -251,6 +252,7 @@ typedef enum {
     kPsiLogEntryReformatFailed      = 0xAB,
     kPsiLogInvalidErrorLevel        = 0xAC,
     kPsiLogNettimeInvalid           = 0xAD,
+    kPsiLogCloseSdoConError         = 0xAE,
 
     kPsiFifoInitFailed              = 0x100,
     kPsiFifoInvalidParam            = 0x101,

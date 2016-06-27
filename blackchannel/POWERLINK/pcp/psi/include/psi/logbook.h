@@ -76,6 +76,8 @@ tLogInstance log_create(tLogInitStruct* pInitParam_p);
 void log_destroy(tLogInstance pInstance_p);
 tPsiStatus log_process(tLogInstance pInstance_p);
 tPsiStatus log_setNettime(tNetTime * pNetTime_p);
+
+tPsiStatus log_closeSdoChannel(tLogInstance pInstance_p);
 tPsiStatus log_consTxTransferFinished(tLogInstance pInstance_p);
 tPsiStatus log_handleIncoming(tLogInstance pInstance_p);
 

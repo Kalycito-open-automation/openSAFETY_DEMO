@@ -75,6 +75,7 @@ void tssdo_init(UINT8 nodeId_p, UINT16 idxSsdoStub_p, UINT16 idxSsdoStubData_p);
 tTssdoInstance tssdo_create(tTssdoInitStruct* pInitParam_p);
 void tssdo_destroy(tTssdoInstance pInstance_p);
 tPsiStatus tssdo_process(tTssdoInstance pInstance_p);
+tPsiStatus tssdo_closeSdoChannel(tTssdoInstance pInstance_p);
 tPsiStatus tssdo_consTxTransferFinished(tTssdoInstance pInstance_p);
 tPsiStatus tssdo_handleIncoming(tTssdoInstance pInstance_p);
 

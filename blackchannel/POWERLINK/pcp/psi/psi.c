@@ -697,6 +697,64 @@ tPsiStatus psi_sdoAccFinished(tSdoComFinished* pSdoComFinHdl_p )
     return ret;
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief    Close SDO Channels
+
+\return tPsiStatus
+\retval kPsiSuccessful                On success
+
+
+\ingroup module_psi
+*/
+//------------------------------------------------------------------------------
+tPsiStatus psi_closeSdoChannels(void)
+{
+    tPsiStatus ret = kPsiSuccessful;
+    UINT16 numErrors = 0;
+
+#if(((PSI_MODULE_INTEGRATION) & (PSI_MODULE_SSDO)) != 0)
+    UINT8 i;
+#endif
+
+#if(((PSI_MODULE_INTEGRATION) & (PSI_MODULE_LOGBOOK)) != 0)
+    UINT8 j;
+#endif
+
+#if(((PSI_MODULE_INTEGRATION) & (PSI_MODULE_SSDO)) != 0)
+    /* Iterate over all SSDO channels */
+    for(i=0; i < kNumSsdoInstCount; i++)
+    {
+        ret = tssdo_closeSdoChannel(psiInstance_l.instTssdoChan_m[i]);
+        if (ret !=  kPsiSuccessful)
+        {
+            numErrors++;
+            DEBUG_TRACE(DEBUG_LVL_ERROR, "ERROR: tssdo_closeSdoChannel() failed for "
+                    "instance %d with: 0x%x!\n", i, ret);
+        }
+    }
+#endif
+
+#if(((PSI_MODULE_INTEGRATION) & (PSI_MODULE_LOGBOOK)) != 0 )
+    /* Iterate over all logbook channels */
+    for(j=0; j < kNumLogInstCount; j++)
+    {
+        ret = log_closeSdoChannel(psiInstance_l.instLogChan_m[j]);
+        if (ret !=  kPsiSuccessful)
+        {
+            numErrors++;
+            DEBUG_TRACE(DEBUG_LVL_ERROR, "ERROR: log_closeSdoChannel() failed for "
+                    "instance %d with: 0x%x!\n", j, ret);
+        }
+    }
+#endif
+    if (numErrors > 0)
+    {
+        ret = kPsiGeneralError;
+    }
+    return ret;
+}
+
 //============================================================================//
 //            P R I V A T E   F U N C T I O N S                               //
 //============================================================================//

@@ -77,6 +77,7 @@ tPsiStatus psi_handleSync(tNetTime * pNetTime_p);
 
 void psi_pdoProcFinished(tPsiPdoDir pdoDir_p);
 tPsiStatus psi_sdoAccFinished(tSdoComFinished* pSdoComFinParam_p );
+tPsiStatus psi_closeSdoChannels(void);
 
 
 #endif /* _INC_psi_H_ */

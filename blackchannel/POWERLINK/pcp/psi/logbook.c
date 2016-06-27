@@ -53,6 +53,9 @@ and forwards the data to the target in the LOGStub.
 
 #include <psi/status.h>
 
+#include <limits.h>
+
+
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
 //============================================================================//
@@ -199,6 +202,9 @@ tLogInstance log_create(tLogInitStruct* pInitParam_p)
     // Set initial transmit state
     logInstance_l[pInitParam_p->chanId_m].consTxState_m = kConsTxStateWaitForFrame;
 
+    // Set invalid SDO instance
+    logInstance_l[pInitParam_p->chanId_m].sdoComConHdl_m = UINT_MAX;
+
     // Set valid instance id
     pInstance = &logInstance_l[pInitParam_p->chanId_m];
 
@@ -285,6 +291,56 @@ tPsiStatus log_setNettime(tNetTime * pNetTime_p)
     else
         ret = kPsiLogNettimeInvalid;
 
+    return ret;
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief    Frees the SDO Channel
+
+\param[in] pInstance_p          Pointer to the instance
+
+\return tPsiStatus
+\retval kPsiSuccessful        On successful
+\retval kPsiInvalidHandle     Passed handle invalid
+
+\ingroup module_ssdo
+*/
+//------------------------------------------------------------------------------
+tPsiStatus log_closeSdoChannel(tLogInstance pInstance_p)
+{
+    tPsiStatus ret = kPsiSuccessful;
+    tOplkError oplkret = kErrorOk;
+
+    // Nothing to free, if not used before
+    if (pInstance_p->sdoComConHdl_m == UINT_MAX)
+        return ret;
+
+    // Abort SDO and free the channel
+    oplk_abortSdo(pInstance_p->sdoComConHdl_m, SDO_AC_TIME_OUT);
+    oplkret = oplk_freeSdoChannel(pInstance_p->sdoComConHdl_m);
+
+    // Wrap oplk return value to tPsiStatus return value
+    switch (oplkret)
+    {
+        case kErrorOk:
+        {
+            pInstance_p->sdoComConHdl_m = UINT_MAX;
+            break;
+        }
+
+        case kErrorSdoSeqInvalidHdl:
+        case kErrorSdoComInvalidHandle:
+        {
+           ret = kPsiInvalidHandle;
+           break;
+        }
+        default:
+        {
+            ret = kPsiLogCloseSdoConError;
+            break;
+        }
+    }
     return ret;
 }
 
@@ -588,6 +644,7 @@ static tPsiStatus sendToDestTarget(tLogInstance pInstance_p,
             buffSize_p,                                // Object size to transfer
             kSdoTypeUdp,                               // Type of SDO carrier (Always use UDP!)
             (void *)pInstance_p);                      // User argument is the instance pointer
+
     switch(oplkret)
     {
         case kErrorApiTaskDeferred:

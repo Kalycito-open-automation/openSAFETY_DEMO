@@ -480,6 +480,9 @@ static tOplkError psi_userEventCb(tOplkApiEventType eventType_p,
                 }
                 case kNmtCsPreOperational1:
                 {
+                    // Close to prevent blocking of SDO in case of short network comm loss
+                    psi_closeSdoChannels();
+
                     // Reset the relative time state machine
                     ret = status_resetRelTime();
                     if(ret != kPsiSuccessful)
