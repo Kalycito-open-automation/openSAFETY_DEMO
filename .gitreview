@@ -1,6 +1,6 @@
 [gerrit]
-host=brateggevoat1
+host=gerrit.br-automation.co.at
 port=29418
-project=openSAFETY_DEMO.git
+project=oat/openSAFETY/openSAFETY_DEMO.git
 defaultremote=origin
 defaultrebase=0
