@@ -84,6 +84,7 @@ to the HNF. Also the frame CRCs are calculated inside this module.
 #define TX_CHANNEL_SSDO_SNMT        1
 
 /* Positions of fields inside a frame */
+#define FRAME_OFFSET_SADR_LOW   0x0
 #define FRAME_OFFSET_ADRID      0x1
 #define FRAME_OFFSET_LENGTH     0x2
 
@@ -636,8 +637,10 @@ static void processRxSpdoFrame(UINT8* pPayload_p, UINT16 paylLen_p)
 
     if(pPayload_p != NULL)
     {
-        /* Only forward receive frames when the SN is in operational state */
-        if(stateh_getSnState() == kSnStateOperational)
+        /* Only forward receive frames when the SN is in operational state
+           and first bytes of frame are valid*/
+        if((stateh_getSnState() == kSnStateOperational)
+            && (pPayload_p[FRAME_OFFSET_SADR_LOW] | pPayload_p[FRAME_OFFSET_ADRID]))
         {
             /* Get payload length field from frame */
             pLenField = &pPayload_p[FRAME_OFFSET_LENGTH];
