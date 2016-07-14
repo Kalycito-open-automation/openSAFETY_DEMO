@@ -28,7 +28,7 @@ The POWERLINK interface IP-Core consists of the following subcomponents:
 
 # IP-Core user interface    {#sect_plkif_gui}
 The graphical user interface of the IP-Core can be accessed by double clicking
-on the instantiation of the core in qsys. See chapter \ref sect_buildhw_quartus
+on the instantiation of the core in qsys. See chapter \ref sect_gs_build_fpga_hw_quartus
 for more information on how to open a project with qsys.
 
 In the IP-Core user interface the following options are available

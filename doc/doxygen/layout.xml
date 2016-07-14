@@ -3,31 +3,33 @@
   <navindex>
     <tab type="mainpage" visible="yes" title=""/>
     <tab type="user" url="\ref page_protocols" title="Fieldbus Protocols"/>
-    <tab type="user" url="\ref page_sysdesc" title="System Overview"/>
     <tab type="user" url="\ref page_directories" title="Directory Structure"/>
 
-    <tab type="usergroup" url="\ref page_ugindex" title="User Guide">
-      <tab type="user" url="\ref page_x86" title="Target x86/amd64"/>
-      <tab type="usergroup" url="\ref page_altnios2" title="Target Altera/Nios2">
-        <tab type="user" url="\ref page_altsetuphw" title="How to setup the board"/>
-        <tab type="user" url="\ref page_altbuildhw" title="How to build the bitstream"/>
-        <tab type="user" url="\ref page_altbuildsw" title="How to build the software"/>
-      </tab>
-      <tab type="usergroup" url="\ref page_stm32f103rb" title="Target STM32f103RB">
-        <tab type="user" url="\ref page_stm32f103_setuphw" title="How to setup the board"/>
-        <tab type="usergroup" url="\ref page_stm32f103_buildsw" title="How to build the software">
-          <tab type="user" url="\ref page_buildenv_stm32" title="Build environment - Setup"/>
+    <tab type="usergroup" url="\ref page_overview_hardware" title="Getting Started">
+        <tab type="user" url="\ref page_overview_hardware" title="Hardware Requirements"/>
+        <tab type="user" url="\ref page_setup_hardware" title="Hardware Setup"/>
+        <tab type="user" url="\ref page_needed_software" title="Software Requirements"/>
+        <tab type="user" url="\ref page_install_software" title="Software Installation"/>
+        <tab type="usergroup" url="\ref page_cmake" title="CMake">
+            <tab type="user" url="\ref page_gs_altnios2" title="Target Altera/Nios2"/>
+            <tab type="user" url="\ref page_gs_stm32f103rb" title="Target STM32f103RB"/>
+            <tab type="user" url="\ref page_gs_stm32f401re" title="Target STM32f401RE"/>
+            <tab type="user" url="\ref page_gs_x86" title="Target x86/amd64"/>
         </tab>
-      </tab>
-      <tab type="usergroup" url="\ref page_stm32f401re" title="Target STM32f401RE">
-        <tab type="user" url="\ref page_stm32f401_setuphw" title="How to setup the board"/>
-        <tab type="usergroup" url="\ref page_stm32f401_buildsw" title="How to build the software">
-          <tab type="user" url="\ref page_buildenv_stm32" title="Build environment - Setup"/>
-        </tab>
-      </tab>
-      <tab type="usergroup" url="\ref page_flashing" title="Flashing the boards"/>
-      <tab type="usergroup" url="\ref page_user_customisations" title="How to customise the openSAFETY_DEMO"/>
-      <tab type="usergroup" url="\ref page_system_integration" title="System integration, start up"/>
+        <tab type="user" url="\ref page_build_fpga_hw" title="Building the FPGA Hardware"/>
+        <tab type="user" url="\ref page_build_fpga_sw" title="Building the FPGA Software"/>
+        <tab type="user" url="\ref page_download_fpga" title="Flashing the FPGA Board"/>
+        <tab type="user" url="\ref page_build_nucleo_sw" title="Building the Nucleo Software"/>
+        <tab type="user" url="\ref page_download_nucleo" title="Flashing the Nucleo Board"/>
+        <tab type="user" url="\ref page_system_integration" title="System Integration"/>
+        <tab type="user" url="\ref page_system_status_diagnostics" title="Observing the System Status / Diagnostics"/>
+    </tab>
+
+    <tab type="user" url="\ref page_fast_track" title="The Fast Track"/>
+
+    <tab type="usergroup" url="" title="Tools and Features">
+        <tab type="user" url="\ref page_user_customisations" title="How to customise the openSAFETY_DEMO"/>
+        <tab type="user" url="\ref page_web_osdd_checker" title="Checking and Securing OSDD files"/>
     </tab>
 
     <tab type="usergroup" url="\ref page_systemdesign" title="System Design">

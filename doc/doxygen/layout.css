@@ -39,3 +39,18 @@ p.startli {
         padding-bottom: 3px;
         margin-bottom: 3px;
 }
+
+.image img{
+    max-width:100%
+}
+
+dl.warning{
+/*         border-color: #F00;
+        border-bottom: 1px solid #F00;
+        border-right: 1px solid #F00;
+        border-top: 1px solid #F00;
+        border-top-width: 1px;
+        border-top-style: solid;
+        border-top-color: #F00; */
+        background-color: #FFEFEF;
+}

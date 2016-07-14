@@ -49,7 +49,7 @@ Section \ref sect_pysodbuilder_cmakeconfig describes the available
 settings.
 
 ![pysodbuilder - principle](pysodbuilder_flow_small.png)
-@image latex pysodbuilder_flow.eps "pysodbuilder_flow" width=0.75\textwidth
+@image latex pysodbuilder_flow.png "pysodbuilder_flow" width=0.75\textwidth
 
 
 When building the application with the tool enabled, the generated files
@@ -101,7 +101,7 @@ PYSODBUILDER_OSDD_SCHEMA_FILE | OSDD schema file to which the used OSDD file adh
 PYSODBUILDER_SETTINGS_FILE | Settings file to use for pysodbuilder, which is created by **CMake** | [PysodbuilderBinaryDir]/pysodbsettings.ini
 USE_CUSTOMISED_FILES    | Enable or disable the usage of customised files instead of original or generated ones | ON
 
-- **USE_CUSTOMISED_FILES** {#paragraph_cmake_options_use_customised_files}
+- **USE_CUSTOMISED_FILES**
 
   This option depends on PYSODBUILDER_ENABLE and the selected target, where
   it is currently available for the STM32 target only.

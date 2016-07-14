@@ -1,4 +1,4 @@
-Target platform x86/amd64 (Windows/Linux) {#page_x86}
+Target platform x86/amd64 (Windows/Linux) {#page_gs_x86}
 ============
 
 [TOC]
@@ -9,9 +9,9 @@ execute the unit tests and to generate the documentation.
 
 All unit tests for the PSI project use the testing framework CUnit and are able
 to be run with **CTest**. (CTest is the CMake testing framework). All tests are
-located in the folder **src/unittest**.
+located in the folder **blackchannel/POWERLINK/unittest**.
 
-# Configuration options - x86   {#sect_targx86_options}
+# Configuration options - x86   {#sect_gs_targx86_options}
 In order to configure the build on your local workstation the following CMake
 configuration options are available:
 
@@ -23,7 +23,7 @@ configuration options are available:
 
   Enable/Disable the generation of a test report in XML format.
 
-# CMake Generators {#sect_targx86_generators}
+# CMake Generators {#sect_gs_targx86_generators}
 The following CMake generators are tested for the PSI project on Windows:
 
 - **Visual Studio 10:** Generates a Visual Studio solution and uses the MSVC compiler

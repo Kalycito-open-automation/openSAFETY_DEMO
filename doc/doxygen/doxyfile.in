@@ -756,7 +756,7 @@ WARN_FORMAT            = "$file:$line: $text"
 # messages should be written. If left blank the output is written to standard
 # error (stderr).
 
-WARN_LOGFILE           =
+WARN_LOGFILE           = @CMAKE_BINARY_DIR@/doxygen_warnings.log
 
 #---------------------------------------------------------------------------
 # Configuration options related to the input files
@@ -770,9 +770,26 @@ WARN_LOGFILE           =
 
 INPUT                  = @DOXYFILE_SOURCE_DIR@/doxygen \
                          @CMAKE_SOURCE_DIR@/readme.md \
+                         @DOXYFILE_SOURCE_DIR@/getting_started/demo_detail.md \
+                         @DOXYFILE_SOURCE_DIR@/getting_started/overview_hardware.md \
+                         @DOXYFILE_SOURCE_DIR@/getting_started/setup_hardware.md \
+                         @DOXYFILE_SOURCE_DIR@/getting_started/needed_software.md \
+                         @DOXYFILE_SOURCE_DIR@/getting_started/install_software.md \
+                         @DOXYFILE_SOURCE_DIR@/getting_started/cmake.md \
+                         @DOXYFILE_SOURCE_DIR@/getting_started/targ_altnios2.md \
+                         @DOXYFILE_SOURCE_DIR@/getting_started/targ_stm32f103rb.md \
+                         @DOXYFILE_SOURCE_DIR@/getting_started/targ_stm32f401re.md \
+                         @DOXYFILE_SOURCE_DIR@/getting_started/targ_x86.md \
+                         @DOXYFILE_SOURCE_DIR@/getting_started/build_fpga_hw.md \
+                         @DOXYFILE_SOURCE_DIR@/getting_started/build_fpga_sw.md \
+                         @DOXYFILE_SOURCE_DIR@/getting_started/download_fpga.md \
+                         @DOXYFILE_SOURCE_DIR@/getting_started/build_nucleo_sw.md \
+                         @DOXYFILE_SOURCE_DIR@/getting_started/download_nucleo.md \
+                         @DOXYFILE_SOURCE_DIR@/getting_started/system_integration.md \
+                         @DOXYFILE_SOURCE_DIR@/getting_started/system_status_diagnostics.md \
+                         @DOXYFILE_SOURCE_DIR@/getting_started/fast_track.md \
                          @DOXYFILE_SOURCE_DIR@/directories.md \
                          @DOXYFILE_SOURCE_DIR@/protocols.md \
-                         @DOXYFILE_SOURCE_DIR@/systemoverview.md \
                          @DOXYFILE_SOURCE_DIR@/systemdesign.md \
                          @DOXYFILE_SOURCE_DIR@/hardware/index.md \
                          @DOXYFILE_SOURCE_DIR@/hardware/hw_pcp.md \
@@ -782,24 +799,8 @@ INPUT                  = @DOXYFILE_SOURCE_DIR@/doxygen \
                          @DOXYFILE_SOURCE_DIR@/ipcore/spibridge.md \
                          @DOXYFILE_SOURCE_DIR@/ipcore/triplebuffer.md \
                          @DOXYFILE_SOURCE_DIR@/ipcore/openmac.md \
-                         @DOXYFILE_SOURCE_DIR@/userguide/index.md \
                          @DOXYFILE_SOURCE_DIR@/userguide/customisations.md \
-                         @DOXYFILE_SOURCE_DIR@/userguide/targ_x86.md \
-                         @DOXYFILE_SOURCE_DIR@/userguide/targ_altnios2.md \
-                         @DOXYFILE_SOURCE_DIR@/userguide/targ_stm32f103rb.md \
-                         @DOXYFILE_SOURCE_DIR@/userguide/stm32f103rb_setuphw.md \
-                         @DOXYFILE_SOURCE_DIR@/userguide/stm32f103rb_buildsw.md \
-                         @DOXYFILE_SOURCE_DIR@/userguide/targ_stm32f401re.md \
-                         @DOXYFILE_SOURCE_DIR@/userguide/stm32f401re_setuphw.md \
-                         @DOXYFILE_SOURCE_DIR@/userguide/stm32f401re_buildsw.md \
-                         @DOXYFILE_SOURCE_DIR@/userguide/stm32_buildenv.md \
-                         @DOXYFILE_SOURCE_DIR@/userguide/altnios2_buildhw.md \
-                         @DOXYFILE_SOURCE_DIR@/userguide/altnios2_buildsw.md \
-                         @DOXYFILE_SOURCE_DIR@/userguide/altnios2_setuphw.md \
-                         @DOXYFILE_SOURCE_DIR@/userguide/system_integration.md \
-                         @DOXYFILE_SOURCE_DIR@/userguide/flashing.md \
-                         @CMAKE_SOURCE_DIR@/revision.md \
-                         @CMAKE_SOURCE_DIR@/licenses.md \
+                         @DOXYFILE_SOURCE_DIR@/userguide/web_osdd_checker.md \
                          @DOXYFILE_SOURCE_DIR@/software/index.md \
                          @DOXYFILE_SOURCE_DIR@/software/group_applications.txt \
                          @DOXYFILE_SOURCE_DIR@/software/group_sn.txt \
@@ -844,7 +845,9 @@ INPUT                  = @DOXYFILE_SOURCE_DIR@/doxygen \
                          @DOXYFILE_SOURCE_DIR@/software/group_libpsicommon.txt \
                          @CMAKE_SOURCE_DIR@/blackchannel/POWERLINK/libs/psicommon/include/libpsicommon \
                          @CMAKE_SOURCE_DIR@/blackchannel/POWERLINK/libs/psicommon/include/libpsicommon/internal \
-                         @CMAKE_SOURCE_DIR@/blackchannel/POWERLINK/libs/psicommon
+                         @CMAKE_SOURCE_DIR@/blackchannel/POWERLINK/libs/psicommon \
+                         @CMAKE_SOURCE_DIR@/revision.md \
+                         @CMAKE_SOURCE_DIR@/licenses.md \
 
 
 # This tag can be used to specify the character encoding of the source files
@@ -934,7 +937,8 @@ EXAMPLE_RECURSIVE      = NO
 # that contain images that are to be included in the documentation (see the
 # \image command).
 
-IMAGE_PATH             = @DOXYFILE_SOURCE_DIR@/images
+IMAGE_PATH             = @DOXYFILE_SOURCE_DIR@/images \
+                         @DOXYFILE_SOURCE_DIR@/images/wireshark
 
 # The INPUT_FILTER tag can be used to specify a program that doxygen should
 # invoke to filter for each input file. Doxygen will invoke the filter program

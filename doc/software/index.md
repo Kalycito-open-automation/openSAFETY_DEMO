@@ -10,8 +10,8 @@ application processor. Basically the software consists of the following parts:
 - \ref group_libpsicommon
 
 The build steps for the software vary depending on the platform the software is
-cross compiled. See the \ref page_ugindex for more information about each build
-step.
+cross compiled. See the \ref page_overview_hardware for more information about
+each build step.
 
 For the interface libraries which are running on the application processor there
 are provided unit tests in the folder `src/unittest`.

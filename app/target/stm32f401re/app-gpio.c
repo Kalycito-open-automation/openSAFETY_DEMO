@@ -85,7 +85,7 @@ forwards it to the user application.
  * file.
  * They describe port, pin and control registers of the STM32F401RE
  * microcontroller.
- * For information on the pinout see \ref page_stm32f401_setuphw,
+ * For information on the pinout see \ref sect_gs_nucleoboard_setup,
  * the STM32 NUCLEO-F401RE webpage
  * http://www.st.com/web/catalog/tools/FM116/SC959/SS1532/LN1847/PF260000
  * or the STM32F401RE webpage

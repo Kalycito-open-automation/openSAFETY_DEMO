@@ -32,7 +32,8 @@ The SN demo application demonstrates the usage of the user library.
 
 Directory                     | Description
 ----------------------------- | -----------------------------------------------
-demo-sn-gpio                  | A lightweight openSAFETY SN demo (See \ref sect_sysdesc_app_sndemo)
+demo-sn-gpio                  | A lightweight openSAFETY SN demo (See \ref sect_gs_sysdesc_app_sndemo)
+target                        | Target platform specific files
 
 ### Configuration files {#sect_directories_configuration}
 
@@ -42,17 +43,19 @@ object dictionaries and the triple buffer configuration headers.
 Directory                     | Description
 ----------------------------- | -----------------------------------------------
 pcp                           | POWERLINK processor configuration files, e.g. Object dictionary
+sn                            | application processor configuration files
 tbuf                          | Configuration headers for the triple buffers
 
 
 ## Pre-built binaries {#sect_directories_bin}
-This directory contains pre-built binaries for flashing onto the development
+The __bin__ directory contains pre-built binaries for flashing onto the development
 boards.
 
 Directory                     | Description
 ----------------------------- | -----------------------------------------------
 fpga/boards/terasic-de2-115   | Pre-built bitstream and application
-stm32f401re                   | Pre-built binaries in single and dual channelled version
+stm32f103rb                   | Pre-built binaries in single and dual channelled version for STM32F103RB microcontroller
+stm32f401re                   | Pre-built binaries in single and dual channelled version for STM32F401RE microcontroller
 
 
 ## Black channel {#sect_directories_blackchannel}
@@ -82,7 +85,7 @@ psicommon                     | Slim interface common library (Used by POWERLINK
 
 ### Stack sources {#sect_directories_stack}
 
-This directory contains the source code of the stacks which are included in the
+The __stacks__ directory contains the source code of the stacks which are included in the
 POWERLINK interface.
 
 Directory                     | Description
