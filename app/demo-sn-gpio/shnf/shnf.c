@@ -637,10 +637,8 @@ static void processRxSpdoFrame(UINT8* pPayload_p, UINT16 paylLen_p)
 
     if(pPayload_p != NULL)
     {
-        /* Only forward receive frames when the SN is in operational state
-           and first bytes of frame are valid*/
-        if((stateh_getSnState() == kSnStateOperational)
-            && (pPayload_p[FRAME_OFFSET_SADR_LOW] | pPayload_p[FRAME_OFFSET_ADRID]))
+        /* Only forward receive frames when the SN is in operational state */
+        if(stateh_getSnState() == kSnStateOperational)
         {
             /* Get payload length field from frame */
             pLenField = &pPayload_p[FRAME_OFFSET_LENGTH];
@@ -652,8 +650,11 @@ static void processRxSpdoFrame(UINT8* pPayload_p, UINT16 paylLen_p)
             /* Calculate real size of frame by using the length field */
             paylLen = getFrameLength(pLenField);
 
-            /* Forward frame to stack */
-            SPDO_ProcessRxSpdo(B_INSTNUM_ consTime, pPayload_p, paylLen);
+            /* Forward frame to stack if first bytes of frame are valid*/
+            if(pPayload_p[FRAME_OFFSET_SADR_LOW] | pPayload_p[FRAME_OFFSET_ADRID])
+            {
+                SPDO_ProcessRxSpdo(B_INSTNUM_ consTime, pPayload_p, paylLen);
+            }
 
 #if (SPDO_cfg_MAX_NO_RX_SPDO != 0)
             /* SCT timeout is checked */
