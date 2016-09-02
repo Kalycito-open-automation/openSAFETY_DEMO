@@ -345,4 +345,43 @@ static tOplkError updateIpStack(tSocketWrapInstance* pInstance_p)
     return kErrorOk;
 }
 
+
+//------------------------------------------------------------------------------
+/**
+\brief  The function handles the Arp Query
+
+The function is called when a new SDO connection is initialized to handle the Arprequests
+of the remote nodes.
+
+\param  pSocketWrapper_p   Socket wrapper instance      
+
+\param  remoteIpAddress_p  Ip Address
+
+\return The function returns a tOplkError error code.
+*/
+//------------------------------------------------------------------------------
+
+tOplkError socketwrapper_arpQuery(tSocketWrapper pSocketWrapper_p,
+                                       UINT32 remoteIpAddress_p)
+{
+    eth_addr       macAddr;
+    eth_addr       macAddrZero;
+    tOplkError     ret = kErrorOk;
+
+    memset(&macAddrZero, 0, sizeof(eth_addr));
+    memset(&macAddr, 0, sizeof(eth_addr));
+
+    // if target node MAC is unknown return with error
+    ipArpQuery(remoteIpAddress_p, &macAddr);
+    if(!memcmp(&macAddr , &macAddrZero , sizeof(eth_addr)))
+    {
+         printf(" Inside socketwrapper_arpQuery\n");
+        // send ARP request when MAC is unknown!
+        ipArpRequest(remoteIpAddress_p, &macAddr);
+        ret = kErrorSdoUdpArpInProgress;
+    }
+       return ret;
+
+}
+
 /// \}
