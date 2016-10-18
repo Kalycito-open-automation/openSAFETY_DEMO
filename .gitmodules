@@ -1,0 +1,3 @@
+[submodule "openSAFETY"]
+	path = openSAFETY
+	url = git://git.code.sf.net/p/opensafety/git
