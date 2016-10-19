@@ -7,14 +7,13 @@ Introduction {#mainpage}
 
 The openSAFETY_DEMO is an example implementation of an openSAFETY Safe Node (SN)
 with a simple GPIO application using POWERLINK as the underlying
-communication network. It is intended for people interested in openSAFETY,
-for evaluation purposes of openSAFETY and as
-a very first starting point for SN development.
+communication network. It is intended for people interested in openSAFETY and
+for evaluation purposes of openSAFETY.
 
-
-\warning This demo is **NOT** intended to meet any needed requirements
-demanded by notified bodies. Therefore the demo as it is cannot be
-certified.
+\warning This demo only demonstrates the network capabilities and transport of
+openSAFEY frames. Additional software and hardware components are necessary to
+meet any necessary requirements demanded by notified bodies or related
+standards.
 
 The demo application consists of one part for handling the
 POWERLINK communication (POWERLINK Communication Processor, PCP) which is
@@ -59,7 +58,7 @@ System setup details of the dual channelled implementation are
 depicted in the next figure. For a single channelled application, the lower
 processor board on the right would not be part of the system.
 
-![Component overview: Control system consisting of the openSAFETY_DEMO Hardware (dual chhannelled) and B&R Hardware](system_overview.png)
+![Component overview: Control system consisting of the openSAFETY_DEMO Hardware (dual channelled) and B&R Hardware](system_overview.png)
 @image latex system_overview.eps "Component overview of the openSAFETY_DEMO"
 
 See \subpage page_gs_demo_detail for further information.

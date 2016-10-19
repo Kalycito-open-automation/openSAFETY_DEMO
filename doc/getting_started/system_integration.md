@@ -41,16 +41,7 @@ Make sure the tools are installed:
 
 ## Importing the openSAFETY_DEMO device to Automation Studio {#sect_gs_as_osdd_import}
 
-For importing the openSAFETY_DEMO device, perform the following steps
-depending on your Automation Studio and SafeDESIGNER versions:
-
-### Automation Studio up to 4.2.4.x and SafeDESIGNER 4.1.x {#sect_gs_as_legacy_hwx}
-
-1. Close Automation Studio, if open.
-2. Copy the `.hwx` file from the directory **devicedescription** to the
-   Automation Studio installation folder, eg:
-   `C:/BrAutomation/AS4[x]/AS/Hardware/Modules`,
-   where x is the minor version number of the used Automation Studio.
+For importing the openSAFETY_DEMO device, perform the following steps:
 
 ### Automation Studio 4.2.5.342 and SafeDESIGNER 4.2.0.17 onwards {#sect_gs_as_osdd_import_new_as_sd}
 
@@ -66,10 +57,6 @@ depending on your Automation Studio and SafeDESIGNER versions:
 3. Open the sample project shipped with the demo by opening Automation Studio,
    `File -> Open Project` and select the `.zip` file located in the subfolder
    **automation_studio** of the demo package.
-   > **Note**: For Automation Studio versions up to 4.2.4.x and SafeDESIGNER
-   > 4.1.x use the openSAFETY_DEMO_legacy.zip.
-   > For Automation Studio 4.2.5.342 and SafeDESIGNER 4.2.0.17 onwards,
-   > use the openSAFETY_DEMO_osdd.zip.
 
    The software will ask to specify a storage location. Unless an other location
    is wanted, the default location is just fine. Accept with a click on the

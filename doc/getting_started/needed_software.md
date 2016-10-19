@@ -168,7 +168,7 @@ and putting the whole system into operation the following software is needed.
 Please contact your local B&R representation regarding further product
 information and purchasing.
 
-- Automation Studio 4.2.4 or higher
+- Automation Studio 4.2.5 or higher
 
   integrated development environment used, among others, for planning,
   implementing and configuring B&R control systems

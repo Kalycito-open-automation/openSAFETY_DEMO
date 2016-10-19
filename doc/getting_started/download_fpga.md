@@ -6,7 +6,7 @@ and executable.
 
 \warning Wrong wiring of the boards or previously downloaded software
 which drives the I/O pins in a different manner can destroy the hardware.
-It case of doubt, do the initial flash without the wiring, just with
+In case of doubt, do the initial flash without the wiring, just with
 the power supply and the USB programming cable connected.
 
 [TOC]
