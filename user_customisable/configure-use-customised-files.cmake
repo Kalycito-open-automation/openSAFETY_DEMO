@@ -45,8 +45,8 @@ IF ( USE_CUSTOMISED_FILES )
         #set custom command to copy at compile time
         #this is needed when the user customised code has changed,
         #and no further cmake generate step has been carried out.
-        ADD_CUSTOM_COMMAND (
-            TARGET pysodbuilder
+        ADD_CUSTOM_TARGET (
+            use_customised_files
             COMMAND ${CMAKE_COMMAND} -E touch
             ${CUSTOMISED_TIMESTAMP}
             COMMAND ${CMAKE_COMMAND} -E copy_directory
@@ -54,13 +54,18 @@ IF ( USE_CUSTOMISED_FILES )
             COMMENT "Copying customised files to build directory"
             DEPENDS ${FILES_TO_COPY} ${CUSTOMISED_TIMESTAMP}
         )
+
+        IF (DEMO_SAFETY_APP_TARGET_NAME)
+            ADD_DEPENDENCIES(${DEMO_SAFETY_APP_TARGET_NAME} use_customised_files)
+        ENDIF(DEMO_SAFETY_APP_TARGET_NAME)
+
     ENDIF()
 
 ELSE ()
     IF ( PYSODBUILDER_ENABLE )
             #copy app.c from pysodbuilder, app-gpio.c from original source
-            ADD_CUSTOM_COMMAND (
-                TARGET pysodbuilder
+            ADD_CUSTOM_TARGET (
+                use_customised_files
                 COMMAND ${CMAKE_COMMAND} -E copy
                 ${FILE_APP_GPIO_C_SOURCE_PATH} ${CUSTOMISED_FILES_BUILD_DIR}
                 COMMAND ${CMAKE_COMMAND} -E copy
@@ -68,6 +73,10 @@ ELSE ()
                 COMMENT "Copying original app-gpio.c and generated app.c to build directory"
                 DEPENDS ${FILE_APP_GPIO_C_SOURCE_PATH} ${FILE_APP_C_SOURCE_PATH}
             )
+
+        IF (DEMO_SAFETY_APP_TARGET_NAME)
+            ADD_DEPENDENCIES(${DEMO_SAFETY_APP_TARGET_NAME} use_customised_files)
+        ENDIF(DEMO_SAFETY_APP_TARGET_NAME)
 
     ELSE()
         #copy files from original source directory, no copy at compile time needed
