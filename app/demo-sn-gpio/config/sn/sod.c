@@ -253,13 +253,15 @@ static UINT16 w_0_def_1C00_01 SAFE_INIT_SEKTOR = 0x0000;
 static UINT16 w_0_def_1C00_02 SAFE_INIT_SEKTOR = 1;
 static UINT8 b_0_def_1C00_03 SAFE_INIT_SEKTOR = 0x00;
 
-/* 0x2000 Parameters */
-static tSettingGroups manParams = { 0, 0, { 0, 0, 0 }};
-static SOD_t_ACT_LEN_PTR_DATA SOD_ManParam SAFE_INIT_SEKTOR = { sizeof(tSettingGroups), &manParams };
-
 /* 0x2001 Parameters */
 static tUsedChannels usedChannels = {0, { 0 }};
 static SOD_t_ACT_LEN_PTR_DATA SOD_UsedChannels SAFE_INIT_SEKTOR = { sizeof(tUsedChannels), &usedChannels.channel[0] };
+
+/* 0x4000 Settings */
+static tGenericParameters manSettings = {0,0,0};
+static UINT32 dw_0_def_4000_01 SAFE_INIT_SEKTOR = 0x0000;
+static UINT16 w_0_def_4000_02 SAFE_INIT_SEKTOR = 0x0000;
+static UINT16 w_0_def_4000_03 SAFE_INIT_SEKTOR = 0x0000;
 
 /* 0x6200 SPDO transmit Parameters */
 static UINT8 b_0_def_6200_01 = 0x00;
@@ -374,8 +376,13 @@ SOD_cfg_TO_RAM_ROM SOD_t_OBJECT SAPL_s_OD_INST_0[]=
     {0x1C00, 0x03, {RW | CRC , U8 , 0x1UL, &b_0_def_1C00_03 }, &s_0_act_general.aTxComParam[0].ucNoTRes , NULL , SOD_k_NO_CALLBACK},
 
     /* vendor/module specific data */
-    {0x2000, 0x00, {RW | CRC , DOM, sizeof(tSettingGroups), NULL }, &SOD_ManParam, NULL, SOD_k_NO_CALLBACK},
     {0x2001, 0x00, {RW | CRC , DOM, sizeof(tUsedChannels), NULL }, &SOD_UsedChannels, NULL, SOD_k_NO_CALLBACK},
+
+    {0x4000, 0x00, {CONS, U8, 0x1UL, &b_noE_3}, &b_noE_3, NULL, SOD_k_NO_CALLBACK},
+    {0x4000, 0x01, {RW | CRC , U32, 0x4UL, &dw_0_def_4000_01}, &manSettings.DefaultSetting01, NULL, SOD_k_NO_CALLBACK},
+    {0x4000, 0x02, {RW | CRC , U16, 0x2UL, &w_0_def_4000_02}, &manSettings.DefaultSetting02, NULL, SOD_k_NO_CALLBACK},
+    {0x4000, 0x03, {RW | CRC , U16, 0x2UL, &w_0_def_4000_03}, &manSettings.DefaultSetting03, NULL, SOD_k_NO_CALLBACK},
+
 
     /* Input data */
     {0x6000, 0x00, {CONS, U8, 0x1UL, &b_noE_4}, &b_noE_4, NULL, SOD_k_NO_CALLBACK},

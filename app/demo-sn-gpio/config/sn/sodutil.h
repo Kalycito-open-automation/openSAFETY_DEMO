@@ -74,16 +74,6 @@ typedef struct
 } tGenericParameters;
 
 /**
- * \brief Structure of all SettingGroups
- */
-typedef struct
-{
-    UINT16 ParameterVersion;                /**< Parameter stream version number */
-    UINT16 ParameterLength;                 /**< Parameter stream length */
-    tGenericParameters GenericParameters;
-} tSettingGroups;
-
-/**
  * \brief Structure of the SPDOTransport channel of SafeIN
  */
 typedef struct
