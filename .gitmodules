@@ -1,3 +1,6 @@
 [submodule "openSAFETY"]
 	path = openSAFETY
 	url = git://git.code.sf.net/p/opensafety/git
+[submodule "blackchannel/POWERLINK/stacks/openPOWERLINK"]
+	path = blackchannel/POWERLINK/stacks/openPOWERLINK
+	url = https://github.com/OpenAutomationTechnologies/openPOWERLINK_V2.git
