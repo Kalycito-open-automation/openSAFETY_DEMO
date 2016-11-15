@@ -150,6 +150,7 @@ SET(OPLK_INCS
     #${OBJDICT_DIR}/${OBJDICT}
     ${CONTRIB_SOURCE_DIR}/socketwrapper
     ${DEMO_BOARD_DIR}/include
+    ${OPLK_HW_DIR}/boards/terasic-de2-115/cn-single-gpio/include
    )
 
 SET(OMETHLIB_INCS
