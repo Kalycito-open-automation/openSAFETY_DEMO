@@ -100,9 +100,7 @@ This structure defines the receive buffer descriptor.
 typedef struct
 {
     BOOL            fIpStackOwner;      ///< TRUE if the IP stack owns the buffer
-                                        //<TODO: Use here same type like in \ref ip_packet_typ!
-    ULONG           length;             ///< Payload length
-    UINT8           aBuffer[IP_MTU];    ///< Receive buffer
+    ip_packet_typ   ipPacketDesc;
 } tEdrv2VethRxDesc;
 
 /**
@@ -287,19 +285,23 @@ tOplkError edrv2veth_receiveHandler(UINT8* pFrame_p, UINT32 frameSize_p)
     for (i=0; i<IP_RX_BUF_CNT; i++)
     {
         if (edrv2vethInstance_l.aRxBuffer[i].fIpStackOwner)
+            continue;
+        else
             break;
     }
 
     if (i == IP_RX_BUF_CNT)
     {
         // No free buffer found => ignore frame
-        PRINTF("%s (Err/Warn): No free buffer found, Frames ignored\n");
+        PRINTF("%s (Err/Warn): No free buffer found, Frames ignored\n",
+        __func__);
         return kErrorOk;
     }
 
     // i points to a free buffer!
     edrv2vethInstance_l.aRxBuffer[i].fIpStackOwner = TRUE;
-    pPacket = (ip_packet_typ*)&edrv2vethInstance_l.aRxBuffer[i].length;
+    pPacket = (ip_packet_typ*)&edrv2vethInstance_l.aRxBuffer[i].
+                               ipPacketDesc.length;
     pPacket->length = frameSize_p;
     memcpy(pPacket->data, pFrame_p, frameSize_p);
 
@@ -372,7 +374,7 @@ static void freePacket(ip_packet_typ* pPacket_p)
 
     for (i = 0; i < IP_RX_BUF_CNT; i++)
     {
-        if ((ip_packet_typ*)&edrv2vethInstance_l.aRxBuffer[i].length == pPacket_p)
+        if ((ip_packet_typ*)&edrv2vethInstance_l.aRxBuffer[i].ipPacketDesc.length == pPacket_p)
         {
             edrv2vethInstance_l.aRxBuffer[i].fIpStackOwner = FALSE;
             break;
