@@ -100,7 +100,8 @@ This structure defines the receive buffer descriptor.
 typedef struct
 {
     BOOL            fIpStackOwner;      ///< TRUE if the IP stack owns the buffer
-    ip_packet_typ   ipPacketDesc;
+    ULONG           length;             ///< Payload length
+    UINT8           aBuffer[IP_MTU];    ///< Receive buffer
 } tEdrv2VethRxDesc;
 
 /**
@@ -300,8 +301,7 @@ tOplkError edrv2veth_receiveHandler(UINT8* pFrame_p, UINT32 frameSize_p)
 
     // i points to a free buffer!
     edrv2vethInstance_l.aRxBuffer[i].fIpStackOwner = TRUE;
-    pPacket = (ip_packet_typ*)&edrv2vethInstance_l.aRxBuffer[i].
-                               ipPacketDesc.length;
+    pPacket = (ip_packet_typ*)&edrv2vethInstance_l.aRxBuffer[i].length;
     pPacket->length = frameSize_p;
     memcpy(pPacket->data, pFrame_p, frameSize_p);
 
@@ -374,7 +374,7 @@ static void freePacket(ip_packet_typ* pPacket_p)
 
     for (i = 0; i < IP_RX_BUF_CNT; i++)
     {
-        if ((ip_packet_typ*)&edrv2vethInstance_l.aRxBuffer[i].ipPacketDesc.length == pPacket_p)
+        if ((ip_packet_typ*)&edrv2vethInstance_l.aRxBuffer[i].length == pPacket_p)
         {
             edrv2vethInstance_l.aRxBuffer[i].fIpStackOwner = FALSE;
             break;
