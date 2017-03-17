@@ -285,9 +285,7 @@ tOplkError edrv2veth_receiveHandler(UINT8* pFrame_p, UINT32 frameSize_p)
 
     for (i=0; i<IP_RX_BUF_CNT; i++)
     {
-        if (edrv2vethInstance_l.aRxBuffer[i].fIpStackOwner)
-            continue;
-        else
+        if (!edrv2vethInstance_l.aRxBuffer[i].fIpStackOwner)
             break;
     }
 
